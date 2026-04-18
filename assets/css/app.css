@@ -1,0 +1,132 @@
+html, body {
+    min-height: 100%;
+}
+
+body {
+    background-color: var(--tblr-body-bg, #f6f8fb);
+}
+
+.page {
+    min-height: 100vh;
+}
+
+.page-wrapper {
+    min-height: calc(100vh - 56px);
+}
+
+.navbar-brand {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.nav-link-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content:empty {
+    min-height: 120px;
+}
+
+#main-modal-content,
+#secondary-modal-content {
+    min-height: 120px;
+}
+
+.kirpi-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 160px;
+    padding: 2rem;
+}
+
+.kirpi-loading .spinner-border {
+    width: 2rem;
+    height: 2rem;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.table-actions {
+    white-space: nowrap;
+}
+
+.form-required::after {
+    content: " *";
+    color: var(--tblr-danger, #d63939);
+}
+
+.kirpi-hidden {
+    display: none !important;
+}
+
+.navbar .dropdown-toggle::after {
+    display: none !important;
+}
+
+.auth-cover-page {
+    min-height: 100vh;
+    margin: 0;
+    background: var(--tblr-body-bg, #f6f8fb);
+}
+
+.auth-cover {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: row;
+}
+
+.auth-cover__form-side {
+    width: 100%;
+    max-width: 50%;
+    min-height: 100vh;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 3rem;
+}
+
+.auth-cover__form-wrap {
+    width: 100%;
+    max-width: 420px;
+}
+
+.auth-cover__image-side {
+    display: none;
+    width: 70%;
+    min-height: 100vh;
+    background: #e9ecef;
+}
+
+.auth-cover__image {
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+@media (min-width: 992px) {
+    .auth-cover__form-side {
+        width: 50%;
+        max-width: 50%;
+    }
+
+    .auth-cover__image-side {
+        display: block;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .auth-cover__form-side {
+        max-width: 100%;
+        width: 100%;
+        padding: 2rem 1.5rem;
+    }
+}

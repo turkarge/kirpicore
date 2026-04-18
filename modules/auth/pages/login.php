@@ -1,0 +1,131 @@
+<?php
+if (!defined('KIRPI_CORE_ENTRY')) {
+    exit;
+}
+
+if (is_user_logged_in()) {
+    redirect(base_url(APP_DEFAULT_ROUTE));
+}
+
+$coverImage = AUTH_LOGIN_COVER_IMAGE !== ''
+    ? AUTH_LOGIN_COVER_IMAGE
+    : 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=80';
+?>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title><?php echo e(app_name()); ?> - Giriş Yap</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="<?php echo asset_url('css/tabler.min.css'); ?>" rel="stylesheet">
+    <link href="<?php echo asset_url('css/tabler-icons.min.css'); ?>" rel="stylesheet">
+    <link href="<?php echo asset_url('css/app.css'); ?>" rel="stylesheet">
+    <link href="<?php echo asset_url('css/toastr.min.css'); ?>" rel="stylesheet">
+</head>
+<body class="auth-cover-page">
+<script>
+window.KIRPI_CONFIG = {
+    baseUrl: "<?php echo e(BASE_URL); ?>",
+    csrfToken: "<?php echo e(get_csrf_token()); ?>"
+};
+</script>
+
+<div class="auth-cover">
+    <div class="auth-cover__form-side">
+        <div class="auth-cover__form-wrap">
+            <div class="text-center text-lg-start mb-4">
+                <h1 class="navbar-brand navbar-brand-autodark mb-0">
+                    <?php echo e(app_name()); ?>
+                </h1>
+            </div>
+
+            <h2 class="h1 mb-3">Hesabınıza giriş yapın</h2>
+
+            <div id="login-alert-area"></div>
+
+            <form
+                id="login-form"
+                action="<?php echo base_url('auth/actions/login'); ?>"
+                method="post"
+                data-ajax="true"
+                novalidate
+            >
+                <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+
+                <div class="mb-3">
+                    <label class="form-label">E-posta adresi</label>
+                    <input
+                        type="email"
+                        class="form-control"
+                        name="email"
+                        placeholder="ornek@alanadi.com"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label">
+                        Şifre
+                        <span class="form-label-description">
+                            <a href="<?php echo base_url('auth/forgot-password'); ?>">Şifremi unuttum</a>
+                        </span>
+                    </label>
+
+                    <div class="input-group input-group-flat">
+                        <input
+                            type="password"
+                            class="form-control"
+                            name="password"
+                            id="login-password"
+                            placeholder="Şifreniz"
+                            autocomplete="current-password"
+                            required
+                        >
+                        <span class="input-group-text">
+                            <a href="#" class="link-secondary" id="toggle-login-password" tabindex="-1" aria-label="Şifreyi göster">
+                                <i class="ti ti-eye"></i>
+                            </a>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-check">
+                        <input type="checkbox" class="form-check-input" name="remember" value="1">
+                        <span class="form-check-label">Bu cihazda beni hatırla</span>
+                    </label>
+                </div>
+
+                <div class="form-footer">
+                    <button type="submit" class="btn btn-primary w-100" id="login-submit-button">
+                        Giriş Yap
+                    </button>
+                </div>
+            </form>
+
+            <div class="text-secondary mt-4">
+                Giriş yaparak
+                <a href="<?php echo base_url('auth/terms'); ?>">kullanım şartlarını</a>
+                kabul etmiş olursunuz.
+            </div>
+        </div>
+    </div>
+
+    <div class="auth-cover__image-side">
+        <div
+            class="auth-cover__image"
+            style="background-image: url('<?php echo e($coverImage); ?>');"
+        ></div>
+    </div>
+</div>
+
+<script src="<?php echo asset_url('js/jquery-3.7.1.min.js'); ?>"></script>
+<script src="<?php echo asset_url('js/bootstrap.bundle.min.js'); ?>"></script>
+<script src="<?php echo asset_url('js/tabler.min.js'); ?>"></script>
+<script src="<?php echo asset_url('js/toastr.min.js'); ?>"></script>
+<script src="<?php echo asset_url('js/app.js'); ?>"></script>
+<script src="<?php echo base_url('modules/auth/scripts/login.js'); ?>"></script>
+</body>
+</html>
