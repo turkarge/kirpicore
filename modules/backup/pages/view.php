@@ -101,6 +101,12 @@ if ($backupReady) {
                                                 <input type="hidden" name="backup_id" value="<?php echo (int) ($backup['id'] ?? 0); ?>">
                                             </form>
                                             <a href="#" class="btn btn-sm btn-outline-danger" data-confirm="Bu backup geri yuklenecek. Emin misiniz?" data-form="backup-restore-form-<?php echo (int) ($backup['id'] ?? 0); ?>">Restore</a>
+
+                                            <form id="backup-delete-form-<?php echo (int) ($backup['id'] ?? 0); ?>" action="<?php echo base_url('backup/actions/delete'); ?>" method="post" data-ajax="true" class="m-0">
+                                                <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+                                                <input type="hidden" name="backup_id" value="<?php echo (int) ($backup['id'] ?? 0); ?>">
+                                            </form>
+                                            <a href="#" class="btn btn-sm btn-outline-secondary" data-confirm="Bu backup kaydi silinecek. Emin misiniz?" data-form="backup-delete-form-<?php echo (int) ($backup['id'] ?? 0); ?>">Sil</a>
                                         </div>
                                     </td>
                                 </tr>

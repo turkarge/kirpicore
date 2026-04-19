@@ -199,7 +199,7 @@ CLI:
 Yonetim menusu altinda `Backup Restore` ekrani bulunur.
 
 - Route: `backup/view`
-- Permissions: `backup.view`, `backup.create`, `backup.restore`, `backup.download`
+- Permissions: `backup.view`, `backup.create`, `backup.restore`, `backup.download`, `backup.delete`
 
 Ozellikler:
 
@@ -207,6 +207,7 @@ Ozellikler:
 - Kayitli backup dosyalarini listeleme
 - Backup dosyasini panelden indirme
 - Tek tik restore komutu calistirma
+- Backup kaydini ve dosyasini silme
 - Restore gecmisini loglama
 
 CLI:
@@ -216,4 +217,5 @@ CLI:
 
 Not:
 
-- SSL sertifika zinciri hatasi alirsan `DB_SSL_MODE=DISABLED` kullan.
+- Bazi `mysqldump` istemcileri `--ssl-mode` desteklemez (MariaDB gibi). Bu nedenle sadece genel `--ssl` flag'i kullaniliyor.
+- `DB_SSL_MODE=DISABLED` veya `PREFERRED` iken ekstra SSL parametresi gecilmez.

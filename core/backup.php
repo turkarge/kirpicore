@@ -37,7 +37,7 @@ function kirpi_mysql_password_arg(): string
     return '--password=' . escapeshellarg($password);
 }
 
-function kirpi_mysql_ssl_mode_arg(): string
+function kirpi_mysql_ssl_arg(): string
 {
     $sslMode = strtoupper(trim((string) env('DB_SSL_MODE', 'DISABLED')));
     $allowed = ['DISABLED', 'PREFERRED', 'REQUIRED', 'VERIFY_CA', 'VERIFY_IDENTITY'];
@@ -46,7 +46,13 @@ function kirpi_mysql_ssl_mode_arg(): string
         $sslMode = 'DISABLED';
     }
 
-    return '--ssl-mode=' . $sslMode;
+    if (in_array($sslMode, ['REQUIRED', 'VERIFY_CA', 'VERIFY_IDENTITY'], true)) {
+        // Generic flag supported by both MySQL and MariaDB clients.
+        return '--ssl';
+    }
+
+    // DISABLED/PREFERRED -> do not pass client-specific SSL mode flags.
+    return '';
 }
 
 function kirpi_backup_create(?string $label = null, ?int $userId = null): array
@@ -74,7 +80,7 @@ function kirpi_backup_create(?string $label = null, ?int $userId = null): array
 
     $command = sprintf(
         'mysqldump --single-transaction --routines --triggers --events %s -h %s -P %s -u %s %s %s 1> %s 2> %s',
-        kirpi_mysql_ssl_mode_arg(),
+        kirpi_mysql_ssl_arg(),
         escapeshellarg((string) DB_HOST),
         escapeshellarg((string) DB_PORT),
         escapeshellarg((string) DB_USER),
@@ -163,7 +169,7 @@ function kirpi_backup_restore(int $backupId, ?int $userId = null): array
 
     $command = sprintf(
         'mysql %s -h %s -P %s -u %s %s %s < %s 2>&1',
-        kirpi_mysql_ssl_mode_arg(),
+        kirpi_mysql_ssl_arg(),
         escapeshellarg((string) DB_HOST),
         escapeshellarg((string) DB_PORT),
         escapeshellarg((string) DB_USER),

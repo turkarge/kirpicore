@@ -151,6 +151,10 @@ function kirpi_core_permission_catalog(): array
                     'name' => 'Backup Indirme',
                     'slug' => 'backup.download',
                 ],
+                [
+                    'name' => 'Backup Silme',
+                    'slug' => 'backup.delete',
+                ],
             ],
         ],
         'security' => [

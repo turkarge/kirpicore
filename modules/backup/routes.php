@@ -29,4 +29,11 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'backup/actions/delete' => [
+        'file' => 'modules/backup/actions/delete.php',
+        'layout' => false,
+        'permission' => 'backup.delete',
+        'auth' => true,
+        'method' => 'POST',
+    ],
 ];
