@@ -13,6 +13,8 @@ Core moduller tamamlandi:
 - `settings`
 - `queue`
 - `backup`
+- `health`
+- `throttle`
 
 ## Dokploy ile calistirma
 
@@ -43,6 +45,10 @@ Opsiyonel:
 - `BACKUP_RETENTION_COUNT=20` (default: `20`) - son N backup disindakiler otomatik silinir
 - `BACKUP_VERIFY_DRY_RUN=true` (default: `true`) - backup dogrulamada gecici veritabanina restore testi yapar
 - `BACKUP_INCLUDE_SYSTEM_TABLES=false` (default: `false`) - `db_backups` ve `db_backup_restores` tablolarini dump'e dahil eder
+- `THROTTLE_ENABLED=true` (default: `true`)
+- `THROTTLE_LOGIN_LIMIT=5`, `THROTTLE_LOGIN_WINDOW=600`, `THROTTLE_LOGIN_BLOCK=900`
+- `THROTTLE_CRITICAL_LIMIT=10`, `THROTTLE_CRITICAL_WINDOW=60`, `THROTTLE_CRITICAL_BLOCK=120`
+- `THROTTLE_GLOBAL_POST_LIMIT=180`, `THROTTLE_GLOBAL_POST_WINDOW=60`, `THROTTLE_GLOBAL_POST_BLOCK=60`
 
 ### 3) Deploy et
 
@@ -130,6 +136,37 @@ Bu sayfa su kontrolleri gosterir:
 - Session cookie guvenlik bilgileri
 - Kritik klasorlerin varlik/yazilabilirlik/izin durumu
 - Veritabanindaki mevcut tablolar
+
+## Health + Metrics Modulu
+
+Yonetim menusu altina `Health Metrics` sayfasi eklendi.
+
+- Route: `health/view`
+- Permission: `health.view`
+
+Bu sayfa matrix formatinda su bilesenleri izler:
+
+- Application
+- Database (latency)
+- Queue
+- Mail
+- Backup
+- Disk
+- Session
+- Throttle
+
+## Rate Limit / Throttle
+
+Sistem genelinde POST islemleri ve kritik actionlar icin istek limiti uygulanir.
+
+- Login brute-force korumasi (`auth/actions/login`)
+- Kritik action korumasi (`backup`, `mail`, `queue`, `settings/actions/install-missing`)
+- Genel POST limiti
+
+Not:
+
+- Throttle tablosu: `request_throttles`
+- Limit asiminda `429` doner ve `Retry-After` header set edilir
 
 ## Mail Modulu
 

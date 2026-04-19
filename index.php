@@ -90,6 +90,37 @@ if ($auth_required && is_user_logged_in() && !validate_active_session_user()) {
     redirect(base_url('auth/login'));
 }
 
+$throttleResult = kirpi_throttle_guard_request(
+    $request_path,
+    $current_method,
+    is_user_logged_in() ? (int) (current_user()['id'] ?? 0) : null
+);
+
+if (!($throttleResult['allowed'] ?? true)) {
+    $retryAfter = max(1, (int) ($throttleResult['retry_after'] ?? 30));
+    $message = (string) ($throttleResult['message'] ?? 'Istek siniri asildi. Lutfen daha sonra tekrar deneyin.');
+
+    header('Retry-After: ' . $retryAfter);
+
+    $isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+        strtolower((string) $_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+
+    if ($isAjax || !$render_layout) {
+        json_response([
+            'status' => 'error',
+            'message' => $message,
+            'retry_after' => $retryAfter,
+        ], 429);
+    }
+
+    display_error_page(
+        '429 - Cok Fazla Istek',
+        $message,
+        429,
+        $render_layout
+    );
+}
+
 if ($required_permission && !check_permission($required_permission)) {
     display_error_page(
         '403 - Yetkisiz Erisim',

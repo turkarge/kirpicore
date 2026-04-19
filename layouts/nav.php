@@ -76,6 +76,12 @@ $menu = [
                 'url' => 'security/view',
                 'permission' => 'security.view',
             ],
+            [
+                'title' => 'Health Metrics',
+                'icon' => 'ti ti-activity-heartbeat',
+                'url' => 'health/view',
+                'permission' => 'health.view',
+            ],
         ],
     ],
 ];

@@ -9,3 +9,4 @@ require_once BASE_PATH . '/core/permissions.php';
 require_once BASE_PATH . '/core/mail.php';
 require_once BASE_PATH . '/core/queue.php';
 require_once BASE_PATH . '/core/backup.php';
+require_once BASE_PATH . '/core/throttle.php';

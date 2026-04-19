@@ -166,6 +166,15 @@ function kirpi_core_permission_catalog(): array
                 ],
             ],
         ],
+        'health' => [
+            'title' => 'Health',
+            'permissions' => [
+                [
+                    'name' => 'Health Metrics Goruntuleme',
+                    'slug' => 'health.view',
+                ],
+            ],
+        ],
     ];
 }
 
