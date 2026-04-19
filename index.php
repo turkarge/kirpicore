@@ -10,6 +10,10 @@ define('KIRPI_CORE_ENTRY', true);
 require_once BASE_PATH . '/core/config.php';
 require_once BASE_PATH . '/core/database.php';
 require_once BASE_PATH . '/core/functions.php';
+require_once BASE_PATH . '/core/setup.php';
+
+kirpi_try_auto_setup_if_empty();
+
 require_once BASE_PATH . '/core/routes.php';
 
 $request_path = trim($_GET['url'] ?? '', '/');
