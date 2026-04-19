@@ -126,6 +126,14 @@ try {
         ':is_active' => $isActive,
     ]);
 
+    $createdUserId = (int) db()->lastInsertId();
+    kirpi_audit_log('create', 'users', [
+        'target_user_id' => $createdUserId,
+        'email' => $email,
+        'role_id' => $roleId !== '' ? (int) $roleId : null,
+        'is_active' => $isActive,
+    ], 'user', $createdUserId, 'success');
+
     json_response([
         'status' => 'success',
         'message' => 'Kullanıcı başarıyla oluşturuldu.',

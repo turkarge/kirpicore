@@ -68,6 +68,11 @@ try {
         ':id' => $id,
     ]);
 
+    kirpi_audit_log('toggle_status', 'users', [
+        'target_user_id' => $id,
+        'is_active' => $status,
+    ], 'user', $id, 'success');
+
     json_response([
         'status' => 'success',
         'message' => $status === 1 ? 'Kullanici aktif yapildi.' : 'Kullanici pasif yapildi.',

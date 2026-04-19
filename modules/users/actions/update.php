@@ -226,6 +226,14 @@ try {
         if ($isActive !== 1) {
             unset($_SESSION['user']);
 
+            kirpi_audit_log('update', 'users', [
+                'target_user_id' => $id,
+                'email' => $email,
+                'role_id' => $roleId !== '' ? (int) $roleId : null,
+                'is_active' => $isActive,
+                'forced_logout' => true,
+            ], 'user', $id, 'success');
+
             json_response([
                 'status' => 'success',
                 'message' => 'Kullanıcı güncellendi. Hesabınız pasife alındığı için tekrar giriş yapmanız gerekiyor.',
@@ -247,6 +255,15 @@ try {
             $_SESSION['user']['avatar'] = $newAvatarFileName;
         }
     }
+
+    kirpi_audit_log('update', 'users', [
+        'target_user_id' => $id,
+        'email' => $email,
+        'role_id' => $roleId !== '' ? (int) $roleId : null,
+        'is_active' => $isActive,
+        'password_changed' => $passwordWillChange,
+        'avatar_changed' => $newAvatarFileName !== null,
+    ], 'user', $id, 'success');
 
     json_response([
         'status' => 'success',

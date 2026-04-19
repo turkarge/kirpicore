@@ -68,6 +68,12 @@ try {
         ':id' => $id,
     ]);
 
+    kirpi_audit_log('toggle_status', 'roles', [
+        'target_role_id' => $id,
+        'name' => (string) ($role['name'] ?? ''),
+        'is_active' => $status,
+    ], 'role', $id, 'success');
+
     json_response([
         'status' => 'success',
         'message' => '"' . ($role['name'] ?? 'Rol') . '" rolu ' . ($status === 1 ? 'aktif yapildi.' : 'pasif yapildi.'),

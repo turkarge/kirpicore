@@ -97,6 +97,15 @@ function kirpi_core_permission_catalog(): array
                 ],
             ],
         ],
+        'audit' => [
+            'title' => 'Audit',
+            'permissions' => [
+                [
+                    'name' => 'Audit Log Goruntuleme',
+                    'slug' => 'audit.view',
+                ],
+            ],
+        ],
         'security' => [
             'title' => 'Guvenlik',
             'permissions' => [

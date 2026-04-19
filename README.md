@@ -9,6 +9,7 @@ Core moduller tamamlandi:
 - `profile`
 - `notifications`
 - `mail`
+- `audit`
 
 ## Dokploy ile calistirma
 
@@ -140,3 +141,17 @@ Not:
 
 - `MAIL_HOST` doluysa SMTP ile gonderim denenir
 - `MAIL_HOST` bos ise PHP `mail()` fallback kullanilir
+
+## Audit Modulu
+
+Yonetim menusu altinda `Audit Log` ekrani bulunur.
+
+- Route: `audit/list`
+- Permission: `audit.view`
+
+Ozellikler:
+
+- Login/logout ve temel yonetim aksiyonlari icin audit kaydi toplar
+- Son 200 kaydi listeler
+- Status/module/action/user filtreleme sunar
+- Her kayit icin route, method, IP ve detay JSON bilgisi gosterir

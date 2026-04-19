@@ -55,6 +55,13 @@ try {
         ':is_active' => $isActive,
     ]);
 
+    $createdRoleId = (int) db()->lastInsertId();
+    kirpi_audit_log('create', 'roles', [
+        'target_role_id' => $createdRoleId,
+        'name' => $name,
+        'is_active' => $isActive,
+    ], 'role', $createdRoleId, 'success');
+
     json_response([
         'status' => 'success',
         'message' => '"' . $name . '" rolü başarıyla oluşturuldu.',

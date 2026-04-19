@@ -30,11 +30,24 @@ $htmlBody = nl2br(e($message));
 $sendResult = kirpi_send_mail($recipientEmail, $subject, $htmlBody, $userId > 0 ? $userId : null);
 
 if (!($sendResult['success'] ?? false)) {
+    kirpi_audit_log('send_test_failed', 'mail', [
+        'recipient_email' => $recipientEmail,
+        'subject' => $subject,
+        'transport' => (string) ($sendResult['transport'] ?? ''),
+        'message' => (string) ($sendResult['message'] ?? ''),
+    ], 'mail', null, 'failed');
+
     json_response([
         'status' => 'error',
         'message' => (string) ($sendResult['message'] ?? 'Test maili gonderilemedi.'),
     ], 422);
 }
+
+kirpi_audit_log('send_test', 'mail', [
+    'recipient_email' => $recipientEmail,
+    'subject' => $subject,
+    'transport' => (string) ($sendResult['transport'] ?? ''),
+], 'mail', null, 'success');
 
 json_response([
     'status' => 'success',

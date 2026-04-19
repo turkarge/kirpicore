@@ -8,7 +8,7 @@ require_action('POST', true);
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Güvenlik doğrulaması başarısız oldu.',
+        'message' => 'Guvenlik dogrulamasi basarisiz oldu.',
     ], 419);
 }
 
@@ -18,14 +18,14 @@ $permissionSlugs = array_map('strval', $_POST['permission_slugs'] ?? []);
 if ($id <= 0) {
     json_response([
         'status' => 'error',
-        'message' => 'Geçersiz rol.',
+        'message' => 'Gecersiz rol.',
     ], 422);
 }
 
 if (!db_table_exists('permissions') || !db_table_exists('role_permissions')) {
     json_response([
         'status' => 'error',
-        'message' => 'Permission tabloları henüz kurulu değil.',
+        'message' => 'Permission tablolari henuz kurulu degil.',
     ], 422);
 }
 
@@ -45,24 +45,31 @@ try {
     if (!$role) {
         json_response([
             'status' => 'error',
-            'message' => 'Rol bulunamadı.',
+            'message' => 'Rol bulunamadi.',
         ], 404);
     }
 
     if (($role['name'] ?? '') === 'Super Admin') {
         json_response([
             'status' => 'error',
-            'message' => 'Super Admin rolü için izin matrisi düzenlenmez.',
+            'message' => 'Super Admin rolu icin izin matrisi duzenlenmez.',
         ], 422);
     }
 
     sync_role_permissions($id, $permissionSlugs);
 
-    set_flash_message('success', '"' . ($role['name'] ?? 'Rol') . '" rolünün izinleri başarıyla güncellendi.');
+    kirpi_audit_log('permissions_update', 'roles', [
+        'target_role_id' => $id,
+        'name' => (string) ($role['name'] ?? ''),
+        'permission_count' => count($permissionSlugs),
+        'permission_slugs' => array_values($permissionSlugs),
+    ], 'role', $id, 'success');
+
+    set_flash_message('success', '"' . ($role['name'] ?? 'Rol') . '" rolunun izinleri basariyla guncellendi.');
 
     json_response([
         'status' => 'success',
-        'message' => '"' . ($role['name'] ?? 'Rol') . '" rolünün izinleri başarıyla güncellendi.',
+        'message' => '"' . ($role['name'] ?? 'Rol') . '" rolunun izinleri basariyla guncellendi.',
         'redirect' => base_url('roles/permissions?id=' . $id),
     ]);
 } catch (Throwable $e) {
@@ -70,6 +77,6 @@ try {
 
     json_response([
         'status' => 'error',
-        'message' => 'Rol izinleri güncellenirken bir hata oluştu.',
+        'message' => 'Rol izinleri guncellenirken bir hata olustu.',
     ], 500);
 }

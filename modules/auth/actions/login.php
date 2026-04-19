@@ -8,7 +8,7 @@ require_action('POST', false);
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Güvenlik doğrulaması başarısız oldu. Sayfayı yenileyip tekrar deneyin.',
+        'message' => 'GÃ¼venlik doÄŸrulamasÄ± baÅŸarÄ±sÄ±z oldu. SayfayÄ± yenileyip tekrar deneyin.',
     ], 419);
 }
 
@@ -18,14 +18,14 @@ $password = (string)($_POST['password'] ?? '');
 if ($email === '' || $password === '') {
     json_response([
         'status' => 'error',
-        'message' => 'E-posta ve şifre alanları zorunludur.',
+        'message' => 'E-posta ve ÅŸifre alanlarÄ± zorunludur.',
     ], 422);
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     json_response([
         'status' => 'error',
-        'message' => 'Geçerli bir e-posta adresi girin.',
+        'message' => 'GeÃ§erli bir e-posta adresi girin.',
     ], 422);
 }
 
@@ -52,16 +52,27 @@ try {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$user || !password_verify($password, $user['password'])) {
+        kirpi_audit_log('login_failed', 'auth', [
+            'email' => $email,
+            'reason' => 'invalid_credentials',
+        ], 'session', null, 'failed');
+
         json_response([
             'status' => 'error',
-            'message' => 'E-posta veya şifre hatalı.',
+            'message' => 'E-posta veya ÅŸifre hatalÄ±.',
         ], 401);
     }
 
     if (($user['role_id'] ?? null) && isset($user['role_is_active']) && (int) $user['role_is_active'] !== 1) {
+        kirpi_audit_log('login_failed', 'auth', [
+            'email' => $email,
+            'reason' => 'role_inactive',
+            'role_id' => (int) ($user['role_id'] ?? 0),
+        ], 'session', null, 'failed');
+
         json_response([
             'status' => 'error',
-            'message' => 'Bu kullanıcıya bağlı rol pasif durumda.',
+            'message' => 'Bu kullanÄ±cÄ±ya baÄŸlÄ± rol pasif durumda.',
         ], 403);
     }
 
@@ -118,16 +129,22 @@ try {
         $redirect = $defaultRedirect;
     }
 
+    kirpi_audit_log('login', 'auth', [
+        'email' => (string) ($user['email'] ?? ''),
+        'role_id' => (int) ($user['role_id'] ?? 0),
+        'role_name' => (string) ($user['role_name'] ?? ''),
+    ], 'session', null, 'success');
+
     json_response([
         'status' => 'success',
-        'message' => 'Giriş başarılı. Yönlendiriliyorsunuz.',
+        'message' => 'GiriÅŸ baÅŸarÄ±lÄ±. YÃ¶nlendiriliyorsunuz.',
         'redirect' => $redirect,
     ]);
 } catch (Throwable $e) {
-    error_log('Login action hatası: ' . $e->getMessage());
+    error_log('Login action hatasÄ±: ' . $e->getMessage());
 
     json_response([
         'status' => 'error',
-        'message' => 'Giriş işlemi sırasında bir hata oluştu.',
+        'message' => 'GiriÅŸ iÅŸlemi sÄ±rasÄ±nda bir hata oluÅŸtu.',
     ], 500);
 }

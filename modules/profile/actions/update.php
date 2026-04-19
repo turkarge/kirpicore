@@ -160,6 +160,13 @@ try {
         $_SESSION['user']['avatar'] = $newAvatarFileName;
     }
 
+    kirpi_audit_log('update', 'profile', [
+        'target_user_id' => $id,
+        'email' => $email,
+        'password_changed' => $passwordWillChange,
+        'avatar_changed' => $newAvatarFileName !== null,
+    ], 'user', $id, 'success');
+
     json_response([
         'status' => 'success',
         'message' => 'Profil başarıyla güncellendi.',

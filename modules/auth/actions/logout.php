@@ -5,6 +5,8 @@ if (!defined('KIRPI_CORE_ENTRY')) {
 
 require_action('POST', true);
 
+$logoutUser = current_user();
+
 $isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) &&
     strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
@@ -19,6 +21,12 @@ if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     set_flash_message('danger', 'Güvenlik doğrulaması başarısız oldu.');
     redirect(base_url('auth/login'));
 }
+
+kirpi_audit_log('logout', 'auth', [
+    'email' => (string) ($logoutUser['email'] ?? ''),
+    'role_id' => (int) ($logoutUser['role_id'] ?? 0),
+    'role_name' => (string) ($logoutUser['role_name'] ?? ''),
+], 'session', null, 'success');
 
 $_SESSION = [];
 

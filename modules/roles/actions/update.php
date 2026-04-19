@@ -115,6 +115,12 @@ try {
         $_SESSION['user']['permissions'] = load_user_permissions($currentRoleId, $name);
     }
 
+    kirpi_audit_log('update', 'roles', [
+        'target_role_id' => $id,
+        'name' => $name,
+        'is_active' => $isActive,
+    ], 'role', $id, 'success');
+
     json_response([
         'status' => 'success',
         'message' => '"' . $name . '" rolu basariyla guncellendi.',

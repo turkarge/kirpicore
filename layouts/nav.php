@@ -47,6 +47,12 @@ $menu = [
                 'permission' => 'mail.view',
             ],
             [
+                'title' => 'Audit Log',
+                'icon' => 'ti ti-list-details',
+                'url' => 'audit/list',
+                'permission' => 'audit.view',
+            ],
+            [
                 'title' => 'Guvenlik Izleme',
                 'icon' => 'ti ti-shield-check',
                 'url' => 'security/view',
