@@ -22,4 +22,11 @@ return [
         'auth' => true,
         'method' => 'POST',
     ],
+    'backup/actions/download' => [
+        'file' => 'modules/backup/actions/download.php',
+        'layout' => false,
+        'permission' => 'backup.download',
+        'auth' => true,
+        'method' => 'GET',
+    ],
 ];

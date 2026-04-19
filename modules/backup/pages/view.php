@@ -93,11 +93,15 @@ if ($backupReady) {
                                     <td><?php echo e((string) ($backup['created_at'] ?? '')); ?></td>
                                     <td><?php echo e((string) ($backup['created_by_name'] ?? '-')); ?></td>
                                     <td>
-                                        <form id="backup-restore-form-<?php echo (int) ($backup['id'] ?? 0); ?>" action="<?php echo base_url('backup/actions/restore'); ?>" method="post" data-ajax="true" class="m-0">
-                                            <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
-                                            <input type="hidden" name="backup_id" value="<?php echo (int) ($backup['id'] ?? 0); ?>">
-                                        </form>
-                                        <a href="#" class="btn btn-sm btn-outline-danger" data-confirm="Bu backup geri yüklenecek. Emin misiniz?" data-form="backup-restore-form-<?php echo (int) ($backup['id'] ?? 0); ?>">Restore</a>
+                                        <div class="d-flex gap-2">
+                                            <a href="<?php echo base_url('backup/actions/download?id=' . (int) ($backup['id'] ?? 0)); ?>" class="btn btn-sm btn-outline-primary">Indir</a>
+
+                                            <form id="backup-restore-form-<?php echo (int) ($backup['id'] ?? 0); ?>" action="<?php echo base_url('backup/actions/restore'); ?>" method="post" data-ajax="true" class="m-0">
+                                                <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+                                                <input type="hidden" name="backup_id" value="<?php echo (int) ($backup['id'] ?? 0); ?>">
+                                            </form>
+                                            <a href="#" class="btn btn-sm btn-outline-danger" data-confirm="Bu backup geri yuklenecek. Emin misiniz?" data-form="backup-restore-form-<?php echo (int) ($backup['id'] ?? 0); ?>">Restore</a>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

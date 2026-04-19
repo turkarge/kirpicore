@@ -199,12 +199,13 @@ CLI:
 Yonetim menusu altinda `Backup Restore` ekrani bulunur.
 
 - Route: `backup/view`
-- Permissions: `backup.view`, `backup.create`, `backup.restore`
+- Permissions: `backup.view`, `backup.create`, `backup.restore`, `backup.download`
 
 Ozellikler:
 
 - `mysqldump` ile SQL backup olusturma
 - Kayitli backup dosyalarini listeleme
+- Backup dosyasini panelden indirme
 - Tek tik restore komutu calistirma
 - Restore gecmisini loglama
 
