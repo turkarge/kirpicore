@@ -37,6 +37,18 @@ function kirpi_mysql_password_arg(): string
     return '--password=' . escapeshellarg($password);
 }
 
+function kirpi_mysql_ssl_mode_arg(): string
+{
+    $sslMode = strtoupper(trim((string) env('DB_SSL_MODE', 'DISABLED')));
+    $allowed = ['DISABLED', 'PREFERRED', 'REQUIRED', 'VERIFY_CA', 'VERIFY_IDENTITY'];
+
+    if (!in_array($sslMode, $allowed, true)) {
+        $sslMode = 'DISABLED';
+    }
+
+    return '--ssl-mode=' . $sslMode;
+}
+
 function kirpi_backup_create(?string $label = null, ?int $userId = null): array
 {
     if (!kirpi_backup_table_ready()) {
@@ -58,27 +70,38 @@ function kirpi_backup_create(?string $label = null, ?int $userId = null): array
     $safeLabel = preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) ($label ?? 'manual')) ?: 'manual';
     $fileName = 'backup_' . $stamp . '_' . $safeLabel . '.sql';
     $fullPath = $dir . '/' . $fileName;
+    $errorPath = $dir . '/' . $fileName . '.err';
 
     $command = sprintf(
-        'mysqldump --single-transaction --routines --triggers --events -h %s -P %s -u %s %s %s > %s 2>&1',
+        'mysqldump --single-transaction --routines --triggers --events %s -h %s -P %s -u %s %s %s 1> %s 2> %s',
+        kirpi_mysql_ssl_mode_arg(),
         escapeshellarg((string) DB_HOST),
         escapeshellarg((string) DB_PORT),
         escapeshellarg((string) DB_USER),
         kirpi_mysql_password_arg(),
         escapeshellarg((string) DB_NAME),
-        escapeshellarg($fullPath)
+        escapeshellarg($fullPath),
+        escapeshellarg($errorPath)
     );
 
-    $output = shell_exec($command);
+    $outputLines = [];
+    $exitCode = 0;
+    exec($command, $outputLines, $exitCode);
 
-    if (!is_file($fullPath) || filesize($fullPath) === 0) {
+    $errorOutput = '';
+    if (is_file($errorPath)) {
+        $errorOutput = trim((string) file_get_contents($errorPath));
+        @unlink($errorPath);
+    }
+
+    if ($exitCode !== 0 || !is_file($fullPath) || filesize($fullPath) === 0) {
         if (is_file($fullPath)) {
             @unlink($fullPath);
         }
 
         return [
             'success' => false,
-            'message' => 'mysqldump basarisiz. ' . trim((string) $output),
+            'message' => 'mysqldump basarisiz. ' . ($errorOutput !== '' ? $errorOutput : ('exit code: ' . $exitCode)),
         ];
     }
 
@@ -139,7 +162,8 @@ function kirpi_backup_restore(int $backupId, ?int $userId = null): array
     }
 
     $command = sprintf(
-        'mysql -h %s -P %s -u %s %s %s < %s 2>&1',
+        'mysql %s -h %s -P %s -u %s %s %s < %s 2>&1',
+        kirpi_mysql_ssl_mode_arg(),
         escapeshellarg((string) DB_HOST),
         escapeshellarg((string) DB_PORT),
         escapeshellarg((string) DB_USER),
@@ -148,7 +172,10 @@ function kirpi_backup_restore(int $backupId, ?int $userId = null): array
         escapeshellarg($filePath)
     );
 
-    $output = shell_exec($command);
+    $outputLines = [];
+    $exitCode = 0;
+    exec($command, $outputLines, $exitCode);
+    $output = trim(implode(PHP_EOL, $outputLines));
 
     $logStmt = db()->prepare("\n        INSERT INTO db_backup_restores (\n            backup_id,\n            restored_by,\n            restore_output\n        ) VALUES (\n            :backup_id,\n            :restored_by,\n            :restore_output\n        )\n    ");
     $logStmt->execute([
@@ -156,6 +183,13 @@ function kirpi_backup_restore(int $backupId, ?int $userId = null): array
         ':restored_by' => $userId,
         ':restore_output' => mb_substr(trim((string) $output), 0, 5000),
     ]);
+
+    if ($exitCode !== 0) {
+        return [
+            'success' => false,
+            'message' => 'Restore komutu basarisiz. ' . ($output !== '' ? $output : ('exit code: ' . $exitCode)),
+        ];
+    }
 
     return [
         'success' => true,

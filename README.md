@@ -213,3 +213,7 @@ CLI:
 
 - `php shell.php backup:create [label]`
 - `php shell.php backup:restore <backup_id>`
+
+Not:
+
+- SSL sertifika zinciri hatasi alirsan `DB_SSL_MODE=DISABLED` kullan.
