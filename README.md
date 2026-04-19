@@ -27,10 +27,13 @@ Minimum gerekli degiskenler:
 - `APP_ENV=production`
 - `APP_DEBUG=false`
 - `APP_TRUST_PROXY=true`
+- `SETUP_KEY=guclu_bir_setup_key`
 
 Opsiyonel:
 
 - `AUTO_DB_INSTALL=true` (default: `true`)
+- `AUTO_WEB_SETUP=true` (default: `true`)
+- `SESSION_COOKIE_DOMAIN=` (onerilen: bos birakin; isterseniz sadece host verin, ornek: `core.kirpinetwork.com`)
 
 ### 3) Deploy et
 
@@ -58,3 +61,32 @@ Ardindan:
 Notlar:
 
 - Compose servislerinde log rotasyonu aktiftir (`10m`, `5` dosya).
+
+## Web Setup Arayuzu
+
+Ilk kurulum icin:
+
+- `https://sizin-domaininiz/setup.php`
+
+Bu arayuz:
+
+1. `SETUP_KEY` dogrular
+2. Core + module schema kurar
+3. `Super Admin` ve `Default User` rollerini olusturur
+4. Formdan girdigin admin kullaniciyi olusturur/gunceller
+5. Kurulan tablolar ve ozet raporu gosterir
+
+Kurulum bitince guvenlik icin:
+
+- `AUTO_WEB_SETUP=false`
+- `SETUP_KEY` degerini degistir veya bosalt
+
+## Sorun Giderme
+
+### "Guvenlik dogrulamasi basarisiz oldu"
+
+Bu hata genelde eski session cookie kaynaklidir.
+
+1. Domain cookie'lerini temizle
+2. `SESSION_COOKIE_DOMAIN` degerini bos birakip redeploy et
+3. Login sayfasini yeniden acip tekrar dene

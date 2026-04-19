@@ -20,6 +20,7 @@ date_default_timezone_set(env('APP_TIMEZONE', 'Europe/Istanbul'));
 $appEnv = env('APP_ENV', 'production');
 $appDebug = env_bool('APP_DEBUG', false);
 $appTrustProxy = env_bool('APP_TRUST_PROXY', true);
+$appVer = (string) env('APP_VER', '1.0.15');
 
 if ($appEnv === 'development' || $appDebug === true) {
     error_reporting(E_ALL);
@@ -36,6 +37,11 @@ ini_set('error_log', BASE_PATH . '/logs/php-errors.log');
 if (session_status() === PHP_SESSION_NONE) {
     $sessionCookieDomain = env('SESSION_COOKIE_DOMAIN', '');
     $isHttpsRequest = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+    $sessionVersion = preg_replace('/[^a-zA-Z0-9]/', '', $appVer);
+
+    if ($sessionVersion === '' || $sessionVersion === null) {
+        $sessionVersion = '100';
+    }
 
     if (!$isHttpsRequest && $appTrustProxy) {
         $forwardedProto = strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''));
@@ -50,6 +56,7 @@ if (session_status() === PHP_SESSION_NONE) {
     ini_set('session.cookie_httponly', '1');
     ini_set('session.use_strict_mode', '1');
     ini_set('session.cookie_samesite', 'Lax');
+    session_name('KIRPISESSID_' . $sessionVersion);
 
     if ($isHttpsRequest) {
         ini_set('session.cookie_secure', '1');
@@ -59,7 +66,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 define('APP_NAME', env('APP_NAME', 'Kirpi Core'));
-define('APP_VER', env('APP_VER'));
+define('APP_VER', $appVer);
 define('APP_ENV', $appEnv);
 define('APP_DEBUG', $appDebug);
 define('APP_TRUST_PROXY', $appTrustProxy);
