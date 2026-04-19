@@ -355,6 +355,11 @@
                     if (formId) {
                         const form = document.getElementById(formId);
                         if (form) {
+                            if (form.matches("form[data-ajax='true']")) {
+                                this.submitAjaxForm(form);
+                                return;
+                            }
+
                             if (typeof form.requestSubmit === "function") {
                                 form.requestSubmit();
                             } else {
@@ -378,6 +383,70 @@
                 }
                 confirmModal.hide();
             });
+        },
+
+        async submitAjaxForm(form) {
+            if (!form || !form.matches("form[data-ajax='true']")) {
+                return;
+            }
+
+            const submitButton = form.querySelector("[type='submit']");
+            if (submitButton) {
+                submitButton.disabled = true;
+            }
+
+            try {
+                const formData = new FormData(form);
+
+                if (this.csrfToken && !formData.has("csrf_token")) {
+                    formData.append("csrf_token", this.csrfToken);
+                }
+
+                const response = await fetch(form.action, {
+                    method: form.method || "POST",
+                    body: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.message) {
+                    this.toast(result.message, result.status || "info");
+                }
+
+                if (result.status === "success" && form.dataset.closeModal === "true") {
+                    this.closeModalElement(form.closest(".modal"));
+                }
+
+                document.dispatchEvent(new CustomEvent("kirpi:form.success", {
+                    detail: {
+                        form: form,
+                        result: result
+                    }
+                }));
+
+                if (result.reload_page) {
+                    if (result.message) {
+                        this.persistPendingToast(result.message, result.status || "info");
+                    }
+                    window.location.reload();
+                    return;
+                }
+
+                if (result.redirect) {
+                    window.location.href = result.redirect;
+                    return;
+                }
+            } catch (error) {
+                console.error("AJAX form submit error:", error);
+                this.toast("Islem sirasinda bir hata olustu.", "error");
+            } finally {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                }
+            }
         },
 
         getNotificationUnreadCount() {
@@ -486,67 +555,9 @@
                 }
 
                 event.preventDefault();
-
-                const submitButton = form.querySelector("[type='submit']");
-                if (submitButton) {
-                    submitButton.disabled = true;
-                }
-
-                try {
-                    const formData = new FormData(form);
-
-                    if (this.csrfToken && !formData.has("csrf_token")) {
-                        formData.append("csrf_token", this.csrfToken);
-                    }
-
-                    const response = await fetch(form.action, {
-                        method: form.method || "POST",
-                        body: formData,
-                        headers: {
-                            "X-Requested-With": "XMLHttpRequest"
-                        }
-                    });
-
-                    const result = await response.json();
-
-                    if (result.message) {
-                        this.toast(result.message, result.status || "info");
-                    }
-
-                    if (result.status === "success" && form.dataset.closeModal === "true") {
-                        this.closeModalElement(form.closest(".modal"));
-                    }
-
-                    document.dispatchEvent(new CustomEvent("kirpi:form.success", {
-                        detail: {
-                            form: form,
-                            result: result
-                        }
-                    }));
-
-                    if (result.reload_page) {
-                        if (result.message) {
-                            this.persistPendingToast(result.message, result.status || "info");
-                        }
-                        window.location.reload();
-                        return;
-                    }
-
-                    if (result.redirect) {
-                        window.location.href = result.redirect;
-                        return;
-                    }
-                } catch (error) {
-                    console.error("AJAX form submit error:", error);
-                    this.toast("İşlem sırasında bir hata oluştu.", "error");
-                } finally {
-                    if (submitButton) {
-                        submitButton.disabled = false;
-                    }
-                }
-            });
+                await this.submitAjaxForm(form);
+            }, true);
         },
-
         toast(message, type = "info") {
             if (window.toastr && typeof toastr[type] === "function") {
                 try {
@@ -574,3 +585,5 @@
         KirpiCore.init();
     });
 })();
+
+
