@@ -38,6 +38,10 @@ function shell_usage(): void
     shell_output('  php shell.php db:permissions:install');
     shell_output('  php shell.php db:notifications:install');
     shell_output('  php shell.php db:notifications:seed-demo <user_id>');
+    shell_output('  php shell.php queue:work-once [queue_name]');
+    shell_output('  php shell.php queue:work [max_jobs] [queue_name]');
+    shell_output('  php shell.php backup:create [label]');
+    shell_output('  php shell.php backup:restore <backup_id>');
     shell_output('');
     shell_output('Examples:');
     shell_output('  php shell.php hash:password 123456');
@@ -51,6 +55,10 @@ function shell_usage(): void
     shell_output('  php shell.php db:permissions:install');
     shell_output('  php shell.php db:notifications:install');
     shell_output('  php shell.php db:notifications:seed-demo 1');
+    shell_output('  php shell.php queue:work-once default');
+    shell_output('  php shell.php queue:work 20 default');
+    shell_output('  php shell.php backup:create deploy_oncesi');
+    shell_output('  php shell.php backup:restore 1');
 }
 
 function shell_render_rows(array $rows): void
@@ -384,6 +392,81 @@ try {
             }
 
             shell_output('Demo notifications inserted for user #' . $userId . '.');
+            break;
+
+        case 'queue:work-once':
+            shell_boot_database();
+
+            $queueName = trim((string) ($argv[2] ?? 'default'));
+            if ($queueName === '') {
+                $queueName = 'default';
+            }
+
+            $result = kirpi_queue_work_once($queueName);
+            shell_output(json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+            break;
+
+        case 'queue:work':
+            shell_boot_database();
+
+            $maxJobs = (int) ($argv[2] ?? 10);
+            $queueName = trim((string) ($argv[3] ?? 'default'));
+            if ($maxJobs <= 0) {
+                $maxJobs = 10;
+            }
+            if ($maxJobs > 1000) {
+                $maxJobs = 1000;
+            }
+            if ($queueName === '') {
+                $queueName = 'default';
+            }
+
+            $processed = 0;
+            for ($i = 0; $i < $maxJobs; $i++) {
+                $result = kirpi_queue_work_once($queueName);
+                shell_output(json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+
+                if (($result['status'] ?? '') === 'processed') {
+                    $processed++;
+                    continue;
+                }
+
+                if (($result['status'] ?? '') === 'failed') {
+                    continue;
+                }
+
+                break;
+            }
+
+            shell_output('Queue worker finished. Processed: ' . $processed);
+            break;
+
+        case 'backup:create':
+            shell_boot_database();
+
+            $label = trim((string) ($argv[2] ?? ''));
+            $result = kirpi_backup_create($label !== '' ? $label : null, null);
+            shell_output(json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+
+            if (!($result['success'] ?? false)) {
+                shell_error((string) ($result['message'] ?? 'Backup create failed.'), 2);
+            }
+            break;
+
+        case 'backup:restore':
+            shell_boot_database();
+
+            $backupId = (int) ($argv[2] ?? 0);
+            if ($backupId <= 0) {
+                shell_error('Backup ID is required.');
+            }
+
+            $result = kirpi_backup_restore($backupId, null);
+            shell_output(json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+
+            if (!($result['success'] ?? false)) {
+                shell_error((string) ($result['message'] ?? 'Backup restore failed.'), 2);
+            }
             break;
 
         default:

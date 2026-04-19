@@ -59,6 +59,18 @@ $menu = [
                 'permission' => 'settings.view',
             ],
             [
+                'title' => 'Jobs Queue',
+                'icon' => 'ti ti-clock-play',
+                'url' => 'queue/view',
+                'permission' => 'queue.view',
+            ],
+            [
+                'title' => 'Backup Restore',
+                'icon' => 'ti ti-database-export',
+                'url' => 'backup/view',
+                'permission' => 'backup.view',
+            ],
+            [
                 'title' => 'Guvenlik Izleme',
                 'icon' => 'ti ti-shield-check',
                 'url' => 'security/view',

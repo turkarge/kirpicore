@@ -11,6 +11,8 @@ Core moduller tamamlandi:
 - `mail`
 - `audit`
 - `settings`
+- `queue`
+- `backup`
 
 ## Dokploy ile calistirma
 
@@ -172,3 +174,41 @@ Ozellikler:
 - Mail sifresi icin guvenli guncelleme (bos birakilirsa mevcut deger korunur)
 - Ayar degisikliklerini audit log'a yazma
 - Sistem tablo kontrolu ve eksik schema kurulumunu panelden tek tikla calistirma
+
+## Queue Modulu
+
+Yonetim menusu altinda `Jobs Queue` ekrani bulunur.
+
+- Route: `queue/view`
+- Permissions: `queue.view`, `queue.manage`
+
+Ozellikler:
+
+- Asenkron job kuyrugu (`jobs_queue` tablosu)
+- Test mail job'i kuyruga ekleme
+- Worker `run once` tetikleme
+- Failed joblari tekrar kuyruğa alma
+
+CLI:
+
+- `php shell.php queue:work-once [queue_name]`
+- `php shell.php queue:work [max_jobs] [queue_name]`
+
+## Backup / Restore Modulu
+
+Yonetim menusu altinda `Backup Restore` ekrani bulunur.
+
+- Route: `backup/view`
+- Permissions: `backup.view`, `backup.create`, `backup.restore`
+
+Ozellikler:
+
+- `mysqldump` ile SQL backup olusturma
+- Kayitli backup dosyalarini listeleme
+- Tek tik restore komutu calistirma
+- Restore gecmisini loglama
+
+CLI:
+
+- `php shell.php backup:create [label]`
+- `php shell.php backup:restore <backup_id>`

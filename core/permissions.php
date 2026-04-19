@@ -119,6 +119,36 @@ function kirpi_core_permission_catalog(): array
                 ],
             ],
         ],
+        'queue' => [
+            'title' => 'Queue',
+            'permissions' => [
+                [
+                    'name' => 'Queue Goruntuleme',
+                    'slug' => 'queue.view',
+                ],
+                [
+                    'name' => 'Queue Yonetimi',
+                    'slug' => 'queue.manage',
+                ],
+            ],
+        ],
+        'backup' => [
+            'title' => 'Backup',
+            'permissions' => [
+                [
+                    'name' => 'Backup Goruntuleme',
+                    'slug' => 'backup.view',
+                ],
+                [
+                    'name' => 'Backup Olusturma',
+                    'slug' => 'backup.create',
+                ],
+                [
+                    'name' => 'Backup Restore',
+                    'slug' => 'backup.restore',
+                ],
+            ],
+        ],
         'security' => [
             'title' => 'Guvenlik',
             'permissions' => [
