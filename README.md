@@ -15,6 +15,7 @@ Core moduller tamamlandi:
 - `backup`
 - `health`
 - `throttle`
+- `api`
 
 ## Dokploy ile calistirma
 
@@ -49,6 +50,9 @@ Opsiyonel:
 - `THROTTLE_LOGIN_LIMIT=5`, `THROTTLE_LOGIN_WINDOW=600`, `THROTTLE_LOGIN_BLOCK=900`
 - `THROTTLE_CRITICAL_LIMIT=10`, `THROTTLE_CRITICAL_WINDOW=60`, `THROTTLE_CRITICAL_BLOCK=120`
 - `THROTTLE_GLOBAL_POST_LIMIT=180`, `THROTTLE_GLOBAL_POST_WINDOW=60`, `THROTTLE_GLOBAL_POST_BLOCK=60`
+- `THROTTLE_API_LIMIT=120`, `THROTTLE_API_WINDOW=60`, `THROTTLE_API_BLOCK=120`
+- `THROTTLE_API_AUTH_LIMIT=10`, `THROTTLE_API_AUTH_WINDOW=300`, `THROTTLE_API_AUTH_BLOCK=600`
+- `API_TOKEN_TTL_SECONDS=2592000` (default: 30 gun)
 
 ### 3) Deploy et
 
@@ -167,6 +171,26 @@ Not:
 
 - Throttle tablosu: `request_throttles`
 - Limit asiminda `429` doner ve `Retry-After` header set edilir
+
+## REST API (v1)
+
+Temel REST API iskeleti eklendi.
+
+- Route prefix: `api/v1`
+- Auth: `Authorization: Bearer <token>`
+- Response format: `status`, `message`, `data`, `meta`
+
+Endpointler:
+
+- `POST /api/v1/auth/token` (email + password ile token alir)
+- `GET /api/v1/me` (token sahibinin profil bilgisi)
+- `GET /api/v1/users` (kullanici listesi, `users.view` yetkisi gerekir)
+
+Not:
+
+- API token tablosu: `api_tokens`
+- Token olusturma endpoint'i brute-force'a karsi throttle ile korunur
+- API cagrilari da throttle kapsamindadir
 
 ## Mail Modulu
 

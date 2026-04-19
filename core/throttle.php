@@ -193,6 +193,36 @@ function kirpi_throttle_guard_request(string $requestPath, string $method, ?int 
     $ip = kirpi_client_ip();
     $userScope = $userId && $userId > 0 ? ('user:' . $userId) : ('ip:' . $ip);
 
+    if (str_starts_with($requestPath, 'api/v1/')) {
+        $apiLimit = (int) env('THROTTLE_API_LIMIT', '120');
+        $apiWindow = (int) env('THROTTLE_API_WINDOW', '60');
+        $apiBlock = (int) env('THROTTLE_API_BLOCK', '120');
+
+        $apiCheck = kirpi_throttle_consume('api:' . $requestPath . ':' . $method . ':ip:' . $ip, $apiLimit, $apiWindow, $apiBlock);
+        if (!($apiCheck['allowed'] ?? true)) {
+            return [
+                'allowed' => false,
+                'message' => 'API istek limiti asildi. Lutfen daha sonra tekrar deneyin.',
+                'retry_after' => (int) ($apiCheck['retry_after'] ?? 30),
+            ];
+        }
+
+        if ($requestPath === 'api/v1/auth/token' && $method === 'POST') {
+            $authLimit = (int) env('THROTTLE_API_AUTH_LIMIT', '10');
+            $authWindow = (int) env('THROTTLE_API_AUTH_WINDOW', '300');
+            $authBlock = (int) env('THROTTLE_API_AUTH_BLOCK', '600');
+
+            $authCheck = kirpi_throttle_consume('api_auth:ip:' . $ip, $authLimit, $authWindow, $authBlock);
+            if (!($authCheck['allowed'] ?? true)) {
+                return [
+                    'allowed' => false,
+                    'message' => 'API token deneme limiti asildi. Lutfen daha sonra tekrar deneyin.',
+                    'retry_after' => (int) ($authCheck['retry_after'] ?? 60),
+                ];
+            }
+        }
+    }
+
     if ($requestPath === 'auth/actions/login' && $method === 'POST') {
         $limit = (int) env('THROTTLE_LOGIN_LIMIT', '5');
         $window = (int) env('THROTTLE_LOGIN_WINDOW', '600');
@@ -264,4 +294,3 @@ function kirpi_throttle_guard_request(string $requestPath, string $method, ?int 
 
     return ['allowed' => true];
 }
-
