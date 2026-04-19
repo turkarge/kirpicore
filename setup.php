@@ -173,7 +173,8 @@ if (strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     ]);
 }
 
-if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
+$csrfToken = (string) ($_POST['csrf_token'] ?? '');
+if ($csrfToken !== '' && !verify_csrf_token($csrfToken)) {
     setup_response([
         'status' => 'error',
         'message' => 'Guvenlik dogrulamasi basarisiz oldu. Sayfayi yenileyin.',
