@@ -84,6 +84,19 @@ function kirpi_core_permission_catalog(): array
                 ],
             ],
         ],
+        'mail' => [
+            'title' => 'Mail',
+            'permissions' => [
+                [
+                    'name' => 'Mail Modulu Goruntuleme',
+                    'slug' => 'mail.view',
+                ],
+                [
+                    'name' => 'Test Maili Gonderme',
+                    'slug' => 'mail.test',
+                ],
+            ],
+        ],
         'security' => [
             'title' => 'Guvenlik',
             'permissions' => [

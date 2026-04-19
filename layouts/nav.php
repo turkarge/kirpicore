@@ -41,6 +41,12 @@ $menu = [
                 'permission' => 'notifications.view',
             ],
             [
+                'title' => 'Mail Test',
+                'icon' => 'ti ti-mail',
+                'url' => 'mail/test',
+                'permission' => 'mail.view',
+            ],
+            [
                 'title' => 'Guvenlik Izleme',
                 'icon' => 'ti ti-shield-check',
                 'url' => 'security/view',

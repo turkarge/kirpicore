@@ -8,6 +8,7 @@ Core moduller tamamlandi:
 - `roles`
 - `profile`
 - `notifications`
+- `mail`
 
 ## Dokploy ile calistirma
 
@@ -121,3 +122,21 @@ Bu sayfa su kontrolleri gosterir:
 - Session cookie guvenlik bilgileri
 - Kritik klasorlerin varlik/yazilabilirlik/izin durumu
 - Veritabanindaki mevcut tablolar
+
+## Mail Modulu
+
+Yonetim menusu altinda `Mail Test` ekrani bulunur.
+
+- Route: `mail/test`
+- Permissions: `mail.view`, `mail.test`
+
+Ozellikler:
+
+- Env tabanli mail konfigurasyon durumunu listeler
+- Test e-posta gonderimi yapar
+- Son 20 gonderim kaydini (mail log) gosterir
+
+Not:
+
+- `MAIL_HOST` doluysa SMTP ile gonderim denenir
+- `MAIL_HOST` bos ise PHP `mail()` fallback kullanilir
