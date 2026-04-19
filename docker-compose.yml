@@ -68,9 +68,9 @@ services:
         max-size: "10m"
         max-file: "5"
     volumes:
-      - kirpicore_mysql_data:/var/lib/mysql
+      - kirpicore_mysql_data_v2:/var/lib/mysql
 
 volumes:
-  kirpicore_mysql_data:
+  kirpicore_mysql_data_v2:
   kirpicore_uploads:
   kirpicore_logs:
