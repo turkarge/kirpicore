@@ -33,6 +33,8 @@ services:
       MAIL_FROM_NAME: ${MAIL_FROM_NAME:-Kirpi Core}
       APP_TRUST_PROXY: ${APP_TRUST_PROXY:-true}
       AUTO_DB_INSTALL: ${AUTO_DB_INSTALL:-true}
+      AUTO_WEB_SETUP: ${AUTO_WEB_SETUP:-true}
+      SETUP_KEY: ${SETUP_KEY:-}
     ports:
       - "8080:80"
     healthcheck:
