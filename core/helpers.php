@@ -54,9 +54,13 @@ function route_exists(string $path): bool
     return isset($routes[$path]);
 }
 
-function db_table_exists(string $tableName): bool
+function db_table_exists(string $tableName, bool $refresh = false): bool
 {
     static $cache = [];
+
+    if ($refresh) {
+        unset($cache[$tableName]);
+    }
 
     if (isset($cache[$tableName])) {
         return $cache[$tableName];

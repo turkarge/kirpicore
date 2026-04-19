@@ -14,6 +14,9 @@ $mailFromAddress = trim((string) kirpi_setting_get('mail.from_address', MAIL_FRO
 $mailFromName = trim((string) kirpi_setting_get('mail.from_name', MAIL_FROM_NAME));
 
 $mailPasswordStored = trim((string) kirpi_setting_get('mail.password', '')) !== '' || trim((string) MAIL_PASSWORD) !== '';
+$schemaReport = kirpi_missing_tables_report();
+$missingTables = (array) ($schemaReport['missing_tables'] ?? []);
+$missingByFile = (array) ($schemaReport['missing_by_file'] ?? []);
 ?>
 
 <div class="page-header d-print-none">
@@ -34,6 +37,52 @@ $mailPasswordStored = trim((string) kirpi_setting_get('mail.password', '')) !== 
                 Ayarlar tablosu kurulu degil. Kurulum icin setup veya db:install calistirin.
             </div>
         <?php endif; ?>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="card-title">Sistem Kontrol ve Eksik Kurulum</h3>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <div class="text-secondary small">Beklenen Toplam Tablo</div>
+                        <div class="h3 mb-0"><?php echo (int) ($schemaReport['required_table_count'] ?? 0); ?></div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="text-secondary small">Eksik Tablo</div>
+                        <div class="h3 mb-0 <?php echo count($missingTables) > 0 ? 'text-red' : 'text-green'; ?>">
+                            <?php echo count($missingTables); ?>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4 d-flex align-items-end">
+                        <form
+                            action="<?php echo base_url('settings/actions/install-missing'); ?>"
+                            method="post"
+                            data-ajax="true"
+                            class="w-100"
+                        >
+                            <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                Eksikleri Kur
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <?php if (!empty($missingByFile)): ?>
+                    <hr class="my-4">
+                    <div class="text-secondary mb-2">Eksik tablo bulunan schema dosyalari:</div>
+                    <ul class="mb-0">
+                        <?php foreach ($missingByFile as $item): ?>
+                            <li>
+                                <code><?php echo e((string) ($item['file'] ?? '')); ?></code>
+                                - <?php echo e(implode(', ', array_map('strval', (array) ($item['tables'] ?? [])))); ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+            </div>
+        </div>
 
         <div class="card">
             <form id="settings-update-form" action="<?php echo base_url('settings/actions/update'); ?>" method="post" data-ajax="true">

@@ -36,6 +36,7 @@ Opsiyonel:
 
 - `AUTO_DB_INSTALL=true` (default: `true`)
 - `AUTO_WEB_SETUP=true` (default: `true`)
+- `AUTO_DB_ENSURE_MISSING=false` (default: `false`) - `true` ise uygulama acilisinda eksik tablo kontrolu yapip eksikleri kurar
 - `SESSION_COOKIE_DOMAIN=` (onerilen: bos birakin; isterseniz sadece host verin, ornek: `core.kirpinetwork.com`)
 
 ### 3) Deploy et
@@ -170,3 +171,4 @@ Ozellikler:
 - Mail konfigurasyonunu panelden yonetme (DB override)
 - Mail sifresi icin guvenli guncelleme (bos birakilirsa mevcut deger korunur)
 - Ayar degisikliklerini audit log'a yazma
+- Sistem tablo kontrolu ve eksik schema kurulumunu panelden tek tikla calistirma

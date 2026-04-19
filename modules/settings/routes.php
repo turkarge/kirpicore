@@ -15,4 +15,11 @@ return [
         'auth' => true,
         'method' => 'POST',
     ],
+    'settings/actions/install-missing' => [
+        'file' => 'modules/settings/actions/install_missing.php',
+        'layout' => false,
+        'permission' => 'settings.update',
+        'auth' => true,
+        'method' => 'POST',
+    ],
 ];

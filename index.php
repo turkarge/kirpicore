@@ -13,6 +13,7 @@ require_once BASE_PATH . '/core/functions.php';
 require_once BASE_PATH . '/core/setup.php';
 
 kirpi_try_auto_setup_if_empty();
+kirpi_try_auto_setup_if_missing();
 
 require_once BASE_PATH . '/core/routes.php';
 
