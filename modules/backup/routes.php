@@ -22,6 +22,13 @@ return [
         'auth' => true,
         'method' => 'POST',
     ],
+    'backup/actions/verify' => [
+        'file' => 'modules/backup/actions/verify.php',
+        'layout' => false,
+        'permission' => 'backup.restore',
+        'auth' => true,
+        'method' => 'POST',
+    ],
     'backup/actions/download' => [
         'file' => 'modules/backup/actions/download.php',
         'layout' => false,

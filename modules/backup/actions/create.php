@@ -30,13 +30,20 @@ if (!($result['success'] ?? false)) {
 }
 
 $backupId = (int) ($result['backup_id'] ?? 0);
+$retentionDeletedCount = (int) ($result['retention_deleted_count'] ?? 0);
 kirpi_audit_log('create', 'backup', [
     'backup_id' => $backupId,
     'file_name' => (string) ($result['file_name'] ?? ''),
+    'retention_deleted_count' => $retentionDeletedCount,
 ], 'backup', $backupId, 'success');
+
+$message = 'Backup olusturuldu. ID: ' . $backupId;
+if ($retentionDeletedCount > 0) {
+    $message .= ' Retention temizligi: ' . $retentionDeletedCount . ' eski backup silindi.';
+}
 
 json_response([
     'status' => 'success',
-    'message' => 'Backup olusturuldu. ID: ' . $backupId,
+    'message' => $message,
     'reload_page' => true,
 ]);

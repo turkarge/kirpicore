@@ -42,6 +42,8 @@ function shell_usage(): void
     shell_output('  php shell.php queue:work [max_jobs] [queue_name]');
     shell_output('  php shell.php backup:create [label]');
     shell_output('  php shell.php backup:restore <backup_id>');
+    shell_output('  php shell.php backup:verify <backup_id>');
+    shell_output('  php shell.php backup:cleanup [keep_count]');
     shell_output('');
     shell_output('Examples:');
     shell_output('  php shell.php hash:password 123456');
@@ -59,6 +61,8 @@ function shell_usage(): void
     shell_output('  php shell.php queue:work 20 default');
     shell_output('  php shell.php backup:create deploy_oncesi');
     shell_output('  php shell.php backup:restore 1');
+    shell_output('  php shell.php backup:verify 1');
+    shell_output('  php shell.php backup:cleanup 20');
 }
 
 function shell_render_rows(array $rows): void
@@ -467,6 +471,30 @@ try {
             if (!($result['success'] ?? false)) {
                 shell_error((string) ($result['message'] ?? 'Backup restore failed.'), 2);
             }
+            break;
+
+        case 'backup:verify':
+            shell_boot_database();
+
+            $backupId = (int) ($argv[2] ?? 0);
+            if ($backupId <= 0) {
+                shell_error('Backup ID is required.');
+            }
+
+            $result = kirpi_backup_verify($backupId, null);
+            shell_output(json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+
+            if (!($result['success'] ?? false)) {
+                shell_error((string) ($result['message'] ?? 'Backup verify failed.'), 2);
+            }
+            break;
+
+        case 'backup:cleanup':
+            shell_boot_database();
+
+            $keepCount = (int) ($argv[2] ?? 0);
+            $result = kirpi_backup_apply_retention($keepCount > 0 ? $keepCount : null);
+            shell_output(json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
             break;
 
         default:

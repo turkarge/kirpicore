@@ -40,6 +40,9 @@ Opsiyonel:
 - `AUTO_WEB_SETUP=true` (default: `true`)
 - `AUTO_DB_ENSURE_MISSING=false` (default: `false`) - `true` ise uygulama acilisinda eksik tablo kontrolu yapip eksikleri kurar
 - `SESSION_COOKIE_DOMAIN=` (onerilen: bos birakin; isterseniz sadece host verin, ornek: `core.kirpinetwork.com`)
+- `BACKUP_RETENTION_COUNT=20` (default: `20`) - son N backup disindakiler otomatik silinir
+- `BACKUP_VERIFY_DRY_RUN=true` (default: `true`) - backup dogrulamada gecici veritabanina restore testi yapar
+- `BACKUP_INCLUDE_SYSTEM_TABLES=false` (default: `false`) - `db_backups` ve `db_backup_restores` tablolarini dump'e dahil eder
 
 ### 3) Deploy et
 
@@ -206,16 +209,21 @@ Ozellikler:
 - `mysqldump` ile SQL backup olusturma
 - Kayitli backup dosyalarini listeleme
 - Backup dosyasini panelden indirme
+- Tek tik backup dogrulama (SHA-256 + dry-run restore)
 - Tek tik restore komutu calistirma
 - Backup kaydini ve dosyasini silme
 - Restore gecmisini loglama
+- Otomatik retention temizligi (son N backup tutulur)
 
 CLI:
 
 - `php shell.php backup:create [label]`
 - `php shell.php backup:restore <backup_id>`
+- `php shell.php backup:verify <backup_id>`
+- `php shell.php backup:cleanup [keep_count]`
 
 Not:
 
 - Bazi `mysqldump` istemcileri `--ssl-mode` desteklemez (MariaDB gibi). Bu nedenle sadece genel `--ssl` flag'i kullaniliyor.
 - `DB_SSL_MODE=DISABLED` veya `PREFERRED` iken ekstra SSL parametresi gecilmez.
+- Restore testinde (`Dogrula`) gecici bir veritabani olusturulur ve islem sonunda otomatik silinir. DB kullanicisinin `CREATE/DROP DATABASE` yetkisi olmalidir.

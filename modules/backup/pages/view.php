@@ -96,6 +96,12 @@ if ($backupReady) {
                                         <div class="d-flex gap-2">
                                             <a href="<?php echo base_url('backup/actions/download?id=' . (int) ($backup['id'] ?? 0)); ?>" class="btn btn-sm btn-outline-primary">Indir</a>
 
+                                            <form id="backup-verify-form-<?php echo (int) ($backup['id'] ?? 0); ?>" action="<?php echo base_url('backup/actions/verify'); ?>" method="post" data-ajax="true" class="m-0">
+                                                <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+                                                <input type="hidden" name="backup_id" value="<?php echo (int) ($backup['id'] ?? 0); ?>">
+                                            </form>
+                                            <a href="#" class="btn btn-sm btn-outline-warning" data-confirm="Bu backup dosyasi checksum ve dry-run restore ile dogrulanacak. Emin misiniz?" data-form="backup-verify-form-<?php echo (int) ($backup['id'] ?? 0); ?>">Dogrula</a>
+
                                             <form id="backup-restore-form-<?php echo (int) ($backup['id'] ?? 0); ?>" action="<?php echo base_url('backup/actions/restore'); ?>" method="post" data-ajax="true" class="m-0">
                                                 <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                                                 <input type="hidden" name="backup_id" value="<?php echo (int) ($backup['id'] ?? 0); ?>">
