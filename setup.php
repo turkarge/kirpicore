@@ -173,14 +173,6 @@ if (strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
     ]);
 }
 
-$csrfToken = (string) ($_POST['csrf_token'] ?? '');
-if ($csrfToken !== '' && !verify_csrf_token($csrfToken)) {
-    setup_response([
-        'status' => 'error',
-        'message' => 'Guvenlik dogrulamasi basarisiz oldu. Sayfayi yenileyin.',
-    ], 419);
-}
-
 $providedKey = trim((string) ($_POST['setup_key'] ?? ''));
 if ($setupKey !== '' && !hash_equals($setupKey, $providedKey)) {
     setup_response([
