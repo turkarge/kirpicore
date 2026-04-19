@@ -101,6 +101,27 @@ function kirpi_backup_is_unknown_ssl_option(string $errorText): bool
     return str_contains($errorText, 'unknown variable') || str_contains($errorText, 'unknown option');
 }
 
+function kirpi_backup_ignore_tables_args(): string
+{
+    $includeSystemTables = filter_var((string) env('BACKUP_INCLUDE_SYSTEM_TABLES', 'false'), FILTER_VALIDATE_BOOLEAN);
+    if ($includeSystemTables) {
+        return '';
+    }
+
+    $dbName = (string) DB_NAME;
+    $ignoredTables = [
+        'db_backups',
+        'db_backup_restores',
+    ];
+
+    $args = [];
+    foreach ($ignoredTables as $table) {
+        $args[] = '--ignore-table=' . escapeshellarg($dbName . '.' . $table);
+    }
+
+    return implode(' ', $args);
+}
+
 function kirpi_backup_create(?string $label = null, ?int $userId = null): array
 {
     if (!kirpi_backup_table_ready()) {
@@ -129,8 +150,9 @@ function kirpi_backup_create(?string $label = null, ?int $userId = null): array
 
     foreach (kirpi_mysql_ssl_candidates() as $sslArg) {
         $command = sprintf(
-            'mysqldump --single-transaction --routines --triggers --events %s -h %s -P %s -u %s %s %s 1> %s 2> %s',
+            'mysqldump --single-transaction --routines --triggers --events %s %s -h %s -P %s -u %s %s %s 1> %s 2> %s',
             $sslArg,
+            kirpi_backup_ignore_tables_args(),
             escapeshellarg((string) DB_HOST),
             escapeshellarg((string) DB_PORT),
             escapeshellarg((string) DB_USER),
@@ -211,7 +233,7 @@ function kirpi_backup_restore(int $backupId, ?int $userId = null): array
         ];
     }
 
-    $stmt = db()->prepare("\n        SELECT id, file_path, file_name\n        FROM db_backups\n        WHERE id = :id\n        LIMIT 1\n    ");
+    $stmt = db()->prepare("\n        SELECT id, label, file_name, file_path, file_size, status, created_by\n        FROM db_backups\n        WHERE id = :id\n        LIMIT 1\n    ");
     $stmt->execute([
         ':id' => $backupId,
     ]);
@@ -256,18 +278,46 @@ function kirpi_backup_restore(int $backupId, ?int $userId = null): array
         }
     }
 
-    $logStmt = db()->prepare("\n        INSERT INTO db_backup_restores (\n            backup_id,\n            restored_by,\n            restore_output\n        ) VALUES (\n            :backup_id,\n            :restored_by,\n            :restore_output\n        )\n    ");
-    $logStmt->execute([
-        ':backup_id' => $backupId,
-        ':restored_by' => $userId,
-        ':restore_output' => mb_substr(trim((string) $output), 0, 5000),
-    ]);
-
     if ($exitCode !== 0) {
         return [
             'success' => false,
             'message' => 'Restore komutu basarisiz. ' . ($output !== '' ? $output : ('exit code: ' . $exitCode)),
         ];
+    }
+
+    // Restore dump eskiyse backup kayitlarini geri alabilir/silebilir.
+    // Dosya kaydini geri ekleyip restore logunu "best effort" olarak yazariz.
+    try {
+        if (db_table_exists('db_backups')) {
+            $checkStmt = db()->prepare("\n                SELECT id\n                FROM db_backups\n                WHERE id = :id\n                LIMIT 1\n            ");
+            $checkStmt->execute([
+                ':id' => $backupId,
+            ]);
+
+            $exists = $checkStmt->fetchColumn();
+            if ($exists === false) {
+                $reInsertStmt = db()->prepare("\n                    INSERT INTO db_backups (\n                        label,\n                        file_name,\n                        file_path,\n                        file_size,\n                        status,\n                        created_by\n                    ) VALUES (\n                        :label,\n                        :file_name,\n                        :file_path,\n                        :file_size,\n                        :status,\n                        :created_by\n                    )\n                ");
+                $reInsertStmt->execute([
+                    ':label' => (string) ($backup['label'] ?? ('Backup ' . date('d.m.Y H:i'))),
+                    ':file_name' => (string) ($backup['file_name'] ?? ''),
+                    ':file_path' => (string) ($backup['file_path'] ?? ''),
+                    ':file_size' => (int) ($backup['file_size'] ?? 0),
+                    ':status' => (string) ($backup['status'] ?? 'ready'),
+                    ':created_by' => (int) ($backup['created_by'] ?? 0) ?: null,
+                ]);
+            }
+        }
+
+        if (db_table_exists('db_backup_restores')) {
+            $logStmt = db()->prepare("\n                INSERT INTO db_backup_restores (\n                    backup_id,\n                    restored_by,\n                    restore_output\n                ) VALUES (\n                    :backup_id,\n                    :restored_by,\n                    :restore_output\n                )\n            ");
+            $logStmt->execute([
+                ':backup_id' => $backupId,
+                ':restored_by' => $userId,
+                ':restore_output' => mb_substr(trim((string) $output), 0, 5000),
+            ]);
+        }
+    } catch (Throwable $e) {
+        error_log('backup restore post-process error: ' . $e->getMessage());
     }
 
     return [
