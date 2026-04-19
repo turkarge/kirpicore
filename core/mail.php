@@ -1,14 +1,26 @@
 <?php
 
+function kirpi_mail_setting(string $key, string $fallback = ''): string
+{
+    if (function_exists('kirpi_setting_get')) {
+        $value = trim((string) kirpi_setting_get($key, ''));
+        if ($value !== '') {
+            return $value;
+        }
+    }
+
+    return trim($fallback);
+}
+
 function kirpi_mail_from_address(): string
 {
-    $from = trim((string) MAIL_FROM_ADDRESS);
+    $from = kirpi_mail_setting('mail.from_address', (string) MAIL_FROM_ADDRESS);
 
     if ($from !== '') {
         return $from;
     }
 
-    $username = trim((string) MAIL_USERNAME);
+    $username = kirpi_mail_setting('mail.username', (string) MAIL_USERNAME);
     if ($username !== '' && filter_var($username, FILTER_VALIDATE_EMAIL)) {
         return $username;
     }
@@ -18,26 +30,26 @@ function kirpi_mail_from_address(): string
 
 function kirpi_mail_from_name(): string
 {
-    $name = trim((string) MAIL_FROM_NAME);
+    $name = kirpi_mail_setting('mail.from_name', (string) MAIL_FROM_NAME);
     return $name !== '' ? $name : APP_NAME;
 }
 
 function kirpi_mail_uses_smtp(): bool
 {
-    return trim((string) MAIL_HOST) !== '';
+    return kirpi_mail_setting('mail.host', (string) MAIL_HOST) !== '';
 }
 
 function kirpi_mail_config_status(): array
 {
     $status = [
         'transport' => kirpi_mail_uses_smtp() ? 'smtp' : 'php_mail',
-        'mail_host' => trim((string) MAIL_HOST) !== '',
-        'mail_port' => (int) MAIL_PORT > 0,
-        'mail_username' => trim((string) MAIL_USERNAME) !== '',
-        'mail_password' => trim((string) MAIL_PASSWORD) !== '',
-        'mail_from_address' => trim((string) MAIL_FROM_ADDRESS) !== '',
-        'mail_from_name' => trim((string) MAIL_FROM_NAME) !== '',
-        'mail_encryption' => in_array(strtolower(trim((string) MAIL_ENCRYPTION)), ['tls', 'ssl', 'none', ''], true),
+        'mail_host' => kirpi_mail_setting('mail.host', (string) MAIL_HOST) !== '',
+        'mail_port' => (int) kirpi_mail_setting('mail.port', (string) MAIL_PORT) > 0,
+        'mail_username' => kirpi_mail_setting('mail.username', (string) MAIL_USERNAME) !== '',
+        'mail_password' => kirpi_mail_setting('mail.password', (string) MAIL_PASSWORD) !== '',
+        'mail_from_address' => kirpi_mail_setting('mail.from_address', (string) MAIL_FROM_ADDRESS) !== '',
+        'mail_from_name' => kirpi_mail_setting('mail.from_name', (string) MAIL_FROM_NAME) !== '',
+        'mail_encryption' => in_array(strtolower(kirpi_mail_setting('mail.encryption', (string) MAIL_ENCRYPTION)), ['tls', 'ssl', 'none', ''], true),
     ];
 
     $status['ready'] = $status['transport'] === 'php_mail'
@@ -113,11 +125,11 @@ function kirpi_smtp_command($socket, string $command, array $expectedCodes): arr
 
 function kirpi_smtp_send_mail(string $to, string $subject, string $htmlBody): array
 {
-    $host = trim((string) MAIL_HOST);
-    $port = (int) MAIL_PORT;
-    $username = trim((string) MAIL_USERNAME);
-    $password = (string) MAIL_PASSWORD;
-    $encryption = strtolower(trim((string) MAIL_ENCRYPTION));
+    $host = kirpi_mail_setting('mail.host', (string) MAIL_HOST);
+    $port = (int) kirpi_mail_setting('mail.port', (string) MAIL_PORT);
+    $username = kirpi_mail_setting('mail.username', (string) MAIL_USERNAME);
+    $password = kirpi_mail_setting('mail.password', (string) MAIL_PASSWORD);
+    $encryption = strtolower(kirpi_mail_setting('mail.encryption', (string) MAIL_ENCRYPTION));
     $fromAddress = kirpi_mail_from_address();
     $fromName = kirpi_mail_from_name();
 

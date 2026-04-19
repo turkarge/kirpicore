@@ -257,6 +257,13 @@ function get_recent_notifications(?int $userId, int $limit = 5): array
 
 function app_name(): string
 {
+    if (function_exists('kirpi_setting_get')) {
+        $name = trim((string) kirpi_setting_get('app.name', APP_NAME));
+        if ($name !== '') {
+            return $name;
+        }
+    }
+
     return APP_NAME;
 }
 

@@ -53,6 +53,12 @@ $menu = [
                 'permission' => 'audit.view',
             ],
             [
+                'title' => 'Ayarlar',
+                'icon' => 'ti ti-adjustments',
+                'url' => 'settings/view',
+                'permission' => 'settings.view',
+            ],
+            [
                 'title' => 'Guvenlik Izleme',
                 'icon' => 'ti ti-shield-check',
                 'url' => 'security/view',

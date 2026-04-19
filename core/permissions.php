@@ -106,6 +106,19 @@ function kirpi_core_permission_catalog(): array
                 ],
             ],
         ],
+        'settings' => [
+            'title' => 'Ayarlar',
+            'permissions' => [
+                [
+                    'name' => 'Ayarlari Goruntuleme',
+                    'slug' => 'settings.view',
+                ],
+                [
+                    'name' => 'Ayarlari Guncelleme',
+                    'slug' => 'settings.update',
+                ],
+            ],
+        ],
         'security' => [
             'title' => 'Guvenlik',
             'permissions' => [

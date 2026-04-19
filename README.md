@@ -10,6 +10,7 @@ Core moduller tamamlandi:
 - `notifications`
 - `mail`
 - `audit`
+- `settings`
 
 ## Dokploy ile calistirma
 
@@ -155,3 +156,17 @@ Ozellikler:
 - Son 200 kaydi listeler
 - Status/module/action/user filtreleme sunar
 - Her kayit icin route, method, IP ve detay JSON bilgisi gosterir
+
+## Settings Modulu
+
+Yonetim menusu altinda `Ayarlar` ekrani bulunur.
+
+- Route: `settings/view`
+- Permissions: `settings.view`, `settings.update`
+
+Ozellikler:
+
+- Uygulama adini panelden guncelleme (`app.name`)
+- Mail konfigurasyonunu panelden yonetme (DB override)
+- Mail sifresi icin guvenli guncelleme (bos birakilirsa mevcut deger korunur)
+- Ayar degisikliklerini audit log'a yazma
