@@ -10,6 +10,18 @@ function env(string $key, mixed $default = null): mixed
         return $_SERVER[$key];
     }
 
+    $value = getenv($key);
+    if ($value !== false) {
+        return $value;
+    }
+
+    if (function_exists('apache_getenv')) {
+        $apacheValue = apache_getenv($key, true);
+        if ($apacheValue !== false) {
+            return $apacheValue;
+        }
+    }
+
     return $default;
 }
 
