@@ -84,6 +84,15 @@ function kirpi_core_permission_catalog(): array
                 ],
             ],
         ],
+        'security' => [
+            'title' => 'Guvenlik',
+            'permissions' => [
+                [
+                    'name' => 'Guvenlik Izleme Goruntuleme',
+                    'slug' => 'security.view',
+                ],
+            ],
+        ],
     ];
 }
 

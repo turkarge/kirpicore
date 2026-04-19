@@ -37,6 +37,12 @@ $menu = [
                 'url' => 'notifications/list',
                 'permission' => 'notifications.view',
             ],
+            [
+                'title' => 'Guvenlik Izleme',
+                'icon' => 'ti ti-shield-check',
+                'url' => 'security/view',
+                'permission' => 'security.view',
+            ],
         ],
     ],
 ];

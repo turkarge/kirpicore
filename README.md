@@ -90,3 +90,34 @@ Bu hata genelde eski session cookie kaynaklidir.
 1. Domain cookie'lerini temizle
 2. `SESSION_COOKIE_DOMAIN` degerini bos birakip redeploy et
 3. Login sayfasini yeniden acip tekrar dene
+
+### "Yukleme dizini olusturulamadi"
+
+Profil avatar yukleme icin uygulama su dizinleri kullanir:
+
+- `uploads`
+- `uploads/avatars`
+- `logs`
+- `storage`
+
+Container acilisinda bu dizinler otomatik olusturulur ve `www-data` icin yazilabilir hale getirilir.
+
+Eger hata devam ederse:
+
+1. Container icinde bu dizinlerin varligini kontrol et
+2. Yazma izinlerini kontrol et
+3. Reverse proxy veya volume mount ile `uploads` yolunun read-only olmadigini dogrula
+
+## Guvenlik Izleme Sayfasi
+
+Yonetim menusu altina `Guvenlik Izleme` sayfasi eklendi.
+
+- Route: `security/view`
+- Permission: `security.view`
+
+Bu sayfa su kontrolleri gosterir:
+
+- Uygulama guvenlik ayarlari (`APP_ENV`, `APP_DEBUG`, `APP_TRUST_PROXY`, `AUTO_WEB_SETUP`, `SETUP_KEY`)
+- Session cookie guvenlik bilgileri
+- Kritik klasorlerin varlik/yazilabilirlik/izin durumu
+- Veritabanindaki mevcut tablolar

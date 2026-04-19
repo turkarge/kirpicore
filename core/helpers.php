@@ -303,7 +303,7 @@ function kirpi_upload_avatar(array $file): array
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
         return [
             'success' => false,
-            'message' => 'Görsel yüklenemedi.',
+            'message' => 'Gorsel yuklenemedi.',
         ];
     }
 
@@ -317,7 +317,7 @@ function kirpi_upload_avatar(array $file): array
     if (($file['size'] ?? 0) > $maxSize) {
         return [
             'success' => false,
-            'message' => 'Görsel boyutu 2 MB sınırını aşıyor.',
+            'message' => 'Gorsel boyutu 2 MB sinirini asiyor.',
         ];
     }
 
@@ -327,19 +327,41 @@ function kirpi_upload_avatar(array $file): array
     if (!isset($allowedMimeTypes[$mimeType])) {
         return [
             'success' => false,
-            'message' => 'Desteklenmeyen görsel formatı.',
+            'message' => 'Desteklenmeyen gorsel formati.',
         ];
     }
 
     $extension = $allowedMimeTypes[$mimeType];
     $fileName = 'avatar_' . bin2hex(random_bytes(8)) . '.' . $extension;
 
+    $uploadsRoot = BASE_PATH . '/uploads';
     $uploadDir = BASE_PATH . '/uploads/avatars';
+
+    if (!is_dir($uploadsRoot) && !mkdir($uploadsRoot, 0775, true) && !is_dir($uploadsRoot)) {
+        return [
+            'success' => false,
+            'message' => 'Yukleme kok dizini olusturulamadi.',
+        ];
+    }
+
+    if (!is_writable($uploadsRoot)) {
+        return [
+            'success' => false,
+            'message' => 'Yukleme kok dizini yazilabilir degil.',
+        ];
+    }
 
     if (!is_dir($uploadDir) && !mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
         return [
             'success' => false,
-            'message' => 'Yükleme dizini oluşturulamadı.',
+            'message' => 'Yukleme dizini olusturulamadi.',
+        ];
+    }
+
+    if (!is_writable($uploadDir)) {
+        return [
+            'success' => false,
+            'message' => 'Yukleme dizini yazilabilir degil.',
         ];
     }
 
@@ -348,7 +370,7 @@ function kirpi_upload_avatar(array $file): array
     if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
         return [
             'success' => false,
-            'message' => 'Görsel sunucuya kaydedilemedi.',
+            'message' => 'Gorsel sunucuya kaydedilemedi.',
         ];
     }
 
@@ -387,7 +409,7 @@ function render_pagination(int $current_page, int $total_pages, int $links_to_sh
 
     $prev_disabled = ($current_page <= 1) ? 'disabled' : '';
     echo "<li class='page-item {$prev_disabled}'>
-            <a class='page-link' href='#' data-page='" . ($current_page - 1) . "'>Önceki</a>
+            <a class='page-link' href='#' data-page='" . ($current_page - 1) . "'>Onceki</a>
           </li>";
 
     for ($i = 1; $i <= $total_pages; $i++) {

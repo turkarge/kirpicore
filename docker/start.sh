@@ -3,6 +3,10 @@ set -eu
 
 cd /var/www/html
 
+mkdir -p /var/www/html/uploads/avatars /var/www/html/logs /var/www/html/storage
+chown -R www-data:www-data /var/www/html/uploads /var/www/html/logs /var/www/html/storage
+chmod -R ug+rwX /var/www/html/uploads /var/www/html/logs /var/www/html/storage
+
 if [ ! -d vendor ]; then
   composer install --no-dev --optimize-autoloader --no-interaction
 fi
