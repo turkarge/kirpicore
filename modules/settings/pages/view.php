@@ -26,6 +26,16 @@ $missingByFile = (array) ($schemaReport['missing_by_file'] ?? []);
                 <div class="page-pretitle">Sistem Yonetimi</div>
                 <h2 class="page-title">Ayarlar</h2>
             </div>
+            <div class="col-auto ms-auto d-print-none">
+                <a
+                    href="#"
+                    class="btn btn-outline-primary btn-modal-trigger"
+                    data-url="/ajax/settings/session"
+                    data-size="modal-lg"
+                >
+                    Session Verileri
+                </a>
+            </div>
         </div>
     </div>
 </div>

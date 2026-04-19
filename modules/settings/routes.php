@@ -8,6 +8,13 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'ajax/settings/session' => [
+        'file' => 'modules/settings/modals/session.php',
+        'layout' => false,
+        'permission' => 'settings.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
     'settings/actions/update' => [
         'file' => 'modules/settings/actions/update.php',
         'layout' => false,
