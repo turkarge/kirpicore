@@ -210,6 +210,39 @@ function get_unread_notifications_count(?int $userId): int
     }
 }
 
+function get_recent_notifications(?int $userId, int $limit = 5): array
+{
+    if (!$userId || !db_table_exists('notifications')) {
+        return [];
+    }
+
+    $limit = max(1, min(20, $limit));
+
+    try {
+        $stmt = db()->prepare("
+            SELECT
+                id,
+                title,
+                message,
+                channel,
+                created_at,
+                read_at
+            FROM notifications
+            WHERE user_id = :user_id
+            ORDER BY id DESC
+            LIMIT :limit
+        ");
+        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    } catch (Throwable $e) {
+        error_log('Recent notifications fetch error: ' . $e->getMessage());
+        return [];
+    }
+}
+
 function app_name(): string
 {
     return APP_NAME;

@@ -13,6 +13,30 @@ require_once BASE_PATH . '/core/functions.php';
 require_once BASE_PATH . '/core/routes.php';
 
 $request_path = trim($_GET['url'] ?? '', '/');
+
+if ($request_path === '') {
+    $requestUriPath = (string) parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+    $requestUriPath = trim($requestUriPath, '/');
+
+    $scriptDir = trim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
+
+    if ($scriptDir !== '') {
+        if ($requestUriPath === $scriptDir) {
+            $requestUriPath = '';
+        } elseif (str_starts_with($requestUriPath, $scriptDir . '/')) {
+            $requestUriPath = substr($requestUriPath, strlen($scriptDir) + 1);
+        }
+    }
+
+    if ($requestUriPath === 'index.php') {
+        $requestUriPath = '';
+    } elseif (str_starts_with($requestUriPath, 'index.php/')) {
+        $requestUriPath = substr($requestUriPath, strlen('index.php/'));
+    }
+
+    $request_path = trim($requestUriPath, '/');
+}
+
 $request_path = $request_path !== '' ? $request_path : APP_DEFAULT_ROUTE;
 
 $segments = explode('/', $request_path);
@@ -25,8 +49,8 @@ $current_module = $module;
 
 if (!$route_info) {
     display_error_page(
-        '404 - Sayfa Bulunamadı',
-        'Aradığınız sayfa bulunamadı.',
+        '404 - Sayfa Bulunamadi',
+        'Aradiginiz sayfa bulunamadi.',
         404,
         true
     );
@@ -37,8 +61,8 @@ $current_method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 
 if ($route_method !== $current_method) {
     display_error_page(
-        '405 - Yöntem Desteklenmiyor',
-        'Bu istek yöntemi desteklenmiyor.',
+        '405 - Yontem Desteklenmiyor',
+        'Bu istek yontemi desteklenmiyor.',
         405,
         false
     );
@@ -50,14 +74,21 @@ $auth_required = $route_info['auth'] ?? true;
 
 if ($auth_required && !is_user_logged_in()) {
     $_SESSION['redirect_to'] = $_SERVER['REQUEST_URI'] ?? (BASE_URL . '/' . $request_path);
-    set_flash_message('info', 'Devam etmek için lütfen giriş yapın.');
+    set_flash_message('info', 'Devam etmek icin lutfen giris yapin.');
+    redirect(base_url('auth/login'));
+}
+
+if ($auth_required && is_user_logged_in() && !validate_active_session_user()) {
+    unset($_SESSION['user']);
+    $_SESSION['redirect_to'] = $_SERVER['REQUEST_URI'] ?? (BASE_URL . '/' . $request_path);
+    set_flash_message('warning', 'Hesabinizin veya rolunuzun durumu degismis. Lutfen tekrar giris yapin.');
     redirect(base_url('auth/login'));
 }
 
 if ($required_permission && !check_permission($required_permission)) {
     display_error_page(
-        '403 - Yetkisiz Erişim',
-        'Bu sayfayı görüntüleme yetkiniz bulunmamaktadır.',
+        '403 - Yetkisiz Erisim',
+        'Bu sayfayi goruntuleme yetkiniz bulunmamaktadir.',
         403,
         $render_layout
     );
@@ -68,8 +99,8 @@ $target_file_full_path = BASE_PATH . '/' . ltrim($target_file_relative_path, '/'
 
 if (!is_file($target_file_full_path)) {
     display_error_page(
-        '500 - İç Sunucu Hatası',
-        'Tanımlı rota için hedef dosya bulunamadı.',
+        '500 - Ic Sunucu Hatasi',
+        'Tanimli rota icin hedef dosya bulunamadi.',
         500,
         $render_layout
     );

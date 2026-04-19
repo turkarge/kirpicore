@@ -1,7 +1,5 @@
 RewriteEngine On
 
-RewriteBase /kirpicore/
-
 # Var olan gerçek dosya veya klasör varsa direkt aç
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d

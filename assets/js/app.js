@@ -17,6 +17,7 @@
             this.initMainModal();
             this.initSecondaryModal();
             this.initDropdowns();
+            this.bindNotificationDropdown();
             this.bindModalTriggers();
             this.bindConfirmTriggers();
             this.bindAjaxForms();
@@ -372,6 +373,100 @@
                     this.confirmCallback();
                 }
                 confirmModal.hide();
+            });
+        },
+
+        getNotificationUnreadCount() {
+            const bell = document.querySelector(".js-notification-bell");
+            if (!bell) {
+                return 0;
+            }
+
+            const value = parseInt(bell.dataset.unreadCount || "0", 10);
+            return Number.isNaN(value) ? 0 : value;
+        },
+
+        setNotificationUnreadCount(count) {
+            const next = Math.max(0, parseInt(String(count), 10) || 0);
+            const bells = document.querySelectorAll(".js-notification-bell");
+
+            bells.forEach((bell) => {
+                bell.dataset.unreadCount = String(next);
+                bell.classList.toggle("kirpi-bell-has-unread", next > 0);
+
+                const existingDot = bell.querySelector(".js-notification-dot");
+                if (next > 0) {
+                    if (!existingDot) {
+                        const dot = document.createElement("span");
+                        dot.className = "badge bg-red badge-notification badge-pill position-absolute top-0 start-100 translate-middle js-notification-dot";
+                        bell.appendChild(dot);
+                    }
+                } else if (existingDot) {
+                    existingDot.remove();
+                }
+            });
+        },
+
+        decreaseNotificationUnreadCount(step = 1) {
+            const current = this.getNotificationUnreadCount();
+            this.setNotificationUnreadCount(current - step);
+        },
+
+        bindNotificationDropdown() {
+            document.addEventListener("click", async (event) => {
+                const item = event.target.closest(".js-notification-item");
+                if (!item) {
+                    return;
+                }
+
+                const isUnread = item.dataset.isUnread === "1";
+                if (!isUnread) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                const markReadUrl = item.dataset.markReadUrl || "";
+                const notificationId = parseInt(item.dataset.notificationId || "0", 10);
+                const targetUrl = item.getAttribute("href") || `${this.baseUrl}/notifications/list`;
+
+                try {
+                    if (markReadUrl && notificationId > 0) {
+                        await this.post(markReadUrl, {
+                            id: String(notificationId)
+                        });
+
+                        item.dataset.isUnread = "0";
+                        const dot = item.querySelector(".js-notification-item-dot");
+                        if (dot) {
+                            dot.classList.remove("status-dot-animated", "bg-red");
+                            dot.classList.add("bg-secondary");
+                        }
+
+                        this.decreaseNotificationUnreadCount(1);
+                    }
+                } catch (error) {
+                    console.warn("Notification mark-read error:", error);
+                } finally {
+                    window.location.href = targetUrl;
+                }
+            });
+
+            document.addEventListener("kirpi:form.success", (event) => {
+                const form = event.detail?.form;
+                const result = event.detail?.result || {};
+
+                if (!form || result.status !== "success") {
+                    return;
+                }
+
+                if (form.classList.contains("notifications-mark-read-form")) {
+                    this.decreaseNotificationUnreadCount(1);
+                }
+
+                if (form.id === "notifications-mark-all-read-form") {
+                    this.setNotificationUnreadCount(0);
+                }
             });
         },
 

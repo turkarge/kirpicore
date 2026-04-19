@@ -6,6 +6,7 @@ if (!defined('KIRPI_CORE_ENTRY')) {
 $user = current_user();
 $currentRoutePath = $GLOBALS['current_route_path'] ?? '';
 $unreadNotificationsCount = get_unread_notifications_count((int) ($user['id'] ?? 0));
+$recentNotifications = get_recent_notifications((int) ($user['id'] ?? 0), 5);
 
 $menu = [
     [
@@ -75,16 +76,85 @@ $filterVisibleMenuItems = static function (array $items): array {
         <div class="navbar-nav flex-row order-md-last">
             <?php if ($user): ?>
                 <?php if (route_exists('notifications/list') && check_permission('notifications.view')): ?>
-                    <div class="nav-item me-3">
-                        <a href="<?php echo base_url('notifications/list'); ?>"
-                            class="nav-link px-0 position-relative <?php echo $currentRoutePath === 'notifications/list' ? 'active' : ''; ?>"
-                            aria-label="Bildirimler">
-                            <i class="ti ti-bell fs-2"></i>
+                    <div class="nav-item dropdown d-none d-md-flex me-3">
+                        <a href="#"
+                            class="nav-link px-0 position-relative js-notification-bell <?php echo $currentRoutePath === 'notifications/list' ? 'active' : ''; ?> <?php echo $unreadNotificationsCount > 0 ? 'kirpi-bell-has-unread' : ''; ?>"
+                            data-unread-count="<?php echo (int) $unreadNotificationsCount; ?>"
+                            data-bs-toggle="dropdown" tabindex="-1" aria-label="Bildirimleri goster" aria-expanded="false">
+                            <i class="ti ti-bell fs-2 kirpi-bell-icon"></i>
                             <?php if ($unreadNotificationsCount > 0): ?>
-                                <span
-                                    class="badge badge-sm bg-red text-white badge-notification badge-pill position-absolute top-0 start-100 translate-middle">
-                                    <?php echo $unreadNotificationsCount > 99 ? '99+' : (int) $unreadNotificationsCount; ?>
-                                </span>
+                                <span class="badge bg-red badge-notification badge-pill position-absolute top-0 start-100 translate-middle js-notification-dot"></span>
+                            <?php endif; ?>
+                        </a>
+
+                        <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card" style="min-width: 24rem;">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h3 class="card-title m-0">Bildirimler</h3>
+                                    <?php if ($unreadNotificationsCount > 0): ?>
+                                        <span class="badge bg-red-lt">Yeni</span>
+                                    <?php endif; ?>
+                                </div>
+
+                                <div class="list-group list-group-flush list-group-hoverable">
+                                    <?php if (empty($recentNotifications)): ?>
+                                        <div class="list-group-item text-secondary">
+                                            Henuz bildiriminiz bulunmuyor.
+                                        </div>
+                                    <?php else: ?>
+                                        <?php foreach ($recentNotifications as $notification): ?>
+                                            <?php
+                                            $isUnread = empty($notification['read_at']);
+                                            $dateLabel = '';
+
+                                            if (!empty($notification['created_at'])) {
+                                                $timestamp = strtotime((string) $notification['created_at']);
+                                                if ($timestamp !== false) {
+                                                    $dateLabel = date('d.m.Y H:i', $timestamp);
+                                                }
+                                            }
+                                            ?>
+                                            <a href="<?php echo base_url('notifications/list'); ?>"
+                                                class="list-group-item js-notification-item"
+                                                data-notification-id="<?php echo (int) ($notification['id'] ?? 0); ?>"
+                                                data-is-unread="<?php echo $isUnread ? '1' : '0'; ?>"
+                                                data-mark-read-url="<?php echo base_url('notifications/actions/mark-read'); ?>">
+                                                <div class="row align-items-start">
+                                                    <div class="col-auto pt-1">
+                                                        <span class="status-dot <?php echo $isUnread ? 'status-dot-animated bg-red' : 'bg-secondary'; ?> d-block js-notification-item-dot"></span>
+                                                    </div>
+                                                    <div class="col text-truncate">
+                                                        <div class="text-body d-block"><?php echo e($notification['title'] ?? 'Bildirim'); ?></div>
+                                                        <div class="d-block text-secondary text-truncate mt-1">
+                                                            <?php echo e($notification['message'] ?? ''); ?>
+                                                        </div>
+                                                        <?php if ($dateLabel !== ''): ?>
+                                                            <div class="mt-1 text-secondary small"><?php echo e($dateLabel); ?></div>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </div>
+
+                                <div class="card-footer text-center">
+                                    <a href="<?php echo base_url('notifications/list'); ?>" class="btn btn-sm btn-ghost-secondary w-100">
+                                        Tum bildirimleri gor
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="nav-item d-md-none me-3">
+                        <a href="<?php echo base_url('notifications/list'); ?>"
+                            class="nav-link px-0 position-relative js-notification-bell <?php echo $currentRoutePath === 'notifications/list' ? 'active' : ''; ?> <?php echo $unreadNotificationsCount > 0 ? 'kirpi-bell-has-unread' : ''; ?>"
+                            data-unread-count="<?php echo (int) $unreadNotificationsCount; ?>"
+                            aria-label="Bildirimler">
+                            <i class="ti ti-bell fs-2 kirpi-bell-icon"></i>
+                            <?php if ($unreadNotificationsCount > 0): ?>
+                                <span class="badge bg-red badge-notification badge-pill position-absolute top-0 start-100 translate-middle js-notification-dot"></span>
                             <?php endif; ?>
                         </a>
                     </div>

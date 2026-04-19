@@ -8,17 +8,26 @@ require_action('POST', true);
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Güvenlik doğrulaması başarısız oldu.',
+        'message' => 'Guvenlik dogrulamasi basarisiz oldu.',
     ], 419);
 }
 
 $id = (int)($_POST['id'] ?? 0);
 $status = (int)($_POST['status'] ?? -1);
+$currentUser = current_user();
+$currentUserId = (int)($currentUser['id'] ?? 0);
 
 if ($id <= 0 || !in_array($status, [0, 1], true)) {
     json_response([
         'status' => 'error',
-        'message' => 'Geçersiz istek.',
+        'message' => 'Gecersiz istek.',
+    ], 422);
+}
+
+if ($id === $currentUserId && $status !== 1) {
+    json_response([
+        'status' => 'error',
+        'message' => 'Kendi hesabinizi pasife alamazsiniz.',
     ], 422);
 }
 
@@ -42,14 +51,14 @@ try {
     if (!$user) {
         json_response([
             'status' => 'error',
-            'message' => 'Kullanıcı bulunamadı.',
+            'message' => 'Kullanici bulunamadi.',
         ], 404);
     }
 
     if (($user['role_name'] ?? null) === 'Super Admin' && $status !== 1) {
         json_response([
             'status' => 'error',
-            'message' => 'Super Admin kullanıcı pasife alınamaz.',
+            'message' => 'Super Admin kullanici pasife alinamaz.',
         ], 422);
     }
 
@@ -61,13 +70,13 @@ try {
 
     json_response([
         'status' => 'success',
-        'message' => $status === 1 ? 'Kullanıcı aktif yapıldı.' : 'Kullanıcı pasif yapıldı.',
+        'message' => $status === 1 ? 'Kullanici aktif yapildi.' : 'Kullanici pasif yapildi.',
     ]);
 } catch (Throwable $e) {
-    error_log('users toggle status hatası: ' . $e->getMessage());
+    error_log('users toggle status hatasi: ' . $e->getMessage());
 
     json_response([
         'status' => 'error',
-        'message' => 'Durum güncellenirken bir hata oluştu.',
+        'message' => 'Durum guncellenirken bir hata olustu.',
     ], 500);
 }

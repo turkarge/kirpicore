@@ -47,7 +47,7 @@ $notificationsTableReady = db_table_exists('notifications');
         <?php if (!$notificationsTableReady): ?>
             <div class="alert alert-warning">
                 Bildirim tabloları henüz kurulu değil. Önce
-                <code>database/notifications.sql</code> dosyasını çalıştırın.
+                <code>modules/notifications/database/schema.sql</code> dosyasını çalıştırın.
             </div>
         <?php endif; ?>
 

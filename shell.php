@@ -28,18 +28,26 @@ function shell_usage(): void
     shell_output('');
     shell_output('Usage:');
     shell_output('  php shell.php hash:password <password>');
+    shell_output('  php shell.php db:create');
     shell_output('  php shell.php db:status');
     shell_output('  php shell.php db:tables');
     shell_output('  php shell.php db:query "<sql>"');
+    shell_output('  php shell.php db:core:install');
+    shell_output('  php shell.php db:modules:install [module]');
+    shell_output('  php shell.php db:install');
     shell_output('  php shell.php db:permissions:install');
     shell_output('  php shell.php db:notifications:install');
     shell_output('  php shell.php db:notifications:seed-demo <user_id>');
     shell_output('');
     shell_output('Examples:');
     shell_output('  php shell.php hash:password 123456');
+    shell_output('  php shell.php db:create');
     shell_output('  php shell.php db:status');
     shell_output('  php shell.php db:tables');
     shell_output('  php shell.php db:query "SHOW TABLES"');
+    shell_output('  php shell.php db:core:install');
+    shell_output('  php shell.php db:modules:install notifications');
+    shell_output('  php shell.php db:install');
     shell_output('  php shell.php db:permissions:install');
     shell_output('  php shell.php db:notifications:install');
     shell_output('  php shell.php db:notifications:seed-demo 1');
@@ -60,13 +68,93 @@ function shell_render_rows(array $rows): void
 function shell_boot_database(): void
 {
     static $booted = false;
+    global $pdo;
 
     if ($booted) {
         return;
     }
 
     require_once BASE_PATH . '/core/database.php';
+
+    if (!isset($pdo) || !$pdo instanceof PDO) {
+        shell_error('Database bootstrap failed: PDO instance is unavailable.');
+    }
+
     $booted = true;
+}
+
+function shell_create_database_if_not_exists(): void
+{
+    $dsn = sprintf(
+        'mysql:host=%s;port=%s;charset=%s',
+        DB_HOST,
+        DB_PORT,
+        DB_CHARSET
+    );
+
+    $options = [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES => false,
+    ];
+
+    $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+    $dbName = str_replace('`', '``', DB_NAME);
+    $charset = preg_replace('/[^a-zA-Z0-9_]/', '', DB_CHARSET) ?: 'utf8mb4';
+
+    $pdo->exec(sprintf(
+        "CREATE DATABASE IF NOT EXISTS `%s` CHARACTER SET %s COLLATE %s_unicode_ci",
+        $dbName,
+        $charset,
+        $charset
+    ));
+}
+
+function shell_run_sql_file(string $filePath): int
+{
+    $schemaSql = file_get_contents($filePath);
+    if ($schemaSql === false) {
+        shell_error('SQL file could not be read: ' . $filePath);
+    }
+
+    $count = 0;
+
+    foreach (array_filter(array_map('trim', explode(';', $schemaSql))) as $statement) {
+        if ($statement === '') {
+            continue;
+        }
+
+        db()->exec($statement);
+        $count++;
+    }
+
+    return $count;
+}
+
+function shell_module_schema_files(?string $moduleName = null): array
+{
+    $paths = [];
+
+    if ($moduleName !== null && $moduleName !== '') {
+        $moduleSchemaPattern = BASE_PATH . '/modules/' . $moduleName . '/database/*.sql';
+        $paths = glob($moduleSchemaPattern) ?: [];
+        sort($paths);
+        return $paths;
+    }
+
+    $moduleDirs = glob(BASE_PATH . '/modules/*', GLOB_ONLYDIR) ?: [];
+    sort($moduleDirs);
+
+    foreach ($moduleDirs as $moduleDir) {
+        $schemaFiles = glob($moduleDir . '/database/*.sql') ?: [];
+        sort($schemaFiles);
+
+        foreach ($schemaFiles as $schemaFile) {
+            $paths[] = $schemaFile;
+        }
+    }
+
+    return $paths;
 }
 
 $command = $argv[1] ?? null;
@@ -86,6 +174,11 @@ try {
             }
 
             shell_output(password_hash($password, PASSWORD_DEFAULT));
+            break;
+
+        case 'db:create':
+            shell_create_database_if_not_exists();
+            shell_output('Database ensured: ' . DB_NAME);
             break;
 
         case 'db:status':
@@ -139,43 +232,91 @@ try {
             shell_output('Query executed.');
             break;
 
-        case 'db:permissions:install':
+        case 'db:core:install':
+            shell_create_database_if_not_exists();
             shell_boot_database();
 
-            $schemaSql = file_get_contents(BASE_PATH . '/database/permissions.sql');
-            if ($schemaSql === false) {
-                shell_error('permissions.sql could not be read.');
+            $coreSchemaPath = BASE_PATH . '/database/core.sql';
+            $statementCount = shell_run_sql_file($coreSchemaPath);
+
+            shell_output('Core schema installed. Statements: ' . $statementCount);
+            break;
+
+        case 'db:modules:install':
+            shell_create_database_if_not_exists();
+            shell_boot_database();
+
+            $moduleName = $argv[2] ?? null;
+            $schemaFiles = shell_module_schema_files($moduleName);
+
+            if (empty($schemaFiles)) {
+                $target = $moduleName ? ('module "' . $moduleName . '"') : 'all modules';
+                shell_output('No schema files found for ' . $target . '.');
+                break;
             }
 
-            foreach (array_filter(array_map('trim', explode(';', $schemaSql))) as $statement) {
-                if ($statement === '') {
-                    continue;
-                }
+            $totalStatements = 0;
+            foreach ($schemaFiles as $schemaFile) {
+                $count = shell_run_sql_file($schemaFile);
+                $totalStatements += $count;
 
-                db()->exec($statement);
+                $relativePath = str_replace(BASE_PATH . '/', '', $schemaFile);
+                shell_output('Installed: ' . $relativePath . ' (' . $count . ' statements)');
             }
+
+            if (db_table_exists('permissions') && db_table_exists('role_permissions')) {
+                sync_permission_catalog();
+                shell_output('Permission catalog synced.');
+            }
+
+            shell_output('Module schemas installed. Total statements: ' . $totalStatements);
+            break;
+
+        case 'db:install':
+            shell_create_database_if_not_exists();
+            shell_boot_database();
+
+            $coreSchemaPath = BASE_PATH . '/database/core.sql';
+            $coreStatementCount = shell_run_sql_file($coreSchemaPath);
+            shell_output('Core schema installed. Statements: ' . $coreStatementCount);
+
+            $schemaFiles = shell_module_schema_files();
+            $moduleStatementCount = 0;
+
+            foreach ($schemaFiles as $schemaFile) {
+                $count = shell_run_sql_file($schemaFile);
+                $moduleStatementCount += $count;
+
+                $relativePath = str_replace(BASE_PATH . '/', '', $schemaFile);
+                shell_output('Installed: ' . $relativePath . ' (' . $count . ' statements)');
+            }
+
+            if (db_table_exists('permissions') && db_table_exists('role_permissions')) {
+                sync_permission_catalog();
+                shell_output('Permission catalog synced.');
+            }
+
+            shell_output('Database setup completed. Core statements: ' . $coreStatementCount . ', Module statements: ' . $moduleStatementCount);
+            break;
+
+        case 'db:permissions:install':
+            shell_create_database_if_not_exists();
+            shell_boot_database();
+
+            $statementCount = shell_run_sql_file(BASE_PATH . '/modules/roles/database/permissions.sql');
 
             sync_permission_catalog();
-            shell_output('Permission schema installed and core permissions synced.');
+            shell_output('Permission schema installed. Statements: ' . $statementCount);
+            shell_output('Core permissions synced.');
             break;
 
         case 'db:notifications:install':
+            shell_create_database_if_not_exists();
             shell_boot_database();
 
-            $schemaSql = file_get_contents(BASE_PATH . '/database/notifications.sql');
-            if ($schemaSql === false) {
-                shell_error('notifications.sql could not be read.');
-            }
+            $statementCount = shell_run_sql_file(BASE_PATH . '/modules/notifications/database/schema.sql');
 
-            foreach (array_filter(array_map('trim', explode(';', $schemaSql))) as $statement) {
-                if ($statement === '') {
-                    continue;
-                }
-
-                db()->exec($statement);
-            }
-
-            shell_output('Notification schema installed.');
+            shell_output('Notification schema installed. Statements: ' . $statementCount);
             break;
 
         case 'db:notifications:seed-demo':

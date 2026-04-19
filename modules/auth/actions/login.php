@@ -73,11 +73,50 @@ try {
         $user['role_name'] ?? null
     );
 
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_regenerate_id(true);
+    }
+
     $_SESSION['user'] = $user;
     unset($_SESSION['flash_message']);
 
-    $redirect = $_SESSION['redirect_to'] ?? base_url(APP_DEFAULT_ROUTE);
+    $defaultRedirect = base_url(APP_DEFAULT_ROUTE);
+    $redirect = $_SESSION['redirect_to'] ?? $defaultRedirect;
     unset($_SESSION['redirect_to']);
+
+    $redirect = is_string($redirect) ? trim($redirect) : '';
+    if ($redirect === '') {
+        $redirect = $defaultRedirect;
+    }
+
+    $baseParts = parse_url(BASE_URL);
+    $redirectParts = parse_url($redirect);
+
+    if ($redirectParts === false) {
+        $redirect = $defaultRedirect;
+    } elseif (!isset($redirectParts['scheme']) && !isset($redirectParts['host'])) {
+        $redirect = base_url(ltrim($redirect, '/'));
+    } else {
+        $baseHost = strtolower((string) ($baseParts['host'] ?? ''));
+        $baseScheme = strtolower((string) ($baseParts['scheme'] ?? 'http'));
+        $basePort = (int) ($baseParts['port'] ?? ($baseScheme === 'https' ? 443 : 80));
+
+        $redirectHost = strtolower((string) ($redirectParts['host'] ?? ''));
+        $redirectScheme = strtolower((string) ($redirectParts['scheme'] ?? $baseScheme));
+        $redirectPort = (int) ($redirectParts['port'] ?? ($redirectScheme === 'https' ? 443 : 80));
+
+        if (
+            $redirectHost !== $baseHost ||
+            $redirectScheme !== $baseScheme ||
+            $redirectPort !== $basePort
+        ) {
+            $redirect = $defaultRedirect;
+        }
+    }
+
+    if (preg_match('#/auth/login/?$#i', $redirect) === 1) {
+        $redirect = $defaultRedirect;
+    }
 
     json_response([
         'status' => 'success',
