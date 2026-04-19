@@ -53,6 +53,7 @@ Opsiyonel:
 - `THROTTLE_API_LIMIT=120`, `THROTTLE_API_WINDOW=60`, `THROTTLE_API_BLOCK=120`
 - `THROTTLE_API_AUTH_LIMIT=10`, `THROTTLE_API_AUTH_WINDOW=300`, `THROTTLE_API_AUTH_BLOCK=600`
 - `API_TOKEN_TTL_SECONDS=2592000` (default: 30 gun)
+- `API_ENABLED=true` (default: `true`) - REST API genel anahtari
 
 ### 3) Deploy et
 
@@ -193,6 +194,7 @@ Not:
 - Token olusturma endpoint'i brute-force'a karsi throttle ile korunur
 - API cagrilari da throttle kapsamindadir
 - Super Admin, Profil sayfasindan tek tik API token uretebilir
+- API root kontrol endpoint: `GET /api/v1`
 
 ### Postman ile hizli test
 
@@ -253,10 +255,24 @@ Yonetim menusu altinda `Ayarlar` ekrani bulunur.
 Ozellikler:
 
 - Uygulama adini panelden guncelleme (`app.name`)
+- REST API aktif/pasif yonetimi (`api.enabled`)
 - Mail konfigurasyonunu panelden yonetme (DB override)
 - Mail sifresi icin guvenli guncelleme (bos birakilirsa mevcut deger korunur)
 - Ayar degisikliklerini audit log'a yazma
 - Sistem tablo kontrolu ve eksik schema kurulumunu panelden tek tikla calistirma
+- Session verilerini (maskelenmis) modal ile goruntuleme
+
+## Profile Modulu
+
+Yonetim menusu uzerinden profil sayfasi:
+
+- Route: `profile/view`
+- Permissions: `profile.view`, `profile.edit`
+
+Ek ozellik:
+
+- Super Admin icin profil ekraninda API token olusturma bolumu
+- Olusturulan token guvenlik geregi sadece bir kez gosterilir
 
 ## Queue Modulu
 
