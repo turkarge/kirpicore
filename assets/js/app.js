@@ -355,7 +355,7 @@
                     if (formId) {
                         const form = document.getElementById(formId);
                         if (form) {
-                            form.submit();
+                            form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
                             return;
                         }
                     }

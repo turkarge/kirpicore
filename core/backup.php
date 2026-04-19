@@ -37,7 +37,7 @@ function kirpi_mysql_password_arg(): string
     return '--password=' . escapeshellarg($password);
 }
 
-function kirpi_mysql_ssl_arg(): string
+function kirpi_mysql_ssl_candidates(): array
 {
     $sslMode = strtoupper(trim((string) env('DB_SSL_MODE', 'DISABLED')));
     $allowed = ['DISABLED', 'PREFERRED', 'REQUIRED', 'VERIFY_CA', 'VERIFY_IDENTITY'];
@@ -46,13 +46,59 @@ function kirpi_mysql_ssl_arg(): string
         $sslMode = 'DISABLED';
     }
 
-    if (in_array($sslMode, ['REQUIRED', 'VERIFY_CA', 'VERIFY_IDENTITY'], true)) {
-        // Generic flag supported by both MySQL and MariaDB clients.
-        return '--ssl';
+    if ($sslMode === 'DISABLED') {
+        return [
+            '',
+            '--skip-ssl',
+            '--ssl=0',
+            '--ssl-mode=DISABLED',
+        ];
     }
 
-    // DISABLED/PREFERRED -> do not pass client-specific SSL mode flags.
-    return '';
+    if ($sslMode === 'PREFERRED') {
+        return [
+            '',
+            '--ssl-mode=PREFERRED',
+        ];
+    }
+
+    return [
+        '--ssl-mode=REQUIRED',
+        '--ssl',
+    ];
+}
+
+function kirpi_backup_run_command(string $command, ?string $errorPath = null): array
+{
+    $outputLines = [];
+    $exitCode = 0;
+    exec($command, $outputLines, $exitCode);
+
+    $errorOutput = '';
+    if ($errorPath !== null && is_file($errorPath)) {
+        $errorOutput = trim((string) file_get_contents($errorPath));
+        @unlink($errorPath);
+    }
+
+    $output = trim(implode(PHP_EOL, $outputLines));
+    if ($errorOutput === '' && $output !== '') {
+        $errorOutput = $output;
+    }
+
+    return [
+        'exit_code' => $exitCode,
+        'error_output' => $errorOutput,
+    ];
+}
+
+function kirpi_backup_is_unknown_ssl_option(string $errorText): bool
+{
+    $errorText = strtolower($errorText);
+    if ($errorText === '') {
+        return false;
+    }
+
+    return str_contains($errorText, 'unknown variable') || str_contains($errorText, 'unknown option');
 }
 
 function kirpi_backup_create(?string $label = null, ?int $userId = null): array
@@ -78,36 +124,55 @@ function kirpi_backup_create(?string $label = null, ?int $userId = null): array
     $fullPath = $dir . '/' . $fileName;
     $errorPath = $dir . '/' . $fileName . '.err';
 
-    $command = sprintf(
-        'mysqldump --single-transaction --routines --triggers --events %s -h %s -P %s -u %s %s %s 1> %s 2> %s',
-        kirpi_mysql_ssl_arg(),
-        escapeshellarg((string) DB_HOST),
-        escapeshellarg((string) DB_PORT),
-        escapeshellarg((string) DB_USER),
-        kirpi_mysql_password_arg(),
-        escapeshellarg((string) DB_NAME),
-        escapeshellarg($fullPath),
-        escapeshellarg($errorPath)
-    );
+    $attemptErrors = [];
+    $success = false;
 
-    $outputLines = [];
-    $exitCode = 0;
-    exec($command, $outputLines, $exitCode);
+    foreach (kirpi_mysql_ssl_candidates() as $sslArg) {
+        $command = sprintf(
+            'mysqldump --single-transaction --routines --triggers --events %s -h %s -P %s -u %s %s %s 1> %s 2> %s',
+            $sslArg,
+            escapeshellarg((string) DB_HOST),
+            escapeshellarg((string) DB_PORT),
+            escapeshellarg((string) DB_USER),
+            kirpi_mysql_password_arg(),
+            escapeshellarg((string) DB_NAME),
+            escapeshellarg($fullPath),
+            escapeshellarg($errorPath)
+        );
 
-    $errorOutput = '';
-    if (is_file($errorPath)) {
-        $errorOutput = trim((string) file_get_contents($errorPath));
-        @unlink($errorPath);
+        $run = kirpi_backup_run_command($command, $errorPath);
+        $exitCode = (int) ($run['exit_code'] ?? 1);
+        $errorOutput = trim((string) ($run['error_output'] ?? ''));
+
+        if ($exitCode === 0 && is_file($fullPath) && filesize($fullPath) > 0) {
+            $success = true;
+            break;
+        }
+
+        if (is_file($fullPath)) {
+            @unlink($fullPath);
+        }
+
+        if ($errorOutput !== '') {
+            $attemptErrors[] = $errorOutput;
+        } else {
+            $attemptErrors[] = 'exit code: ' . $exitCode;
+        }
+
+        if ($errorOutput !== '' && !kirpi_backup_is_unknown_ssl_option($errorOutput)) {
+            // Not an option-compatibility issue; no need to keep trying unsupported variants.
+            continue;
+        }
     }
 
-    if ($exitCode !== 0 || !is_file($fullPath) || filesize($fullPath) === 0) {
+    if (!$success) {
         if (is_file($fullPath)) {
             @unlink($fullPath);
         }
 
         return [
             'success' => false,
-            'message' => 'mysqldump basarisiz. ' . ($errorOutput !== '' ? $errorOutput : ('exit code: ' . $exitCode)),
+            'message' => 'mysqldump basarisiz. ' . implode(' | ', array_slice($attemptErrors, -2)),
         ];
     }
 
@@ -167,21 +232,29 @@ function kirpi_backup_restore(int $backupId, ?int $userId = null): array
         ];
     }
 
-    $command = sprintf(
-        'mysql %s -h %s -P %s -u %s %s %s < %s 2>&1',
-        kirpi_mysql_ssl_arg(),
-        escapeshellarg((string) DB_HOST),
-        escapeshellarg((string) DB_PORT),
-        escapeshellarg((string) DB_USER),
-        kirpi_mysql_password_arg(),
-        escapeshellarg((string) DB_NAME),
-        escapeshellarg($filePath)
-    );
+    $exitCode = 1;
+    $output = '';
 
-    $outputLines = [];
-    $exitCode = 0;
-    exec($command, $outputLines, $exitCode);
-    $output = trim(implode(PHP_EOL, $outputLines));
+    foreach (kirpi_mysql_ssl_candidates() as $sslArg) {
+        $command = sprintf(
+            'mysql %s -h %s -P %s -u %s %s %s < %s 2>&1',
+            $sslArg,
+            escapeshellarg((string) DB_HOST),
+            escapeshellarg((string) DB_PORT),
+            escapeshellarg((string) DB_USER),
+            kirpi_mysql_password_arg(),
+            escapeshellarg((string) DB_NAME),
+            escapeshellarg($filePath)
+        );
+
+        $run = kirpi_backup_run_command($command);
+        $exitCode = (int) ($run['exit_code'] ?? 1);
+        $output = trim((string) ($run['error_output'] ?? ''));
+
+        if ($exitCode === 0) {
+            break;
+        }
+    }
 
     $logStmt = db()->prepare("\n        INSERT INTO db_backup_restores (\n            backup_id,\n            restored_by,\n            restore_output\n        ) VALUES (\n            :backup_id,\n            :restored_by,\n            :restore_output\n        )\n    ");
     $logStmt->execute([
