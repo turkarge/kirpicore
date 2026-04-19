@@ -7,6 +7,9 @@ $user = current_user();
 $currentRoutePath = $GLOBALS['current_route_path'] ?? '';
 $unreadNotificationsCount = get_unread_notifications_count((int) ($user['id'] ?? 0));
 $recentNotifications = get_recent_notifications((int) ($user['id'] ?? 0), 5);
+$userAvatarUrl = !empty($user['avatar'])
+    ? base_url('uploads/avatars/' . ltrim((string) $user['avatar'], '/'))
+    : null;
 
 $menu = [
     [
@@ -169,9 +172,13 @@ $filterVisibleMenuItems = static function (array $items): array {
                 <div class="nav-item dropdown">
                     <a href="#" id="user-menu-trigger" class="nav-link d-flex lh-1 text-reset p-0 dropdown-toggle"
                         data-bs-toggle="dropdown" aria-label="Kullanıcı Menüsü" aria-expanded="false">
-                        <span class="avatar avatar-sm">
-                            <?php echo e(mb_strtoupper(mb_substr($user['name'] ?? 'U', 0, 1))); ?>
-                        </span>
+                        <?php if ($userAvatarUrl): ?>
+                            <span class="avatar avatar-sm" style="background-image: url('<?php echo e($userAvatarUrl); ?>')"></span>
+                        <?php else: ?>
+                            <span class="avatar avatar-sm">
+                                <?php echo e(mb_strtoupper(mb_substr($user['name'] ?? 'U', 0, 1))); ?>
+                            </span>
+                        <?php endif; ?>
 
                         <div class="d-none d-xl-block ps-2">
                             <div><?php echo e($user['name'] ?? 'User'); ?></div>
