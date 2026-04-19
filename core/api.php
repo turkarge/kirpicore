@@ -1,5 +1,14 @@
 <?php
 
+function api_is_enabled(): bool
+{
+    if (function_exists('kirpi_settings_table_ready') && kirpi_settings_table_ready()) {
+        return kirpi_setting_bool('api.enabled', env_bool('API_ENABLED', true));
+    }
+
+    return env_bool('API_ENABLED', true);
+}
+
 function api_json_input(): array
 {
     static $cached = null;
@@ -194,4 +203,3 @@ function api_require_token(?string $requiredPermission = null): array
 
     return $user;
 }
-

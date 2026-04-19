@@ -179,6 +179,7 @@ Temel REST API iskeleti eklendi.
 - Route prefix: `api/v1`
 - Auth: `Authorization: Bearer <token>`
 - Response format: `status`, `message`, `data`, `meta`
+- API aktif/pasif: `api.enabled` (Ayarlar ekranindan) veya `API_ENABLED=true/false` (env)
 
 Endpointler:
 
@@ -191,6 +192,7 @@ Not:
 - API token tablosu: `api_tokens`
 - Token olusturma endpoint'i brute-force'a karsi throttle ile korunur
 - API cagrilari da throttle kapsamindadir
+- Super Admin, Profil sayfasindan tek tik API token uretebilir
 
 ### Postman ile hizli test
 

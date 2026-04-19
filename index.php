@@ -77,6 +77,10 @@ $render_layout = (bool)($route_info['layout'] ?? false);
 $required_permission = $route_info['permission'] ?? null;
 $auth_required = $route_info['auth'] ?? true;
 
+if (str_starts_with($request_path, 'api/v1/') && !api_is_enabled()) {
+    api_error(503, 'API gecici olarak devre disi birakildi.');
+}
+
 if ($auth_required && !is_user_logged_in()) {
     $_SESSION['redirect_to'] = $_SERVER['REQUEST_URI'] ?? (BASE_URL . '/' . $request_path);
     set_flash_message('info', 'Devam etmek icin lutfen giris yapin.');

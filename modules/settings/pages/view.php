@@ -12,6 +12,7 @@ $mailUsername = trim((string) kirpi_setting_get('mail.username', MAIL_USERNAME))
 $mailEncryption = trim((string) kirpi_setting_get('mail.encryption', MAIL_ENCRYPTION));
 $mailFromAddress = trim((string) kirpi_setting_get('mail.from_address', MAIL_FROM_ADDRESS));
 $mailFromName = trim((string) kirpi_setting_get('mail.from_name', MAIL_FROM_NAME));
+$apiEnabled = kirpi_setting_bool('api.enabled', env_bool('API_ENABLED', true));
 
 $mailPasswordStored = trim((string) kirpi_setting_get('mail.password', '')) !== '' || trim((string) MAIL_PASSWORD) !== '';
 $schemaReport = kirpi_missing_tables_report();
@@ -104,6 +105,14 @@ $missingByFile = (array) ($schemaReport['missing_by_file'] ?? []);
                         <div class="col-12 col-md-6">
                             <label class="form-label">Uygulama Adi</label>
                             <input type="text" name="app_name" class="form-control" value="<?php echo e($appName); ?>" <?php echo !$tableReady ? 'disabled' : ''; ?>>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label d-block">API Durumu</label>
+                            <label class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" name="api_enabled" value="1" <?php echo $apiEnabled ? 'checked' : ''; ?> <?php echo !$tableReady ? 'disabled' : ''; ?>>
+                                <span class="form-check-label">REST API aktif</span>
+                            </label>
+                            <div class="form-hint">Kapali oldugunda /api/v1/* endpointleri 503 doner.</div>
                         </div>
                     </div>
 

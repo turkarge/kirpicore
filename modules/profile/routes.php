@@ -15,4 +15,11 @@ return [
         'auth' => true,
         'method' => 'POST',
     ],
+    'profile/actions/create-api-token' => [
+        'file' => 'modules/profile/actions/create_api_token.php',
+        'layout' => false,
+        'permission' => 'profile.edit',
+        'auth' => true,
+        'method' => 'POST',
+    ],
 ];

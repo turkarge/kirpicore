@@ -54,6 +54,11 @@ $avatarUrl = !empty($profile['avatar'])
     : null;
 
 $initial = mb_strtoupper(mb_substr($profile['name'] ?? 'U', 0, 1));
+$isSuperAdmin = ((string) ($profile['role_name'] ?? '')) === 'Super Admin';
+$apiTokenOnce = $_SESSION['profile_api_token_once'] ?? null;
+if (isset($_SESSION['profile_api_token_once'])) {
+    unset($_SESSION['profile_api_token_once']);
+}
 ?>
 
 <div class="page-header d-print-none">
@@ -98,6 +103,42 @@ $initial = mb_strtoupper(mb_substr($profile['name'] ?? 'U', 0, 1));
             </div>
 
             <div class="col-12 col-lg-8">
+                <?php if ($isSuperAdmin): ?>
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title">API Token Yonetimi (Super Admin)</h3>
+                        </div>
+                        <div class="card-body">
+                            <?php if (is_array($apiTokenOnce) && !empty($apiTokenOnce['token'])): ?>
+                                <div class="alert alert-warning">
+                                    <div class="fw-bold mb-2">Bu token sadece bir kez gosterilir. Guvenli bir yerde saklayin.</div>
+                                    <div class="mb-2">
+                                        <label class="form-label mb-1">Token</label>
+                                        <input type="text" class="form-control" readonly value="<?php echo e((string) ($apiTokenOnce['token'] ?? '')); ?>">
+                                    </div>
+                                    <div class="text-secondary small">
+                                        Token Name: <?php echo e((string) ($apiTokenOnce['token_name'] ?? '-')); ?> |
+                                        Expires At: <?php echo e((string) ($apiTokenOnce['expires_at'] ?? '-')); ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+
+                            <form action="<?php echo base_url('profile/actions/create-api-token'); ?>" method="post">
+                                <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-8">
+                                        <label class="form-label">Token Name</label>
+                                        <input type="text" name="token_name" class="form-control" placeholder="ornek: postman" value="profile-token">
+                                    </div>
+                                    <div class="col-12 col-md-4 d-flex align-items-end">
+                                        <button type="submit" class="btn btn-outline-primary w-100">API Token Olustur</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">Profil Bilgileri</h3>

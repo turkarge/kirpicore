@@ -1,6 +1,13 @@
 <?php
 
 return [
+    'api/v1' => [
+        'file' => 'modules/api/v1/index.php',
+        'layout' => false,
+        'permission' => null,
+        'auth' => false,
+        'method' => 'GET',
+    ],
     'api/v1/auth/token' => [
         'file' => 'modules/api/v1/auth/token.php',
         'layout' => false,
@@ -23,4 +30,3 @@ return [
         'method' => 'GET',
     ],
 ];
-

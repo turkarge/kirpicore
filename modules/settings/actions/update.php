@@ -27,6 +27,7 @@ $mailPassword = (string) ($_POST['mail_password'] ?? '');
 $mailEncryption = strtolower(trim((string) ($_POST['mail_encryption'] ?? 'tls')));
 $mailFromAddress = trim((string) ($_POST['mail_from_address'] ?? ''));
 $mailFromName = trim((string) ($_POST['mail_from_name'] ?? ''));
+$apiEnabled = isset($_POST['api_enabled']) ? '1' : '0';
 
 if ($appName === '') {
     json_response([
@@ -65,6 +66,9 @@ try {
 
     kirpi_setting_set('app.name', $appName, $updatedBy);
     $changes[] = 'app.name';
+
+    kirpi_setting_set('api.enabled', $apiEnabled, $updatedBy);
+    $changes[] = 'api.enabled';
 
     kirpi_setting_set('mail.host', $mailHost, $updatedBy);
     $changes[] = 'mail.host';
