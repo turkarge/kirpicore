@@ -192,6 +192,23 @@ Not:
 - Token olusturma endpoint'i brute-force'a karsi throttle ile korunur
 - API cagrilari da throttle kapsamindadir
 
+### Postman ile hizli test
+
+Repo icinde hazir collection dosyasi:
+
+- `postman/KirpiCore_API_v1.postman_collection.json`
+
+Adimlar:
+
+1. Postman > Import > bu JSON dosyasini secin
+2. Collection variables icinde `base_url`, `email`, `password` degerlerini kontrol edin
+3. Sirayla calistirin:
+   - `Auth - Create Token`
+   - `Me - Current User`
+   - `Users - List`
+
+`Auth - Create Token` istegi basarili olursa `access_token` degiskenine otomatik yazilir.
+
 ## Mail Modulu
 
 Yonetim menusu altinda `Mail Test` ekrani bulunur.
