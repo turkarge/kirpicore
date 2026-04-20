@@ -31,9 +31,21 @@ if (!api_token_table_ready()) {
 
 $tokenName = trim((string) ($_POST['token_name'] ?? 'profile-token'));
 $tokenName = $tokenName !== '' ? $tokenName : 'profile-token';
+$ttlOption = trim((string) ($_POST['ttl_option'] ?? '1_month'));
+
+$ttlMap = [
+    '24h' => 24 * 60 * 60,
+    '1_month' => 30 * 24 * 60 * 60,
+    '3_months' => 90 * 24 * 60 * 60,
+    '6_months' => 180 * 24 * 60 * 60,
+    '1_year' => 365 * 24 * 60 * 60,
+    'unlimited' => -1,
+];
+
+$ttlSeconds = $ttlMap[$ttlOption] ?? $ttlMap['1_month'];
 
 try {
-    $issued = api_issue_token_for_user($userId, $tokenName);
+    $issued = api_issue_token_for_user($userId, $tokenName, $ttlSeconds);
     if (!$issued) {
         set_flash_message('danger', 'API token olusturulamadi.');
         redirect(base_url('profile/view'));
@@ -43,11 +55,14 @@ try {
         'token' => (string) ($issued['token'] ?? ''),
         'expires_at' => (string) ($issued['expires_at'] ?? ''),
         'token_name' => $tokenName,
+        'ttl_option' => $ttlOption,
+        'is_unlimited' => (bool) ($issued['is_unlimited'] ?? false),
     ];
 
     kirpi_audit_log('create_token', 'api', [
         'token_name' => $tokenName,
         'expires_at' => (string) ($issued['expires_at'] ?? ''),
+        'ttl_option' => $ttlOption,
     ], 'api_token', null, 'success');
 
     set_flash_message('success', 'API token olusturuldu. Profil sayfasinda bir kez gosterilecek.');
@@ -63,4 +78,3 @@ try {
     set_flash_message('danger', 'API token olusturulurken bir hata olustu.');
     redirect(base_url('profile/view'));
 }
-

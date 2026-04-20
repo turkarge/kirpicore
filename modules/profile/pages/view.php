@@ -117,11 +117,17 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
                                     <div class="fw-bold mb-2">Bu token sadece bir kez gosterilir. Guvenli bir yerde saklayin.</div>
                                     <div class="mb-2">
                                         <label class="form-label mb-1">Token</label>
-                                        <input type="text" class="form-control" readonly value="<?php echo e((string) ($apiTokenOnce['token'] ?? '')); ?>">
+                                        <input
+                                            type="text"
+                                            class="form-control w-100 js-token-copy"
+                                            readonly
+                                            title="Kopyalamak icin tiklayin"
+                                            value="<?php echo e((string) ($apiTokenOnce['token'] ?? '')); ?>"
+                                        >
                                     </div>
                                     <div class="text-secondary small">
                                         Token Name: <?php echo e((string) ($apiTokenOnce['token_name'] ?? '-')); ?> |
-                                        Expires At: <?php echo e((string) ($apiTokenOnce['expires_at'] ?? '-')); ?>
+                                        Expires At: <?php echo !empty($apiTokenOnce['is_unlimited']) ? 'Sinirsiz' : e((string) ($apiTokenOnce['expires_at'] ?? '-')); ?>
                                     </div>
                                 </div>
                             <?php endif; ?>
@@ -133,7 +139,18 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
                                         <label class="form-label">Token Name</label>
                                         <input type="text" name="token_name" class="form-control" placeholder="ornek: postman" value="profile-token" <?php echo (!$apiEnabled || !$apiTokenTableReady) ? 'disabled' : ''; ?>>
                                     </div>
-                                    <div class="col-12 col-md-4 d-flex align-items-end">
+                                    <div class="col-12 col-md-4">
+                                        <label class="form-label">Gecerlilik</label>
+                                        <select name="ttl_option" class="form-select" <?php echo (!$apiEnabled || !$apiTokenTableReady) ? 'disabled' : ''; ?>>
+                                            <option value="24h">24 Saat</option>
+                                            <option value="1_month" selected>1 Ay</option>
+                                            <option value="3_months">3 Ay</option>
+                                            <option value="6_months">6 Ay</option>
+                                            <option value="1_year">1 Yil</option>
+                                            <option value="unlimited">Sinirsiz</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 d-flex align-items-end">
                                         <button type="submit" class="btn btn-outline-primary w-100" <?php echo (!$apiEnabled || !$apiTokenTableReady) ? 'disabled' : ''; ?>>API Token Olustur</button>
                                     </div>
                                 </div>
@@ -171,7 +188,8 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
                                             <?php
                                             $isRevoked = !empty($tokenRow['revoked_at']);
                                             $expiresAtRaw = (string) ($tokenRow['expires_at'] ?? '');
-                                            $isExpired = !$isRevoked && $expiresAtRaw !== '' && strtotime($expiresAtRaw) !== false && strtotime($expiresAtRaw) < time();
+                                            $isUnlimitedToken = $expiresAtRaw !== '' && strtotime($expiresAtRaw) !== false && strtotime($expiresAtRaw) >= strtotime('2099-01-01 00:00:00');
+                                            $isExpired = !$isRevoked && !$isUnlimitedToken && $expiresAtRaw !== '' && strtotime($expiresAtRaw) !== false && strtotime($expiresAtRaw) < time();
                                             $statusLabel = $isRevoked ? 'Revoked' : ($isExpired ? 'Expired' : 'Active');
                                             $statusClass = $isRevoked ? 'bg-red-lt' : ($isExpired ? 'bg-yellow-lt' : 'bg-green-lt');
                                             $tokenId = (int) ($tokenRow['id'] ?? 0);
@@ -181,7 +199,7 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
                                                 <td><?php echo e((string) ($tokenRow['token_name'] ?? 'default')); ?></td>
                                                 <td><?php echo e((string) ($tokenRow['created_at'] ?? '-')); ?></td>
                                                 <td><?php echo e((string) ($tokenRow['last_used_at'] ?? '-')); ?></td>
-                                                <td><?php echo e($expiresAtRaw !== '' ? $expiresAtRaw : '-'); ?></td>
+                                                <td><?php echo e($isUnlimitedToken ? 'Sinirsiz' : ($expiresAtRaw !== '' ? $expiresAtRaw : '-')); ?></td>
                                                 <td><span class="badge <?php echo e($statusClass); ?>"><?php echo e($statusLabel); ?></span></td>
                                                 <td>
                                                     <?php if (!$isRevoked && !$isExpired): ?>
@@ -287,3 +305,33 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".js-token-copy").forEach(function (input) {
+        input.addEventListener("click", async function () {
+            const value = input.value || "";
+            if (!value) {
+                return;
+            }
+
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(value);
+                } else {
+                    input.select();
+                    document.execCommand("copy");
+                }
+
+                if (window.KirpiCore && typeof window.KirpiCore.toast === "function") {
+                    window.KirpiCore.toast("Token panoya kopyalandi.", "success");
+                }
+            } catch (error) {
+                if (window.KirpiCore && typeof window.KirpiCore.toast === "function") {
+                    window.KirpiCore.toast("Token kopyalanamadi.", "error");
+                }
+            }
+        });
+    });
+});
+</script>

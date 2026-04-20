@@ -92,11 +92,16 @@ function api_issue_token_for_user(int $userId, ?string $tokenName = null, ?int $
     $hash = api_token_hash($plain);
     $name = trim((string) ($tokenName ?? 'default')) ?: 'default';
     $ttl = $ttlSeconds ?? (int) env('API_TOKEN_TTL_SECONDS', '2592000');
-    if ($ttl <= 0) {
-        $ttl = 2592000;
-    }
+    $isUnlimited = $ttlSeconds !== null && $ttlSeconds < 0;
 
-    $expiresAt = (new DateTimeImmutable('now'))->add(new DateInterval('PT' . $ttl . 'S'))->format('Y-m-d H:i:s');
+    if ($isUnlimited) {
+        $expiresAt = '2099-12-31 23:59:59';
+    } else {
+        if ($ttl <= 0) {
+            $ttl = 2592000;
+        }
+        $expiresAt = (new DateTimeImmutable('now'))->add(new DateInterval('PT' . $ttl . 'S'))->format('Y-m-d H:i:s');
+    }
 
     $stmt = db()->prepare("\n        INSERT INTO api_tokens (\n            user_id,\n            token_name,\n            token_hash,\n            expires_at,\n            last_used_at\n        ) VALUES (\n            :user_id,\n            :token_name,\n            :token_hash,\n            :expires_at,\n            NULL\n        )\n    ");
     $stmt->execute([
@@ -109,6 +114,7 @@ function api_issue_token_for_user(int $userId, ?string $tokenName = null, ?int $
     return [
         'token' => $plain,
         'expires_at' => $expiresAt,
+        'is_unlimited' => $isUnlimited,
     ];
 }
 
