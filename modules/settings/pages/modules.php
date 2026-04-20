@@ -82,18 +82,25 @@ $modules = kirpi_list_modules();
                                     <?php if ($isCore): ?>
                                         <span class="text-secondary small">Kilitle</span>
                                     <?php else: ?>
-                                        <form action="<?php echo base_url('settings/actions/module-toggle'); ?>" method="post" data-ajax="true">
+                                        <form
+                                            id="module-toggle-form-<?php echo e($moduleKey); ?>"
+                                            action="<?php echo base_url('settings/actions/module-toggle'); ?>"
+                                            method="post"
+                                            data-ajax="true"
+                                            class="d-none"
+                                        >
                                             <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                                             <input type="hidden" name="module_key" value="<?php echo e($moduleKey); ?>">
                                             <input type="hidden" name="is_enabled" value="<?php echo $isEnabled ? '0' : '1'; ?>">
-                                            <button
-                                                type="submit"
-                                                class="btn btn-sm <?php echo $isEnabled ? 'btn-outline-danger' : 'btn-outline-success'; ?>"
-                                                data-confirm="<?php echo $isEnabled ? 'Bu modul devre disi birakilacak. Emin misiniz?' : 'Bu modul aktif edilecek. Emin misiniz?'; ?>"
-                                            >
-                                                <?php echo $isEnabled ? 'Disable' : 'Enable'; ?>
-                                            </button>
                                         </form>
+                                        <a
+                                            href="#"
+                                            class="btn btn-sm <?php echo $isEnabled ? 'btn-outline-danger' : 'btn-outline-success'; ?>"
+                                            data-confirm="<?php echo $isEnabled ? 'Bu modul devre disi birakilacak. Emin misiniz?' : 'Bu modul aktif edilecek. Emin misiniz?'; ?>"
+                                            data-form="module-toggle-form-<?php echo e($moduleKey); ?>"
+                                        >
+                                            <?php echo $isEnabled ? 'Disable' : 'Enable'; ?>
+                                        </a>
                                     <?php endif; ?>
                                 </td>
                             </tr>
