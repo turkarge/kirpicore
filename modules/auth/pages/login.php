@@ -135,6 +135,5 @@ window.KIRPI_CONFIG = {
 <script src="<?php echo asset_url('js/toastr.min.js'); ?>"></script>
 <script src="<?php echo asset_url('js/app.js'); ?>"></script>
 <script src="<?php echo base_url('modules/auth/scripts/login.js'); ?>"></script>
-<?php echo kirpi_analytics_snippet(); ?>
 </body>
 </html>

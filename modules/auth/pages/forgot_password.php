@@ -52,6 +52,5 @@ if (is_user_logged_in()) {
         </div>
     </div>
 </div>
-<?php echo kirpi_analytics_snippet(); ?>
 </body>
 </html>

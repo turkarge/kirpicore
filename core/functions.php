@@ -12,4 +12,3 @@ require_once BASE_PATH . '/core/queue.php';
 require_once BASE_PATH . '/core/backup.php';
 require_once BASE_PATH . '/core/throttle.php';
 require_once BASE_PATH . '/core/api.php';
-require_once BASE_PATH . '/core/analytics.php';

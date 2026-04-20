@@ -60,6 +60,5 @@ if (!defined('KIRPI_CORE_ENTRY')) {
         </div>
     </div>
 </div>
-<?php echo kirpi_analytics_snippet(); ?>
 </body>
 </html>
