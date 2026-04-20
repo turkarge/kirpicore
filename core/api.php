@@ -64,6 +64,7 @@ function api_response(int $statusCode, string $message, array $data = [], array 
         $payload['meta'] = $meta;
     }
 
+    api_log_response($statusCode, $errorCode);
     json_response($payload, $statusCode);
 }
 
@@ -109,6 +110,74 @@ function api_token_table_ready(): bool
 function api_token_scope_table_ready(): bool
 {
     return db_table_exists('api_token_scopes');
+}
+
+function api_request_log_table_ready(): bool
+{
+    return db_table_exists('api_request_logs');
+}
+
+function api_log_response(int $statusCode, ?string $errorCode = null): void
+{
+    $requestPath = (string) ($GLOBALS['current_route_path'] ?? '');
+    if (!str_starts_with($requestPath, 'api/v1/')) {
+        return;
+    }
+
+    if (!api_request_log_table_ready()) {
+        return;
+    }
+
+    static $logged = false;
+    if ($logged) {
+        return;
+    }
+    $logged = true;
+
+    $auth = (array) ($GLOBALS['api_last_auth'] ?? []);
+    $tokenId = (int) ($auth['token_id'] ?? 0);
+    $userId = (int) ($auth['user_id'] ?? 0);
+    $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+    $ipAddress = function_exists('kirpi_request_ip') ? kirpi_request_ip() : '';
+    $startedAt = (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true));
+    $durationMs = (int) round((microtime(true) - $startedAt) * 1000);
+
+    try {
+        $stmt = db()->prepare("
+            INSERT INTO api_request_logs (
+                route_path,
+                request_method,
+                status_code,
+                error_code,
+                user_id,
+                token_id,
+                ip_address,
+                duration_ms
+            ) VALUES (
+                :route_path,
+                :request_method,
+                :status_code,
+                :error_code,
+                :user_id,
+                :token_id,
+                :ip_address,
+                :duration_ms
+            )
+        ");
+
+        $stmt->execute([
+            ':route_path' => mb_substr($requestPath, 0, 190),
+            ':request_method' => mb_substr($method, 0, 10),
+            ':status_code' => $statusCode,
+            ':error_code' => $errorCode !== null ? mb_substr((string) $errorCode, 0, 80) : null,
+            ':user_id' => $userId > 0 ? $userId : null,
+            ':token_id' => $tokenId > 0 ? $tokenId : null,
+            ':ip_address' => mb_substr((string) $ipAddress, 0, 45),
+            ':duration_ms' => max(0, $durationMs),
+        ]);
+    } catch (Throwable $e) {
+        error_log('api request log insert error: ' . $e->getMessage());
+    }
 }
 
 function api_token_hash(string $plainToken): string
@@ -407,6 +476,12 @@ function api_require_token(?string $requiredPermission = null, ?string $required
     if (!api_token_has_scope((array) $auth, $requiredScope)) {
         api_error(403, 'Bu token scope nedeniyle bu endpointe erisemez.', 'scope_denied');
     }
+
+    $GLOBALS['api_last_auth'] = [
+        'token_id' => (int) ($auth['token_id'] ?? 0),
+        'user_id' => (int) ($user['id'] ?? 0),
+        'scopes' => (array) ($auth['token_scopes'] ?? []),
+    ];
 
     return $user;
 }

@@ -1,6 +1,13 @@
 <?php
 
 return [
+    'api/metrics' => [
+        'file' => 'modules/api/pages/metrics.php',
+        'layout' => true,
+        'permission' => 'health.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
     'api/v1' => [
         'file' => 'modules/api/v1/index.php',
         'layout' => false,

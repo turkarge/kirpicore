@@ -240,6 +240,20 @@ Bu ekranda:
 - JSON body gonderilir
 - HTTP status + response anlik gorulur
 
+### API Metrics (Panel)
+
+- Menu: `Yonetim -> API Metrics`
+- Route: `api/metrics`
+- Permission: `health.view`
+
+Bu ekranda son 24 saat icin:
+
+- Toplam API cagri sayisi
+- 2xx / 4xx / 5xx dagilimi
+- 401 / 403 / 429 sayilari
+- En cok cagrilan endpointler
+- Son hatalar (`error_code` dahil)
+
 ### Postman ile hizli test
 
 Repo icinde hazir collection dosyasi:

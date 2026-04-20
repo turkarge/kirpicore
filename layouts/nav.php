@@ -77,6 +77,12 @@ $menu = [
                 'permission' => 'health.view',
             ],
             [
+                'title' => 'API Metrics',
+                'icon' => 'ti ti-chart-line',
+                'url' => 'api/metrics',
+                'permission' => 'health.view',
+            ],
+            [
                 'title' => 'Jobs Queue',
                 'icon' => 'ti ti-clock-play',
                 'url' => 'queue/view',
