@@ -94,5 +94,6 @@ window.KIRPI_CONFIG = {
 <script src="<?php echo asset_url('js/tabler.min.js'); ?>"></script>
 <script src="<?php echo asset_url('js/toastr.min.js'); ?>"></script>
 <script src="<?php echo asset_url('js/app.js'); ?>"></script>
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "7356366510c54c86a154d277ed978201"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
