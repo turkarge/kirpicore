@@ -22,4 +22,11 @@ return [
         'auth' => true,
         'method' => 'POST',
     ],
+    'profile/actions/revoke-api-token' => [
+        'file' => 'modules/profile/actions/revoke_api_token.php',
+        'layout' => false,
+        'permission' => 'profile.edit',
+        'auth' => true,
+        'method' => 'POST',
+    ],
 ];

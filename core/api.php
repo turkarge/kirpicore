@@ -112,6 +112,47 @@ function api_issue_token_for_user(int $userId, ?string $tokenName = null, ?int $
     ];
 }
 
+function api_list_tokens_for_user(int $userId, int $limit = 50): array
+{
+    if ($userId <= 0 || !api_token_table_ready()) {
+        return [];
+    }
+
+    $limit = max(1, min(200, $limit));
+
+    try {
+        $stmt = db()->prepare("\n            SELECT\n                id,\n                token_name,\n                last_used_at,\n                expires_at,\n                revoked_at,\n                created_at,\n                updated_at\n            FROM api_tokens\n            WHERE user_id = :user_id\n            ORDER BY id DESC\n            LIMIT :limit\n        ");
+        $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    } catch (Throwable $e) {
+        error_log('api list tokens error: ' . $e->getMessage());
+        return [];
+    }
+}
+
+function api_revoke_token_for_user(int $tokenId, int $userId): bool
+{
+    if ($tokenId <= 0 || $userId <= 0 || !api_token_table_ready()) {
+        return false;
+    }
+
+    try {
+        $stmt = db()->prepare("\n            UPDATE api_tokens\n            SET revoked_at = NOW(),\n                updated_at = NOW()\n            WHERE id = :id\n              AND user_id = :user_id\n              AND revoked_at IS NULL\n        ");
+        $stmt->execute([
+            ':id' => $tokenId,
+            ':user_id' => $userId,
+        ]);
+
+        return $stmt->rowCount() > 0;
+    } catch (Throwable $e) {
+        error_log('api revoke token error: ' . $e->getMessage());
+        return false;
+    }
+}
+
 function api_authenticate_by_token(string $plainToken): ?array
 {
     if ($plainToken === '' || !api_token_table_ready()) {

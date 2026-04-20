@@ -193,7 +193,7 @@ Not:
 - API token tablosu: `api_tokens`
 - Token olusturma endpoint'i brute-force'a karsi throttle ile korunur
 - API cagrilari da throttle kapsamindadir
-- Super Admin, Profil sayfasindan tek tik API token uretebilir
+- Super Admin, Profil sayfasindan API token olusturabilir, listeleyebilir ve revoke edebilir
 - API root kontrol endpoint: `GET /api/v1`
 
 ### Postman ile hizli test
@@ -272,6 +272,7 @@ Yonetim menusu uzerinden profil sayfasi:
 Ek ozellik:
 
 - Super Admin icin profil ekraninda API token olusturma bolumu
+- Super Admin icin API token listeleme + revoke islemi
 - Olusturulan token guvenlik geregi sadece bir kez gosterilir
 
 ## Queue Modulu
