@@ -2,14 +2,16 @@
 if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
+
+require_once BASE_PATH . '/modules/users/language.php';
 ?>
 
 <div class="page-header d-print-none">
     <div class="container-xl">
         <div class="row g-2 align-items-center">
             <div class="col">
-                <div class="page-pretitle">Sistem Yönetimi</div>
-                <h2 class="page-title">Kullanıcılar</h2>
+                <div class="page-pretitle"><?php echo e(users_lang('system_management')); ?></div>
+                <h2 class="page-title"><?php echo e(users_lang('users')); ?></h2>
             </div>
 
             <div class="col-auto ms-auto d-print-none">
@@ -21,7 +23,7 @@ if (!defined('KIRPI_CORE_ENTRY')) {
                         data-size="modal-lg"
                     >
                         <i class="ti ti-plus"></i>
-                        Yeni Kullanıcı
+                        <?php echo e(users_lang('new_user')); ?>
                     </a>
                 </div>
             </div>
@@ -39,27 +41,27 @@ if (!defined('KIRPI_CORE_ENTRY')) {
                             type="text"
                             id="users-search"
                             class="form-control"
-                            placeholder="Ad, e-posta veya rol ara..."
+                            placeholder="<?php echo e(users_lang('search_placeholder')); ?>"
                         >
                     </div>
 
                     <div class="col-6 col-md-3">
                         <select id="users-role-filter" class="form-select">
-                            <option value="">Tüm Roller</option>
+                            <option value=""><?php echo e(users_lang('all_roles')); ?></option>
                             <?php
                             try {
                                 $roles = get_roles_for_select();
                                 foreach ($roles as $role) {
                                     $label = $role['name'];
 
-                                    if (isset($role['is_active']) && (int)$role['is_active'] !== 1) {
-                                        $label .= ' (Pasif)';
+                                    if (isset($role['is_active']) && (int) $role['is_active'] !== 1) {
+                                        $label .= users_lang('status_inactive_suffix');
                                     }
 
-                                    echo '<option value="' . (int)$role['id'] . '">' . e($label) . '</option>';
+                                    echo '<option value="' . (int) $role['id'] . '">' . e($label) . '</option>';
                                 }
                             } catch (Throwable $e) {
-                                // sessiz geç
+                                // sessiz gec
                             }
                             ?>
                         </select>
@@ -67,9 +69,9 @@ if (!defined('KIRPI_CORE_ENTRY')) {
 
                     <div class="col-6 col-md-3">
                         <select id="users-status-filter" class="form-select">
-                            <option value="">Tüm Durumlar</option>
-                            <option value="1">Aktif</option>
-                            <option value="0">Pasif</option>
+                            <option value=""><?php echo e(users_lang('all_statuses')); ?></option>
+                            <option value="1"><?php echo e(users_lang('active')); ?></option>
+                            <option value="0"><?php echo e(users_lang('inactive')); ?></option>
                         </select>
                     </div>
                 </div>

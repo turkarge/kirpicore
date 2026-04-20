@@ -3,6 +3,8 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/users/language.php';
+
 $page = max(1, (int) ($_GET['page'] ?? 1));
 $search = trim((string) ($_GET['search'] ?? ''));
 $roleId = trim((string) ($_GET['role_id'] ?? ''));
@@ -92,10 +94,10 @@ try {
     <table class="table table-vcenter card-table table-striped">
         <thead>
             <tr>
-                <th>Kullanıcı</th>
-                <th>Rol</th>
-                <th>Durum</th>
-                <th>Oluşturulma</th>
+                <th><?php echo e(users_lang('table_user')); ?></th>
+                <th><?php echo e(users_lang('table_role')); ?></th>
+                <th><?php echo e(users_lang('table_status')); ?></th>
+                <th><?php echo e(users_lang('table_created_at')); ?></th>
                 <th class="w-1"></th>
             </tr>
         </thead>
@@ -103,7 +105,7 @@ try {
             <?php if (empty($users)): ?>
                 <tr>
                     <td colspan="5" class="text-center text-secondary py-4">
-                        Kayıt bulunamadı.
+                        <?php echo e(users_lang('no_records')); ?>
                     </td>
                 </tr>
             <?php else: ?>
@@ -135,8 +137,8 @@ try {
                             <?php
                             $roleLabel = $user['role_name'] ?: '-';
 
-                            if ($user['role_name'] && isset($user['role_is_active']) && (int)$user['role_is_active'] !== 1) {
-                                $roleLabel .= ' (Pasif)';
+                            if ($user['role_name'] && isset($user['role_is_active']) && (int) $user['role_is_active'] !== 1) {
+                                $roleLabel .= users_lang('status_inactive_suffix');
                             }
                             ?>
                             <?php echo e($roleLabel); ?>
@@ -150,19 +152,18 @@ try {
                                 data-ajax="true"
                             >
                                 <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
-                                <input type="hidden" name="id" value="<?php echo (int)$user['id']; ?>">
-                                <input type="hidden" name="status" value="<?php echo (int)$user['is_active']; ?>">
+                                <input type="hidden" name="id" value="<?php echo (int) $user['id']; ?>">
+                                <input type="hidden" name="status" value="<?php echo (int) $user['is_active']; ?>">
 
                                 <label class="form-check form-switch m-0 d-inline-block">
                                     <input
                                         class="form-check-input users-status-switch"
                                         type="checkbox"
-                                        <?php echo (int)$user['is_active'] === 1 ? 'checked' : ''; ?>
+                                        <?php echo (int) $user['is_active'] === 1 ? 'checked' : ''; ?>
                                     >
                                 </label>
                             </form>
                         </td>
-
 
                         <td>
                             <?php echo e(date('d.m.Y H:i', strtotime($user['created_at']))); ?>
@@ -174,29 +175,29 @@ try {
                                     <a
                                         href="#"
                                         class="btn btn-sm btn-outline-primary btn-modal-trigger"
-                                        data-url="/ajax/users/edit?id=<?php echo (int)$user['id']; ?>"
+                                        data-url="/ajax/users/edit?id=<?php echo (int) $user['id']; ?>"
                                         data-size="modal-lg"
                                     >
-                                        Duzenle
+                                        <?php echo e(users_lang('edit')); ?>
                                     </a>
                                 <?php endif; ?>
 
                                 <?php if ($canDropSession): ?>
-                                    <form id="users-drop-session-list-form-<?php echo (int)$user['id']; ?>" action="<?php echo base_url('users/actions/drop-session'); ?>" method="post" data-ajax="true" class="m-0">
+                                    <form id="users-drop-session-list-form-<?php echo (int) $user['id']; ?>" action="<?php echo base_url('users/actions/drop-session'); ?>" method="post" data-ajax="true" class="m-0">
                                         <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
-                                        <input type="hidden" name="id" value="<?php echo (int)$user['id']; ?>">
-                                        <button type="button" class="btn btn-sm btn-outline-warning" data-confirm="Bu kullanicinin aktif oturumlari sonlandirilacak. Emin misiniz?" data-form="users-drop-session-list-form-<?php echo (int)$user['id']; ?>">
-                                            Oturum
+                                        <input type="hidden" name="id" value="<?php echo (int) $user['id']; ?>">
+                                        <button type="button" class="btn btn-sm btn-outline-warning" data-confirm="<?php echo e(users_lang('drop_session_confirm')); ?>" data-form="users-drop-session-list-form-<?php echo (int) $user['id']; ?>">
+                                            <?php echo e(users_lang('session')); ?>
                                         </button>
                                     </form>
                                 <?php endif; ?>
 
                                 <?php if ($canResetLockKey): ?>
-                                    <form id="users-reset-lock-list-form-<?php echo (int)$user['id']; ?>" action="<?php echo base_url('users/actions/reset-lock-key'); ?>" method="post" data-ajax="true" class="m-0">
+                                    <form id="users-reset-lock-list-form-<?php echo (int) $user['id']; ?>" action="<?php echo base_url('users/actions/reset-lock-key'); ?>" method="post" data-ajax="true" class="m-0">
                                         <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
-                                        <input type="hidden" name="id" value="<?php echo (int)$user['id']; ?>">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-confirm="Bu kullanicinin lock key ayari sifirlanacak. Emin misiniz?" data-form="users-reset-lock-list-form-<?php echo (int)$user['id']; ?>">
-                                            Key
+                                        <input type="hidden" name="id" value="<?php echo (int) $user['id']; ?>">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-confirm="<?php echo e(users_lang('reset_key_list_confirm')); ?>" data-form="users-reset-lock-list-form-<?php echo (int) $user['id']; ?>">
+                                            <?php echo e(users_lang('key')); ?>
                                         </button>
                                     </form>
                                 <?php endif; ?>

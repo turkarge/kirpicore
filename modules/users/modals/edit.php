@@ -3,17 +3,19 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
-$id = (int)($_GET['id'] ?? 0);
+require_once BASE_PATH . '/modules/users/language.php';
+
+$id = (int) ($_GET['id'] ?? 0);
 
 if ($id <= 0) {
     ?>
     <div class="modal-header">
-        <h5 class="modal-title">Kullanıcı Düzenle</h5>
+        <h5 class="modal-title"><?php echo e(users_lang('edit_user')); ?></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <div class="modal-body">
         <div class="alert alert-danger mb-0">
-            Geçersiz kullanıcı ID.
+            <?php echo e(users_lang('invalid_user_id')); ?>
         </div>
     </div>
     <?php
@@ -45,7 +47,7 @@ try {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$user) {
-        throw new RuntimeException('Kullanıcı bulunamadı.');
+        throw new RuntimeException('User not found.');
     }
 
     $roles = get_roles_for_select((int) ($user['role_id'] ?? 0), true);
@@ -53,12 +55,12 @@ try {
     error_log('users edit modal error: ' . $e->getMessage());
     ?>
     <div class="modal-header">
-        <h5 class="modal-title">Kullanıcı Düzenle</h5>
+        <h5 class="modal-title"><?php echo e(users_lang('edit_user')); ?></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
     <div class="modal-body">
         <div class="alert alert-danger mb-0">
-            Kullanıcı verileri yüklenemedi.
+            <?php echo e(users_lang('user_data_load_error')); ?>
         </div>
     </div>
     <?php
@@ -75,7 +77,7 @@ $canResetLockKey = check_permission('users.lock.reset');
 ?>
 
 <div class="modal-header">
-    <h5 class="modal-title">Kullanıcı Düzenle</h5>
+    <h5 class="modal-title"><?php echo e(users_lang('edit_user')); ?></h5>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 
@@ -89,7 +91,7 @@ $canResetLockKey = check_permission('users.lock.reset');
 >
     <div class="modal-body">
         <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
-        <input type="hidden" name="id" value="<?php echo (int)$user['id']; ?>">
+        <input type="hidden" name="id" value="<?php echo (int) $user['id']; ?>">
 
         <div id="users-edit-alert-area"></div>
 
@@ -110,7 +112,7 @@ $canResetLockKey = check_permission('users.lock.reset');
                         <div class="text-secondary"><?php echo e($user['email']); ?></div>
                         <div class="mt-1">
                             <span class="badge <?php echo (int) ($user['lock_enabled'] ?? 0) === 1 ? 'bg-yellow-lt' : 'bg-secondary-lt'; ?>">
-                                <?php echo (int) ($user['lock_enabled'] ?? 0) === 1 ? 'Lock Aktif' : 'Lock Pasif'; ?>
+                                <?php echo (int) ($user['lock_enabled'] ?? 0) === 1 ? e(users_lang('lock_enabled')) : e(users_lang('lock_disabled')); ?>
                             </span>
                         </div>
                     </div>
@@ -118,7 +120,7 @@ $canResetLockKey = check_permission('users.lock.reset');
             </div>
 
             <div class="col-12 col-md-8">
-                <label class="form-label form-required">Ad Soyad</label>
+                <label class="form-label form-required"><?php echo e(users_lang('name_surname')); ?></label>
                 <input
                     type="text"
                     name="name"
@@ -129,25 +131,25 @@ $canResetLockKey = check_permission('users.lock.reset');
             </div>
 
             <div class="col-12 col-md-4">
-                <label class="form-label">Rol</label>
+                <label class="form-label"><?php echo e(users_lang('role')); ?></label>
                 <select name="role_id" class="form-select">
-                    <option value="">Rol Seçin</option>
+                    <option value=""><?php echo e(users_lang('select_role')); ?></option>
                     <?php foreach ($roles as $role): ?>
                         <option
-                            value="<?php echo (int)$role['id']; ?>"
-                            <?php echo (int)$user['role_id'] === (int)$role['id'] ? 'selected' : ''; ?>
+                            value="<?php echo (int) $role['id']; ?>"
+                            <?php echo (int) $user['role_id'] === (int) $role['id'] ? 'selected' : ''; ?>
                         >
-                            <?php echo e($role['name'] . ((int)($role['is_active'] ?? 1) !== 1 ? ' (Pasif)' : '')); ?>
+                            <?php echo e($role['name'] . ((int) ($role['is_active'] ?? 1) !== 1 ? users_lang('status_inactive_suffix') : '')); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
-                <?php if ((int)($user['role_id'] ?? 0) > 0): ?>
-                    <small class="form-hint">Pasif roller yeni atama için listelenmez. Mevcut pasif rol yalnızca bilgilendirme için gösterilir.</small>
+                <?php if ((int) ($user['role_id'] ?? 0) > 0): ?>
+                    <small class="form-hint"><?php echo e(users_lang('passive_role_info_hint')); ?></small>
                 <?php endif; ?>
             </div>
 
             <div class="col-12">
-                <label class="form-label form-required">E-posta</label>
+                <label class="form-label form-required"><?php echo e(users_lang('email')); ?></label>
                 <input
                     type="email"
                     name="email"
@@ -158,35 +160,35 @@ $canResetLockKey = check_permission('users.lock.reset');
             </div>
 
             <div class="col-12 col-md-6">
-                <label class="form-label">Yeni Şifre</label>
+                <label class="form-label"><?php echo e(users_lang('new_password')); ?></label>
                 <input
                     type="password"
                     name="password"
                     class="form-control"
-                    placeholder="Boş bırakılırsa değişmez"
+                    placeholder="<?php echo e(users_lang('password_optional_placeholder')); ?>"
                 >
-                <small class="form-hint">Şifreyi değiştirmek istemiyorsanız boş bırakın.</small>
+                <small class="form-hint"><?php echo e(users_lang('password_optional_hint')); ?></small>
             </div>
 
             <div class="col-12 col-md-6">
-                <label class="form-label">Yeni Şifre Tekrar</label>
+                <label class="form-label"><?php echo e(users_lang('new_password_repeat')); ?></label>
                 <input
                     type="password"
                     name="password_confirm"
                     class="form-control"
-                    placeholder="Boş bırakılırsa değişmez"
+                    placeholder="<?php echo e(users_lang('password_optional_placeholder')); ?>"
                 >
             </div>
 
             <div class="col-12 col-md-6">
-                <label class="form-label">Profil Görseli</label>
+                <label class="form-label"><?php echo e(users_lang('profile_image')); ?></label>
                 <input
                     type="file"
                     name="avatar"
                     class="form-control"
                     accept=".jpg,.jpeg,.png,.webp"
                 >
-                <small class="form-hint">Yeni görsel seçerseniz mevcut görselin yerine geçer.</small>
+                <small class="form-hint"><?php echo e(users_lang('profile_image_replace_hint')); ?></small>
             </div>
 
             <div class="col-12 col-md-6 d-flex align-items-end">
@@ -196,9 +198,9 @@ $canResetLockKey = check_permission('users.lock.reset');
                         name="is_active"
                         value="1"
                         class="form-check-input"
-                        <?php echo (int)$user['is_active'] === 1 ? 'checked' : ''; ?>
+                        <?php echo (int) $user['is_active'] === 1 ? 'checked' : ''; ?>
                     >
-                    <span class="form-check-label">Kullanıcı aktif olsun</span>
+                    <span class="form-check-label"><?php echo e(users_lang('user_active_switch')); ?></span>
                 </label>
             </div>
         </div>
@@ -208,22 +210,22 @@ $canResetLockKey = check_permission('users.lock.reset');
         <?php if ($canDropSession || $canResetLockKey): ?>
             <div class="me-auto d-flex gap-2">
                 <?php if ($canDropSession): ?>
-                    <a href="#" class="btn btn-outline-warning" data-confirm="Bu kullanicinin aktif oturumlari sonlandirilacak. Emin misiniz?" data-form="users-drop-session-form-<?php echo (int) $user['id']; ?>">
-                        Oturumu Dusur
+                    <a href="#" class="btn btn-outline-warning" data-confirm="<?php echo e(users_lang('drop_session_confirm')); ?>" data-form="users-drop-session-form-<?php echo (int) $user['id']; ?>">
+                        <?php echo e(users_lang('drop_session')); ?>
                     </a>
                 <?php endif; ?>
 
                 <?php if ($canResetLockKey): ?>
-                    <a href="#" class="btn btn-outline-secondary" data-confirm="Bu kullanicinin lock key ayari sifirlanacak ve oturum kilitleme pasif olacak. Emin misiniz?" data-form="users-reset-lock-form-<?php echo (int) $user['id']; ?>">
-                        Key Sifirla
+                    <a href="#" class="btn btn-outline-secondary" data-confirm="<?php echo e(users_lang('reset_key_confirm')); ?>" data-form="users-reset-lock-form-<?php echo (int) $user['id']; ?>">
+                        <?php echo e(users_lang('reset_key')); ?>
                     </a>
                 <?php endif; ?>
             </div>
-            <button type="button" class="btn" data-bs-dismiss="modal">Iptal</button>
+            <button type="button" class="btn" data-bs-dismiss="modal"><?php echo e(users_lang('cancel')); ?></button>
         <?php else: ?>
-            <button type="button" class="btn me-auto" data-bs-dismiss="modal">Iptal</button>
+            <button type="button" class="btn me-auto" data-bs-dismiss="modal"><?php echo e(users_lang('cancel')); ?></button>
         <?php endif; ?>
-        <button type="submit" class="btn btn-primary" id="users-edit-submit-button">Guncelle</button>
+        <button type="submit" class="btn btn-primary" id="users-edit-submit-button"><?php echo e(users_lang('update')); ?></button>
     </div>
 </form>
 
