@@ -200,11 +200,33 @@ Not:
 - API root kontrol endpoint: `GET /api/v1`
 - Detayli users API dokumani: `docs/API_USERS.md`
 
+### API Test Merkezi (Panel)
+
+Postman gerektirmeden panelden canli API testi yapabilirsiniz.
+
+- Menu: `Yonetim -> API Test`
+- Route: `settings/api-test`
+- Permission: `settings.view`
+
+Bu ekranda:
+
+- Method secilir (`GET`, `POST`, `PATCH`, `DELETE`)
+- Endpoint girilir (or: `/api/v1/me`)
+- Bearer token eklenir
+- JSON body gonderilir
+- HTTP status + response anlik gorulur
+
 ### Postman ile hizli test
 
 Repo icinde hazir collection dosyasi:
 
 - `postman/KirpiCore_API_v1.postman_collection.json`
+
+Collection indirme endpointleri:
+
+- `GET /api/v1/postman-collection`
+- `GET /api/v1/postman`
+- `GET /api/v1/postman-collection.json`
 
 Adimlar:
 
