@@ -10,6 +10,9 @@ $recentNotifications = get_recent_notifications((int) ($user['id'] ?? 0), 5);
 $userAvatarUrl = !empty($user['avatar'])
     ? base_url('uploads/avatars/' . ltrim((string) $user['avatar'], '/'))
     : null;
+$canUseLockFeature = $user
+    && kirpi_auth_lock_schema_ready()
+    && !empty($user['lock_enabled']);
 
 $menu = [
     [
@@ -223,6 +226,22 @@ $filterVisibleMenuItems = static function (array $items): array {
                     </div>
                 <?php endif; ?>
 
+                <?php if ($canUseLockFeature && route_exists('auth/actions/lock')): ?>
+                    <div class="nav-item d-none d-md-flex me-3">
+                        <form action="<?php echo base_url('auth/actions/lock'); ?>" method="post" data-ajax="true" class="m-0">
+                            <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+                            <button
+                                type="submit"
+                                class="nav-link px-0 border-0 bg-transparent"
+                                title="Oturumu Kilitle"
+                                aria-label="Oturumu Kilitle"
+                            >
+                                <i class="ti ti-user-key fs-2"></i>
+                            </button>
+                        </form>
+                    </div>
+                <?php endif; ?>
+
                 <div class="nav-item dropdown">
                     <a href="#" id="user-menu-trigger" class="nav-link d-flex lh-1 text-reset p-0 dropdown-toggle"
                         data-bs-toggle="dropdown" aria-label="Kullanıcı Menüsü" aria-expanded="false">
@@ -245,6 +264,15 @@ $filterVisibleMenuItems = static function (array $items): array {
                     <div id="user-menu-dropdown" class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                         <?php if (route_exists('profile/view')): ?>
                             <a href="<?php echo base_url('profile/view'); ?>" class="dropdown-item">Profil</a>
+                        <?php endif; ?>
+
+                        <?php if ($canUseLockFeature && route_exists('auth/actions/lock')): ?>
+                            <form action="<?php echo base_url('auth/actions/lock'); ?>" method="post" class="m-0" data-ajax="true">
+                                <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+                                <button type="submit" class="dropdown-item w-100 text-start border-0 bg-transparent">
+                                    Oturumu Kilitle
+                                </button>
+                            </form>
                         <?php endif; ?>
 
                         <form action="<?php echo base_url('auth/actions/logout'); ?>" method="post" class="m-0"

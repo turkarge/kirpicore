@@ -33,6 +33,9 @@ $whereSql = '';
 if (!empty($where)) {
     $whereSql = 'WHERE ' . implode(' AND ', $where);
 }
+$canDropSession = check_permission('users.session.drop');
+$canResetLockKey = check_permission('users.lock.reset');
+$canEditUser = check_permission('users.edit');
 
 try {
     $countSql = "
@@ -160,22 +163,45 @@ try {
                             </form>
                         </td>
 
+
                         <td>
                             <?php echo e(date('d.m.Y H:i', strtotime($user['created_at']))); ?>
                         </td>
 
                         <td>
-    <div class="btn-list flex-nowrap">
-        <a
-            href="#"
-            class="btn btn-sm btn-outline-primary btn-modal-trigger"
-            data-url="/ajax/users/edit?id=<?php echo (int)$user['id']; ?>"
-            data-size="modal-lg"
-        >
-            Düzenle
-        </a>
-    </div>
-</td>
+                            <div class="btn-list flex-nowrap">
+                                <?php if ($canEditUser): ?>
+                                    <a
+                                        href="#"
+                                        class="btn btn-sm btn-outline-primary btn-modal-trigger"
+                                        data-url="/ajax/users/edit?id=<?php echo (int)$user['id']; ?>"
+                                        data-size="modal-lg"
+                                    >
+                                        Duzenle
+                                    </a>
+                                <?php endif; ?>
+
+                                <?php if ($canDropSession): ?>
+                                    <form id="users-drop-session-list-form-<?php echo (int)$user['id']; ?>" action="<?php echo base_url('users/actions/drop-session'); ?>" method="post" data-ajax="true" class="m-0">
+                                        <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+                                        <input type="hidden" name="id" value="<?php echo (int)$user['id']; ?>">
+                                        <button type="button" class="btn btn-sm btn-outline-warning" data-confirm="Bu kullanicinin aktif oturumlari sonlandirilacak. Emin misiniz?" data-form="users-drop-session-list-form-<?php echo (int)$user['id']; ?>">
+                                            Oturum
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
+
+                                <?php if ($canResetLockKey): ?>
+                                    <form id="users-reset-lock-list-form-<?php echo (int)$user['id']; ?>" action="<?php echo base_url('users/actions/reset-lock-key'); ?>" method="post" data-ajax="true" class="m-0">
+                                        <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+                                        <input type="hidden" name="id" value="<?php echo (int)$user['id']; ?>">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-confirm="Bu kullanicinin lock key ayari sifirlanacak. Emin misiniz?" data-form="users-reset-lock-list-form-<?php echo (int)$user['id']; ?>">
+                                            Key
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             <?php endif; ?>

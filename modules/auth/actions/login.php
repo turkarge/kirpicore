@@ -30,6 +30,11 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 }
 
 try {
+    $hasLockSchema = kirpi_auth_lock_schema_ready();
+    $lockSelectSql = $hasLockSchema
+        ? "u.lock_enabled, u.session_version,"
+        : "0 AS lock_enabled, 0 AS session_version,";
+
     $stmt = db()->prepare("
     SELECT 
         u.id,
@@ -37,6 +42,7 @@ try {
         u.email,
         u.password,
         u.role_id,
+        {$lockSelectSql}
         r.name AS role_name,
         r.is_active AS role_is_active
     FROM users u
@@ -83,12 +89,16 @@ try {
         isset($user['role_id']) ? (int) $user['role_id'] : null,
         $user['role_name'] ?? null
     );
+    $user['lock_enabled'] = $hasLockSchema && (int) ($user['lock_enabled'] ?? 0) === 1;
+    $user['session_version'] = $hasLockSchema ? (int) ($user['session_version'] ?? 0) : 0;
 
     if (session_status() === PHP_SESSION_ACTIVE) {
         session_regenerate_id(true);
     }
 
     $_SESSION['user'] = $user;
+    unset($_SESSION['_auth_lock']);
+    kirpi_register_user_session((int) ($user['id'] ?? 0));
     unset($_SESSION['flash_message']);
 
     $defaultRedirect = base_url(APP_DEFAULT_ROUTE);

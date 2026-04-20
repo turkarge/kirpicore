@@ -16,30 +16,35 @@ try {
     $result = kirpi_install_missing_database_schema();
     $beforeMissing = (int) ($result['before']['missing_table_count'] ?? 0);
     $afterMissing = (int) ($result['after']['missing_table_count'] ?? 0);
+    $beforeMissingColumns = (int) ($result['columns']['before']['missing_column_count'] ?? 0);
+    $afterMissingColumns = (int) ($result['columns']['after']['missing_column_count'] ?? 0);
     $beforeMissingIndexes = (int) ($result['indexes']['before']['missing_index_count'] ?? 0);
     $afterMissingIndexes = (int) ($result['indexes']['after']['missing_index_count'] ?? 0);
 
     kirpi_audit_log('install_missing_schema', 'settings', [
         'before_missing_table_count' => $beforeMissing,
         'after_missing_table_count' => $afterMissing,
+        'before_missing_column_count' => $beforeMissingColumns,
+        'after_missing_column_count' => $afterMissingColumns,
         'before_missing_index_count' => $beforeMissingIndexes,
         'after_missing_index_count' => $afterMissingIndexes,
         'installed_files' => $result['installed_files'] ?? [],
+        'installed_columns' => $result['columns']['installed_columns'] ?? [],
         'installed_indexes' => $result['indexes']['installed_indexes'] ?? [],
     ], 'schema', null, 'success');
 
-    if ($beforeMissing <= 0 && $beforeMissingIndexes <= 0) {
+    if ($beforeMissing <= 0 && $beforeMissingColumns <= 0 && $beforeMissingIndexes <= 0) {
         json_response([
             'status' => 'success',
-            'message' => 'Eksik tablo veya indeks yok. Sistem zaten tam.',
+            'message' => 'Eksik tablo, kolon veya indeks yok. Sistem zaten tam.',
             'reload_page' => true,
         ]);
     }
 
-    if ($afterMissing <= 0 && $afterMissingIndexes <= 0) {
+    if ($afterMissing <= 0 && $afterMissingColumns <= 0 && $afterMissingIndexes <= 0) {
         json_response([
             'status' => 'success',
-            'message' => 'Eksik tablo ve indeksler basariyla kuruldu.',
+            'message' => 'Eksik tablo, kolon ve indeksler basariyla kuruldu.',
             'reload_page' => true,
         ]);
     }

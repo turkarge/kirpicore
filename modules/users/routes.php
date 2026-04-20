@@ -50,4 +50,18 @@ return [
         'auth' => true,
         'method' => 'POST',
     ],
+    'users/actions/drop-session' => [
+        'file' => 'modules/users/actions/drop_session.php',
+        'layout' => false,
+        'permission' => 'users.session.drop',
+        'auth' => true,
+        'method' => 'POST',
+    ],
+    'users/actions/reset-lock-key' => [
+        'file' => 'modules/users/actions/reset_lock_key.php',
+        'layout' => false,
+        'permission' => 'users.lock.reset',
+        'auth' => true,
+        'method' => 'POST',
+    ],
 ];

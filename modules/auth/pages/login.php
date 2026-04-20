@@ -8,6 +8,10 @@ header('Pragma: no-cache');
 header('Expires: 0');
 
 if (is_user_logged_in()) {
+    if (kirpi_session_lock_state()) {
+        redirect(base_url('auth/lock'));
+    }
+
     redirect(base_url(APP_DEFAULT_ROUTE));
 }
 

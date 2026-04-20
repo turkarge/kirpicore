@@ -43,4 +43,18 @@ return [
         'auth' => true,
         'method' => 'POST',
     ],
+    'auth/actions/lock' => [
+        'file' => 'modules/auth/actions/lock.php',
+        'layout' => false,
+        'permission' => null,
+        'auth' => true,
+        'method' => 'POST',
+    ],
+    'auth/actions/unlock' => [
+        'file' => 'modules/auth/actions/unlock.php',
+        'layout' => false,
+        'permission' => null,
+        'auth' => true,
+        'method' => 'POST',
+    ],
 ];

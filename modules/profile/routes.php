@@ -29,4 +29,11 @@ return [
         'auth' => true,
         'method' => 'POST',
     ],
+    'profile/actions/lock-settings' => [
+        'file' => 'modules/profile/actions/lock_settings.php',
+        'layout' => false,
+        'permission' => 'profile.edit',
+        'auth' => true,
+        'method' => 'POST',
+    ],
 ];

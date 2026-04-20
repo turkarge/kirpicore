@@ -22,6 +22,7 @@ if ($id <= 0) {
 
 $roles = [];
 $user = null;
+$lockSchemaReady = kirpi_auth_lock_schema_ready();
 
 try {
     $stmt = db()->prepare("
@@ -31,7 +32,8 @@ try {
             u.name,
             u.email,
             u.avatar,
-            u.is_active
+            u.is_active,
+            " . ($lockSchemaReady ? "u.lock_enabled" : "0 AS lock_enabled") . "
         FROM users u
         WHERE u.id = :id
         LIMIT 1
@@ -68,6 +70,8 @@ $avatarUrl = !empty($user['avatar'])
     : null;
 
 $initial = mb_strtoupper(mb_substr($user['name'], 0, 1));
+$canDropSession = check_permission('users.session.drop');
+$canResetLockKey = check_permission('users.lock.reset');
 ?>
 
 <div class="modal-header">
@@ -104,6 +108,11 @@ $initial = mb_strtoupper(mb_substr($user['name'], 0, 1));
                     <div>
                         <div class="fw-bold"><?php echo e($user['name']); ?></div>
                         <div class="text-secondary"><?php echo e($user['email']); ?></div>
+                        <div class="mt-1">
+                            <span class="badge <?php echo (int) ($user['lock_enabled'] ?? 0) === 1 ? 'bg-yellow-lt' : 'bg-secondary-lt'; ?>">
+                                <?php echo (int) ($user['lock_enabled'] ?? 0) === 1 ? 'Lock Aktif' : 'Lock Pasif'; ?>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -196,7 +205,38 @@ $initial = mb_strtoupper(mb_substr($user['name'], 0, 1));
     </div>
 
     <div class="modal-footer">
-        <button type="button" class="btn me-auto" data-bs-dismiss="modal">İptal</button>
-        <button type="submit" class="btn btn-primary" id="users-edit-submit-button">Güncelle</button>
+        <?php if ($canDropSession || $canResetLockKey): ?>
+            <div class="me-auto d-flex gap-2">
+                <?php if ($canDropSession): ?>
+                    <a href="#" class="btn btn-outline-warning" data-confirm="Bu kullanicinin aktif oturumlari sonlandirilacak. Emin misiniz?" data-form="users-drop-session-form-<?php echo (int) $user['id']; ?>">
+                        Oturumu Dusur
+                    </a>
+                <?php endif; ?>
+
+                <?php if ($canResetLockKey): ?>
+                    <a href="#" class="btn btn-outline-secondary" data-confirm="Bu kullanicinin lock key ayari sifirlanacak ve oturum kilitleme pasif olacak. Emin misiniz?" data-form="users-reset-lock-form-<?php echo (int) $user['id']; ?>">
+                        Key Sifirla
+                    </a>
+                <?php endif; ?>
+            </div>
+            <button type="button" class="btn" data-bs-dismiss="modal">Iptal</button>
+        <?php else: ?>
+            <button type="button" class="btn me-auto" data-bs-dismiss="modal">Iptal</button>
+        <?php endif; ?>
+        <button type="submit" class="btn btn-primary" id="users-edit-submit-button">Guncelle</button>
     </div>
 </form>
+
+<?php if ($canDropSession): ?>
+    <form id="users-drop-session-form-<?php echo (int) $user['id']; ?>" action="<?php echo base_url('users/actions/drop-session'); ?>" method="post" data-ajax="true" class="d-none">
+        <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+        <input type="hidden" name="id" value="<?php echo (int) $user['id']; ?>">
+    </form>
+<?php endif; ?>
+
+<?php if ($canResetLockKey): ?>
+    <form id="users-reset-lock-form-<?php echo (int) $user['id']; ?>" action="<?php echo base_url('users/actions/reset-lock-key'); ?>" method="post" data-ajax="true" class="d-none">
+        <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+        <input type="hidden" name="id" value="<?php echo (int) $user['id']; ?>">
+    </form>
+<?php endif; ?>

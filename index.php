@@ -124,10 +124,20 @@ if ($auth_required && !is_user_logged_in()) {
 }
 
 if ($auth_required && is_user_logged_in() && !validate_active_session_user()) {
+    kirpi_delete_current_user_session();
     unset($_SESSION['user']);
+    unset($_SESSION['_auth_lock']);
     $_SESSION['redirect_to'] = $_SERVER['REQUEST_URI'] ?? (BASE_URL . '/' . $request_path);
     set_flash_message('warning', 'Hesabinizin veya rolunuzun durumu degismis. Lutfen tekrar giris yapin.');
     redirect(base_url('auth/login'));
+}
+
+if (is_user_logged_in() && kirpi_session_lock_state() && !kirpi_route_allows_locked_session($request_path)) {
+    if ($request_path !== 'auth/lock') {
+        $_SESSION['redirect_to'] = $_SERVER['REQUEST_URI'] ?? (BASE_URL . '/' . $request_path);
+    }
+
+    redirect(base_url('auth/lock'));
 }
 
 $throttleResult = kirpi_throttle_guard_request(

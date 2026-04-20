@@ -191,6 +191,119 @@ function kirpi_missing_indexes_report(): array
     ];
 }
 
+function kirpi_expected_columns_map(): array
+{
+    return [
+        'users' => [
+            'lock_enabled' => 'TINYINT(1) NOT NULL DEFAULT 0',
+            'lock_pin_hash' => 'VARCHAR(255) NULL',
+            'session_version' => 'INT NOT NULL DEFAULT 0',
+        ],
+    ];
+}
+
+function kirpi_db_column_exists_raw(string $tableName, string $columnName): bool
+{
+    try {
+        $stmt = db()->prepare("
+            SELECT COUNT(*)
+            FROM information_schema.columns
+            WHERE table_schema = DATABASE()
+              AND table_name = :table_name
+              AND column_name = :column_name
+        ");
+        $stmt->execute([
+            ':table_name' => $tableName,
+            ':column_name' => $columnName,
+        ]);
+
+        return (int) $stmt->fetchColumn() > 0;
+    } catch (Throwable $e) {
+        return false;
+    }
+}
+
+function kirpi_missing_columns_report(): array
+{
+    $expectedMap = kirpi_expected_columns_map();
+    $missingByTable = [];
+    $requiredCount = 0;
+    $missingCount = 0;
+
+    foreach ($expectedMap as $tableName => $columns) {
+        if (!db_table_exists($tableName, true)) {
+            continue;
+        }
+
+        foreach ((array) $columns as $columnName => $definition) {
+            $requiredCount++;
+
+            if (kirpi_db_column_exists_raw((string) $tableName, (string) $columnName)) {
+                continue;
+            }
+
+            $missingCount++;
+            if (!isset($missingByTable[$tableName])) {
+                $missingByTable[$tableName] = [];
+            }
+
+            $missingByTable[$tableName][] = [
+                'name' => (string) $columnName,
+                'definition' => (string) $definition,
+            ];
+        }
+    }
+
+    return [
+        'required_column_count' => $requiredCount,
+        'missing_column_count' => $missingCount,
+        'missing_by_table' => $missingByTable,
+    ];
+}
+
+function kirpi_install_missing_columns(): array
+{
+    $before = kirpi_missing_columns_report();
+    $installed = [];
+
+    foreach ((array) ($before['missing_by_table'] ?? []) as $tableName => $columns) {
+        foreach ((array) $columns as $columnDef) {
+            $columnName = (string) ($columnDef['name'] ?? '');
+            $definition = (string) ($columnDef['definition'] ?? '');
+
+            if ($columnName === '' || $definition === '') {
+                continue;
+            }
+
+            $sql = sprintf(
+                'ALTER TABLE `%s` ADD COLUMN `%s` %s',
+                str_replace('`', '', (string) $tableName),
+                str_replace('`', '', $columnName),
+                $definition
+            );
+
+            try {
+                db()->exec($sql);
+                db_column_exists((string) $tableName, $columnName, true);
+                $installed[] = [
+                    'table' => (string) $tableName,
+                    'column' => $columnName,
+                ];
+            } catch (Throwable $e) {
+                error_log('Missing column install failed [' . $tableName . '.' . $columnName . ']: ' . $e->getMessage());
+            }
+        }
+    }
+
+    $after = kirpi_missing_columns_report();
+
+    return [
+        'before' => $before,
+        'after' => $after,
+        'installed_columns' => $installed,
+    ];
+}
+
 function kirpi_install_missing_indexes(): array
 {
     $before = kirpi_missing_indexes_report();
@@ -345,6 +458,7 @@ function kirpi_install_missing_database_schema(): array
         kirpi_sync_module_registry();
     }
 
+    $columnResult = kirpi_install_missing_columns();
     $indexResult = kirpi_install_missing_indexes();
     $after = kirpi_missing_tables_report();
 
@@ -353,6 +467,7 @@ function kirpi_install_missing_database_schema(): array
         'after' => $after,
         'installed_files' => $installedFiles,
         'installed_statements' => $installedStatements,
+        'columns' => $columnResult,
         'indexes' => $indexResult,
     ];
 }
@@ -403,6 +518,14 @@ function kirpi_try_auto_setup_if_missing(): bool
         if (($tableReport['missing_table_count'] ?? 0) > 0) {
             kirpi_install_missing_database_schema();
             $ranInstall = true;
+        }
+
+        if (env_bool('AUTO_DB_ENSURE_COLUMNS', true)) {
+            $columnReport = kirpi_missing_columns_report();
+            if (($columnReport['missing_column_count'] ?? 0) > 0) {
+                kirpi_install_missing_columns();
+                $ranInstall = true;
+            }
         }
 
         if (env_bool('AUTO_DB_ENSURE_INDEXES', true)) {

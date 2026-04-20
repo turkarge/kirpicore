@@ -31,6 +31,14 @@ function kirpi_core_permission_catalog(): array
                     'name' => 'Kullanıcı Durumu Güncelleme',
                     'slug' => 'users.status',
                 ],
+                [
+                    'name' => 'Kullanici Oturumu Dusurme',
+                    'slug' => 'users.session.drop',
+                ],
+                [
+                    'name' => 'Kullanici Lock Key Sifirlama',
+                    'slug' => 'users.lock.reset',
+                ],
             ],
         ],
         'roles' => [

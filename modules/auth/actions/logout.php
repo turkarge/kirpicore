@@ -28,6 +28,8 @@ kirpi_audit_log('logout', 'auth', [
     'role_name' => (string) ($logoutUser['role_name'] ?? ''),
 ], 'session', null, 'success');
 
+kirpi_delete_current_user_session();
+
 $_SESSION = [];
 
 if (ini_get('session.use_cookies')) {

@@ -85,10 +85,14 @@ function db_table_exists(string $tableName, bool $refresh = false): bool
     return $cache[$tableName];
 }
 
-function db_column_exists(string $tableName, string $columnName): bool
+function db_column_exists(string $tableName, string $columnName, bool $refresh = false): bool
 {
     static $cache = [];
     $cacheKey = $tableName . '.' . $columnName;
+
+    if ($refresh) {
+        unset($cache[$cacheKey]);
+    }
 
     if (isset($cache[$cacheKey])) {
         return $cache[$cacheKey];
@@ -223,6 +227,43 @@ function get_unread_notifications_count(?int $userId): int
     } catch (Throwable $e) {
         error_log('Unread notifications count error: ' . $e->getMessage());
         return 0;
+    }
+}
+
+function kirpi_create_notification(int $userId, string $title, string $message, string $channel = 'in_app'): bool
+{
+    if ($userId <= 0 || !db_table_exists('notifications')) {
+        return false;
+    }
+
+    $title = trim($title);
+    $message = trim($message);
+    $channel = trim($channel);
+
+    if ($title === '' || $message === '') {
+        return false;
+    }
+
+    if ($channel === '') {
+        $channel = 'in_app';
+    }
+
+    try {
+        $stmt = db()->prepare("
+            INSERT INTO notifications (user_id, title, message, channel)
+            VALUES (:user_id, :title, :message, :channel)
+        ");
+        $stmt->execute([
+            ':user_id' => $userId,
+            ':title' => mb_substr($title, 0, 150),
+            ':message' => $message,
+            ':channel' => mb_substr($channel, 0, 50),
+        ]);
+
+        return true;
+    } catch (Throwable $e) {
+        error_log('create notification error: ' . $e->getMessage());
+        return false;
     }
 }
 

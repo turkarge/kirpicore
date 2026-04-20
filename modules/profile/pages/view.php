@@ -5,6 +5,7 @@ if (!defined('KIRPI_CORE_ENTRY')) {
 
 $currentUser = current_user();
 $profile = null;
+$lockSchemaReady = kirpi_auth_lock_schema_ready();
 
 if (!$currentUser || !isset($currentUser['id'])) {
     display_error_page(
@@ -23,6 +24,7 @@ try {
             u.email,
             u.avatar,
             u.is_active,
+            " . ($lockSchemaReady ? "u.lock_enabled" : "0 AS lock_enabled") . ",
             r.name AS role_name
         FROM users u
         LEFT JOIN roles r ON r.id = u.role_id
@@ -65,6 +67,7 @@ $apiTokenCopyMap = isset($_SESSION['profile_api_token_copy_map']) && is_array($_
 $apiEnabled = api_is_enabled();
 $apiTokenTableReady = api_token_table_ready();
 $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?? 0), 100) : [];
+$lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
 ?>
 
 <div class="page-header d-print-none">
@@ -362,6 +365,59 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
                                 </div>
                             </div>
                         </div>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($lockSchemaReady): ?>
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h3 class="card-title">Oturum Kilitleme Key</h3>
+                        </div>
+                        <form action="<?php echo base_url('profile/actions/lock-settings'); ?>" method="post" data-ajax="true">
+                            <div class="card-body">
+                                <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+
+                                <div class="mb-3">
+                                    <label class="form-check form-switch m-0">
+                                        <input class="form-check-input" type="checkbox" name="lock_enabled" value="1" <?php echo $lockEnabled ? 'checked' : ''; ?>>
+                                        <span class="form-check-label">Oturum kilitleme aktif</span>
+                                    </label>
+                                    <div class="form-hint">Navbar'daki user-key ikonu ile ekrani kilitleyebilirsiniz.</div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Yeni Key (4-6 hane)</label>
+                                        <input
+                                            type="password"
+                                            name="lock_pin"
+                                            class="form-control"
+                                            inputmode="numeric"
+                                            pattern="\d{4,6}"
+                                            minlength="4"
+                                            maxlength="6"
+                                            placeholder="Ornek: 1234"
+                                        >
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label">Key Tekrar</label>
+                                        <input
+                                            type="password"
+                                            name="lock_pin_confirm"
+                                            class="form-control"
+                                            inputmode="numeric"
+                                            pattern="\d{4,6}"
+                                            minlength="4"
+                                            maxlength="6"
+                                            placeholder="Ornek: 1234"
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer text-end">
+                                <button type="submit" class="btn btn-outline-primary">Key Ayarini Kaydet</button>
+                            </div>
+                        </form>
                     </div>
                 <?php endif; ?>
             </div>

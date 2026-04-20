@@ -69,6 +69,7 @@ Opsiyonel:
 - `AUTO_DB_INSTALL=true` (default: `true`)
 - `AUTO_WEB_SETUP=true` (default: `true`)
 - `AUTO_DB_ENSURE_MISSING=false` (default: `false`) - `true` ise uygulama acilisinda eksik tablo kontrolu yapip eksikleri kurar
+- `AUTO_DB_ENSURE_COLUMNS=true` (default: `true`) - eksik kritik kolonlari otomatik tamamlar
 - `AUTO_DB_ENSURE_INDEXES=true` (default: `true`) - `true` ise eksik performans indekslerini otomatik tamamlar
 - `SESSION_COOKIE_DOMAIN=` (onerilen: bos birakin; isterseniz sadece host verin, ornek: `core.kirpinetwork.com`)
 - `SESSION_IDLE_TIMEOUT_SECONDS=7200` (default: `7200`) - belirli sure pasif kalan session otomatik sifirlanir
@@ -382,6 +383,15 @@ Ek ozellik:
 - Super Admin icin API token listeleme + revoke islemi
 - Olusturulan token guvenlik geregi sadece bir kez gosterilir
 - Token satirinda kopyalama ikonu vardir (guvenlik geregi sadece bu oturumda olusturulan tokenlar kopyalanabilir)
+- Profil ekraninda kullanici 4-6 haneli lock key tanimlayabilir ve oturum kilitlemeyi aktif/pasif yapabilir
+
+## Auth Lock (Oturum Kilitleme)
+
+- Navbar'da `user-key` ikonu ile aktif oturum kilitlenebilir
+- Kilitli ekranda lock key ile oturum acilir
+- `users.session.drop` yetkisi olan kullanici hedef kullanicinin aktif oturumlarini sonlandirabilir
+- `users.lock.reset` yetkisi olan kullanici hedef kullanicinin lock key bilgisini sifirlayip lock ozelligini pasif yapabilir
+- Bu iki yonetim islemi sonrasi hedef kullaniciya bildirim gonderilir
 
 ## Queue Modulu
 
