@@ -1,0 +1,13 @@
+{
+    "key":  "settings",
+    "name":  "Settings",
+    "description":  "Uygulama ve sistem ayarlari",
+    "version":  "1.0.0",
+    "enabled":  true,
+    "core":  true,
+    "load_order":  42,
+    "requires":  [
+
+                 ],
+    "author":  "Kirpi Core"
+}

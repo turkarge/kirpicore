@@ -1,0 +1,13 @@
+{
+    "key":  "roles",
+    "name":  "Roles",
+    "description":  "Rol ve yetki yonetimi",
+    "version":  "1.0.0",
+    "enabled":  true,
+    "core":  true,
+    "load_order":  31,
+    "requires":  [
+
+                 ],
+    "author":  "Kirpi Core"
+}

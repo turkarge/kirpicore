@@ -1,0 +1,13 @@
+{
+    "key":  "mail",
+    "name":  "Mail",
+    "description":  "Mail test ve gonderim kayitlari",
+    "version":  "1.0.0",
+    "enabled":  true,
+    "core":  true,
+    "load_order":  41,
+    "requires":  [
+
+                 ],
+    "author":  "Kirpi Core"
+}

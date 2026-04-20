@@ -17,6 +17,14 @@ Core moduller tamamlandi:
 - `throttle`
 - `api`
 
+## Modul Manifest Yapisi
+
+Moduller icin geriye uyumlu `module.json` yapisi eklendi.
+
+- Konum: `modules/<module>/module.json`
+- Mevcut yapi korunur: `module.json` olmayan modul de calismaya devam eder.
+- Detay: `docs/MODULE_MANIFEST.md`
+
 ## Dokploy ile calistirma
 
 Bu repo artik Docker Compose ile dogrudan deploy edilebilir.

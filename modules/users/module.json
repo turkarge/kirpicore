@@ -1,0 +1,13 @@
+{
+    "key":  "users",
+    "name":  "Users",
+    "description":  "Kullanici yonetimi",
+    "version":  "1.0.0",
+    "enabled":  true,
+    "core":  true,
+    "load_order":  30,
+    "requires":  [
+
+                 ],
+    "author":  "Kirpi Core"
+}

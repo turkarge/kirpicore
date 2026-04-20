@@ -1,0 +1,13 @@
+{
+    "key":  "security",
+    "name":  "Security",
+    "description":  "Guvenlik izleme ekrani",
+    "version":  "1.0.0",
+    "enabled":  true,
+    "core":  true,
+    "load_order":  51,
+    "requires":  [
+
+                 ],
+    "author":  "Kirpi Core"
+}

@@ -1,0 +1,13 @@
+{
+    "key":  "backup",
+    "name":  "Backup",
+    "description":  "Veritabani yedekleme ve geri yukleme",
+    "version":  "1.0.0",
+    "enabled":  true,
+    "core":  true,
+    "load_order":  54,
+    "requires":  [
+
+                 ],
+    "author":  "Kirpi Core"
+}

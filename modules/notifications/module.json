@@ -1,0 +1,13 @@
+{
+    "key":  "notifications",
+    "name":  "Notifications",
+    "description":  "Bildirim listesi ve ayarlari",
+    "version":  "1.0.0",
+    "enabled":  true,
+    "core":  true,
+    "load_order":  40,
+    "requires":  [
+
+                 ],
+    "author":  "Kirpi Core"
+}

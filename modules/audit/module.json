@@ -1,0 +1,13 @@
+{
+    "key":  "audit",
+    "name":  "Audit",
+    "description":  "Audit log izleme",
+    "version":  "1.0.0",
+    "enabled":  true,
+    "core":  true,
+    "load_order":  50,
+    "requires":  [
+
+                 ],
+    "author":  "Kirpi Core"
+}

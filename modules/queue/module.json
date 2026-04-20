@@ -1,0 +1,13 @@
+{
+    "key":  "queue",
+    "name":  "Queue",
+    "description":  "Arka plan is kuyrugu",
+    "version":  "1.0.0",
+    "enabled":  true,
+    "core":  true,
+    "load_order":  53,
+    "requires":  [
+
+                 ],
+    "author":  "Kirpi Core"
+}
