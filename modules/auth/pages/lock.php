@@ -15,6 +15,9 @@ $user = current_user();
 $userName = (string) ($user['name'] ?? 'Kullanici');
 $userRole = (string) ($user['role_name'] ?? '');
 $initial = mb_strtoupper(mb_substr($userName, 0, 1));
+$avatarUrl = !empty($user['avatar'])
+    ? base_url('uploads/avatars/' . ltrim((string) $user['avatar'], '/'))
+    : null;
 ?>
 <!DOCTYPE html>
 <html lang="tr">
@@ -39,7 +42,11 @@ window.KIRPI_CONFIG = {
 <div class="page page-center">
     <div class="container container-tight py-4">
         <div class="text-center mb-4">
-            <span class="avatar avatar-xl mb-3"><?php echo e($initial); ?></span>
+            <?php if ($avatarUrl): ?>
+                <span class="avatar avatar-xl mb-3" style="background-image: url('<?php echo e($avatarUrl); ?>')"></span>
+            <?php else: ?>
+                <span class="avatar avatar-xl mb-3"><?php echo e($initial); ?></span>
+            <?php endif; ?>
             <h2 class="mb-1"><?php echo e($userName); ?></h2>
             <?php if ($userRole !== ''): ?>
                 <div class="text-secondary mb-2"><?php echo e($userRole); ?></div>
@@ -53,16 +60,16 @@ window.KIRPI_CONFIG = {
                     <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
 
                     <div class="mb-3">
-                        <label class="form-label form-required">Key (4-6 haneli)</label>
+                        <label class="form-label form-required">Key (4 haneli)</label>
                         <input
                             type="password"
                             name="lock_pin"
                             class="form-control"
                             inputmode="numeric"
-                            pattern="\\d{4,6}"
+                            pattern="[0-9]{4}"
                             minlength="4"
-                            maxlength="6"
-                            placeholder="••••"
+                            maxlength="4"
+                            placeholder="0000"
                             autocomplete="off"
                             required
                         >

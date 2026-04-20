@@ -387,15 +387,15 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
 
                                 <div class="row g-3">
                                     <div class="col-12 col-md-6">
-                                        <label class="form-label">Yeni Key (4-6 hane)</label>
+                                        <label class="form-label">Yeni Key (4 hane)</label>
                                         <input
                                             type="password"
                                             name="lock_pin"
                                             class="form-control"
                                             inputmode="numeric"
-                                            pattern="\d{4,6}"
+                                            pattern="[0-9]{4}"
                                             minlength="4"
-                                            maxlength="6"
+                                            maxlength="4"
                                             placeholder="Ornek: 1234"
                                         >
                                     </div>
@@ -406,9 +406,9 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
                                             name="lock_pin_confirm"
                                             class="form-control"
                                             inputmode="numeric"
-                                            pattern="\d{4,6}"
+                                            pattern="[0-9]{4}"
                                             minlength="4"
-                                            maxlength="6"
+                                            maxlength="4"
                                             placeholder="Ornek: 1234"
                                         >
                                     </div>

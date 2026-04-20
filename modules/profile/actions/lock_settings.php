@@ -47,10 +47,10 @@ try {
 
     $updatePin = ($lockPin !== '' || $lockPinConfirm !== '');
     if ($updatePin) {
-        if (!preg_match('/^\d{4,6}$/', $lockPin)) {
+        if (!preg_match('/^\d{4}$/', $lockPin)) {
             json_response([
                 'status' => 'error',
-                'message' => 'Key sadece rakam olmali ve 4-6 hane araliginda olmalidir.',
+                'message' => 'Key sadece rakam olmali ve 4 hane olmalidir.',
             ], 422);
         }
 

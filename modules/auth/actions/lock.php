@@ -46,7 +46,7 @@ try {
     if (!$lockEnabled || $pinHash === '') {
         json_response([
             'status' => 'warning',
-            'message' => 'Oturum kilitleme aktif degil. Profilinizden 4-6 haneli key tanimlayin.',
+            'message' => 'Oturum kilitleme aktif degil. Profilinizden 4 haneli key tanimlayin.',
             'redirect' => base_url('profile/view'),
         ]);
     }

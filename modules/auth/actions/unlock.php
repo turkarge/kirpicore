@@ -32,10 +32,10 @@ if (!kirpi_session_lock_state()) {
     ]);
 }
 
-if (!preg_match('/^\d{4,6}$/', $pin)) {
+if (!preg_match('/^\d{4}$/', $pin)) {
     json_response([
         'status' => 'error',
-        'message' => 'Key 4-6 haneli sayisal olmalidir.',
+        'message' => 'Key 4 haneli sayisal olmalidir.',
     ], 422);
 }
 
