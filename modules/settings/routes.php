@@ -8,6 +8,13 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'settings/api-test' => [
+        'file' => 'modules/settings/pages/api_test.php',
+        'layout' => true,
+        'permission' => 'settings.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
     'ajax/settings/session' => [
         'file' => 'modules/settings/modals/session.php',
         'layout' => false,

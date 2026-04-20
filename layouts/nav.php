@@ -59,6 +59,12 @@ $menu = [
                 'permission' => 'settings.view',
             ],
             [
+                'title' => 'API Test',
+                'icon' => 'ti ti-api',
+                'url' => 'settings/api-test',
+                'permission' => 'settings.view',
+            ],
+            [
                 'title' => 'Jobs Queue',
                 'icon' => 'ti ti-clock-play',
                 'url' => 'queue/view',
