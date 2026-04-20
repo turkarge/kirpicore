@@ -274,6 +274,7 @@ Ek ozellik:
 - Super Admin icin profil ekraninda API token olusturma bolumu
 - Super Admin icin API token listeleme + revoke islemi
 - Olusturulan token guvenlik geregi sadece bir kez gosterilir
+- Token satirinda kopyalama ikonu vardir (guvenlik geregi sadece bu oturumda olusturulan tokenlar kopyalanabilir)
 
 ## Queue Modulu
 

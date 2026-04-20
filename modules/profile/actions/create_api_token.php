@@ -52,6 +52,7 @@ try {
     }
 
     $_SESSION['profile_api_token_once'] = [
+        'token_id' => (int) ($issued['token_id'] ?? 0),
         'token' => (string) ($issued['token'] ?? ''),
         'expires_at' => (string) ($issued['expires_at'] ?? ''),
         'token_name' => $tokenName,
@@ -59,7 +60,17 @@ try {
         'is_unlimited' => (bool) ($issued['is_unlimited'] ?? false),
     ];
 
+    $newTokenId = (int) ($issued['token_id'] ?? 0);
+    if ($newTokenId > 0 && !empty($issued['token'])) {
+        if (!isset($_SESSION['profile_api_token_copy_map']) || !is_array($_SESSION['profile_api_token_copy_map'])) {
+            $_SESSION['profile_api_token_copy_map'] = [];
+        }
+
+        $_SESSION['profile_api_token_copy_map'][(string) $newTokenId] = (string) $issued['token'];
+    }
+
     kirpi_audit_log('create_token', 'api', [
+        'token_id' => (int) ($issued['token_id'] ?? 0),
         'token_name' => $tokenName,
         'expires_at' => (string) ($issued['expires_at'] ?? ''),
         'ttl_option' => $ttlOption,

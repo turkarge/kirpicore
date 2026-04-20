@@ -37,6 +37,10 @@ try {
         redirect(base_url('profile/view'));
     }
 
+    if (isset($_SESSION['profile_api_token_copy_map']) && is_array($_SESSION['profile_api_token_copy_map'])) {
+        unset($_SESSION['profile_api_token_copy_map'][(string) $tokenId]);
+    }
+
     kirpi_audit_log('revoke_token', 'api', [
         'token_id' => $tokenId,
     ], 'api_token', $tokenId, 'success');
@@ -54,4 +58,3 @@ try {
     set_flash_message('danger', 'Token iptal edilirken bir hata olustu.');
     redirect(base_url('profile/view'));
 }
-

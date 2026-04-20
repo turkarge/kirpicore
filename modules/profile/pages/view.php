@@ -59,6 +59,9 @@ $apiTokenOnce = $_SESSION['profile_api_token_once'] ?? null;
 if (isset($_SESSION['profile_api_token_once'])) {
     unset($_SESSION['profile_api_token_once']);
 }
+$apiTokenCopyMap = isset($_SESSION['profile_api_token_copy_map']) && is_array($_SESSION['profile_api_token_copy_map'])
+    ? $_SESSION['profile_api_token_copy_map']
+    : [];
 $apiEnabled = api_is_enabled();
 $apiTokenTableReady = api_token_table_ready();
 $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?? 0), 100) : [];
@@ -114,16 +117,25 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
                         <div class="card-body">
                             <?php if (is_array($apiTokenOnce) && !empty($apiTokenOnce['token'])): ?>
                                 <div class="alert alert-warning">
-                                    <div class="fw-bold mb-2">Bu token sadece bir kez gosterilir. Guvenli bir yerde saklayin.</div>
-                                    <div class="mb-2">
+                                    <div class="fw-bold mb-3">Bu token sadece bir kez gosterilir. Guvenli bir yerde saklayin.</div>
+                                    <div class="mb-2 w-100">
                                         <label class="form-label mb-1">Token</label>
-                                        <input
-                                            type="text"
-                                            class="form-control w-100 js-token-copy"
-                                            readonly
-                                            title="Kopyalamak icin tiklayin"
-                                            value="<?php echo e((string) ($apiTokenOnce['token'] ?? '')); ?>"
-                                        >
+                                        <div class="input-group">
+                                            <input
+                                                type="text"
+                                                class="form-control w-100"
+                                                readonly
+                                                value="<?php echo e((string) ($apiTokenOnce['token'] ?? '')); ?>"
+                                            >
+                                            <button
+                                                type="button"
+                                                class="btn btn-outline-secondary js-token-copy-btn"
+                                                data-token="<?php echo e((string) ($apiTokenOnce['token'] ?? '')); ?>"
+                                                title="Kopyala"
+                                            >
+                                                Kopyala
+                                            </button>
+                                        </div>
                                     </div>
                                     <div class="text-secondary small">
                                         Token Name: <?php echo e((string) ($apiTokenOnce['token_name'] ?? '-')); ?> |
@@ -193,6 +205,7 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
                                             $statusLabel = $isRevoked ? 'Revoked' : ($isExpired ? 'Expired' : 'Active');
                                             $statusClass = $isRevoked ? 'bg-red-lt' : ($isExpired ? 'bg-yellow-lt' : 'bg-green-lt');
                                             $tokenId = (int) ($tokenRow['id'] ?? 0);
+                                            $copyTokenValue = (string) ($apiTokenCopyMap[(string) $tokenId] ?? '');
                                             ?>
                                             <tr>
                                                 <td><?php echo $tokenId; ?></td>
@@ -203,11 +216,23 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
                                                 <td><span class="badge <?php echo e($statusClass); ?>"><?php echo e($statusLabel); ?></span></td>
                                                 <td>
                                                     <?php if (!$isRevoked && !$isExpired): ?>
-                                                        <form id="profile-revoke-token-form-<?php echo $tokenId; ?>" action="<?php echo base_url('profile/actions/revoke-api-token'); ?>" method="post" class="d-none">
-                                                            <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
-                                                            <input type="hidden" name="token_id" value="<?php echo $tokenId; ?>">
-                                                        </form>
-                                                        <a href="#" class="btn btn-sm btn-outline-danger" data-confirm="Bu API token iptal edilecek. Emin misiniz?" data-form="profile-revoke-token-form-<?php echo $tokenId; ?>">Revoke</a>
+                                                        <div class="d-flex gap-2">
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-sm btn-outline-secondary js-token-copy-btn"
+                                                                data-token="<?php echo e($copyTokenValue); ?>"
+                                                                title="<?php echo $copyTokenValue !== '' ? 'Kopyala' : 'Guvenlik nedeniyle sadece bu oturumda olusturulan tokenlar kopyalanabilir'; ?>"
+                                                                <?php echo $copyTokenValue === '' ? 'disabled' : ''; ?>
+                                                            >
+                                                                <i class="ti ti-copy"></i>
+                                                            </button>
+
+                                                            <form id="profile-revoke-token-form-<?php echo $tokenId; ?>" action="<?php echo base_url('profile/actions/revoke-api-token'); ?>" method="post" class="d-none">
+                                                                <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+                                                                <input type="hidden" name="token_id" value="<?php echo $tokenId; ?>">
+                                                            </form>
+                                                            <a href="#" class="btn btn-sm btn-outline-danger" data-confirm="Bu API token iptal edilecek. Emin misiniz?" data-form="profile-revoke-token-form-<?php echo $tokenId; ?>">Revoke</a>
+                                                        </div>
                                                     <?php else: ?>
                                                         <span class="text-secondary small">-</span>
                                                     <?php endif; ?>
@@ -308,10 +333,13 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".js-token-copy").forEach(function (input) {
-        input.addEventListener("click", async function () {
-            const value = input.value || "";
+    document.querySelectorAll(".js-token-copy-btn").forEach(function (button) {
+        button.addEventListener("click", async function () {
+            const value = String(button.dataset.token || "");
             if (!value) {
+                if (window.KirpiCore && typeof window.KirpiCore.toast === "function") {
+                    window.KirpiCore.toast("Bu token bu oturumda kopyalanamaz.", "warning");
+                }
                 return;
             }
 
@@ -319,8 +347,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     await navigator.clipboard.writeText(value);
                 } else {
-                    input.select();
+                    const tempInput = document.createElement("input");
+                    tempInput.value = value;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
                     document.execCommand("copy");
+                    document.body.removeChild(tempInput);
                 }
 
                 if (window.KirpiCore && typeof window.KirpiCore.toast === "function") {

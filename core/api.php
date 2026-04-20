@@ -112,6 +112,7 @@ function api_issue_token_for_user(int $userId, ?string $tokenName = null, ?int $
     ]);
 
     return [
+        'token_id' => (int) db()->lastInsertId(),
         'token' => $plain,
         'expires_at' => $expiresAt,
         'is_unlimited' => $isUnlimited,
