@@ -4,6 +4,39 @@ if (!defined('KIRPI_CORE_ENTRY')) {
 }
 
 $modules = kirpi_list_modules();
+$requiredByMap = [];
+
+foreach ($modules as $candidateModule) {
+    $candidateKey = (string) ($candidateModule['key'] ?? '');
+    if ($candidateKey === '') {
+        continue;
+    }
+
+    if (!array_key_exists($candidateKey, $requiredByMap)) {
+        $requiredByMap[$candidateKey] = [];
+    }
+}
+
+foreach ($modules as $candidateModule) {
+    if (empty($candidateModule['enabled'])) {
+        continue;
+    }
+
+    $ownerKey = (string) ($candidateModule['key'] ?? '');
+    $requires = array_map('strval', (array) ($candidateModule['requires'] ?? []));
+
+    foreach ($requires as $requiredKey) {
+        if ($requiredKey === '' || !array_key_exists($requiredKey, $requiredByMap)) {
+            continue;
+        }
+
+        $requiredByMap[$requiredKey][] = $ownerKey;
+    }
+}
+
+foreach ($requiredByMap as $moduleKey => $dependents) {
+    $requiredByMap[$moduleKey] = array_values(array_unique($dependents));
+}
 ?>
 
 <div class="page-header d-print-none">
@@ -38,6 +71,7 @@ $modules = kirpi_list_modules();
                         <th>Versiyon</th>
                         <th>Sira</th>
                         <th>Bagimlilik</th>
+                        <th>Kullanan Moduller</th>
                         <th>Tip</th>
                         <th>Durum</th>
                         <th class="w-1">Islem</th>
@@ -46,7 +80,7 @@ $modules = kirpi_list_modules();
                     <tbody>
                     <?php if (empty($modules)): ?>
                         <tr>
-                            <td colspan="8" class="text-center text-secondary py-4">Modul bulunamadi.</td>
+                            <td colspan="9" class="text-center text-secondary py-4">Modul bulunamadi.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($modules as $module): ?>
@@ -55,6 +89,8 @@ $modules = kirpi_list_modules();
                             $isCore = !empty($module['core']);
                             $isEnabled = !empty($module['enabled']);
                             $requires = array_map('strval', (array) ($module['requires'] ?? []));
+                            $requiredBy = array_map('strval', (array) ($requiredByMap[$moduleKey] ?? []));
+                            $hasDisableBlock = !$isCore && $isEnabled && !empty($requiredBy);
                             ?>
                             <tr>
                                 <td><code><?php echo e($moduleKey); ?></code></td>
@@ -66,6 +102,13 @@ $modules = kirpi_list_modules();
                                         <span class="text-secondary">-</span>
                                     <?php else: ?>
                                         <code><?php echo e(implode(', ', $requires)); ?></code>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if (empty($requiredBy)): ?>
+                                        <span class="text-secondary">-</span>
+                                    <?php else: ?>
+                                        <code><?php echo e(implode(', ', $requiredBy)); ?></code>
                                     <?php endif; ?>
                                 </td>
                                 <td>
@@ -95,11 +138,14 @@ $modules = kirpi_list_modules();
                                         </form>
                                         <a
                                             href="#"
-                                            class="btn btn-sm <?php echo $isEnabled ? 'btn-outline-danger' : 'btn-outline-success'; ?>"
-                                            data-confirm="<?php echo $isEnabled ? 'Bu modul devre disi birakilacak. Emin misiniz?' : 'Bu modul aktif edilecek. Emin misiniz?'; ?>"
-                                            data-form="module-toggle-form-<?php echo e($moduleKey); ?>"
+                                            class="btn btn-sm <?php echo $isEnabled ? 'btn-outline-danger' : 'btn-outline-success'; ?> <?php echo $hasDisableBlock ? 'disabled' : ''; ?>"
+                                            <?php if (!$hasDisableBlock): ?>
+                                                data-confirm="<?php echo $isEnabled ? 'Bu modul devre disi birakilacak. Emin misiniz?' : 'Bu modul aktif edilecek. Emin misiniz?'; ?>"
+                                                data-form="module-toggle-form-<?php echo e($moduleKey); ?>"
+                                            <?php endif; ?>
+                                            title="<?php echo $hasDisableBlock ? e('Disable engelli. Aktif bagimli moduller: ' . implode(', ', $requiredBy)) : ''; ?>"
                                         >
-                                            <?php echo $isEnabled ? 'Disable' : 'Enable'; ?>
+                                            <?php echo $hasDisableBlock ? 'Bagimli Modul Var' : ($isEnabled ? 'Disable' : 'Enable'); ?>
                                         </a>
                                     <?php endif; ?>
                                 </td>
