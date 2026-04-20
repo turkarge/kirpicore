@@ -1,17 +1,57 @@
 # KirpiCore API v1 - Users
 
-Bu dokuman, KirpiCore icindeki `users` API endpointlerinin teknik kullanimini anlatir.
+Bu dokuman, KirpiCore `users` API endpointlerinin pratik kullanimini anlatir.
 
 ## Base URL
 
-- Production ornek: `https://core.kirpinetwork.com`
+- Production: `https://core.kirpinetwork.com`
+
+## Hizli Test Yontemleri
+
+### 1) Admin panelinden API Test Merkezi
+
+- Yol: `Yonetim -> API Test`
+- Sayfa: `settings/api-test`
+- Bu ekranda:
+  - Method secersin
+  - Endpoint girersin
+  - Bearer token eklersin
+  - JSON body gonderebilirsin
+  - HTTP status + response gorursun
+
+### 2) PowerShell ile test
+
+```powershell
+$base = "https://core.kirpinetwork.com"
+$token = "BURAYA_BEARER_TOKEN"
+
+Invoke-RestMethod -Uri "$base/api/v1/me" -Headers @{ Authorization = "Bearer $token" } -Method GET
+Invoke-RestMethod -Uri "$base/api/v1/users?page=1&per_page=5" -Headers @{ Authorization = "Bearer $token" } -Method GET
+```
 
 ## Auth
 
 - Header: `Authorization: Bearer <access_token>`
-- Token alma endpointi: `POST /api/v1/auth/token`
+- Token endpoint: `POST /api/v1/auth/token`
+
+Token alma ornegi:
+
+```bash
+curl -X POST "https://core.kirpinetwork.com/api/v1/auth/token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@kirpi.local",
+    "password": "123456",
+    "token_name": "api-test"
+  }'
+```
+
+Not:
+- `401 Kullanici bilgileri hatali.` donerse email/sifre yanlistir.
 
 ## Ortak Cevap Formati
+
+Basarili cevap:
 
 ```json
 {
@@ -22,7 +62,7 @@ Bu dokuman, KirpiCore icindeki `users` API endpointlerinin teknik kullanimini an
 }
 ```
 
-Hata durumunda:
+Hata cevabi:
 
 ```json
 {
@@ -55,8 +95,6 @@ curl "https://core.kirpinetwork.com/api/v1/users?page=1&per_page=20" \
   -H "Authorization: Bearer <TOKEN>"
 ```
 
----
-
 ### 2) Kullanici Olustur
 
 - Method: `POST`
@@ -84,24 +122,6 @@ Notlar:
 - `role_id` opsiyonel.
 - `is_active` opsiyonel (default `true`).
 
-Ornek:
-
-```bash
-curl -X POST "https://core.kirpinetwork.com/api/v1/users" \
-  -H "Authorization: Bearer <TOKEN>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Test User",
-    "email": "test.user@kirpi.local",
-    "password": "123456",
-    "password_confirm": "123456",
-    "role_id": 2,
-    "is_active": true
-  }'
-```
-
----
-
 ### 3) Kullanici Guncelle
 
 - Method: `PATCH`
@@ -126,20 +146,6 @@ Notlar:
 - Super Admin kullanici pasife alinamaz.
 - Sistemde en az 1 aktif Super Admin kalacak sekilde kontrol vardir.
 
-Ornek:
-
-```bash
-curl -X PATCH "https://core.kirpinetwork.com/api/v1/users/5" \
-  -H "Authorization: Bearer <TOKEN>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Updated Name",
-    "is_active": true
-  }'
-```
-
----
-
 ### 4) Kullanici Durumunu Guncelle
 
 - Method: `POST`
@@ -154,24 +160,27 @@ Body (JSON):
 }
 ```
 
-Notlar:
+Not:
 
 - Super Admin kullanici pasife alinamaz.
 
-Ornek:
+## Postman Collection
 
-```bash
-curl -X POST "https://core.kirpinetwork.com/api/v1/users/5/status" \
-  -H "Authorization: Bearer <TOKEN>" \
-  -H "Content-Type: application/json" \
-  -d '{"is_active": false}'
-```
+Asagidaki URL'lerden biriyle collection indirebilirsin:
 
-## Sık HTTP Kodlari
+- `/api/v1/postman-collection`
+- `/api/v1/postman`
+- `/api/v1/postman-collection.json`
+
+Tam URL ornegi:
+
+`https://core.kirpinetwork.com/api/v1/postman-collection`
+
+## Sik HTTP Kodlari
 
 - `200` Basarili
 - `201` Kayit olusturuldu
-- `401` Token yok/gecersiz/suresi dolmus
+- `401` Token yok/gecersiz/suresi dolmus veya kimlik bilgisi yanlis
 - `403` Yetki yok
 - `404` Kayit bulunamadi
 - `422` Dogrulama hatasi
@@ -184,4 +193,3 @@ API endpointleri su limitlere tabidir:
 
 - `THROTTLE_API_*` genel API limiti
 - `THROTTLE_API_AUTH_*` token endpoint limiti
-
