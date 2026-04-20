@@ -64,18 +64,6 @@ $menu = [
                 'url' => 'backup/view',
                 'permission' => 'backup.view',
             ],
-        ],
-    ],
-    [
-        'title' => 'Monitoring',
-        'icon' => 'ti ti-radar',
-        'children' => [
-            [
-                'title' => 'Audit Log',
-                'icon' => 'ti ti-list-details',
-                'url' => 'audit/list',
-                'permission' => 'audit.view',
-            ],
             [
                 'title' => 'Guvenlik Izleme',
                 'icon' => 'ti ti-shield-check',
@@ -93,6 +81,12 @@ $menu = [
                 'icon' => 'ti ti-clock-play',
                 'url' => 'queue/view',
                 'permission' => 'queue.view',
+            ],
+            [
+                'title' => 'Audit Log',
+                'icon' => 'ti ti-list-details',
+                'url' => 'audit/list',
+                'permission' => 'audit.view',
             ],
         ],
     ],

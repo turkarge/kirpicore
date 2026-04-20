@@ -162,7 +162,7 @@ Bu sayfa matrix formatinda su bilesenleri izler:
 
 ## Monitoring Menusu
 
-Yonetim menusu sadelemek için izleme ekranlari `Monitoring` altinda toplandi:
+Yonetim menusu sadelemek için izleme ekranlari `Yonetim` menusu altinda, listenin en altina toplandi:
 
 - `Audit Log`
 - `Guvenlik Izleme`
