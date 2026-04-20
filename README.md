@@ -53,6 +53,7 @@ Opsiyonel:
 - `THROTTLE_API_LIMIT=120`, `THROTTLE_API_WINDOW=60`, `THROTTLE_API_BLOCK=120`
 - `THROTTLE_API_AUTH_LIMIT=10`, `THROTTLE_API_AUTH_WINDOW=300`, `THROTTLE_API_AUTH_BLOCK=600`
 - `API_TOKEN_TTL_SECONDS=2592000` (default: 30 gun)
+- `API_REQUEST_LOG_RETENTION_DAYS=90` (default: `90`) - API request log kayitlarini bu gunden eskiyse otomatik temizler
 - `API_ENABLED=true` (default: `true`) - REST API genel anahtari
 
 ### 3) Deploy et
@@ -253,6 +254,12 @@ Bu ekranda son 24 saat icin:
 - 401 / 403 / 429 sayilari
 - En cok cagrilan endpointler
 - Son hatalar (`error_code` dahil)
+
+Zaman filtresi:
+
+- `1 Saat`
+- `24 Saat`
+- `7 Gun`
 
 ### Postman ile hizli test
 

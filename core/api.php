@@ -117,6 +117,42 @@ function api_request_log_table_ready(): bool
     return db_table_exists('api_request_logs');
 }
 
+function api_request_log_retention_days(): int
+{
+    $days = (int) env('API_REQUEST_LOG_RETENTION_DAYS', '90');
+    if ($days < 1) {
+        $days = 1;
+    }
+    if ($days > 3650) {
+        $days = 3650;
+    }
+
+    return $days;
+}
+
+function api_cleanup_request_logs_if_needed(): void
+{
+    if (!api_request_log_table_ready()) {
+        return;
+    }
+
+    try {
+        if (random_int(1, 100) !== 1) {
+            return;
+        }
+
+        $retentionDays = api_request_log_retention_days();
+        $cleanupStmt = db()->prepare("
+            DELETE FROM api_request_logs
+            WHERE created_at < (NOW() - INTERVAL :retention_days DAY)
+        ");
+        $cleanupStmt->bindValue(':retention_days', $retentionDays, PDO::PARAM_INT);
+        $cleanupStmt->execute();
+    } catch (Throwable $e) {
+        error_log('api request log cleanup error: ' . $e->getMessage());
+    }
+}
+
 function api_log_response(int $statusCode, ?string $errorCode = null): void
 {
     $requestPath = (string) ($GLOBALS['current_route_path'] ?? '');
@@ -143,6 +179,8 @@ function api_log_response(int $statusCode, ?string $errorCode = null): void
     $durationMs = (int) round((microtime(true) - $startedAt) * 1000);
 
     try {
+        api_cleanup_request_logs_if_needed();
+
         $stmt = db()->prepare("
             INSERT INTO api_request_logs (
                 route_path,

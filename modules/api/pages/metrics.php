@@ -4,16 +4,28 @@ if (!defined('KIRPI_CORE_ENTRY')) {
 }
 
 $tableReady = db_table_exists('api_request_logs');
+$window = trim((string) ($_GET['window'] ?? '24h'));
+$windowMap = [
+    '1h' => ['sql' => '1 HOUR', 'label' => '1 Saat'],
+    '24h' => ['sql' => '24 HOUR', 'label' => '24 Saat'],
+    '7d' => ['sql' => '7 DAY', 'label' => '7 Gun'],
+];
+if (!isset($windowMap[$window])) {
+    $window = '24h';
+}
+$windowSql = (string) $windowMap[$window]['sql'];
+$windowLabel = (string) $windowMap[$window]['label'];
+
 $summary = [
-    'total_24h' => 0,
+    'total' => 0,
     'status_2xx' => 0,
     'status_4xx' => 0,
     'status_5xx' => 0,
     'status_401' => 0,
     'status_403' => 0,
     'status_429' => 0,
-    'unique_tokens_24h' => 0,
-    'unique_ips_24h' => 0,
+    'unique_tokens' => 0,
+    'unique_ips' => 0,
     'avg_duration_ms' => 0,
 ];
 $topEndpoints = [];
@@ -23,18 +35,18 @@ if ($tableReady) {
     try {
         $summaryStmt = db()->query("
             SELECT
-                COUNT(*) AS total_24h,
+                COUNT(*) AS total,
                 SUM(CASE WHEN status_code BETWEEN 200 AND 299 THEN 1 ELSE 0 END) AS status_2xx,
                 SUM(CASE WHEN status_code BETWEEN 400 AND 499 THEN 1 ELSE 0 END) AS status_4xx,
                 SUM(CASE WHEN status_code BETWEEN 500 AND 599 THEN 1 ELSE 0 END) AS status_5xx,
                 SUM(CASE WHEN status_code = 401 THEN 1 ELSE 0 END) AS status_401,
                 SUM(CASE WHEN status_code = 403 THEN 1 ELSE 0 END) AS status_403,
                 SUM(CASE WHEN status_code = 429 THEN 1 ELSE 0 END) AS status_429,
-                COUNT(DISTINCT token_id) AS unique_tokens_24h,
-                COUNT(DISTINCT ip_address) AS unique_ips_24h,
+                COUNT(DISTINCT token_id) AS unique_tokens,
+                COUNT(DISTINCT ip_address) AS unique_ips,
                 ROUND(AVG(duration_ms), 0) AS avg_duration_ms
             FROM api_request_logs
-            WHERE created_at >= (NOW() - INTERVAL 24 HOUR)
+            WHERE created_at >= (NOW() - INTERVAL {$windowSql})
         ");
         $summaryRow = $summaryStmt->fetch(PDO::FETCH_ASSOC) ?: [];
         foreach ($summary as $key => $value) {
@@ -48,7 +60,7 @@ if ($tableReady) {
                 COUNT(*) AS hit_count,
                 SUM(CASE WHEN status_code >= 400 THEN 1 ELSE 0 END) AS error_count
             FROM api_request_logs
-            WHERE created_at >= (NOW() - INTERVAL 24 HOUR)
+            WHERE created_at >= (NOW() - INTERVAL {$windowSql})
             GROUP BY route_path, request_method
             ORDER BY hit_count DESC
             LIMIT 8
@@ -64,7 +76,7 @@ if ($tableReady) {
                 error_code,
                 ip_address
             FROM api_request_logs
-            WHERE created_at >= (NOW() - INTERVAL 24 HOUR)
+            WHERE created_at >= (NOW() - INTERVAL {$windowSql})
               AND status_code >= 400
             ORDER BY id DESC
             LIMIT 20
@@ -81,7 +93,14 @@ if ($tableReady) {
         <div class="row g-2 align-items-center">
             <div class="col">
                 <div class="page-pretitle">Sistem Yonetimi</div>
-                <h2 class="page-title">API Metrics (24 Saat)</h2>
+                <h2 class="page-title">API Metrics (<?php echo e($windowLabel); ?>)</h2>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-group" role="group" aria-label="Window Filter">
+                    <a href="<?php echo base_url('api/metrics?window=1h'); ?>" class="btn <?php echo $window === '1h' ? 'btn-primary' : 'btn-outline-primary'; ?>">1 Saat</a>
+                    <a href="<?php echo base_url('api/metrics?window=24h'); ?>" class="btn <?php echo $window === '24h' ? 'btn-primary' : 'btn-outline-primary'; ?>">24 Saat</a>
+                    <a href="<?php echo base_url('api/metrics?window=7d'); ?>" class="btn <?php echo $window === '7d' ? 'btn-primary' : 'btn-outline-primary'; ?>">7 Gun</a>
+                </div>
             </div>
         </div>
     </div>
@@ -100,7 +119,7 @@ if ($tableReady) {
                 <div class="card">
                     <div class="card-body">
                         <div class="text-secondary">Toplam</div>
-                        <div class="h1 m-0"><?php echo (int) $summary['total_24h']; ?></div>
+                        <div class="h1 m-0"><?php echo (int) $summary['total']; ?></div>
                     </div>
                 </div>
             </div>
@@ -132,7 +151,7 @@ if ($tableReady) {
                 <div class="card">
                     <div class="card-body">
                         <div class="text-secondary">Token (uniq)</div>
-                        <div class="h1 m-0"><?php echo (int) $summary['unique_tokens_24h']; ?></div>
+                        <div class="h1 m-0"><?php echo (int) $summary['unique_tokens']; ?></div>
                     </div>
                 </div>
             </div>
@@ -150,7 +169,7 @@ if ($tableReady) {
             <div class="col-12 col-lg-6">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Kritik Kodlar (24h)</h3>
+                        <h3 class="card-title">Kritik Kodlar (<?php echo e($windowLabel); ?>)</h3>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
@@ -167,7 +186,7 @@ if ($tableReady) {
                                 <div class="h2 m-0"><?php echo (int) $summary['status_429']; ?></div>
                             </div>
                             <div class="col-12 mt-2 text-secondary">
-                                Unique IP (24h): <strong><?php echo (int) $summary['unique_ips_24h']; ?></strong>
+                                Unique IP: <strong><?php echo (int) $summary['unique_ips']; ?></strong>
                             </div>
                         </div>
                     </div>
@@ -211,7 +230,7 @@ if ($tableReady) {
 
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Son Hatalar (24h)</h3>
+                <h3 class="card-title">Son Hatalar (<?php echo e($windowLabel); ?>)</h3>
             </div>
             <div class="table-responsive">
                 <table class="table table-vcenter card-table table-striped mb-0">
