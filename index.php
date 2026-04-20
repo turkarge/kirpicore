@@ -1,9 +1,5 @@
 <?php
 
-header('X-Content-Type-Options: nosniff');
-header('X-Frame-Options: DENY');
-header('Referrer-Policy: strict-origin-when-cross-origin');
-
 define('BASE_PATH', __DIR__);
 define('KIRPI_CORE_ENTRY', true);
 
@@ -11,6 +7,16 @@ require_once BASE_PATH . '/core/config.php';
 require_once BASE_PATH . '/core/database.php';
 require_once BASE_PATH . '/core/functions.php';
 require_once BASE_PATH . '/core/setup.php';
+
+if (env_bool('SECURITY_HEADERS_ENABLED', true)) {
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: DENY');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()');
+    header('Cross-Origin-Opener-Policy: same-origin');
+    header('Cross-Origin-Resource-Policy: same-origin');
+    header("Content-Security-Policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https:;");
+}
 
 kirpi_try_auto_setup_if_empty();
 kirpi_try_auto_setup_if_missing();

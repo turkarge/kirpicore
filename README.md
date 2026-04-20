@@ -69,7 +69,11 @@ Opsiyonel:
 - `AUTO_DB_INSTALL=true` (default: `true`)
 - `AUTO_WEB_SETUP=true` (default: `true`)
 - `AUTO_DB_ENSURE_MISSING=false` (default: `false`) - `true` ise uygulama acilisinda eksik tablo kontrolu yapip eksikleri kurar
+- `AUTO_DB_ENSURE_INDEXES=true` (default: `true`) - `true` ise eksik performans indekslerini otomatik tamamlar
 - `SESSION_COOKIE_DOMAIN=` (onerilen: bos birakin; isterseniz sadece host verin, ornek: `core.kirpinetwork.com`)
+- `SESSION_IDLE_TIMEOUT_SECONDS=7200` (default: `7200`) - belirli sure pasif kalan session otomatik sifirlanir
+- `SESSION_ID_ROTATE_SECONDS=900` (default: `900`) - session fixation riskini azaltmak icin session id periyodik yenilenir
+- `SECURITY_HEADERS_ENABLED=true` (default: `true`) - CSP, permissions-policy ve ek guvenlik headerlarini aktif eder
 - `BACKUP_RETENTION_COUNT=20` (default: `20`) - son N backup disindakiler otomatik silinir
 - `BACKUP_VERIFY_DRY_RUN=true` (default: `true`) - backup dogrulamada gecici veritabanina restore testi yapar
 - `BACKUP_INCLUDE_SYSTEM_TABLES=false` (default: `false`) - `db_backups` ve `db_backup_restores` tablolarini dump'e dahil eder
@@ -362,7 +366,7 @@ Ozellikler:
 - Mail konfigurasyonunu panelden yonetme (DB override)
 - Mail sifresi icin guvenli guncelleme (bos birakilirsa mevcut deger korunur)
 - Ayar degisikliklerini audit log'a yazma
-- Sistem tablo kontrolu ve eksik schema kurulumunu panelden tek tikla calistirma
+- Sistem tablo + indeks kontrolu ve eksiklerini panelden tek tikla tamamlama
 - Session verilerini (maskelenmis) modal ile goruntuleme
 
 ## Profile Modulu

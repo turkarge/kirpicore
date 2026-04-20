@@ -44,6 +44,8 @@ CREATE TABLE IF NOT EXISTS api_request_logs (
     INDEX idx_api_request_logs_error_code (error_code),
     INDEX idx_api_request_logs_user_id (user_id),
     INDEX idx_api_request_logs_token_id (token_id),
+    INDEX idx_api_request_logs_created_route_method_status (created_at, route_path, request_method, status_code),
+    INDEX idx_api_request_logs_created_status_id (created_at, status_code, id),
     CONSTRAINT fk_api_request_logs_user_id
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     CONSTRAINT fk_api_request_logs_token_id

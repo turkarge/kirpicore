@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS db_backups (
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_db_backups_status (status),
     INDEX idx_db_backups_created_by (created_by),
+    INDEX idx_db_backups_created_at_id (created_at, id),
     CONSTRAINT fk_db_backups_created_by
         FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

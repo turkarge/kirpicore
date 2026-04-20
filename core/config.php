@@ -37,6 +37,8 @@ ini_set('error_log', BASE_PATH . '/logs/php-errors.log');
 if (session_status() === PHP_SESSION_NONE) {
     $sessionCookieDomain = env('SESSION_COOKIE_DOMAIN', '');
     $isHttpsRequest = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
+    $sessionIdleTimeout = max(300, (int) env('SESSION_IDLE_TIMEOUT_SECONDS', 7200));
+    $sessionRotateSeconds = max(60, (int) env('SESSION_ID_ROTATE_SECONDS', 900));
     $sessionVersion = preg_replace('/[^a-zA-Z0-9]/', '', $appVer);
 
     if ($sessionVersion === '' || $sessionVersion === null) {
@@ -54,8 +56,11 @@ if (session_status() === PHP_SESSION_NONE) {
     }
 
     ini_set('session.cookie_httponly', '1');
+    ini_set('session.use_only_cookies', '1');
     ini_set('session.use_strict_mode', '1');
     ini_set('session.cookie_samesite', 'Lax');
+    ini_set('session.sid_length', '64');
+    ini_set('session.sid_bits_per_character', '6');
     session_name('KIRPISESSID_' . $sessionVersion);
 
     if ($isHttpsRequest) {
@@ -63,6 +68,27 @@ if (session_status() === PHP_SESSION_NONE) {
     }
 
     session_start();
+
+    if (!isset($_SESSION['_meta'])) {
+        $_SESSION['_meta'] = [];
+    }
+
+    $nowTs = time();
+    $lastActivityTs = (int) ($_SESSION['_meta']['last_activity_at'] ?? 0);
+    if ($lastActivityTs > 0 && ($nowTs - $lastActivityTs) > $sessionIdleTimeout) {
+        session_unset();
+        session_destroy();
+        session_start();
+        $_SESSION['_meta'] = [];
+    }
+
+    $lastRotateTs = (int) ($_SESSION['_meta']['last_rotate_at'] ?? 0);
+    if ($lastRotateTs <= 0 || ($nowTs - $lastRotateTs) >= $sessionRotateSeconds) {
+        session_regenerate_id(true);
+        $_SESSION['_meta']['last_rotate_at'] = $nowTs;
+    }
+
+    $_SESSION['_meta']['last_activity_at'] = $nowTs;
 }
 
 define('APP_NAME', env('APP_NAME', 'Kirpi Core'));
@@ -70,6 +96,8 @@ define('APP_VER', $appVer);
 define('APP_ENV', $appEnv);
 define('APP_DEBUG', $appDebug);
 define('APP_TRUST_PROXY', $appTrustProxy);
+define('SESSION_IDLE_TIMEOUT_SECONDS', max(300, (int) env('SESSION_IDLE_TIMEOUT_SECONDS', 7200)));
+define('SESSION_ID_ROTATE_SECONDS', max(60, (int) env('SESSION_ID_ROTATE_SECONDS', 900)));
 
 define('APP_DEFAULT_ROUTE', env('APP_DEFAULT_ROUTE', 'dashboard/view'));
 define('BASE_URL', rtrim(env('BASE_URL', 'http://localhost'), '/'));

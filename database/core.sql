@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_users_role_id (role_id),
+    INDEX idx_users_is_active_role (is_active, role_id),
+    INDEX idx_users_is_active_id (is_active, id),
     CONSTRAINT fk_users_role_id
         FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

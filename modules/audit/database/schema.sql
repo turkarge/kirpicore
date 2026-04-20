@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     INDEX idx_audit_logs_action_key (action_key),
     INDEX idx_audit_logs_status (status),
     INDEX idx_audit_logs_created_at (created_at),
+    INDEX idx_audit_logs_created_status_id (created_at, status, id),
     CONSTRAINT fk_audit_logs_user_id
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

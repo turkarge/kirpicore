@@ -18,6 +18,10 @@ $mailPasswordStored = trim((string) kirpi_setting_get('mail.password', '')) !== 
 $schemaReport = kirpi_missing_tables_report();
 $missingTables = (array) ($schemaReport['missing_tables'] ?? []);
 $missingByFile = (array) ($schemaReport['missing_by_file'] ?? []);
+$indexReport = kirpi_missing_indexes_report();
+$missingIndexCount = (int) ($indexReport['missing_index_count'] ?? 0);
+$requiredIndexCount = (int) ($indexReport['required_index_count'] ?? 0);
+$missingIndexesByTable = (array) ($indexReport['missing_by_table'] ?? []);
 ?>
 
 <div class="page-header d-print-none">
@@ -55,17 +59,23 @@ $missingByFile = (array) ($schemaReport['missing_by_file'] ?? []);
             </div>
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-3">
                         <div class="text-secondary small">Beklenen Toplam Tablo</div>
                         <div class="h3 mb-0"><?php echo (int) ($schemaReport['required_table_count'] ?? 0); ?></div>
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-3">
                         <div class="text-secondary small">Eksik Tablo</div>
                         <div class="h3 mb-0 <?php echo count($missingTables) > 0 ? 'text-red' : 'text-green'; ?>">
                             <?php echo count($missingTables); ?>
                         </div>
                     </div>
-                    <div class="col-12 col-md-4 d-flex align-items-end">
+                    <div class="col-12 col-md-3">
+                        <div class="text-secondary small">Eksik Indeks / Beklenen</div>
+                        <div class="h3 mb-0 <?php echo $missingIndexCount > 0 ? 'text-red' : 'text-green'; ?>">
+                            <?php echo $missingIndexCount; ?> / <?php echo $requiredIndexCount; ?>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-3 d-flex align-items-end">
                         <form
                             action="<?php echo base_url('settings/actions/install-missing'); ?>"
                             method="post"
@@ -89,6 +99,22 @@ $missingByFile = (array) ($schemaReport['missing_by_file'] ?? []);
                                 <code><?php echo e((string) ($item['file'] ?? '')); ?></code>
                                 - <?php echo e(implode(', ', array_map('strval', (array) ($item['tables'] ?? [])))); ?>
                             </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+
+                <?php if (!empty($missingIndexesByTable)): ?>
+                    <hr class="my-4">
+                    <div class="text-secondary mb-2">Eksik indeksler:</div>
+                    <ul class="mb-0">
+                        <?php foreach ($missingIndexesByTable as $tableName => $indexes): ?>
+                            <?php foreach ((array) $indexes as $index): ?>
+                                <li>
+                                    <code><?php echo e((string) $tableName); ?></code>
+                                    - <code><?php echo e((string) ($index['name'] ?? '')); ?></code>
+                                    (<?php echo e(implode(', ', array_map('strval', (array) ($index['columns'] ?? [])))); ?>)
+                                </li>
+                            <?php endforeach; ?>
                         <?php endforeach; ?>
                     </ul>
                 <?php endif; ?>

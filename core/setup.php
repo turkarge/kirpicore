@@ -110,6 +110,131 @@ function kirpi_extract_tables_from_sql(string $sqlContent): array
     return array_values(array_unique($tables));
 }
 
+function kirpi_expected_indexes_map(): array
+{
+    return [
+        'users' => [
+            'idx_users_is_active_id' => ['is_active', 'id'],
+        ],
+        'mail_logs' => [
+            'idx_mail_logs_created_status_id' => ['created_at', 'status', 'id'],
+        ],
+        'audit_logs' => [
+            'idx_audit_logs_created_status_id' => ['created_at', 'status', 'id'],
+        ],
+        'api_request_logs' => [
+            'idx_api_request_logs_created_route_method_status' => ['created_at', 'route_path', 'request_method', 'status_code'],
+            'idx_api_request_logs_created_status_id' => ['created_at', 'status_code', 'id'],
+        ],
+        'db_backups' => [
+            'idx_db_backups_created_at_id' => ['created_at', 'id'],
+        ],
+    ];
+}
+
+function kirpi_db_index_exists(string $tableName, string $indexName): bool
+{
+    try {
+        $stmt = db()->prepare("
+            SELECT COUNT(*)
+            FROM information_schema.statistics
+            WHERE table_schema = DATABASE()
+              AND table_name = :table_name
+              AND index_name = :index_name
+        ");
+        $stmt->execute([
+            ':table_name' => $tableName,
+            ':index_name' => $indexName,
+        ]);
+
+        return (int) $stmt->fetchColumn() > 0;
+    } catch (Throwable $e) {
+        return false;
+    }
+}
+
+function kirpi_missing_indexes_report(): array
+{
+    $expectedMap = kirpi_expected_indexes_map();
+    $missingByTable = [];
+    $requiredCount = 0;
+    $missingCount = 0;
+
+    foreach ($expectedMap as $tableName => $indexes) {
+        if (!db_table_exists($tableName, true)) {
+            continue;
+        }
+
+        foreach ((array) $indexes as $indexName => $columns) {
+            $requiredCount++;
+
+            if (kirpi_db_index_exists((string) $tableName, (string) $indexName)) {
+                continue;
+            }
+
+            $missingCount++;
+            if (!isset($missingByTable[$tableName])) {
+                $missingByTable[$tableName] = [];
+            }
+
+            $missingByTable[$tableName][] = [
+                'name' => (string) $indexName,
+                'columns' => array_map('strval', (array) $columns),
+            ];
+        }
+    }
+
+    return [
+        'required_index_count' => $requiredCount,
+        'missing_index_count' => $missingCount,
+        'missing_by_table' => $missingByTable,
+    ];
+}
+
+function kirpi_install_missing_indexes(): array
+{
+    $before = kirpi_missing_indexes_report();
+    $installed = [];
+
+    foreach ((array) ($before['missing_by_table'] ?? []) as $tableName => $indexes) {
+        foreach ((array) $indexes as $indexDef) {
+            $indexName = (string) ($indexDef['name'] ?? '');
+            $columns = array_map('strval', (array) ($indexDef['columns'] ?? []));
+
+            if ($indexName === '' || empty($columns)) {
+                continue;
+            }
+
+            $columnSql = implode(', ', array_map(static fn(string $col): string => '`' . str_replace('`', '', $col) . '`', $columns));
+            $sql = sprintf(
+                'ALTER TABLE `%s` ADD INDEX `%s` (%s)',
+                str_replace('`', '', (string) $tableName),
+                str_replace('`', '', $indexName),
+                $columnSql
+            );
+
+            try {
+                db()->exec($sql);
+                $installed[] = [
+                    'table' => (string) $tableName,
+                    'index' => $indexName,
+                    'columns' => $columns,
+                ];
+            } catch (Throwable $e) {
+                error_log('Missing index install failed [' . $tableName . '.' . $indexName . ']: ' . $e->getMessage());
+            }
+        }
+    }
+
+    $after = kirpi_missing_indexes_report();
+
+    return [
+        'before' => $before,
+        'after' => $after,
+        'installed_indexes' => $installed,
+    ];
+}
+
 function kirpi_schema_file_tables(string $filePath): array
 {
     if (!is_file($filePath)) {
@@ -220,6 +345,7 @@ function kirpi_install_missing_database_schema(): array
         kirpi_sync_module_registry();
     }
 
+    $indexResult = kirpi_install_missing_indexes();
     $after = kirpi_missing_tables_report();
 
     return [
@@ -227,6 +353,7 @@ function kirpi_install_missing_database_schema(): array
         'after' => $after,
         'installed_files' => $installedFiles,
         'installed_statements' => $installedStatements,
+        'indexes' => $indexResult,
     ];
 }
 
@@ -270,13 +397,23 @@ function kirpi_try_auto_setup_if_missing(): bool
     }
 
     try {
-        $report = kirpi_missing_tables_report();
-        if (($report['missing_table_count'] ?? 0) <= 0) {
-            return false;
+        $ranInstall = false;
+        $tableReport = kirpi_missing_tables_report();
+
+        if (($tableReport['missing_table_count'] ?? 0) > 0) {
+            kirpi_install_missing_database_schema();
+            $ranInstall = true;
         }
 
-        kirpi_install_missing_database_schema();
-        return true;
+        if (env_bool('AUTO_DB_ENSURE_INDEXES', true)) {
+            $indexReport = kirpi_missing_indexes_report();
+            if (($indexReport['missing_index_count'] ?? 0) > 0) {
+                kirpi_install_missing_indexes();
+                $ranInstall = true;
+            }
+        }
+
+        return $ranInstall;
     } catch (Throwable $e) {
         error_log('Auto missing schema setup failed: ' . $e->getMessage());
         return false;

@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS mail_logs (
     created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_mail_logs_user_id (user_id),
     INDEX idx_mail_logs_status (status),
+    INDEX idx_mail_logs_created_status_id (created_at, status, id),
     CONSTRAINT fk_mail_logs_user_id
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
