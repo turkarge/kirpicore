@@ -50,4 +50,18 @@ return [
         'auth' => false,
         'method' => 'GET',
     ],
+    'api/v1/postman' => [
+        'file' => 'modules/api/v1/postman_collection.php',
+        'layout' => false,
+        'permission' => null,
+        'auth' => false,
+        'method' => 'GET',
+    ],
+    'api/v1/postman-collection.json' => [
+        'file' => 'modules/api/v1/postman_collection.php',
+        'layout' => false,
+        'permission' => null,
+        'auth' => false,
+        'method' => 'GET',
+    ],
 ];

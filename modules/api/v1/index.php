@@ -43,5 +43,15 @@ api_response(200, 'KirpiCore API v1', [
             'path' => '/api/v1/postman-collection',
             'description' => 'Hazir Postman collection dosyasini indirir',
         ],
+        [
+            'method' => 'GET',
+            'path' => '/api/v1/postman',
+            'description' => 'Postman collection icin uyumluluk endpointi',
+        ],
+        [
+            'method' => 'GET',
+            'path' => '/api/v1/postman-collection.json',
+            'description' => 'Postman collection icin uyumluluk endpointi',
+        ],
     ],
 ]);
