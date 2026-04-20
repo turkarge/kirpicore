@@ -218,6 +218,8 @@ Not:
 - Super Admin, Profil sayfasindan API token olusturabilir, listeleyebilir ve revoke edebilir
 - API root kontrol endpoint: `GET /api/v1`
 - Detayli users API dokumani: `docs/API_USERS.md`
+- API release checklist: `docs/API_RELEASE_CHECKLIST.md`
+- API alarm esikleri: `docs/API_ALERT_THRESHOLDS.md`
 - Hata cevaplarinda `error_code` alani vardir
 
 CLI smoke test:

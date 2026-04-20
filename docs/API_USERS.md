@@ -225,3 +225,8 @@ Bu komut su kontrolleri yapar:
 - `GET /api/v1/me`
 - `GET /api/v1/users`
 - Limited token ile scope deny kontrolu (`POST /api/v1/users` -> `403 scope_denied`)
+
+## Operasyon Dokumanlari
+
+- Release checklist: `docs/API_RELEASE_CHECKLIST.md`
+- Alarm esikleri: `docs/API_ALERT_THRESHOLDS.md`
