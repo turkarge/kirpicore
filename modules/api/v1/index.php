@@ -38,5 +38,10 @@ api_response(200, 'KirpiCore API v1', [
             'path' => '/api/v1/users/{id}/status',
             'description' => 'Aktif/pasif durum gunceller (users.status)',
         ],
+        [
+            'method' => 'GET',
+            'path' => '/api/v1/postman-collection',
+            'description' => 'Hazir Postman collection dosyasini indirir',
+        ],
     ],
 ]);

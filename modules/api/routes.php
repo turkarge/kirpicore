@@ -43,4 +43,11 @@ return [
         'auth' => false,
         'method' => 'POST',
     ],
+    'api/v1/postman-collection' => [
+        'file' => 'modules/api/v1/postman_collection.php',
+        'layout' => false,
+        'permission' => null,
+        'auth' => false,
+        'method' => 'GET',
+    ],
 ];

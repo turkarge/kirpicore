@@ -110,147 +110,28 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
 
             <div class="col-12 col-lg-8">
                 <?php if ($isSuperAdmin): ?>
-                    <div class="card mb-4">
+                    <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">API Token Yonetimi (Super Admin)</h3>
+                            <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs">
+                                <li class="nav-item">
+                                    <a href="#tab-profile-info" class="nav-link active" data-bs-toggle="tab">Profil Bilgileri</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="#tab-profile-api-tokens" class="nav-link" data-bs-toggle="tab">API Tokenleri</a>
+                                </li>
+                            </ul>
                         </div>
-                        <div class="card-body">
-                            <?php if (is_array($apiTokenOnce) && !empty($apiTokenOnce['token'])): ?>
-                                <div class="alert alert-warning">
-                                    <div class="fw-bold mb-3">Bu token sadece bir kez gosterilir. Guvenli bir yerde saklayin.</div>
-                                    <div class="mb-2 w-100">
-                                        <label class="form-label mb-1">Token</label>
-                                        <div class="input-group">
-                                            <input
-                                                type="text"
-                                                class="form-control w-100"
-                                                readonly
-                                                value="<?php echo e((string) ($apiTokenOnce['token'] ?? '')); ?>"
-                                            >
-                                            <button
-                                                type="button"
-                                                class="btn btn-outline-secondary js-token-copy-btn"
-                                                data-token="<?php echo e((string) ($apiTokenOnce['token'] ?? '')); ?>"
-                                                title="Kopyala"
-                                            >
-                                                Kopyala
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="text-secondary small">
-                                        Token Name: <?php echo e((string) ($apiTokenOnce['token_name'] ?? '-')); ?> |
-                                        Expires At: <?php echo !empty($apiTokenOnce['is_unlimited']) ? 'Sinirsiz' : e((string) ($apiTokenOnce['expires_at'] ?? '-')); ?>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
-
-                            <form action="<?php echo base_url('profile/actions/create-api-token'); ?>" method="post">
-                                <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
-                                <div class="row g-3">
-                                    <div class="col-12 col-md-8">
-                                        <label class="form-label">Token Name</label>
-                                        <input type="text" name="token_name" class="form-control" placeholder="ornek: postman" value="profile-token" <?php echo (!$apiEnabled || !$apiTokenTableReady) ? 'disabled' : ''; ?>>
-                                    </div>
-                                    <div class="col-12 col-md-4">
-                                        <label class="form-label">Gecerlilik</label>
-                                        <select name="ttl_option" class="form-select" <?php echo (!$apiEnabled || !$apiTokenTableReady) ? 'disabled' : ''; ?>>
-                                            <option value="24h">24 Saat</option>
-                                            <option value="1_month" selected>1 Ay</option>
-                                            <option value="3_months">3 Ay</option>
-                                            <option value="6_months">6 Ay</option>
-                                            <option value="1_year">1 Yil</option>
-                                            <option value="unlimited">Sinirsiz</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-12 d-flex align-items-end">
-                                        <button type="submit" class="btn btn-outline-primary w-100" <?php echo (!$apiEnabled || !$apiTokenTableReady) ? 'disabled' : ''; ?>>API Token Olustur</button>
-                                    </div>
-                                </div>
-                            </form>
-
-                            <?php if (!$apiEnabled): ?>
-                                <div class="alert alert-warning mt-3 mb-0">API su an Ayarlar ekranindan kapatildi.</div>
-                            <?php endif; ?>
-
-                            <?php if (!$apiTokenTableReady): ?>
-                                <div class="alert alert-warning mt-3 mb-0">`api_tokens` tablosu hazir degil. Ayarlar > Eksikleri Kur calistirin.</div>
-                            <?php endif; ?>
-
-                            <hr class="my-4">
-                            <div class="table-responsive">
-                                <table class="table table-vcenter card-table table-striped mb-0">
-                                    <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
-                                        <th>Created</th>
-                                        <th>Last Used</th>
-                                        <th>Expires</th>
-                                        <th>Status</th>
-                                        <th class="w-1"></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <?php if (empty($apiTokenRows)): ?>
-                                        <tr>
-                                            <td colspan="7" class="text-center text-secondary py-4">API token kaydi yok.</td>
-                                        </tr>
-                                    <?php else: ?>
-                                        <?php foreach ($apiTokenRows as $tokenRow): ?>
-                                            <?php
-                                            $isRevoked = !empty($tokenRow['revoked_at']);
-                                            $expiresAtRaw = (string) ($tokenRow['expires_at'] ?? '');
-                                            $isUnlimitedToken = $expiresAtRaw !== '' && strtotime($expiresAtRaw) !== false && strtotime($expiresAtRaw) >= strtotime('2099-01-01 00:00:00');
-                                            $isExpired = !$isRevoked && !$isUnlimitedToken && $expiresAtRaw !== '' && strtotime($expiresAtRaw) !== false && strtotime($expiresAtRaw) < time();
-                                            $statusLabel = $isRevoked ? 'Revoked' : ($isExpired ? 'Expired' : 'Active');
-                                            $statusClass = $isRevoked ? 'bg-red-lt' : ($isExpired ? 'bg-yellow-lt' : 'bg-green-lt');
-                                            $tokenId = (int) ($tokenRow['id'] ?? 0);
-                                            $copyTokenValue = (string) ($apiTokenCopyMap[(string) $tokenId] ?? '');
-                                            ?>
-                                            <tr>
-                                                <td><?php echo $tokenId; ?></td>
-                                                <td><?php echo e((string) ($tokenRow['token_name'] ?? 'default')); ?></td>
-                                                <td><?php echo e((string) ($tokenRow['created_at'] ?? '-')); ?></td>
-                                                <td><?php echo e((string) ($tokenRow['last_used_at'] ?? '-')); ?></td>
-                                                <td><?php echo e($isUnlimitedToken ? 'Sinirsiz' : ($expiresAtRaw !== '' ? $expiresAtRaw : '-')); ?></td>
-                                                <td><span class="badge <?php echo e($statusClass); ?>"><?php echo e($statusLabel); ?></span></td>
-                                                <td>
-                                                    <?php if (!$isRevoked && !$isExpired): ?>
-                                                        <div class="d-flex gap-2">
-                                                            <button
-                                                                type="button"
-                                                                class="btn btn-sm btn-outline-secondary js-token-copy-btn"
-                                                                data-token="<?php echo e($copyTokenValue); ?>"
-                                                                title="<?php echo $copyTokenValue !== '' ? 'Kopyala' : 'Guvenlik nedeniyle sadece bu oturumda olusturulan tokenlar kopyalanabilir'; ?>"
-                                                                <?php echo $copyTokenValue === '' ? 'disabled' : ''; ?>
-                                                            >
-                                                                <i class="ti ti-copy"></i>
-                                                            </button>
-
-                                                            <form id="profile-revoke-token-form-<?php echo $tokenId; ?>" action="<?php echo base_url('profile/actions/revoke-api-token'); ?>" method="post" class="d-none">
-                                                                <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
-                                                                <input type="hidden" name="token_id" value="<?php echo $tokenId; ?>">
-                                                            </form>
-                                                            <a href="#" class="btn btn-sm btn-outline-danger" data-confirm="Bu API token iptal edilecek. Emin misiniz?" data-form="profile-revoke-token-form-<?php echo $tokenId; ?>">Revoke</a>
-                                                        </div>
-                                                    <?php else: ?>
-                                                        <span class="text-secondary small">-</span>
-                                                    <?php endif; ?>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+                        <div class="card-body p-0">
+                            <div class="tab-content">
+                                <div class="tab-pane active show" id="tab-profile-info">
                 <?php endif; ?>
 
-                <div class="card">
+                <div class="card <?php echo $isSuperAdmin ? 'border-0 shadow-none' : ''; ?>">
+                    <?php if (!$isSuperAdmin): ?>
                     <div class="card-header">
                         <h3 class="card-title">Profil Bilgileri</h3>
                     </div>
+                    <?php endif; ?>
 
                     <form
                         id="profile-update-form"
@@ -326,6 +207,150 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
                         </div>
                     </form>
                 </div>
+
+                <?php if ($isSuperAdmin): ?>
+                                </div>
+                                <div class="tab-pane" id="tab-profile-api-tokens">
+                                    <div class="card border-0 shadow-none">
+                                        <div class="card-header">
+                                            <h3 class="card-title">API Token Yonetimi (Super Admin)</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <?php if (is_array($apiTokenOnce) && !empty($apiTokenOnce['token'])): ?>
+                                                <div class="alert alert-warning">
+                                                    <div class="fw-bold mb-3">Bu token sadece bir kez gosterilir. Guvenli bir yerde saklayin.</div>
+                                                    <div class="mb-2 w-100">
+                                                        <label class="form-label mb-1">Token</label>
+                                                        <div class="input-group">
+                                                            <input
+                                                                type="text"
+                                                                class="form-control w-100"
+                                                                readonly
+                                                                value="<?php echo e((string) ($apiTokenOnce['token'] ?? '')); ?>"
+                                                            >
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-outline-secondary js-token-copy-btn"
+                                                                data-token="<?php echo e((string) ($apiTokenOnce['token'] ?? '')); ?>"
+                                                                title="Kopyala"
+                                                            >
+                                                                Kopyala
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-secondary small">
+                                                        Token Name: <?php echo e((string) ($apiTokenOnce['token_name'] ?? '-')); ?> |
+                                                        Expires At: <?php echo !empty($apiTokenOnce['is_unlimited']) ? 'Sinirsiz' : e((string) ($apiTokenOnce['expires_at'] ?? '-')); ?>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <form action="<?php echo base_url('profile/actions/create-api-token'); ?>" method="post">
+                                                <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+                                                <div class="row g-3">
+                                                    <div class="col-12 col-md-8">
+                                                        <label class="form-label">Token Name</label>
+                                                        <input type="text" name="token_name" class="form-control" placeholder="ornek: postman" value="profile-token" <?php echo (!$apiEnabled || !$apiTokenTableReady) ? 'disabled' : ''; ?>>
+                                                    </div>
+                                                    <div class="col-12 col-md-4">
+                                                        <label class="form-label">Gecerlilik</label>
+                                                        <select name="ttl_option" class="form-select" <?php echo (!$apiEnabled || !$apiTokenTableReady) ? 'disabled' : ''; ?>>
+                                                            <option value="24h">24 Saat</option>
+                                                            <option value="1_month" selected>1 Ay</option>
+                                                            <option value="3_months">3 Ay</option>
+                                                            <option value="6_months">6 Ay</option>
+                                                            <option value="1_year">1 Yil</option>
+                                                            <option value="unlimited">Sinirsiz</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-12 d-flex align-items-end">
+                                                        <button type="submit" class="btn btn-outline-primary w-100" <?php echo (!$apiEnabled || !$apiTokenTableReady) ? 'disabled' : ''; ?>>API Token Olustur</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+
+                                            <?php if (!$apiEnabled): ?>
+                                                <div class="alert alert-warning mt-3 mb-0">API su an Ayarlar ekranindan kapatildi.</div>
+                                            <?php endif; ?>
+
+                                            <?php if (!$apiTokenTableReady): ?>
+                                                <div class="alert alert-warning mt-3 mb-0">`api_tokens` tablosu hazir degil. Ayarlar > Eksikleri Kur calistirin.</div>
+                                            <?php endif; ?>
+
+                                            <hr class="my-4">
+                                            <div class="table-responsive">
+                                                <table class="table table-vcenter card-table table-striped mb-0">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>ID</th>
+                                                        <th>Name</th>
+                                                        <th>Created</th>
+                                                        <th>Last Used</th>
+                                                        <th>Expires</th>
+                                                        <th>Status</th>
+                                                        <th class="w-1"></th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <?php if (empty($apiTokenRows)): ?>
+                                                        <tr>
+                                                            <td colspan="7" class="text-center text-secondary py-4">API token kaydi yok.</td>
+                                                        </tr>
+                                                    <?php else: ?>
+                                                        <?php foreach ($apiTokenRows as $tokenRow): ?>
+                                                            <?php
+                                                            $isRevoked = !empty($tokenRow['revoked_at']);
+                                                            $expiresAtRaw = (string) ($tokenRow['expires_at'] ?? '');
+                                                            $isUnlimitedToken = $expiresAtRaw !== '' && strtotime($expiresAtRaw) !== false && strtotime($expiresAtRaw) >= strtotime('2099-01-01 00:00:00');
+                                                            $isExpired = !$isRevoked && !$isUnlimitedToken && $expiresAtRaw !== '' && strtotime($expiresAtRaw) !== false && strtotime($expiresAtRaw) < time();
+                                                            $statusLabel = $isRevoked ? 'Revoked' : ($isExpired ? 'Expired' : 'Active');
+                                                            $statusClass = $isRevoked ? 'bg-red-lt' : ($isExpired ? 'bg-yellow-lt' : 'bg-green-lt');
+                                                            $tokenId = (int) ($tokenRow['id'] ?? 0);
+                                                            $copyTokenValue = (string) ($apiTokenCopyMap[(string) $tokenId] ?? '');
+                                                            ?>
+                                                            <tr>
+                                                                <td><?php echo $tokenId; ?></td>
+                                                                <td><?php echo e((string) ($tokenRow['token_name'] ?? 'default')); ?></td>
+                                                                <td><?php echo e((string) ($tokenRow['created_at'] ?? '-')); ?></td>
+                                                                <td><?php echo e((string) ($tokenRow['last_used_at'] ?? '-')); ?></td>
+                                                                <td><?php echo e($isUnlimitedToken ? 'Sinirsiz' : ($expiresAtRaw !== '' ? $expiresAtRaw : '-')); ?></td>
+                                                                <td><span class="badge <?php echo e($statusClass); ?>"><?php echo e($statusLabel); ?></span></td>
+                                                                <td>
+                                                                    <?php if (!$isRevoked && !$isExpired): ?>
+                                                                        <div class="d-flex gap-2">
+                                                                            <button
+                                                                                type="button"
+                                                                                class="btn btn-sm btn-outline-secondary js-token-copy-btn"
+                                                                                data-token="<?php echo e($copyTokenValue); ?>"
+                                                                                title="<?php echo $copyTokenValue !== '' ? 'Kopyala' : 'Guvenlik nedeniyle sadece bu oturumda olusturulan tokenlar kopyalanabilir'; ?>"
+                                                                                <?php echo $copyTokenValue === '' ? 'disabled' : ''; ?>
+                                                                            >
+                                                                                <i class="ti ti-copy"></i>
+                                                                            </button>
+
+                                                                            <form id="profile-revoke-token-form-<?php echo $tokenId; ?>" action="<?php echo base_url('profile/actions/revoke-api-token'); ?>" method="post" class="d-none">
+                                                                                <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+                                                                                <input type="hidden" name="token_id" value="<?php echo $tokenId; ?>">
+                                                                            </form>
+                                                                            <a href="#" class="btn btn-sm btn-outline-danger" data-confirm="Bu API token iptal edilecek. Emin misiniz?" data-form="profile-revoke-token-form-<?php echo $tokenId; ?>">Revoke</a>
+                                                                        </div>
+                                                                    <?php else: ?>
+                                                                        <span class="text-secondary small">-</span>
+                                                                    <?php endif; ?>
+                                                                </td>
+                                                            </tr>
+                                                        <?php endforeach; ?>
+                                                    <?php endif; ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
