@@ -31,6 +31,7 @@ if (!defined('KIRPI_CORE_ENTRY')) {
 <script src="<?php echo asset_url('js/tabler.min.js'); ?>"></script>
 <script src="<?php echo asset_url('js/toastr.min.js'); ?>"></script>
 <script src="<?php echo asset_url('js/app.js'); ?>"></script>
+<?php echo kirpi_analytics_snippet(); ?>
 
 <?php
 global $current_route;
