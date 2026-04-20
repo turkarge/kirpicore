@@ -44,6 +44,7 @@ function shell_usage(): void
     shell_output('  php shell.php backup:restore <backup_id>');
     shell_output('  php shell.php backup:verify <backup_id>');
     shell_output('  php shell.php backup:cleanup [keep_count]');
+    shell_output('  php shell.php api:smoke [base_url] <email> <password>');
     shell_output('');
     shell_output('Examples:');
     shell_output('  php shell.php hash:password 123456');
@@ -63,6 +64,7 @@ function shell_usage(): void
     shell_output('  php shell.php backup:restore 1');
     shell_output('  php shell.php backup:verify 1');
     shell_output('  php shell.php backup:cleanup 20');
+    shell_output('  php shell.php api:smoke https://core.kirpinetwork.com admin@kirpi.local 123456');
 }
 
 function shell_render_rows(array $rows): void
@@ -167,6 +169,190 @@ function shell_module_schema_files(?string $moduleName = null): array
     }
 
     return $paths;
+}
+
+function shell_http_request(string $url, string $method = 'GET', array $headers = [], ?string $body = null): array
+{
+    $headerLines = [];
+    foreach ($headers as $key => $value) {
+        $headerLines[] = $key . ': ' . $value;
+    }
+
+    $httpOptions = [
+        'method' => strtoupper($method),
+        'header' => implode("\r\n", $headerLines),
+        'ignore_errors' => true,
+        'timeout' => 20,
+    ];
+
+    if ($body !== null) {
+        $httpOptions['content'] = $body;
+    }
+
+    $options = [
+        'http' => $httpOptions,
+    ];
+
+    if (stripos($url, 'https://') === 0 && env_bool('API_SMOKE_INSECURE', false)) {
+        $options['ssl'] = [
+            'verify_peer' => false,
+            'verify_peer_name' => false,
+        ];
+    }
+
+    $context = stream_context_create($options);
+    $responseBody = @file_get_contents($url, false, $context);
+    $responseHeaders = $http_response_header ?? [];
+
+    $statusCode = 0;
+    if (!empty($responseHeaders[0]) && preg_match('#HTTP/\S+\s+(\d{3})#', (string) $responseHeaders[0], $m) === 1) {
+        $statusCode = (int) $m[1];
+    }
+
+    $textBody = $responseBody === false ? '' : (string) $responseBody;
+    $json = null;
+    if ($textBody !== '') {
+        $decoded = json_decode($textBody, true);
+        if (is_array($decoded)) {
+            $json = $decoded;
+        }
+    }
+
+    return [
+        'status_code' => $statusCode,
+        'headers' => $responseHeaders,
+        'body' => $textBody,
+        'json' => $json,
+    ];
+}
+
+function shell_api_assert(string $title, int $actualStatus, int $expectedStatus, ?array $json = null, ?string $expectedErrorCode = null): bool
+{
+    $ok = $actualStatus === $expectedStatus;
+
+    if ($ok && $expectedErrorCode !== null) {
+        $actualErrorCode = (string) ($json['error_code'] ?? '');
+        $ok = $actualErrorCode === $expectedErrorCode;
+    }
+
+    if ($ok) {
+        shell_output('[OK] ' . $title . ' -> HTTP ' . $actualStatus);
+        return true;
+    }
+
+    $message = '[FAIL] ' . $title . ' -> expected HTTP ' . $expectedStatus . ', got HTTP ' . $actualStatus;
+    if ($expectedErrorCode !== null) {
+        $message .= ' (expected error_code=' . $expectedErrorCode . ')';
+    }
+    shell_output($message);
+
+    if (is_array($json)) {
+        shell_output('  response: ' . json_encode($json, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    }
+
+    return false;
+}
+
+function shell_api_smoke(string $baseUrl, string $email, string $password): bool
+{
+    $baseUrl = rtrim(trim($baseUrl), '/');
+    if ($baseUrl === '') {
+        shell_error('Base URL is required for api:smoke.');
+    }
+
+    if (!filter_var($baseUrl, FILTER_VALIDATE_URL)) {
+        shell_error('Base URL is invalid: ' . $baseUrl);
+    }
+
+    $commonHeaders = [
+        'Accept' => 'application/json',
+        'Content-Type' => 'application/json',
+    ];
+
+    $fullTokenResp = shell_http_request(
+        $baseUrl . '/api/v1/auth/token',
+        'POST',
+        $commonHeaders,
+        json_encode([
+            'email' => $email,
+            'password' => $password,
+            'token_name' => 'smoke-full',
+            'scopes' => ['*'],
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+    );
+
+    $ok = true;
+    $ok = shell_api_assert('Auth token (full scope)', (int) $fullTokenResp['status_code'], 200, is_array($fullTokenResp['json']) ? $fullTokenResp['json'] : null) && $ok;
+
+    $fullToken = (string) (($fullTokenResp['json']['data']['access_token'] ?? ''));
+    if ($fullToken === '') {
+        shell_output('[FAIL] access_token alinmadi, smoke test durduruldu.');
+        return false;
+    }
+
+    $meResp = shell_http_request(
+        $baseUrl . '/api/v1/me',
+        'GET',
+        [
+            'Accept' => 'application/json',
+            'Authorization' => 'Bearer ' . $fullToken,
+        ]
+    );
+    $ok = shell_api_assert('/api/v1/me', (int) $meResp['status_code'], 200, is_array($meResp['json']) ? $meResp['json'] : null) && $ok;
+
+    $usersResp = shell_http_request(
+        $baseUrl . '/api/v1/users?page=1&per_page=5',
+        'GET',
+        [
+            'Accept' => 'application/json',
+            'Authorization' => 'Bearer ' . $fullToken,
+        ]
+    );
+    $ok = shell_api_assert('/api/v1/users', (int) $usersResp['status_code'], 200, is_array($usersResp['json']) ? $usersResp['json'] : null) && $ok;
+
+    $limitedTokenResp = shell_http_request(
+        $baseUrl . '/api/v1/auth/token',
+        'POST',
+        $commonHeaders,
+        json_encode([
+            'email' => $email,
+            'password' => $password,
+            'token_name' => 'smoke-limited',
+            'scopes' => ['profile:read', 'users:read'],
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+    );
+    $ok = shell_api_assert('Auth token (limited scope)', (int) $limitedTokenResp['status_code'], 200, is_array($limitedTokenResp['json']) ? $limitedTokenResp['json'] : null) && $ok;
+
+    $limitedToken = (string) (($limitedTokenResp['json']['data']['access_token'] ?? ''));
+    if ($limitedToken !== '') {
+        $scopeDenyResp = shell_http_request(
+            $baseUrl . '/api/v1/users',
+            'POST',
+            [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $limitedToken,
+            ],
+            json_encode([
+                'name' => 'Smoke Scope Deny',
+                'email' => 'scope-deny@example.local',
+                'password' => '123456',
+                'password_confirm' => '123456',
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+        );
+        $ok = shell_api_assert(
+            'Scope deny test (limited token -> POST /users)',
+            (int) $scopeDenyResp['status_code'],
+            403,
+            is_array($scopeDenyResp['json']) ? $scopeDenyResp['json'] : null,
+            'scope_denied'
+        ) && $ok;
+    } else {
+        shell_output('[FAIL] limited token alinmadi, scope deny testi atlandi.');
+        $ok = false;
+    }
+
+    return $ok;
 }
 
 $command = $argv[1] ?? null;
@@ -495,6 +681,39 @@ try {
             $keepCount = (int) ($argv[2] ?? 0);
             $result = kirpi_backup_apply_retention($keepCount > 0 ? $keepCount : null);
             shell_output(json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+            break;
+
+        case 'api:smoke':
+            $baseArg = trim((string) ($argv[2] ?? ''));
+            $emailArg = trim((string) ($argv[3] ?? ''));
+            $passwordArg = (string) ($argv[4] ?? '');
+
+            if ($passwordArg === '' && $emailArg !== '' && strpos($emailArg, '@') !== false) {
+                // Full form expected: api:smoke <base_url> <email> <password>
+                shell_error('Password is required. Usage: php shell.php api:smoke [base_url] <email> <password>');
+            }
+
+            if ($baseArg !== '' && strpos($baseArg, '@') !== false) {
+                // Short form: api:smoke <email> <password>
+                $passwordArg = (string) ($argv[3] ?? '');
+                $emailArg = $baseArg;
+                $baseArg = BASE_URL;
+            }
+
+            if ($baseArg === '') {
+                $baseArg = BASE_URL;
+            }
+
+            if ($emailArg === '' || $passwordArg === '') {
+                shell_error('Usage: php shell.php api:smoke [base_url] <email> <password>');
+            }
+
+            $smokeOk = shell_api_smoke($baseArg, $emailArg, $passwordArg);
+            if (!$smokeOk) {
+                shell_error('API smoke test failed.', 2);
+            }
+
+            shell_output('API smoke test passed.');
             break;
 
         default:

@@ -69,9 +69,13 @@ Hata cevabi:
 {
   "status": "error",
   "message": "Aciklayici hata mesaji",
+  "error_code": "validation_error",
   "data": {}
 }
 ```
+
+Not:
+- Tum hata cevaplarinda `error_code` bulunur.
 
 ## Endpointler
 
@@ -207,3 +211,17 @@ API endpointleri su limitlere tabidir:
 
 - `THROTTLE_API_*` genel API limiti
 - `THROTTLE_API_AUTH_*` token endpoint limiti
+
+## CLI Smoke Test
+
+Tek komutla temel API akislarini test edebilirsin:
+
+```bash
+php shell.php api:smoke https://core.kirpinetwork.com admin@kirpi.local 123456
+```
+
+Bu komut su kontrolleri yapar:
+- Token alma (full scope)
+- `GET /api/v1/me`
+- `GET /api/v1/users`
+- Limited token ile scope deny kontrolu (`POST /api/v1/users` -> `403 scope_denied`)

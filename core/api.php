@@ -32,13 +32,33 @@ function api_json_input(): array
     return $cached;
 }
 
-function api_response(int $statusCode, string $message, array $data = [], array $meta = []): never
+function api_response(int $statusCode, string $message, array $data = [], array $meta = [], ?string $errorCode = null): never
 {
     $payload = [
         'status' => $statusCode >= 200 && $statusCode < 300 ? 'success' : 'error',
         'message' => $message,
         'data' => $data,
     ];
+
+    if ($statusCode < 200 || $statusCode >= 300) {
+        if ($errorCode === null || trim($errorCode) === '') {
+            $errorCode = match ($statusCode) {
+                400 => 'bad_request',
+                401 => 'unauthorized',
+                403 => 'forbidden',
+                404 => 'not_found',
+                405 => 'method_not_allowed',
+                409 => 'conflict',
+                422 => 'validation_error',
+                429 => 'rate_limited',
+                500 => 'internal_error',
+                503 => 'service_unavailable',
+                default => 'api_error',
+            };
+        }
+
+        $payload['error_code'] = $errorCode;
+    }
 
     if (!empty($meta)) {
         $payload['meta'] = $meta;
@@ -47,9 +67,18 @@ function api_response(int $statusCode, string $message, array $data = [], array 
     json_response($payload, $statusCode);
 }
 
-function api_error(int $statusCode, string $message, array $meta = []): never
+function api_error(int $statusCode, string $message, array|string $metaOrErrorCode = [], array $meta = []): never
 {
-    api_response($statusCode, $message, [], $meta);
+    $errorCode = null;
+    $resolvedMeta = $meta;
+
+    if (is_string($metaOrErrorCode)) {
+        $errorCode = trim($metaOrErrorCode) !== '' ? trim($metaOrErrorCode) : null;
+    } else {
+        $resolvedMeta = $metaOrErrorCode;
+    }
+
+    api_response($statusCode, $message, [], $resolvedMeta, $errorCode);
 }
 
 function api_extract_bearer_token(): ?string
@@ -362,21 +391,21 @@ function api_require_token(?string $requiredPermission = null, ?string $required
 {
     $token = api_extract_bearer_token();
     if ($token === null) {
-        api_error(401, 'Bearer token gereklidir.');
+        api_error(401, 'Bearer token gereklidir.', 'missing_bearer_token');
     }
 
     $auth = api_authenticate_by_token($token);
     if (!$auth) {
-        api_error(401, 'Gecersiz veya suresi dolmus token.');
+        api_error(401, 'Gecersiz veya suresi dolmus token.', 'invalid_or_expired_token');
     }
 
     $user = (array) ($auth['user'] ?? []);
     if (!api_user_has_permission($user, $requiredPermission)) {
-        api_error(403, 'Bu endpoint icin yetkiniz yok.');
+        api_error(403, 'Bu endpoint icin yetkiniz yok.', 'permission_denied');
     }
 
     if (!api_token_has_scope((array) $auth, $requiredScope)) {
-        api_error(403, 'Bu token scope nedeniyle bu endpointe erisemez.');
+        api_error(403, 'Bu token scope nedeniyle bu endpointe erisemez.', 'scope_denied');
     }
 
     return $user;

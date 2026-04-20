@@ -217,6 +217,12 @@ Not:
 - Super Admin, Profil sayfasindan API token olusturabilir, listeleyebilir ve revoke edebilir
 - API root kontrol endpoint: `GET /api/v1`
 - Detayli users API dokumani: `docs/API_USERS.md`
+- Hata cevaplarinda `error_code` alani vardir
+
+CLI smoke test:
+
+- `php shell.php api:smoke [base_url] <email> <password>`
+- Ornek: `php shell.php api:smoke https://core.kirpinetwork.com admin@kirpi.local 123456`
 
 ### API Test Merkezi (Panel)
 

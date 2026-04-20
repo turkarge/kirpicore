@@ -6,7 +6,7 @@ if (!defined('KIRPI_CORE_ENTRY')) {
 require_action('POST', false);
 
 if (!api_token_table_ready()) {
-    api_error(503, 'API token tablosu hazir degil. Kurulumlari tamamlayin.');
+    api_error(503, 'API token tablosu hazir degil. Kurulumlari tamamlayin.', 'api_token_table_missing');
 }
 
 $input = api_json_input();
@@ -17,11 +17,11 @@ $scopesInput = $input['scopes'] ?? ($_POST['scopes'] ?? ['*']);
 $scopes = api_normalize_scopes($scopesInput);
 
 if ($email === '' || $password === '') {
-    api_error(422, 'email ve password zorunludur.');
+    api_error(422, 'email ve password zorunludur.', 'missing_credentials');
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    api_error(422, 'Gecerli bir email girin.');
+    api_error(422, 'Gecerli bir email girin.', 'invalid_email');
 }
 
 try {
@@ -37,15 +37,15 @@ try {
             'reason' => 'invalid_credentials',
         ], 'api_token', null, 'failed');
 
-        api_error(401, 'Kullanici bilgileri hatali.');
+        api_error(401, 'Kullanici bilgileri hatali.', 'invalid_credentials');
     }
 
     if ((int) ($user['is_active'] ?? 0) !== 1) {
-        api_error(403, 'Kullanici pasif.');
+        api_error(403, 'Kullanici pasif.', 'user_inactive');
     }
 
     if (($user['role_id'] ?? null) && isset($user['role_is_active']) && (int) $user['role_is_active'] !== 1) {
-        api_error(403, 'Kullanici rolu pasif.');
+        api_error(403, 'Kullanici rolu pasif.', 'role_inactive');
     }
 
     $issued = api_issue_token_for_user(
@@ -55,7 +55,7 @@ try {
         $scopes
     );
     if (!$issued) {
-        api_error(500, 'Token olusturulamadi.');
+        api_error(500, 'Token olusturulamadi.', 'token_issue_failed');
     }
 
     kirpi_audit_log('api_token_create', 'api', [
@@ -73,5 +73,5 @@ try {
     ]);
 } catch (Throwable $e) {
     error_log('api token create error: ' . $e->getMessage());
-    api_error(500, 'Token olusturma sirasinda hata olustu.');
+    api_error(500, 'Token olusturma sirasinda hata olustu.', 'token_issue_exception');
 }
