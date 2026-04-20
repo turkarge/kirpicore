@@ -4,7 +4,7 @@
     "description":  "Bildirim listesi ve ayarlari",
     "version":  "1.0.0",
     "enabled":  true,
-    "core":  true,
+    "core":  false,
     "load_order":  40,
     "requires":  [
 

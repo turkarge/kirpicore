@@ -15,6 +15,13 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'settings/modules' => [
+        'file' => 'modules/settings/pages/modules.php',
+        'layout' => true,
+        'permission' => 'settings.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
     'ajax/settings/session' => [
         'file' => 'modules/settings/modals/session.php',
         'layout' => false,
@@ -31,6 +38,13 @@ return [
     ],
     'settings/actions/install-missing' => [
         'file' => 'modules/settings/actions/install_missing.php',
+        'layout' => false,
+        'permission' => 'settings.update',
+        'auth' => true,
+        'method' => 'POST',
+    ],
+    'settings/actions/module-toggle' => [
+        'file' => 'modules/settings/actions/module_toggle.php',
         'layout' => false,
         'permission' => 'settings.update',
         'auth' => true,

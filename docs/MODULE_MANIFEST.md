@@ -39,3 +39,17 @@ Mevcut sistemi bozmaz; `module.json` olmayan modul de varsayilan degerlerle yukl
 
 - `module.json` yoksa default degerler kullanilir.
 - Mevcut route yapisi ve modul dizin yapisi aynen korunur.
+
+## Registry ve Runtime
+
+- DB registry tablosu: `app_modules`
+- Runtime'da modul listesi:
+  - Manifest degerleri
+  - `app_modules` override degerleri (`is_enabled`, `load_order`, `is_core`)
+- Route yukleme yalnizca `enabled=true` moduller icin yapilir.
+
+## Yönetim Ekrani
+
+- Route: `settings/modules`
+- Core moduller (`is_core=1`) disable edilemez.
+- Bir modul diger aktif moduller tarafindan `requires` ile kullaniliyorsa disable edilmez.

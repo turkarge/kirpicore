@@ -25,6 +25,25 @@ Moduller icin geriye uyumlu `module.json` yapisi eklendi.
 - Mevcut yapi korunur: `module.json` olmayan modul de calismaya devam eder.
 - Detay: `docs/MODULE_MANIFEST.md`
 
+## Modul Yonetimi
+
+Yonetim menusu altina modul yonetim ekrani eklendi.
+
+- Route: `settings/modules`
+- Goruntuleme yetkisi: `settings.view`
+- Toggle yetkisi: `settings.update`
+
+Ozellikler:
+
+- Modul listesi (`module.json` + `app_modules` registry birlesik gorunum)
+- Enable/Disable toggle
+- Core moduller devre disi birakilamaz
+- Bagimlilik kullanan aktif moduller varsa disable engellenir
+
+Not:
+
+- Yeni `app_modules` tablosu icin deploy sonrasi `Ayarlar -> Eksikleri Kur` calistirin.
+
 ## Dokploy ile calistirma
 
 Bu repo artik Docker Compose ile dogrudan deploy edilebilir.

@@ -4,7 +4,7 @@
     "description":  "Arka plan is kuyrugu",
     "version":  "1.0.0",
     "enabled":  true,
-    "core":  true,
+    "core":  false,
     "load_order":  53,
     "requires":  [
 

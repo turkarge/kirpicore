@@ -4,7 +4,7 @@
     "description":  "Mail test ve gonderim kayitlari",
     "version":  "1.0.0",
     "enabled":  true,
-    "core":  true,
+    "core":  false,
     "load_order":  41,
     "requires":  [
 

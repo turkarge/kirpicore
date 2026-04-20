@@ -59,6 +59,12 @@ $menu = [
                 'permission' => 'settings.view',
             ],
             [
+                'title' => 'Moduller',
+                'icon' => 'ti ti-packages',
+                'url' => 'settings/modules',
+                'permission' => 'settings.view',
+            ],
+            [
                 'title' => 'Backup Restore',
                 'icon' => 'ti ti-database-export',
                 'url' => 'backup/view',

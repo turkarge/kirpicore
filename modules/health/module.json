@@ -4,7 +4,7 @@
     "description":  "Sistem saglik ve metrikleri",
     "version":  "1.0.0",
     "enabled":  true,
-    "core":  true,
+    "core":  false,
     "load_order":  52,
     "requires":  [
 

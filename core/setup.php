@@ -83,6 +83,10 @@ function kirpi_install_database_schema(): array
         sync_permission_catalog();
     }
 
+    if (function_exists('kirpi_sync_module_registry')) {
+        kirpi_sync_module_registry();
+    }
+
     return [
         'core_statements' => $coreStatements,
         'module_statements' => $moduleStatements,
@@ -210,6 +214,10 @@ function kirpi_install_missing_database_schema(): array
 
     if (function_exists('sync_permission_catalog') && db_table_exists('permissions') && db_table_exists('role_permissions')) {
         sync_permission_catalog();
+    }
+
+    if (function_exists('kirpi_sync_module_registry')) {
+        kirpi_sync_module_registry();
     }
 
     $after = kirpi_missing_tables_report();
