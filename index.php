@@ -49,6 +49,36 @@ $module = $segments[0] ?? 'dashboard';
 
 $route_info = $routes[$request_path] ?? null;
 
+if (!$route_info) {
+    foreach ($routes as $routeKey => $routeDefinition) {
+        if (strpos((string) $routeKey, '{') === false) {
+            continue;
+        }
+
+        $pattern = preg_replace('/\{[a-zA-Z_][a-zA-Z0-9_]*\}/', '([^/]+)', preg_quote((string) $routeKey, '#'));
+        if ($pattern === null) {
+            continue;
+        }
+
+        if (preg_match('#^' . $pattern . '$#', $request_path, $matches) !== 1) {
+            continue;
+        }
+
+        $paramNames = [];
+        if (preg_match_all('/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/', (string) $routeKey, $nameMatches) === 1 || !empty($nameMatches[1])) {
+            $paramNames = $nameMatches[1];
+        }
+
+        array_shift($matches);
+        foreach ($paramNames as $index => $paramName) {
+            $_GET[$paramName] = isset($matches[$index]) ? urldecode((string) $matches[$index]) : null;
+        }
+
+        $route_info = $routeDefinition;
+        break;
+    }
+}
+
 global $current_module;
 $current_module = $module;
 
@@ -64,7 +94,7 @@ if (!$route_info) {
 $route_method = strtoupper($route_info['method'] ?? 'GET');
 $current_method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 
-if ($route_method !== $current_method) {
+if ($route_method !== 'ANY' && $route_method !== $current_method) {
     display_error_page(
         '405 - Yontem Desteklenmiyor',
         'Bu istek yontemi desteklenmiyor.',

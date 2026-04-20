@@ -27,6 +27,20 @@ return [
         'layout' => false,
         'permission' => null,
         'auth' => false,
-        'method' => 'GET',
+        'method' => 'ANY',
+    ],
+    'api/v1/users/{id}' => [
+        'file' => 'modules/api/v1/users/update.php',
+        'layout' => false,
+        'permission' => null,
+        'auth' => false,
+        'method' => 'PATCH',
+    ],
+    'api/v1/users/{id}/status' => [
+        'file' => 'modules/api/v1/users/status.php',
+        'layout' => false,
+        'permission' => null,
+        'auth' => false,
+        'method' => 'POST',
     ],
 ];

@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "6f1f3d96-2b6b-4e8f-b1df-6f8fb73214f7",
     "name": "KirpiCore API v1",
-    "description": "KirpiCore REST API v1 test koleksiyonu. Once auth/token ile token alin, sonra me ve users endpointlerini cagirın.",
+    "description": "KirpiCore REST API v1 test koleksiyonu. Token al, users listele/olustur/guncelle/status islemlerini test et.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -33,9 +33,45 @@
     {
       "key": "per_page",
       "value": "20"
+    },
+    {
+      "key": "new_user_email",
+      "value": "api.user.{{$timestamp}}@kirpi.local"
+    },
+    {
+      "key": "new_user_name",
+      "value": "API User"
+    },
+    {
+      "key": "new_user_password",
+      "value": "123456"
+    },
+    {
+      "key": "new_user_role_id",
+      "value": "2"
+    },
+    {
+      "key": "created_user_id",
+      "value": ""
     }
   ],
   "item": [
+    {
+      "name": "API Root",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/v1",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1"
+          ]
+        }
+      }
+    },
     {
       "name": "Auth - Create Token",
       "request": {
@@ -105,26 +141,7 @@
             "me"
           ]
         }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Status code is 200', function () {",
-              "    pm.response.to.have.status(200);",
-              "});",
-              "",
-              "var jsonData = pm.response.json();",
-              "pm.test('Current user exists', function () {",
-              "    pm.expect(jsonData.data.user).to.be.an('object');",
-              "    pm.expect(jsonData.data.user.email).to.be.a('string');",
-              "});"
-            ]
-          }
-        }
-      ]
+      }
     },
     {
       "name": "Users - List",
@@ -157,6 +174,37 @@
             }
           ]
         }
+      }
+    },
+    {
+      "name": "Users - Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{new_user_name}}\",\n  \"email\": \"{{new_user_email}}\",\n  \"password\": \"{{new_user_password}}\",\n  \"password_confirm\": \"{{new_user_password}}\",\n  \"role_id\": {{new_user_role_id}},\n  \"is_active\": true\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/users",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "users"
+          ]
+        }
       },
       "event": [
         {
@@ -164,19 +212,82 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('Status code is 200', function () {",
-              "    pm.response.to.have.status(200);",
+              "pm.test('Status code is 201', function () {",
+              "    pm.response.to.have.status(201);",
               "});",
-              "",
               "var jsonData = pm.response.json();",
-              "pm.test('Users list exists', function () {",
-              "    pm.expect(jsonData.data.users).to.be.an('array');",
-              "    pm.expect(jsonData.meta).to.be.an('object');",
-              "});"
+              "if (jsonData && jsonData.data && jsonData.data.user && jsonData.data.user.id) {",
+              "    pm.collectionVariables.set('created_user_id', jsonData.data.user.id);",
+              "}"
             ]
           }
         }
       ]
+    },
+    {
+      "name": "Users - Update (PATCH)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"API User Updated\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/users/{{created_user_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "users",
+            "{{created_user_id}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Users - Status Update",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"is_active\": false\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/users/{{created_user_id}}/status",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "users",
+            "{{created_user_id}}",
+            "status"
+          ]
+        }
+      }
     }
   ]
 }

@@ -187,6 +187,9 @@ Endpointler:
 - `POST /api/v1/auth/token` (email + password ile token alir)
 - `GET /api/v1/me` (token sahibinin profil bilgisi)
 - `GET /api/v1/users` (kullanici listesi, `users.view` yetkisi gerekir)
+- `POST /api/v1/users` (kullanici olusturma, `users.create`)
+- `PATCH /api/v1/users/{id}` (kullanici guncelleme, `users.edit`)
+- `POST /api/v1/users/{id}/status` (durum guncelleme, `users.status`)
 
 Not:
 
@@ -195,6 +198,7 @@ Not:
 - API cagrilari da throttle kapsamindadir
 - Super Admin, Profil sayfasindan API token olusturabilir, listeleyebilir ve revoke edebilir
 - API root kontrol endpoint: `GET /api/v1`
+- Detayli users API dokumani: `docs/API_USERS.md`
 
 ### Postman ile hizli test
 
@@ -210,6 +214,9 @@ Adimlar:
    - `Auth - Create Token`
    - `Me - Current User`
    - `Users - List`
+   - `Users - Create`
+   - `Users - Update (PATCH)`
+   - `Users - Status Update`
 
 `Auth - Create Token` istegi basarili olursa `access_token` degiskenine otomatik yazilir.
 
