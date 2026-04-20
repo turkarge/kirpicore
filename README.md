@@ -160,6 +160,15 @@ Bu sayfa matrix formatinda su bilesenleri izler:
 - Session
 - Throttle
 
+## Monitoring Menusu
+
+Yonetim menusu sadelemek için izleme ekranlari `Monitoring` altinda toplandi:
+
+- `Audit Log`
+- `Guvenlik Izleme`
+- `Health Metrics`
+- `Jobs Queue`
+
 ## Rate Limit / Throttle
 
 Sistem genelinde POST islemleri ve kritik actionlar icin istek limiti uygulanir.
@@ -190,6 +199,15 @@ Endpointler:
 - `POST /api/v1/users` (kullanici olusturma, `users.create`)
 - `PATCH /api/v1/users/{id}` (kullanici guncelleme, `users.edit`)
 - `POST /api/v1/users/{id}/status` (durum guncelleme, `users.status`)
+
+Scope modeli:
+
+- `*` tum endpointlere erisir
+- `profile:read` -> `GET /api/v1/me`
+- `users:read` -> `GET /api/v1/users`
+- `users:create` -> `POST /api/v1/users`
+- `users:update` -> `PATCH /api/v1/users/{id}`
+- `users:status` -> `POST /api/v1/users/{id}/status`
 
 Not:
 

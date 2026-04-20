@@ -240,7 +240,8 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
                                                     </div>
                                                     <div class="text-secondary small">
                                                         Token Name: <?php echo e((string) ($apiTokenOnce['token_name'] ?? '-')); ?> |
-                                                        Expires At: <?php echo !empty($apiTokenOnce['is_unlimited']) ? 'Sinirsiz' : e((string) ($apiTokenOnce['expires_at'] ?? '-')); ?>
+                                                        Expires At: <?php echo !empty($apiTokenOnce['is_unlimited']) ? 'Sinirsiz' : e((string) ($apiTokenOnce['expires_at'] ?? '-')); ?> |
+                                                        Scopes: <?php echo e(implode(', ', (array) ($apiTokenOnce['scopes'] ?? ['*']))); ?>
                                                     </div>
                                                 </div>
                                             <?php endif; ?>
@@ -248,11 +249,11 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
                                             <form action="<?php echo base_url('profile/actions/create-api-token'); ?>" method="post">
                                                 <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                                                 <div class="row g-3">
-                                                    <div class="col-12 col-md-8">
+                                                    <div class="col-12 col-md-6">
                                                         <label class="form-label">Token Name</label>
                                                         <input type="text" name="token_name" class="form-control" placeholder="ornek: postman" value="profile-token" <?php echo (!$apiEnabled || !$apiTokenTableReady) ? 'disabled' : ''; ?>>
                                                     </div>
-                                                    <div class="col-12 col-md-4">
+                                                    <div class="col-12 col-md-3">
                                                         <label class="form-label">Gecerlilik</label>
                                                         <select name="ttl_option" class="form-select" <?php echo (!$apiEnabled || !$apiTokenTableReady) ? 'disabled' : ''; ?>>
                                                             <option value="24h">24 Saat</option>
@@ -261,6 +262,15 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
                                                             <option value="6_months">6 Ay</option>
                                                             <option value="1_year">1 Yil</option>
                                                             <option value="unlimited">Sinirsiz</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-12 col-md-3">
+                                                        <label class="form-label">Scope</label>
+                                                        <select name="scope_option" class="form-select" <?php echo (!$apiEnabled || !$apiTokenTableReady) ? 'disabled' : ''; ?>>
+                                                            <option value="full_access" selected>Tum Yetki (*)</option>
+                                                            <option value="profile_read">Sadece Profil</option>
+                                                            <option value="users_read">Users Read</option>
+                                                            <option value="users_manage">Users Manage</option>
                                                         </select>
                                                     </div>
                                                     <div class="col-12 d-flex align-items-end">
@@ -287,6 +297,7 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
                                                         <th>Created</th>
                                                         <th>Last Used</th>
                                                         <th>Expires</th>
+                                                        <th>Scopes</th>
                                                         <th>Status</th>
                                                         <th class="w-1"></th>
                                                     </tr>
@@ -294,7 +305,7 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
                                                     <tbody>
                                                     <?php if (empty($apiTokenRows)): ?>
                                                         <tr>
-                                                            <td colspan="7" class="text-center text-secondary py-4">API token kaydi yok.</td>
+                                                            <td colspan="8" class="text-center text-secondary py-4">API token kaydi yok.</td>
                                                         </tr>
                                                     <?php else: ?>
                                                         <?php foreach ($apiTokenRows as $tokenRow): ?>
@@ -307,6 +318,7 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
                                                             $statusClass = $isRevoked ? 'bg-red-lt' : ($isExpired ? 'bg-yellow-lt' : 'bg-green-lt');
                                                             $tokenId = (int) ($tokenRow['id'] ?? 0);
                                                             $copyTokenValue = (string) ($apiTokenCopyMap[(string) $tokenId] ?? '');
+                                                            $tokenScopes = (array) ($tokenRow['scopes'] ?? ['*']);
                                                             ?>
                                                             <tr>
                                                                 <td><?php echo $tokenId; ?></td>
@@ -314,6 +326,7 @@ $apiTokenRows = $isSuperAdmin ? api_list_tokens_for_user((int) ($profile['id'] ?
                                                                 <td><?php echo e((string) ($tokenRow['created_at'] ?? '-')); ?></td>
                                                                 <td><?php echo e((string) ($tokenRow['last_used_at'] ?? '-')); ?></td>
                                                                 <td><?php echo e($isUnlimitedToken ? 'Sinirsiz' : ($expiresAtRaw !== '' ? $expiresAtRaw : '-')); ?></td>
+                                                                <td><code><?php echo e(implode(', ', $tokenScopes)); ?></code></td>
                                                                 <td><span class="badge <?php echo e($statusClass); ?>"><?php echo e($statusLabel); ?></span></td>
                                                                 <td>
                                                                     <?php if (!$isRevoked && !$isExpired): ?>

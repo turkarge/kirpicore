@@ -5,7 +5,7 @@ if (!defined('KIRPI_CORE_ENTRY')) {
 
 require_action('GET', false);
 
-$user = api_require_token();
+$user = api_require_token(null, 'profile:read');
 
 api_response(200, 'OK', [
     'user' => [
@@ -18,4 +18,5 @@ api_response(200, 'OK', [
         'permissions' => array_values((array) ($user['permissions'] ?? [])),
     ],
 ]);
+
 

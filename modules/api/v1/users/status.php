@@ -5,7 +5,7 @@ if (!defined('KIRPI_CORE_ENTRY')) {
 
 require_action('POST', false);
 
-$actor = api_require_token('users.status');
+$actor = api_require_token('users.status', 'users:status');
 $id = (int) ($_GET['id'] ?? 0);
 if ($id <= 0) {
     api_error(422, 'Gecersiz kullanici id.');
@@ -59,4 +59,5 @@ try {
     error_log('api users status error: ' . $e->getMessage());
     api_error(500, 'Kullanici durumu guncellenemedi.');
 }
+
 

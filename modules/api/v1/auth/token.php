@@ -13,6 +13,8 @@ $input = api_json_input();
 $email = strtolower(trim((string) ($input['email'] ?? ($_POST['email'] ?? ''))));
 $password = (string) ($input['password'] ?? ($_POST['password'] ?? ''));
 $tokenName = trim((string) ($input['token_name'] ?? ($_POST['token_name'] ?? 'default')));
+$scopesInput = $input['scopes'] ?? ($_POST['scopes'] ?? ['*']);
+$scopes = api_normalize_scopes($scopesInput);
 
 if ($email === '' || $password === '') {
     api_error(422, 'email ve password zorunludur.');
@@ -46,7 +48,12 @@ try {
         api_error(403, 'Kullanici rolu pasif.');
     }
 
-    $issued = api_issue_token_for_user((int) ($user['id'] ?? 0), $tokenName !== '' ? $tokenName : 'default');
+    $issued = api_issue_token_for_user(
+        (int) ($user['id'] ?? 0),
+        $tokenName !== '' ? $tokenName : 'default',
+        null,
+        $scopes
+    );
     if (!$issued) {
         api_error(500, 'Token olusturulamadi.');
     }
@@ -55,12 +62,14 @@ try {
         'user_id' => (int) ($user['id'] ?? 0),
         'email' => $email,
         'token_name' => $tokenName,
+        'scopes' => $scopes,
     ], 'api_token', null, 'success');
 
     api_response(200, 'Token olusturuldu.', [
         'token_type' => 'Bearer',
         'access_token' => (string) ($issued['token'] ?? ''),
         'expires_at' => (string) ($issued['expires_at'] ?? ''),
+        'scopes' => (array) ($issued['scopes'] ?? ['*']),
     ]);
 } catch (Throwable $e) {
     error_log('api token create error: ' . $e->getMessage());

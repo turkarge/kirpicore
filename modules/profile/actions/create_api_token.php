@@ -32,6 +32,7 @@ if (!api_token_table_ready()) {
 $tokenName = trim((string) ($_POST['token_name'] ?? 'profile-token'));
 $tokenName = $tokenName !== '' ? $tokenName : 'profile-token';
 $ttlOption = trim((string) ($_POST['ttl_option'] ?? '1_month'));
+$scopeOption = trim((string) ($_POST['scope_option'] ?? 'full_access'));
 
 $ttlMap = [
     '24h' => 24 * 60 * 60,
@@ -44,8 +45,16 @@ $ttlMap = [
 
 $ttlSeconds = $ttlMap[$ttlOption] ?? $ttlMap['1_month'];
 
+$scopeMap = [
+    'full_access' => ['*'],
+    'profile_read' => ['profile:read'],
+    'users_read' => ['profile:read', 'users:read'],
+    'users_manage' => ['profile:read', 'users:read', 'users:create', 'users:update', 'users:status'],
+];
+$scopes = $scopeMap[$scopeOption] ?? $scopeMap['full_access'];
+
 try {
-    $issued = api_issue_token_for_user($userId, $tokenName, $ttlSeconds);
+    $issued = api_issue_token_for_user($userId, $tokenName, $ttlSeconds, $scopes);
     if (!$issued) {
         set_flash_message('danger', 'API token olusturulamadi.');
         redirect(base_url('profile/view'));
@@ -58,6 +67,7 @@ try {
         'token_name' => $tokenName,
         'ttl_option' => $ttlOption,
         'is_unlimited' => (bool) ($issued['is_unlimited'] ?? false),
+        'scopes' => (array) ($issued['scopes'] ?? $scopes),
     ];
 
     $newTokenId = (int) ($issued['token_id'] ?? 0);
@@ -74,6 +84,8 @@ try {
         'token_name' => $tokenName,
         'expires_at' => (string) ($issued['expires_at'] ?? ''),
         'ttl_option' => $ttlOption,
+        'scope_option' => $scopeOption,
+        'scopes' => (array) ($issued['scopes'] ?? $scopes),
     ], 'api_token', null, 'success');
 
     set_flash_message('success', 'API token olusturuldu. Profil sayfasinda bir kez gosterilecek.');

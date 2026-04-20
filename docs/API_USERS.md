@@ -42,7 +42,8 @@ curl -X POST "https://core.kirpinetwork.com/api/v1/auth/token" \
   -d '{
     "email": "admin@kirpi.local",
     "password": "123456",
-    "token_name": "api-test"
+    "token_name": "api-test",
+    "scopes": ["profile:read", "users:read"]
   }'
 ```
 
@@ -79,6 +80,7 @@ Hata cevabi:
 - Method: `GET`
 - Path: `/api/v1/users`
 - Permission: `users.view`
+- Scope: `users:read`
 
 Query parametreleri:
 
@@ -100,6 +102,7 @@ curl "https://core.kirpinetwork.com/api/v1/users?page=1&per_page=20" \
 - Method: `POST`
 - Path: `/api/v1/users`
 - Permission: `users.create`
+- Scope: `users:create`
 
 Body (JSON):
 
@@ -127,6 +130,7 @@ Notlar:
 - Method: `PATCH`
 - Path: `/api/v1/users/{id}`
 - Permission: `users.edit`
+- Scope: `users:update`
 
 Body (JSON) - en az bir alan:
 
@@ -151,6 +155,7 @@ Notlar:
 - Method: `POST`
 - Path: `/api/v1/users/{id}/status`
 - Permission: `users.status`
+- Scope: `users:status`
 
 Body (JSON):
 
@@ -175,6 +180,15 @@ Asagidaki URL'lerden biriyle collection indirebilirsin:
 Tam URL ornegi:
 
 `https://core.kirpinetwork.com/api/v1/postman-collection`
+
+## Scope Notlari
+
+- `*` -> tum API scope'lari acik
+- `profile:read` -> `/api/v1/me`
+- `users:read` -> `GET /api/v1/users`
+- `users:create` -> `POST /api/v1/users`
+- `users:update` -> `PATCH /api/v1/users/{id}`
+- `users:status` -> `POST /api/v1/users/{id}/status`
 
 ## Sik HTTP Kodlari
 

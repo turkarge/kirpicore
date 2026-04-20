@@ -16,3 +16,13 @@ CREATE TABLE IF NOT EXISTS api_tokens (
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS api_token_scopes (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    token_id BIGINT UNSIGNED NOT NULL,
+    scope_key VARCHAR(80) NOT NULL,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_api_token_scope (token_id, scope_key),
+    INDEX idx_api_token_scopes_token_id (token_id),
+    CONSTRAINT fk_api_token_scopes_token_id
+        FOREIGN KEY (token_id) REFERENCES api_tokens(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

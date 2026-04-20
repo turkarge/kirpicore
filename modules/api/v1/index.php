@@ -17,26 +17,31 @@ api_response(200, 'KirpiCore API v1', [
             'method' => 'GET',
             'path' => '/api/v1/me',
             'description' => 'Token sahibinin profil bilgisi',
+            'required_scope' => 'profile:read',
         ],
         [
             'method' => 'GET',
             'path' => '/api/v1/users',
             'description' => 'Kullanici listesi (users.view)',
+            'required_scope' => 'users:read',
         ],
         [
             'method' => 'POST',
             'path' => '/api/v1/users',
             'description' => 'Kullanici olusturur (users.create)',
+            'required_scope' => 'users:create',
         ],
         [
             'method' => 'PATCH',
             'path' => '/api/v1/users/{id}',
             'description' => 'Kullanici gunceller (users.edit)',
+            'required_scope' => 'users:update',
         ],
         [
             'method' => 'POST',
             'path' => '/api/v1/users/{id}/status',
             'description' => 'Aktif/pasif durum gunceller (users.status)',
+            'required_scope' => 'users:status',
         ],
         [
             'method' => 'GET',

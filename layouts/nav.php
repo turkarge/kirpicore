@@ -47,12 +47,6 @@ $menu = [
                 'permission' => 'mail.view',
             ],
             [
-                'title' => 'Audit Log',
-                'icon' => 'ti ti-list-details',
-                'url' => 'audit/list',
-                'permission' => 'audit.view',
-            ],
-            [
                 'title' => 'Ayarlar',
                 'icon' => 'ti ti-adjustments',
                 'url' => 'settings/view',
@@ -65,16 +59,22 @@ $menu = [
                 'permission' => 'settings.view',
             ],
             [
-                'title' => 'Jobs Queue',
-                'icon' => 'ti ti-clock-play',
-                'url' => 'queue/view',
-                'permission' => 'queue.view',
-            ],
-            [
                 'title' => 'Backup Restore',
                 'icon' => 'ti ti-database-export',
                 'url' => 'backup/view',
                 'permission' => 'backup.view',
+            ],
+        ],
+    ],
+    [
+        'title' => 'Monitoring',
+        'icon' => 'ti ti-radar',
+        'children' => [
+            [
+                'title' => 'Audit Log',
+                'icon' => 'ti ti-list-details',
+                'url' => 'audit/list',
+                'permission' => 'audit.view',
             ],
             [
                 'title' => 'Guvenlik Izleme',
@@ -87,6 +87,12 @@ $menu = [
                 'icon' => 'ti ti-activity-heartbeat',
                 'url' => 'health/view',
                 'permission' => 'health.view',
+            ],
+            [
+                'title' => 'Jobs Queue',
+                'icon' => 'ti ti-clock-play',
+                'url' => 'queue/view',
+                'permission' => 'queue.view',
             ],
         ],
     ],

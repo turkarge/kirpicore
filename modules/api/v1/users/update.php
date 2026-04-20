@@ -5,7 +5,7 @@ if (!defined('KIRPI_CORE_ENTRY')) {
 
 require_action('PATCH', false);
 
-$actor = api_require_token('users.edit');
+$actor = api_require_token('users.edit', 'users:update');
 $id = (int) ($_GET['id'] ?? 0);
 if ($id <= 0) {
     api_error(422, 'Gecersiz kullanici id.');
@@ -179,4 +179,5 @@ try {
     error_log('api users update error: ' . $e->getMessage());
     api_error(500, 'Kullanici guncellenemedi.');
 }
+
 

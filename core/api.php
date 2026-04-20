@@ -77,12 +77,100 @@ function api_token_table_ready(): bool
     return db_table_exists('api_tokens');
 }
 
+function api_token_scope_table_ready(): bool
+{
+    return db_table_exists('api_token_scopes');
+}
+
 function api_token_hash(string $plainToken): string
 {
     return hash('sha256', $plainToken);
 }
 
-function api_issue_token_for_user(int $userId, ?string $tokenName = null, ?int $ttlSeconds = null): ?array
+function api_normalize_scopes(array|string|null $input): array
+{
+    $rawValues = [];
+
+    if (is_array($input)) {
+        $rawValues = $input;
+    } elseif (is_string($input)) {
+        $split = preg_split('/[\s,]+/', $input) ?: [];
+        $rawValues = $split;
+    }
+
+    $scopes = [];
+    foreach ($rawValues as $value) {
+        $scope = strtolower(trim((string) $value));
+        if ($scope === '') {
+            continue;
+        }
+
+        // Allow wildcard and scope tokens like users:read
+        if ($scope !== '*' && preg_match('/^[a-z0-9:_-]{2,80}$/', $scope) !== 1) {
+            continue;
+        }
+
+        $scopes[] = $scope;
+    }
+
+    $scopes = array_values(array_unique($scopes));
+    if (empty($scopes)) {
+        return ['*'];
+    }
+
+    if (in_array('*', $scopes, true)) {
+        return ['*'];
+    }
+
+    return $scopes;
+}
+
+function api_save_token_scopes(int $tokenId, array $scopes): void
+{
+    if ($tokenId <= 0 || !api_token_scope_table_ready()) {
+        return;
+    }
+
+    $normalized = api_normalize_scopes($scopes);
+
+    $insertStmt = db()->prepare("\n        INSERT INTO api_token_scopes (\n            token_id,\n            scope_key\n        ) VALUES (\n            :token_id,\n            :scope_key\n        )\n    ");
+
+    foreach ($normalized as $scope) {
+        try {
+            $insertStmt->execute([
+                ':token_id' => $tokenId,
+                ':scope_key' => $scope,
+            ]);
+        } catch (Throwable $e) {
+            // Ignore duplicate rows to keep idempotent behaviour.
+            if (stripos($e->getMessage(), 'duplicate') === false) {
+                error_log('api save token scope error: ' . $e->getMessage());
+            }
+        }
+    }
+}
+
+function api_list_scopes_for_token(int $tokenId): array
+{
+    if ($tokenId <= 0 || !api_token_scope_table_ready()) {
+        return [];
+    }
+
+    try {
+        $stmt = db()->prepare("\n            SELECT scope_key\n            FROM api_token_scopes\n            WHERE token_id = :token_id\n            ORDER BY scope_key ASC\n        ");
+        $stmt->execute([
+            ':token_id' => $tokenId,
+        ]);
+
+        $rows = $stmt->fetchAll(PDO::FETCH_COLUMN) ?: [];
+        return api_normalize_scopes($rows);
+    } catch (Throwable $e) {
+        error_log('api list token scopes error: ' . $e->getMessage());
+        return [];
+    }
+}
+
+function api_issue_token_for_user(int $userId, ?string $tokenName = null, ?int $ttlSeconds = null, array|string|null $scopes = null): ?array
 {
     if ($userId <= 0 || !api_token_table_ready()) {
         return null;
@@ -93,6 +181,7 @@ function api_issue_token_for_user(int $userId, ?string $tokenName = null, ?int $
     $name = trim((string) ($tokenName ?? 'default')) ?: 'default';
     $ttl = $ttlSeconds ?? (int) env('API_TOKEN_TTL_SECONDS', '2592000');
     $isUnlimited = $ttlSeconds !== null && $ttlSeconds < 0;
+    $normalizedScopes = api_normalize_scopes($scopes ?? ['*']);
 
     if ($isUnlimited) {
         $expiresAt = '2099-12-31 23:59:59';
@@ -111,11 +200,15 @@ function api_issue_token_for_user(int $userId, ?string $tokenName = null, ?int $
         ':expires_at' => $expiresAt,
     ]);
 
+    $tokenId = (int) db()->lastInsertId();
+    api_save_token_scopes($tokenId, $normalizedScopes);
+
     return [
-        'token_id' => (int) db()->lastInsertId(),
+        'token_id' => $tokenId,
         'token' => $plain,
         'expires_at' => $expiresAt,
         'is_unlimited' => $isUnlimited,
+        'scopes' => $normalizedScopes,
     ];
 }
 
@@ -133,7 +226,17 @@ function api_list_tokens_for_user(int $userId, int $limit = 50): array
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        foreach ($rows as &$row) {
+            $tokenId = (int) ($row['id'] ?? 0);
+            $scopes = api_list_scopes_for_token($tokenId);
+            // Backward compatible: old tokens without scope rows are full access.
+            $row['scopes'] = !empty($scopes) ? $scopes : ['*'];
+        }
+        unset($row);
+
+        return $rows;
     } catch (Throwable $e) {
         error_log('api list tokens error: ' . $e->getMessage());
         return [];
@@ -195,9 +298,15 @@ function api_authenticate_by_token(string $plainToken): ?array
         return null;
     }
 
+    $tokenId = (int) ($row['token_id'] ?? 0);
+    $tokenScopes = api_list_scopes_for_token($tokenId);
+    if (empty($tokenScopes)) {
+        $tokenScopes = ['*'];
+    }
+
     $tokenUpdateStmt = db()->prepare("\n        UPDATE api_tokens\n        SET last_used_at = NOW(),\n            updated_at = NOW()\n        WHERE id = :id\n    ");
     $tokenUpdateStmt->execute([
-        ':id' => (int) ($row['token_id'] ?? 0),
+        ':id' => $tokenId,
     ]);
 
     $user = [
@@ -215,7 +324,8 @@ function api_authenticate_by_token(string $plainToken): ?array
 
     return [
         'user' => $user,
-        'token_id' => (int) ($row['token_id'] ?? 0),
+        'token_id' => $tokenId,
+        'token_scopes' => $tokenScopes,
     ];
 }
 
@@ -232,7 +342,23 @@ function api_user_has_permission(array $user, ?string $permission): bool
     return in_array($permission, (array) ($user['permissions'] ?? []), true);
 }
 
-function api_require_token(?string $requiredPermission = null): array
+function api_token_has_scope(array $auth, ?string $requiredScope): bool
+{
+    if ($requiredScope === null || trim($requiredScope) === '') {
+        return true;
+    }
+
+    $requiredScope = strtolower(trim($requiredScope));
+    $tokenScopes = api_normalize_scopes((array) ($auth['token_scopes'] ?? []));
+
+    if (in_array('*', $tokenScopes, true)) {
+        return true;
+    }
+
+    return in_array($requiredScope, $tokenScopes, true);
+}
+
+function api_require_token(?string $requiredPermission = null, ?string $requiredScope = null): array
 {
     $token = api_extract_bearer_token();
     if ($token === null) {
@@ -247,6 +373,10 @@ function api_require_token(?string $requiredPermission = null): array
     $user = (array) ($auth['user'] ?? []);
     if (!api_user_has_permission($user, $requiredPermission)) {
         api_error(403, 'Bu endpoint icin yetkiniz yok.');
+    }
+
+    if (!api_token_has_scope((array) $auth, $requiredScope)) {
+        api_error(403, 'Bu token scope nedeniyle bu endpointe erisemez.');
     }
 
     return $user;

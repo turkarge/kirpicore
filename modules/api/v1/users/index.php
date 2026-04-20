@@ -6,7 +6,7 @@ if (!defined('KIRPI_CORE_ENTRY')) {
 $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 
 if ($method === 'GET') {
-    api_require_token('users.view');
+    api_require_token('users.view', 'users:read');
 
     $page = max(1, (int) ($_GET['page'] ?? 1));
     $perPage = (int) ($_GET['per_page'] ?? 20);
@@ -98,7 +98,7 @@ if ($method === 'GET') {
 }
 
 if ($method === 'POST') {
-    $actor = api_require_token('users.create');
+    $actor = api_require_token('users.create', 'users:create');
     $input = api_json_input();
 
     $name = trim((string) ($input['name'] ?? ''));
@@ -193,3 +193,4 @@ if ($method === 'POST') {
 }
 
 api_error(405, 'Bu endpoint icin yontem desteklenmiyor.');
+
