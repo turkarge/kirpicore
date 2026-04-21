@@ -17,6 +17,7 @@ function auth_lang(string $key, ?string $default = null): string
                 'email' => 'E-posta adresi',
                 'email_placeholder' => 'ornek@alanadi.com',
                 'password' => 'Şifre',
+                'forgot_password' => 'Şifremi unuttum',
                 'password_placeholder' => 'Şifreniz',
                 'show_password' => 'Şifreyi göster',
                 'remember_me' => 'Bu cihazda beni hatırla',

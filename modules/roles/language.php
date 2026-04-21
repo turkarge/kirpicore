@@ -37,6 +37,7 @@ function roles_lang(string $key, ?string $default = null): string
                 // İzinler ve Matris
                 'permissions' => 'İzinler',
                 'permission_matrix' => 'İzin Matrisi',
+                'role_label' => 'Rol',
                 'module' => 'Modül',
                 'module_permissions' => 'İzinler',
                 'select_all' => 'Tümünü Seç',
