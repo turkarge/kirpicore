@@ -202,6 +202,7 @@ if ($tableReady) {
 
     tinymce.init({
         selector: 'textarea.js-mail-template-html',
+        license_key: 'gpl',
         menubar: false,
         height: 360,
         plugins: 'code link lists table autoresize',

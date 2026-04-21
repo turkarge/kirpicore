@@ -410,24 +410,24 @@
                     }
                 });
 
-                const contentType = (response.headers.get("content-type") || "").toLowerCase();
-                let result = null;
+                const responseTextRaw = await response.text();
+                const responseText = responseTextRaw.replace(/^\uFEFF/, "");
 
-                if (contentType.includes("application/json")) {
-                    result = await response.json();
-                } else {
-                    const responseText = await response.text();
+                if (!response.ok && responseText.trim() === "") {
+                    this.toast(`Islem basarisiz oldu (HTTP ${response.status}).`, "error");
+                    return;
+                }
+
+                let result = null;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (parseError) {
                     if (!response.ok) {
                         this.toast(`Islem basarisiz oldu (HTTP ${response.status}).`, "error");
-                        return;
-                    }
-
-                    try {
-                        result = JSON.parse(responseText);
-                    } catch (parseError) {
+                    } else {
                         this.toast("Sunucu beklenmeyen bir yanit dondurdu.", "error");
-                        return;
                     }
+                    return;
                 }
 
                 if (result.message) {
