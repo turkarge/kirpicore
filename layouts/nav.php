@@ -80,43 +80,62 @@ $menu = [
                 'permission' => 'backup.view',
             ],
             [
-                'title' => 'Guvenlik Izleme',
-                'icon' => 'ti ti-shield-check',
-                'url' => 'security/view',
-                'permission' => 'security.view',
-            ],
-            [
-                'title' => 'Health Metrics',
-                'icon' => 'ti ti-activity-heartbeat',
-                'url' => 'health/view',
-                'permission' => 'health.view',
-            ],
-            [
-                'title' => 'API Metrics',
-                'icon' => 'ti ti-chart-line',
-                'url' => 'api/metrics',
-                'permission' => 'health.view',
-            ],
-            [
-                'title' => 'Jobs Queue',
-                'icon' => 'ti ti-clock-play',
-                'url' => 'queue/view',
-                'permission' => 'queue.view',
-            ],
-            [
-                'title' => 'Audit Log',
-                'icon' => 'ti ti-list-details',
-                'url' => 'audit/list',
-                'permission' => 'audit.view',
+                'title' => 'Monitoring / Izleme',
+                'icon' => 'ti ti-radar',
+                'children' => [
+                    [
+                        'title' => 'Guvenlik Izleme',
+                        'icon' => 'ti ti-shield-check',
+                        'url' => 'security/view',
+                        'permission' => 'security.view',
+                    ],
+                    [
+                        'title' => 'Health Metrics',
+                        'icon' => 'ti ti-activity-heartbeat',
+                        'url' => 'health/view',
+                        'permission' => 'health.view',
+                    ],
+                    [
+                        'title' => 'API Metrics',
+                        'icon' => 'ti ti-chart-line',
+                        'url' => 'api/metrics',
+                        'permission' => 'health.view',
+                    ],
+                    [
+                        'title' => 'Jobs Queue',
+                        'icon' => 'ti ti-clock-play',
+                        'url' => 'queue/view',
+                        'permission' => 'queue.view',
+                    ],
+                    [
+                        'title' => 'Audit Log',
+                        'icon' => 'ti ti-list-details',
+                        'url' => 'audit/list',
+                        'permission' => 'audit.view',
+                    ],
+                ],
             ],
         ],
     ],
 ];
 
-$filterVisibleMenuItems = static function (array $items): array {
+$filterVisibleMenuItems = static function (array $items) use (&$filterVisibleMenuItems): array {
     $visibleItems = [];
 
     foreach ($items as $item) {
+        $hasChildren = isset($item['children']) && is_array($item['children']);
+
+        if ($hasChildren) {
+            $visibleChildren = $filterVisibleMenuItems($item['children']);
+            if (empty($visibleChildren)) {
+                continue;
+            }
+
+            $item['children'] = $visibleChildren;
+            $visibleItems[] = $item;
+            continue;
+        }
+
         if (!route_exists($item['url'] ?? '')) {
             continue;
         }
@@ -129,6 +148,22 @@ $filterVisibleMenuItems = static function (array $items): array {
     }
 
     return $visibleItems;
+};
+
+$isMenuItemActive = static function (array $item, string $routePath) use (&$isMenuItemActive): bool {
+    if (!empty($item['url']) && $item['url'] === $routePath) {
+        return true;
+    }
+
+    if (isset($item['children']) && is_array($item['children'])) {
+        foreach ($item['children'] as $childItem) {
+            if ($isMenuItemActive($childItem, $routePath)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 };
 ?>
 
@@ -326,7 +361,7 @@ $filterVisibleMenuItems = static function (array $items): array {
                         $isActive = !$hasChildren && $currentRoutePath === ($item['url'] ?? '');
                         $isChildActive = $hasChildren && array_filter(
                             $visibleChildren,
-                            static fn(array $child): bool => ($child['url'] ?? '') === $currentRoutePath
+                            static fn(array $child): bool => $isMenuItemActive($child, $currentRoutePath)
                         );
                         ?>
 
@@ -344,10 +379,26 @@ $filterVisibleMenuItems = static function (array $items): array {
 
                                 <div class="dropdown-menu">
                                     <?php foreach ($visibleChildren as $child): ?>
-                                        <a class="dropdown-item <?php echo $currentRoutePath === ($child['url'] ?? '') ? 'active' : ''; ?>"
-                                            href="<?php echo base_url($child['url']); ?>">
-                                            <?php echo e($child['title']); ?>
-                                        </a>
+                                        <?php if (isset($child['children']) && is_array($child['children'])): ?>
+                                            <div class="dropdown-header d-flex align-items-center gap-2">
+                                                <?php if (!empty($child['icon'])): ?>
+                                                    <i class="<?php echo e($child['icon']); ?>"></i>
+                                                <?php endif; ?>
+                                                <span><?php echo e($child['title']); ?></span>
+                                            </div>
+                                            <?php foreach ($child['children'] as $subChild): ?>
+                                                <a class="dropdown-item ps-4 <?php echo $currentRoutePath === ($subChild['url'] ?? '') ? 'active' : ''; ?>"
+                                                    href="<?php echo base_url($subChild['url']); ?>">
+                                                    <?php echo e($subChild['title']); ?>
+                                                </a>
+                                            <?php endforeach; ?>
+                                            <div class="dropdown-divider"></div>
+                                        <?php else: ?>
+                                            <a class="dropdown-item <?php echo $currentRoutePath === ($child['url'] ?? '') ? 'active' : ''; ?>"
+                                                href="<?php echo base_url($child['url']); ?>">
+                                                <?php echo e($child['title']); ?>
+                                            </a>
+                                        <?php endif; ?>
                                     <?php endforeach; ?>
                                 </div>
                             </li>
