@@ -162,3 +162,5 @@ Kullanım:
 - Action cevapları tutarlı JSON formatında olur (`status`, `message`, opsiyonel `data`).
 - UI metinleri ve tablo başlıkları dil dosyasından gelir.
 - Yeni modül eklerken önce `module.json` + `language.php` oluşturulur, sonra route/page/action yazılır.
+- Tüm PHP dosyalari `UTF-8 (BOM'suz)` formatta kaydedilmelidir.
+- `language.php` dosyalarinda da ayni kodlama standardi zorunludur; BOM karakteri header/layout cikisinda bosluk sorununa neden olabilir.

@@ -154,6 +154,7 @@ php shell.php db:tables
 - `APP_ENV=production` ve `APP_DEBUG=false` mi?
 - `/healthz` endpoint'i `200` dönüyor mu?
 - Admin girişi ve temel sayfalar açılıyor mu?
+- PHP dosyalari `UTF-8 (BOM'suz)` mu? (ozellikle `language.php` ve layout dosyalari)
 
 ## 7. Sık Karşılaşılan Sorunlar
 

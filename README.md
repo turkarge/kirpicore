@@ -195,11 +195,20 @@ php shell.php db:tables
 
 - `settings/view`: genel ayarlar + eksik tablo/index kurulum aracı
 - `settings/modules`: modül yönetimi (enable/disable, bağımlılık kontrolü)
+- `settings/menu-management`: menü yönetimi (manifestten gelen menü öğeleri, ağırlık ve yerleşim görünümü)
 - `security/view`: güvenlik izleme paneli
 - `health/view`: sağlık + metrikler paneli
 - `backup/view`: backup/restore/download/delete
 - `queue/view`: iş kuyruğu yönetimi
 - `mail/test` ve `mail/templates`: posta testi + şablon yönetimi
+
+Menü davranış standardı:
+
+- `Dashboard` her zaman ilk sıradadır (sabit).
+- `Yönetim` her zaman son sıradadır (sabit).
+- Diğer menüler `modules/<module>/module.json` içindeki `menu` alanından üretilir.
+- `placement=management` ve `group=monitoring` olan öğeler Yönetim altında `Monitoring / Izleme` grubuna alınır.
+- Menü etiketleri için `title_key` + `<module>_lang()` kullanımı önerilen standarttır.
 
 ## 7. REST API (v1)
 
@@ -308,3 +317,4 @@ Kapsayıcı kullanıcısının (`www-data`) yazma izni olmalı.
 
 - Modül mimarisinde `module.json` geriye uyumlu tasarlanmıştır; olmayan modüller yine çalışır.
 - Çekirdek modül bağımlılıkları nedeniyle bazı modüller devre dışı bırakılamaz.
+- Projedeki tüm PHP dosyaları `UTF-8 (BOM'suz)` formatta tutulmalıdır.
