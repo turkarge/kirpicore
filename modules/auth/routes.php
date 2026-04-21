@@ -15,6 +15,13 @@ return [
         'auth' => false,
         'method' => 'GET',
     ],
+    'auth/reset-password' => [
+        'file' => 'modules/auth/pages/reset_password.php',
+        'layout' => false,
+        'permission' => null,
+        'auth' => false,
+        'method' => 'GET',
+    ],
     'auth/terms' => [
         'file' => 'modules/auth/pages/terms.php',
         'layout' => false,
@@ -31,6 +38,20 @@ return [
     ],
     'auth/actions/login' => [
         'file' => 'modules/auth/actions/login.php',
+        'layout' => false,
+        'permission' => null,
+        'auth' => false,
+        'method' => 'POST',
+    ],
+    'auth/actions/forgot-password' => [
+        'file' => 'modules/auth/actions/forgot_password.php',
+        'layout' => false,
+        'permission' => null,
+        'auth' => false,
+        'method' => 'POST',
+    ],
+    'auth/actions/reset-password' => [
+        'file' => 'modules/auth/actions/reset_password.php',
         'layout' => false,
         'permission' => null,
         'auth' => false,
