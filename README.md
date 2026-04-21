@@ -333,6 +333,37 @@ Ozellikler:
 - Env tabanli mail konfigurasyon durumunu listeler
 - Test e-posta gonderimi yapar
 - Son 20 gonderim kaydini (mail log) gosterir
+- Mail sablon yonetim ekranina gecis saglar (`mail/templates`)
+
+### Mail Sablon Yonetimi
+
+Yonetim menusu altinda `Mail Sablonlari` ekrani bulunur.
+
+- Route: `mail/templates`
+- Permission: `mail.view`
+
+Ozellikler:
+
+- Yeni sablon olusturma
+- Var olan sablonlari duzenleme
+- Ozel sablon silme
+- Sistem sablonlarini koruma (`is_system=1`, silinemez)
+- Placeholder listesi gosterimi
+- TinyMCE ile HTML govde duzenleme
+
+Core tarafinda varsayilan sablonlar otomatik senkronlanir:
+
+- `auth.password_reset`
+- `queue.test_mail`
+- `mail.test_manual`
+- `users.session_dropped`
+- `users.lock_key_reset`
+
+Notlar:
+
+- Sablon tablosu: `mail_templates`
+- Kurulum sonrasi gerekirse `Ayarlar -> Eksikleri Kur` calistirin
+- Detayli dokuman: `docs/MAIL_TEMPLATES.md`
 
 Not:
 
