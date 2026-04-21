@@ -72,6 +72,6 @@ try {
     error_log('mail template create error: ' . $e->getMessage());
     json_response([
         'status' => 'error',
-        'message' => mail_lang('template_save_error'),
+        'message' => APP_DEBUG ? (mail_lang('template_save_error') . ' [' . $e->getMessage() . ']') : mail_lang('template_save_error'),
     ], 500);
 }
