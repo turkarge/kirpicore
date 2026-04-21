@@ -89,7 +89,8 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
         </button>
 
         <div class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-            <a href="<?php echo base_url(APP_DEFAULT_ROUTE); ?>" class="text-decoration-none text-reset">
+            <a href="<?php echo base_url(APP_DEFAULT_ROUTE); ?>" class="text-decoration-none text-reset d-inline-flex align-items-center gap-2">
+                <img src="<?php echo asset_url('img/logo.svg'); ?>" alt="<?php echo e(app_name()); ?>" class="kirpi-brand-logo">
                 <?php echo e(app_name()); ?>
             </a>
         </div>

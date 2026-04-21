@@ -19,6 +19,12 @@ body {
     font-weight: 700;
 }
 
+.kirpi-brand-logo {
+    height: 28px;
+    width: auto;
+    display: inline-block;
+}
+
 .nav-link-icon {
     display: inline-flex;
     align-items: center;
