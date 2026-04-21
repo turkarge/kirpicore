@@ -9,5 +9,16 @@
     "requires":  [
 
                  ],
-    "author":  "Kirpi Core"
+    "author":  "Kirpi Core",
+    "menu":  [
+                 {
+                     "title":  "Bildirimler",
+                     "icon":  "ti ti-bell",
+                     "url":  "notifications/list",
+                     "permission":  "notifications.view",
+                     "placement":  "management",
+                     "group":  "default",
+                     "weight":  120
+                 }
+             ]
 }

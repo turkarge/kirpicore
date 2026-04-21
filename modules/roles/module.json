@@ -9,5 +9,16 @@
     "requires":  [
 
                  ],
-    "author":  "Kirpi Core"
+    "author":  "Kirpi Core",
+    "menu":  [
+                 {
+                     "title":  "Roller",
+                     "icon":  "ti ti-shield",
+                     "url":  "roles/view",
+                     "permission":  "roles.view",
+                     "placement":  "management",
+                     "group":  "default",
+                     "weight":  110
+                 }
+             ]
 }

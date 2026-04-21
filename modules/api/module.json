@@ -9,5 +9,16 @@
     "requires":  [
 
                  ],
-    "author":  "Kirpi Core"
+    "author":  "Kirpi Core",
+    "menu":  [
+                 {
+                     "title":  "API Metrics",
+                     "icon":  "ti ti-chart-line",
+                     "url":  "api/metrics",
+                     "permission":  "health.view",
+                     "placement":  "management",
+                     "group":  "monitoring",
+                     "weight":  530
+                 }
+             ]
 }

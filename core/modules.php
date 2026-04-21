@@ -14,6 +14,7 @@ function kirpi_module_manifest_defaults(string $moduleKey): array
         'load_order' => 100,
         'requires' => [],
         'author' => 'Kirpi Core',
+        'menu' => [],
     ];
 }
 
@@ -51,6 +52,40 @@ function kirpi_load_module_manifest(string $moduleDir): array
     $merged['load_order'] = max(0, (int) ($merged['load_order'] ?? 100));
     $merged['requires'] = is_array($merged['requires'] ?? null) ? array_values($merged['requires']) : [];
     $merged['author'] = trim((string) ($merged['author'] ?? 'Kirpi Core')) ?: 'Kirpi Core';
+    $merged['menu'] = [];
+    if (isset($decoded['menu']) && is_array($decoded['menu'])) {
+        foreach ($decoded['menu'] as $menuItem) {
+            if (!is_array($menuItem)) {
+                continue;
+            }
+
+            $title = trim((string) ($menuItem['title'] ?? ''));
+            $url = trim((string) ($menuItem['url'] ?? ''));
+            if ($title === '' || $url === '') {
+                continue;
+            }
+
+            $placement = strtolower(trim((string) ($menuItem['placement'] ?? 'management')));
+            if (!in_array($placement, ['top', 'management'], true)) {
+                $placement = 'management';
+            }
+
+            $group = strtolower(trim((string) ($menuItem['group'] ?? 'default')));
+            if ($group === '') {
+                $group = 'default';
+            }
+
+            $merged['menu'][] = [
+                'title' => $title,
+                'icon' => trim((string) ($menuItem['icon'] ?? 'ti ti-point')),
+                'url' => $url,
+                'permission' => isset($menuItem['permission']) ? trim((string) $menuItem['permission']) : null,
+                'placement' => $placement,
+                'group' => $group,
+                'weight' => (int) ($menuItem['weight'] ?? 500),
+            ];
+        }
+    }
     $merged['_source'] = 'module.json';
 
     return $merged;

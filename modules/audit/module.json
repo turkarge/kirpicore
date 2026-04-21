@@ -9,5 +9,16 @@
     "requires":  [
 
                  ],
-    "author":  "Kirpi Core"
+    "author":  "Kirpi Core",
+    "menu":  [
+                 {
+                     "title":  "Audit Log",
+                     "icon":  "ti ti-list-details",
+                     "url":  "audit/list",
+                     "permission":  "audit.view",
+                     "placement":  "management",
+                     "group":  "monitoring",
+                     "weight":  550
+                 }
+             ]
 }

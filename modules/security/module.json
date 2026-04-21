@@ -9,5 +9,16 @@
     "requires":  [
 
                  ],
-    "author":  "Kirpi Core"
+    "author":  "Kirpi Core",
+    "menu":  [
+                 {
+                     "title":  "Guvenlik Izleme",
+                     "icon":  "ti ti-shield-check",
+                     "url":  "security/view",
+                     "permission":  "security.view",
+                     "placement":  "management",
+                     "group":  "monitoring",
+                     "weight":  510
+                 }
+             ]
 }

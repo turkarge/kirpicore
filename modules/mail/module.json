@@ -9,5 +9,25 @@
     "requires":  [
 
                  ],
-    "author":  "Kirpi Core"
+    "author":  "Kirpi Core",
+    "menu":  [
+                 {
+                     "title":  "Mail Test",
+                     "icon":  "ti ti-mail",
+                     "url":  "mail/test",
+                     "permission":  "mail.view",
+                     "placement":  "management",
+                     "group":  "default",
+                     "weight":  130
+                 },
+                 {
+                     "title":  "Mail Sablonlari",
+                     "icon":  "ti ti-mail-cog",
+                     "url":  "mail/templates",
+                     "permission":  "mail.view",
+                     "placement":  "management",
+                     "group":  "default",
+                     "weight":  131
+                 }
+             ]
 }

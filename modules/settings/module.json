@@ -9,5 +9,43 @@
     "requires":  [
 
                  ],
-    "author":  "Kirpi Core"
+    "author":  "Kirpi Core",
+    "menu":  [
+                 {
+                     "title":  "Ayarlar",
+                     "icon":  "ti ti-adjustments",
+                     "url":  "settings/view",
+                     "permission":  "settings.view",
+                     "placement":  "management",
+                     "group":  "default",
+                     "weight":  200
+                 },
+                 {
+                     "title":  "API Test",
+                     "icon":  "ti ti-api",
+                     "url":  "settings/api-test",
+                     "permission":  "settings.view",
+                     "placement":  "management",
+                     "group":  "default",
+                     "weight":  210
+                 },
+                 {
+                     "title":  "Moduller",
+                     "icon":  "ti ti-packages",
+                     "url":  "settings/modules",
+                     "permission":  "settings.view",
+                     "placement":  "management",
+                     "group":  "default",
+                     "weight":  220
+                 },
+                 {
+                     "title":  "Menu Yonetimi",
+                     "icon":  "ti ti-layout-navbar",
+                     "url":  "settings/menu-management",
+                     "permission":  "settings.view",
+                     "placement":  "management",
+                     "group":  "default",
+                     "weight":  230
+                 }
+             ]
 }

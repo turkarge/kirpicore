@@ -56,6 +56,54 @@ Notlar:
 - `load_order` (int): Modül yükleme sırası (küçükten büyüğe).
 - `requires` (array<string>): Gelecekte bağımlılık kontrolü için ayrılan alan.
 - `author` (string): Modül geliştirici bilgisi.
+- `menu` (array<object>): Modülün navigasyona eklemek istediği menü öğeleri.
+
+## Menü Standardı (`module.json > menu`)
+
+Kirpi Core, menüleri artık modül manifestlerinden üretir.
+
+Sabit kurallar:
+
+- `Dashboard` her zaman ilk sıradadır (`weight=1`, sabit).
+- `Yönetim` her zaman son sıradadır (`weight=999`, sabit).
+- Modüllerden gelen tüm menüler bu iki sabit öğe arasına veya `Yönetim` altına yerleşir.
+
+`menu` öğesi alanları:
+
+- `title` (string, zorunlu): Menüde görünen başlık
+- `icon` (string, opsiyonel): Tabler icon class (örn: `ti ti-users`)
+- `url` (string, zorunlu): Route path (örn: `users/view`)
+- `permission` (string|null, opsiyonel): Yetki kontrol anahtarı
+- `placement` (string): `top` veya `management`
+- `group` (string): `management` içindeki grup anahtarı (`default`, `monitoring`, ...)
+- `weight` (int): Sıralama ağırlığı (küçük değer önce gelir)
+
+Notlar:
+
+- `placement=top`: Dashboard ile Yönetim arasında üst menüde gösterilir.
+- `placement=management`: Yönetim dropdown içinde gösterilir.
+- `group=monitoring`: Yönetim altında `Monitoring / İzleme` alt grubuna otomatik alınır.
+- Route mevcut değilse veya kullanıcının yetkisi yoksa menü öğesi otomatik gizlenir.
+
+Örnek:
+
+```json
+{
+  "key": "users",
+  "name": "Users",
+  "menu": [
+    {
+      "title": "Kullanicilar",
+      "icon": "ti ti-users",
+      "url": "users/view",
+      "permission": "users.view",
+      "placement": "management",
+      "group": "default",
+      "weight": 100
+    }
+  ]
+}
+```
 
 ## Dil Dosyası Standardı (`language.php`)
 

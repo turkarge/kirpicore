@@ -22,6 +22,13 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'settings/menu-management' => [
+        'file' => 'modules/settings/pages/menu_management.php',
+        'layout' => true,
+        'permission' => 'settings.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
     'ajax/settings/session' => [
         'file' => 'modules/settings/modals/session.php',
         'layout' => false,

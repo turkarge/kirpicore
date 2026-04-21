@@ -9,5 +9,16 @@
     "requires":  [
 
                  ],
-    "author":  "Kirpi Core"
+    "author":  "Kirpi Core",
+    "menu":  [
+                 {
+                     "title":  "Jobs Queue",
+                     "icon":  "ti ti-clock-play",
+                     "url":  "queue/view",
+                     "permission":  "queue.view",
+                     "placement":  "management",
+                     "group":  "monitoring",
+                     "weight":  540
+                 }
+             ]
 }

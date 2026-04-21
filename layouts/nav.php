@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
@@ -14,110 +14,7 @@ $canUseLockFeature = $user
     && kirpi_auth_lock_schema_ready()
     && !empty($user['lock_enabled']);
 
-$menu = [
-    [
-        'title' => 'Dashboard',
-        'icon' => 'ti ti-home',
-        'url' => 'dashboard/view',
-        'permission' => null,
-    ],
-    [
-        'title' => 'Yönetim',
-        'icon' => 'ti ti-settings',
-        'children' => [
-            [
-                'title' => 'Kullanıcılar',
-                'icon' => 'ti ti-users',
-                'url' => 'users/view',
-                'permission' => 'users.view',
-            ],
-            [
-                'title' => 'Roller',
-                'icon' => 'ti ti-shield',
-                'url' => 'roles/view',
-                'permission' => 'roles.view',
-            ],
-            [
-                'title' => 'Bildirimler',
-                'icon' => 'ti ti-bell',
-                'url' => 'notifications/list',
-                'permission' => 'notifications.view',
-            ],
-            [
-                'title' => 'Mail Test',
-                'icon' => 'ti ti-mail',
-                'url' => 'mail/test',
-                'permission' => 'mail.view',
-            ],
-            [
-                'title' => 'Mail Sablonlari',
-                'icon' => 'ti ti-mail-cog',
-                'url' => 'mail/templates',
-                'permission' => 'mail.view',
-            ],
-            [
-                'title' => 'Ayarlar',
-                'icon' => 'ti ti-adjustments',
-                'url' => 'settings/view',
-                'permission' => 'settings.view',
-            ],
-            [
-                'title' => 'API Test',
-                'icon' => 'ti ti-api',
-                'url' => 'settings/api-test',
-                'permission' => 'settings.view',
-            ],
-            [
-                'title' => 'Moduller',
-                'icon' => 'ti ti-packages',
-                'url' => 'settings/modules',
-                'permission' => 'settings.view',
-            ],
-            [
-                'title' => 'Backup Restore',
-                'icon' => 'ti ti-database-export',
-                'url' => 'backup/view',
-                'permission' => 'backup.view',
-            ],
-            [
-                'title' => 'Monitoring / Izleme',
-                'icon' => 'ti ti-radar',
-                'children' => [
-                    [
-                        'title' => 'Guvenlik Izleme',
-                        'icon' => 'ti ti-shield-check',
-                        'url' => 'security/view',
-                        'permission' => 'security.view',
-                    ],
-                    [
-                        'title' => 'Health Metrics',
-                        'icon' => 'ti ti-activity-heartbeat',
-                        'url' => 'health/view',
-                        'permission' => 'health.view',
-                    ],
-                    [
-                        'title' => 'API Metrics',
-                        'icon' => 'ti ti-chart-line',
-                        'url' => 'api/metrics',
-                        'permission' => 'health.view',
-                    ],
-                    [
-                        'title' => 'Jobs Queue',
-                        'icon' => 'ti ti-clock-play',
-                        'url' => 'queue/view',
-                        'permission' => 'queue.view',
-                    ],
-                    [
-                        'title' => 'Audit Log',
-                        'icon' => 'ti ti-list-details',
-                        'url' => 'audit/list',
-                        'permission' => 'audit.view',
-                    ],
-                ],
-            ],
-        ],
-    ],
-];
+$menu = function_exists('kirpi_navigation_menu_tree') ? kirpi_navigation_menu_tree() : [];
 
 $filterVisibleMenuItems = static function (array $items) use (&$filterVisibleMenuItems): array {
     $visibleItems = [];
@@ -170,7 +67,7 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
 <header class="navbar navbar-expand-md d-print-none">
     <div class="container-xl">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu"
-            aria-controls="navbar-menu" aria-expanded="false" aria-label="Menüyü Aç/Kapat">
+            aria-controls="navbar-menu" aria-expanded="false" aria-label="MenÃ¼yÃ¼ AÃ§/Kapat">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -292,7 +189,7 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
 
                 <div class="nav-item dropdown">
                     <a href="#" id="user-menu-trigger" class="nav-link d-flex lh-1 text-reset p-0 dropdown-toggle"
-                        data-bs-toggle="dropdown" aria-label="Kullanıcı Menüsü" aria-expanded="false">
+                        data-bs-toggle="dropdown" aria-label="KullanÄ±cÄ± MenÃ¼sÃ¼" aria-expanded="false">
                         <?php if ($userAvatarUrl): ?>
                             <span class="avatar avatar-sm" style="background-image: url('<?php echo e($userAvatarUrl); ?>')"></span>
                         <?php else: ?>
@@ -327,7 +224,7 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                             data-ajax="true">
                             <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                             <button type="submit" class="dropdown-item w-100 text-start border-0 bg-transparent">
-                                Çıkış
+                                Ã‡Ä±kÄ±ÅŸ
                             </button>
                         </form>
                     </div>
@@ -429,3 +326,4 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
         </div>
     </div>
 </header>
+

@@ -7,6 +7,7 @@ require_once BASE_PATH . '/core/audit.php';
 require_once BASE_PATH . '/core/settings.php';
 require_once BASE_PATH . '/core/permissions.php';
 require_once BASE_PATH . '/core/modules.php';
+require_once BASE_PATH . '/core/navigation.php';
 require_once BASE_PATH . '/core/mail.php';
 require_once BASE_PATH . '/core/queue.php';
 require_once BASE_PATH . '/core/backup.php';

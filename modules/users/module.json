@@ -9,5 +9,16 @@
     "requires":  [
 
                  ],
-    "author":  "Kirpi Core"
+    "author":  "Kirpi Core",
+    "menu":  [
+                 {
+                     "title":  "Kullanicilar",
+                     "icon":  "ti ti-users",
+                     "url":  "users/view",
+                     "permission":  "users.view",
+                     "placement":  "management",
+                     "group":  "default",
+                     "weight":  100
+                 }
+             ]
 }

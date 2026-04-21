@@ -9,5 +9,16 @@
     "requires":  [
 
                  ],
-    "author":  "Kirpi Core"
+    "author":  "Kirpi Core",
+    "menu":  [
+                 {
+                     "title":  "Backup Restore",
+                     "icon":  "ti ti-database-export",
+                     "url":  "backup/view",
+                     "permission":  "backup.view",
+                     "placement":  "management",
+                     "group":  "default",
+                     "weight":  300
+                 }
+             ]
 }
