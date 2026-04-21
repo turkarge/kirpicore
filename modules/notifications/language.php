@@ -11,52 +11,52 @@ function notifications_lang(string $key, ?string $default = null): string
     if ($dictionary === null) {
         $dictionary = [
             'tr' => [
-                // Genel BaÅŸlÄ±klar
-                'communication_center' => 'Ä°letiÅŸim Merkezi',
+                // Genel Başlıklar
+                'communication_center' => 'İletişim Merkezi',
                 'notifications' => 'Bildirimler',
                 'settings' => 'Ayarlar',
 
                 // Bildirim Listesi
-                'search_placeholder' => 'BaÅŸlÄ±k veya mesaj ara...',
-                'all_statuses' => 'TÃ¼m Durumlar',
-                'status_unread' => 'OkunmadÄ±',
+                'search_placeholder' => 'Başlık veya mesaj ara...',
+                'all_statuses' => 'Tüm Durumlar',
+                'status_unread' => 'Okunmadı',
                 'status_read' => 'Okundu',
                 'table_notification' => 'Bildirim',
                 'table_channel' => 'Kanal',
                 'table_status' => 'Durum',
                 'table_date' => 'Tarih',
-                'no_records' => 'KayÄ±t bulunamadÄ±.',
+                'no_records' => 'Kayıt bulunamadı.',
                 'mark_read' => 'Okundu Yap',
-                'mark_all_read' => 'TÃ¼mÃ¼nÃ¼ Okundu Yap',
+                'mark_all_read' => 'Tümünü Okundu Yap',
 
-                // Bildirim AyarlarÄ±
+                // Bildirim Ayarları
                 'settings_center' => 'Bildirim Merkezi',
-                'settings_title' => 'Bildirim AyarlarÄ±',
-                'back_to_list' => 'Listeye DÃ¶n',
-                'email_enabled' => 'E-posta bildirimleri aÃ§Ä±k olsun',
-                'in_app_enabled' => 'Uygulama iÃ§i bildirimler aÃ§Ä±k olsun',
-                'save_settings' => 'AyarlarÄ± Kaydet',
+                'settings_title' => 'Bildirim Ayarları',
+                'back_to_list' => 'Listeye Dön',
+                'email_enabled' => 'E-posta bildirimleri açık olsun',
+                'in_app_enabled' => 'Uygulama içi bildirimler açık olsun',
+                'save_settings' => 'Ayarları Kaydet',
                 'default_channel' => 'in_app',
 
-                // Hata ve Bilgilendirme MesajlarÄ±
-                'tables_missing' => 'Bildirim tablolarÄ± henÃ¼z kurulu deÄŸil. Ã–nce modules/notifications/database/schema.sql dosyasÄ±nÄ± Ã§alÄ±ÅŸtÄ±rÄ±n.',
-                'table_missing_short' => 'Bildirim tablosu henÃ¼z kurulu deÄŸil.',
-                'table_waiting' => 'Bildirim tablosu hazÄ±r olduÄŸunda liste burada gÃ¶rÃ¼necek.',
-                'settings_table_missing' => 'Bildirim ayarlarÄ± tablosu henÃ¼z kurulu deÄŸil. Ã–nce database/notifications.sql dosyasÄ±nÄ± Ã§alÄ±ÅŸtÄ±rÄ±n.',
-                'table_not_ready' => 'Bildirim tablosu henÃ¼z kurulu deÄŸil.',
-                'settings_table_not_ready' => 'Bildirim ayarlarÄ± tablosu henÃ¼z kurulu deÄŸil.',
+                // Hata ve Bilgilendirme Mesajları
+                'tables_missing' => 'Bildirim tabloları henüz kurulu değil. Önce modules/notifications/database/schema.sql dosyasını çalıştırın.',
+                'table_missing_short' => 'Bildirim tablosu henüz kurulu değil.',
+                'table_waiting' => 'Bildirim tablosu hazır olduğunda liste burada görünecek.',
+                'settings_table_missing' => 'Bildirim ayarları tablosu henüz kurulu değil. Önce database/notifications.sql dosyasını çalıştırın.',
+                'table_not_ready' => 'Bildirim tablosu henüz kurulu değil.',
+                'settings_table_not_ready' => 'Bildirim ayarları tablosu henüz kurulu değil.',
 
                 // Aksiyon ve Hata Bildirimleri
-                'csrf_failed' => 'GÃ¼venlik doÄŸrulamasÄ± baÅŸarÄ±sÄ±z oldu.',
-                'invalid_request' => 'GeÃ§ersiz istek.',
-                'invalid_session' => 'GeÃ§ersiz kullanÄ±cÄ± oturumu.',
-                'mark_read_success' => 'Bildirim okundu olarak iÅŸaretlendi.',
-                'mark_read_error' => 'Bildirim gÃ¼ncellenirken bir hata oluÅŸtu.',
-                'mark_all_read_success' => 'TÃ¼m bildirimler okundu olarak iÅŸaretlendi.',
-                'mark_all_read_error' => 'Bildirimler gÃ¼ncellenirken bir hata oluÅŸtu.',
-                'settings_update_success' => 'Bildirim ayarlarÄ± baÅŸarÄ±yla gÃ¼ncellendi.',
-                'settings_update_error' => 'Bildirim ayarlarÄ± gÃ¼ncellenirken bir hata oluÅŸtu.',
-                'list_load_error' => 'Bildirim listesi yÃ¼klenirken bir hata oluÅŸtu.',
+                'csrf_failed' => 'Güvenlik doğrulaması başarısız oldu.',
+                'invalid_request' => 'Geçersiz istek.',
+                'invalid_session' => 'Geçersiz kullanıcı oturumu.',
+                'mark_read_success' => 'Bildirim okundu olarak işaretlendi.',
+                'mark_read_error' => 'Bildirim güncellenirken bir hata oluştu.',
+                'mark_all_read_success' => 'Tüm bildirimler okundu olarak işaretlendi.',
+                'mark_all_read_error' => 'Bildirimler güncellenirken bir hata oluştu.',
+                'settings_update_success' => 'Bildirim ayarları başarıyla güncellendi.',
+                'settings_update_error' => 'Bildirim ayarları güncellenirken bir hata oluştu.',
+                'list_load_error' => 'Bildirim listesi yüklenirken bir hata oluştu.',
                 'nav_bell_aria' => 'Bildirimleri goster',
                 'nav_new_badge' => 'Yeni',
                 'nav_empty' => 'Henuz bildiriminiz bulunmuyor.',
