@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
@@ -14,6 +14,9 @@ function settings_lang(string $key, ?string $default = null): string
                 // Sistem ve Ayarlar
                 'system_management' => 'Sistem Yönetimi',
                 'settings' => 'Ayarlar',
+                'nav_toggle' => 'Menuyu Ac/Kapat',
+                'nav_management' => 'Yonetim',
+                'nav_monitoring' => 'Monitoring / Izleme',
                 'session_data' => 'Session Verileri',
                 'settings_table_missing' => 'Ayarlar tablosu kurulu değil. Kurulum için setup veya db:install çalıştırın.',
                 'system_check' => 'Sistem Kontrol ve Eksik Kurulum',
@@ -120,6 +123,9 @@ function settings_lang(string $key, ?string $default = null): string
             'en' => [
                 'system_management' => 'System Management',
                 'settings' => 'Settings',
+                'nav_toggle' => 'Toggle Menu',
+                'nav_management' => 'Management',
+                'nav_monitoring' => 'Monitoring',
                 'session_data' => 'Session Data',
                 'settings_table_missing' => 'Settings table is not installed. Run setup or db:install.',
                 'system_check' => 'System Check and Missing Install',
@@ -192,7 +198,7 @@ function settings_lang(string $key, ?string $default = null): string
                 'module_key_required' => 'Module key is required.',
                 'module_update_failed' => 'Module status could not be updated.',
                 'module_updated' => 'Module status updated.',
-                                'menu_management' => 'Menu Management',
+                'menu_management' => 'Menu Management',
                 'menu_management_note' => 'Menu structure is generated automatically from module.json menu definitions.',
                 'fixed_menu_items' => 'Fixed Menu Items',
                 'top_menu_items' => 'Top Menu Items',
@@ -229,3 +235,4 @@ function settings_lang(string $key, ?string $default = null): string
 
     return $default ?? $key;
 }
+

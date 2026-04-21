@@ -1,7 +1,12 @@
-﻿<?php
+<?php
 if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
+
+require_once BASE_PATH . '/modules/settings/language.php';
+require_once BASE_PATH . '/modules/notifications/language.php';
+require_once BASE_PATH . '/modules/profile/language.php';
+require_once BASE_PATH . '/modules/auth/language.php';
 
 $user = current_user();
 $currentRoutePath = $GLOBALS['current_route_path'] ?? '';
@@ -13,6 +18,18 @@ $userAvatarUrl = !empty($user['avatar'])
 $canUseLockFeature = $user
     && kirpi_auth_lock_schema_ready()
     && !empty($user['lock_enabled']);
+
+$navToggleLabel = settings_lang('nav_toggle', 'Menuyu Ac/Kapat');
+$navBellAria = notifications_lang('nav_bell_aria', notifications_lang('notifications', 'Notifications'));
+$navNotificationsTitle = notifications_lang('notifications', 'Notifications');
+$navNotificationsNew = notifications_lang('nav_new_badge', 'New');
+$navNotificationsEmpty = notifications_lang('nav_empty', 'No notifications');
+$navViewAllNotifications = notifications_lang('nav_view_all', 'View all notifications');
+$navProfileLabel = profile_lang('profile', 'Profile');
+$navUserMenuAria = profile_lang('nav_user_menu', 'User Menu');
+$navUserFallback = profile_lang('user_fallback', 'User');
+$navLockAction = auth_lang('nav_lock_session', 'Lock Session');
+$navLogout = auth_lang('nav_logout', 'Logout');
 
 $menu = function_exists('kirpi_navigation_menu_tree') ? kirpi_navigation_menu_tree() : [];
 
@@ -67,7 +84,7 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
 <header class="navbar navbar-expand-md d-print-none">
     <div class="container-xl">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu"
-            aria-controls="navbar-menu" aria-expanded="false" aria-label="MenÃ¼yÃ¼ AÃ§/Kapat">
+            aria-controls="navbar-menu" aria-expanded="false" aria-label="<?php echo e($navToggleLabel); ?>">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -84,7 +101,7 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                         <a href="#"
                             class="nav-link px-0 position-relative js-notification-bell <?php echo $currentRoutePath === 'notifications/list' ? 'active' : ''; ?> <?php echo $unreadNotificationsCount > 0 ? 'kirpi-bell-has-unread' : ''; ?>"
                             data-unread-count="<?php echo (int) $unreadNotificationsCount; ?>"
-                            data-bs-toggle="dropdown" tabindex="-1" aria-label="Bildirimleri goster" aria-expanded="false">
+                            data-bs-toggle="dropdown" tabindex="-1" aria-label="<?php echo e($navBellAria); ?>" aria-expanded="false">
                             <i class="ti ti-bell fs-2 kirpi-bell-icon"></i>
                             <?php if ($unreadNotificationsCount > 0): ?>
                                 <span class="badge bg-red badge-notification badge-pill position-absolute top-0 start-100 translate-middle js-notification-dot"></span>
@@ -94,16 +111,16 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                         <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card" style="min-width: 24rem;">
                             <div class="card">
                                 <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h3 class="card-title m-0">Bildirimler</h3>
+                                    <h3 class="card-title m-0"><?php echo e($navNotificationsTitle); ?></h3>
                                     <?php if ($unreadNotificationsCount > 0): ?>
-                                        <span class="badge bg-red-lt">Yeni</span>
+                                        <span class="badge bg-red-lt"><?php echo e($navNotificationsNew); ?></span>
                                     <?php endif; ?>
                                 </div>
 
                                 <div class="list-group list-group-flush list-group-hoverable">
                                     <?php if (empty($recentNotifications)): ?>
                                         <div class="list-group-item text-secondary">
-                                            Henuz bildiriminiz bulunmuyor.
+                                            <?php echo e($navNotificationsEmpty); ?>
                                         </div>
                                     <?php else: ?>
                                         <?php foreach ($recentNotifications as $notification): ?>
@@ -128,7 +145,7 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                                                         <span class="status-dot <?php echo $isUnread ? 'status-dot-animated bg-red' : 'bg-secondary'; ?> d-block js-notification-item-dot"></span>
                                                     </div>
                                                     <div class="col text-truncate">
-                                                        <div class="text-body d-block"><?php echo e($notification['title'] ?? 'Bildirim'); ?></div>
+                                                        <div class="text-body d-block"><?php echo e($notification['title'] ?? $navNotificationsTitle); ?></div>
                                                         <div class="d-block text-secondary text-truncate mt-1">
                                                             <?php echo e($notification['message'] ?? ''); ?>
                                                         </div>
@@ -144,7 +161,7 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
 
                                 <div class="card-footer text-center">
                                     <a href="<?php echo base_url('notifications/list'); ?>" class="btn btn-sm btn-ghost-secondary w-100">
-                                        Tum bildirimleri gor
+                                        <?php echo e($navViewAllNotifications); ?>
                                     </a>
                                 </div>
                             </div>
@@ -155,7 +172,7 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                         <a href="<?php echo base_url('notifications/list'); ?>"
                             class="nav-link px-0 position-relative js-notification-bell <?php echo $currentRoutePath === 'notifications/list' ? 'active' : ''; ?> <?php echo $unreadNotificationsCount > 0 ? 'kirpi-bell-has-unread' : ''; ?>"
                             data-unread-count="<?php echo (int) $unreadNotificationsCount; ?>"
-                            aria-label="Bildirimler">
+                            aria-label="<?php echo e($navNotificationsTitle); ?>">
                             <i class="ti ti-bell fs-2 kirpi-bell-icon"></i>
                             <?php if ($unreadNotificationsCount > 0): ?>
                                 <span class="badge bg-red badge-notification badge-pill position-absolute top-0 start-100 translate-middle js-notification-dot"></span>
@@ -171,9 +188,8 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                             <button
                                 type="submit"
                                 class="nav-link px-0 border-0 bg-transparent"
-                                title="Oturumu Kilitle"
-                                aria-label="Oturumu Kilitle"
-                            >
+                                title="<?php echo e($navLockAction); ?>"
+                                aria-label="<?php echo e($navLockAction); ?>">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-user-key">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                     <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
@@ -189,17 +205,17 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
 
                 <div class="nav-item dropdown">
                     <a href="#" id="user-menu-trigger" class="nav-link d-flex lh-1 text-reset p-0 dropdown-toggle"
-                        data-bs-toggle="dropdown" aria-label="KullanÄ±cÄ± MenÃ¼sÃ¼" aria-expanded="false">
+                        data-bs-toggle="dropdown" aria-label="<?php echo e($navUserMenuAria); ?>" aria-expanded="false">
                         <?php if ($userAvatarUrl): ?>
                             <span class="avatar avatar-sm" style="background-image: url('<?php echo e($userAvatarUrl); ?>')"></span>
                         <?php else: ?>
                             <span class="avatar avatar-sm">
-                                <?php echo e(mb_strtoupper(mb_substr($user['name'] ?? 'U', 0, 1))); ?>
+                                <?php echo e(mb_strtoupper(mb_substr($user['name'] ?? $navUserFallback, 0, 1))); ?>
                             </span>
                         <?php endif; ?>
 
                         <div class="d-none d-xl-block ps-2">
-                            <div><?php echo e($user['name'] ?? 'User'); ?></div>
+                            <div><?php echo e($user['name'] ?? $navUserFallback); ?></div>
                             <div class="mt-1 small text-secondary">
                                 <?php echo e($user['role_name'] ?? ''); ?>
                             </div>
@@ -208,14 +224,14 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
 
                     <div id="user-menu-dropdown" class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                         <?php if (route_exists('profile/view')): ?>
-                            <a href="<?php echo base_url('profile/view'); ?>" class="dropdown-item">Profil</a>
+                            <a href="<?php echo base_url('profile/view'); ?>" class="dropdown-item"><?php echo e($navProfileLabel); ?></a>
                         <?php endif; ?>
 
                         <?php if ($canUseLockFeature && route_exists('auth/actions/lock')): ?>
                             <form action="<?php echo base_url('auth/actions/lock'); ?>" method="post" class="m-0" data-ajax="true">
                                 <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                                 <button type="submit" class="dropdown-item w-100 text-start border-0 bg-transparent">
-                                    Oturumu Kilitle
+                                    <?php echo e($navLockAction); ?>
                                 </button>
                             </form>
                         <?php endif; ?>
@@ -224,7 +240,7 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                             data-ajax="true">
                             <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                             <button type="submit" class="dropdown-item w-100 text-start border-0 bg-transparent">
-                                Ã‡Ä±kÄ±ÅŸ
+                                <?php echo e($navLogout); ?>
                             </button>
                         </form>
                     </div>
@@ -326,4 +342,3 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
         </div>
     </div>
 </header>
-

@@ -51,7 +51,7 @@ function kirpi_navigation_group_meta(string $groupKey): array
     ];
 
     if ($groupKey === 'monitoring') {
-        $meta['title'] = 'Monitoring / Izleme';
+        $meta['title'] = kirpi_module_translate('settings', 'nav_monitoring', 'Monitoring / Izleme');
         $meta['icon'] = 'ti ti-radar';
         $meta['weight'] = 900;
     }
@@ -189,7 +189,7 @@ function kirpi_navigation_menu_tree(): array
 
     $menu = [
         [
-            'title' => 'Dashboard',
+            'title' => kirpi_module_translate('dashboard', 'dashboard', 'Dashboard'),
             'icon' => 'ti ti-home',
             'url' => 'dashboard/view',
             'permission' => null,
@@ -202,7 +202,7 @@ function kirpi_navigation_menu_tree(): array
     }
 
     $menu[] = [
-        'title' => 'Yonetim',
+        'title' => kirpi_module_translate('settings', 'nav_management', 'Yonetim'),
         'icon' => 'ti ti-settings',
         'children' => $managementChildren,
         'weight' => 999,
