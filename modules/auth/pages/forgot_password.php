@@ -19,6 +19,7 @@ if (is_user_logged_in()) {
     <link href="<?php echo asset_url('css/tabler.min.css'); ?>" rel="stylesheet">
     <link href="<?php echo asset_url('css/tabler-icons.min.css'); ?>" rel="stylesheet">
     <link href="<?php echo asset_url('css/app.css'); ?>" rel="stylesheet">
+    <link href="<?php echo asset_url('css/toastr.min.css'); ?>" rel="stylesheet">
 </head>
 <body class="d-flex flex-column">
 <script>
@@ -36,6 +37,7 @@ window.KIRPI_CONFIG = {
         </div>
 
         <form
+            id="forgot-password-form"
             class="card card-md"
             action="<?php echo base_url('auth/actions/forgot-password'); ?>"
             method="post"
@@ -49,6 +51,7 @@ window.KIRPI_CONFIG = {
                 <p class="text-secondary mb-4">
                     <?php echo e(auth_lang('forgot_description')); ?>
                 </p>
+                <div id="forgot-password-alert" class="mb-3" style="display:none;"></div>
 
                 <div class="mb-3">
                     <label class="form-label"><?php echo e(auth_lang('email')); ?></label>
@@ -80,6 +83,32 @@ window.KIRPI_CONFIG = {
 <script src="<?php echo asset_url('js/tabler.min.js'); ?>"></script>
 <script src="<?php echo asset_url('js/toastr.min.js'); ?>"></script>
 <script src="<?php echo asset_url('js/app.js'); ?>"></script>
+<script>
+document.addEventListener('kirpi:form.success', function (event) {
+    const form = event.detail?.form;
+    if (!form || form.id !== 'forgot-password-form') {
+        return;
+    }
+
+    const result = event.detail?.result || {};
+    const alertBox = document.getElementById('forgot-password-alert');
+    if (!alertBox) {
+        return;
+    }
+
+    const typeMap = {
+        success: 'alert-success',
+        error: 'alert-danger',
+        warning: 'alert-warning',
+        info: 'alert-info'
+    };
+
+    const cls = typeMap[result.status] || 'alert-info';
+    alertBox.className = 'alert ' + cls + ' mb-3';
+    alertBox.textContent = result.message || '';
+    alertBox.style.display = result.message ? 'block' : 'none';
+});
+</script>
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "7356366510c54c86a154d277ed978201"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
