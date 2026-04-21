@@ -33,7 +33,14 @@ window.KIRPI_CONFIG = {
 </script>
 
 <div class="page">
-
-    <?php require BASE_PATH . '/layouts/nav.php'; ?>
+    <?php
+    ob_start();
+    require BASE_PATH . '/layouts/nav.php';
+    $navOutput = (string) ob_get_clean();
+    $navOutput = str_replace("\xEF\xBB\xBF", '', $navOutput);
+    $navOutput = preg_replace('/\x{FEFF}/u', '', $navOutput) ?? $navOutput;
+    $navOutput = ltrim($navOutput);
+    echo $navOutput;
+    ?>
 
     <div class="page-wrapper">
