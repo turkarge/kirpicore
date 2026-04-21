@@ -11,42 +11,53 @@ function security_lang(string $key, ?string $default = null): string
     if ($dictionary === null) {
         $dictionary = [
             'tr' => [
-                'check_app_env_name' => 'Uygulama ortami',
-                'check_app_env_hint' => 'APP_ENV production olmalidir.',
+                // Sistem Kontrolleri (Checks)
+                'check_app_env_name' => 'Uygulama ortamı',
+                'check_app_env_hint' => 'APP_ENV production olmalıdır.',
                 'check_debug_name' => 'Debug modu',
-                'check_debug_hint' => 'Production ortaminda APP_DEBUG false olmalidir.',
-                'check_proxy_name' => 'Proxy guven',
-                'check_proxy_hint' => 'Reverse proxy kullaniminda APP_TRUST_PROXY true onerilir.',
+                'check_debug_hint' => 'Production ortamında APP_DEBUG false olmalıdır.',
+                'check_proxy_name' => 'Proxy güvenliği',
+                'check_proxy_hint' => 'Reverse proxy kullanımında APP_TRUST_PROXY true önerilir.',
                 'check_web_setup_name' => 'Web setup',
-                'check_web_setup_hint' => 'Kurulumdan sonra AUTO_WEB_SETUP=false yapin.',
+                'check_web_setup_hint' => 'Kurulumdan sonra AUTO_WEB_SETUP=false yapın.',
                 'check_setup_key_name' => 'Setup key',
-                'check_setup_key_hint' => 'SETUP_KEY bos olmamalidir.',
+                'check_setup_key_hint' => 'SETUP_KEY boş olmamalıdır.',
                 'check_session_secure_name' => 'Session secure cookie',
-                'check_session_secure_hint' => 'HTTPS icin session.cookie_secure=1 olmalidir.',
+                'check_session_secure_hint' => 'HTTPS için session.cookie_secure=1 olmalıdır.',
                 'check_session_samesite_name' => 'Session samesite',
-                'check_session_samesite_hint' => 'session.cookie_samesite=Lax onerilir.',
+                'check_session_samesite_hint' => 'session.cookie_samesite=Lax önerilir.',
+
+                // Durum Etiketleri
                 'enabled' => 'enabled',
                 'disabled' => 'disabled',
                 'configured' => 'configured',
                 'empty' => 'empty',
-                'page_pretitle' => 'Sistem Yonetimi',
-                'page_title' => 'Guvenlik Izleme',
-                'security_checks_title' => 'Guvenlik Kontrolleri',
+                'yes' => 'Evet',
+                'no' => 'Hayır',
+
+                // Sayfa Başlıkları
+                'page_pretitle' => 'Sistem Yönetimi',
+                'page_title' => 'Güvenlik İzleme',
+                'security_checks_title' => 'Güvenlik Kontrolleri',
+
+                // Tablo Başlıkları
                 'col_check' => 'Kontrol',
-                'col_value' => 'Deger',
+                'col_value' => 'Değer',
                 'col_status' => 'Durum',
                 'col_note' => 'Not',
-                'status_warn' => 'Uyari',
-                'dirs_title' => 'Dosya ve Klasor Izinleri',
-                'col_folder' => 'Klasor',
+                'status_warn' => 'Uyarı',
+
+                // Dosya ve Klasör İzinleri
+                'dirs_title' => 'Dosya ve Klasör İzinleri',
+                'col_folder' => 'Klasör',
                 'col_path' => 'Yol',
-                'col_exists' => 'Var mi',
-                'col_writable' => 'Yazilabilir mi',
-                'col_perm' => 'Perm',
-                'yes' => 'Evet',
-                'no' => 'Hayir',
-                'db_tables_title' => 'Veritabani Tablolari',
-                'db_empty' => 'Tablo bulunamadi veya veritabani okunamadi.',
+                'col_exists' => 'Var mı',
+                'col_writable' => 'Yazılabilir mi',
+                'col_perm' => 'İzin (Perm)',
+
+                // Veritabanı
+                'db_tables_title' => 'Veritabanı Tabloları',
+                'db_empty' => 'Tablo bulunamadı veya veritabanı okunamadı.',
             ],
             'en' => [
                 'check_app_env_name' => 'Application environment',

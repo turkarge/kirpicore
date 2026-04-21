@@ -11,36 +11,45 @@ function mail_lang(string $key, ?string $default = null): string
     if ($dictionary === null) {
         $dictionary = [
             'tr' => [
+                // Genel Başlıklar
                 'mail_center' => 'Mail Merkezi',
                 'mail_test_status' => 'Mail Test ve Durum',
-                'mail_configuration' => 'Mail Konfigurasyonu',
+                'mail_configuration' => 'Mail Konfigürasyonu',
+
+                // Durum ve Etiketler
                 'check' => 'Kontrol',
                 'status' => 'Durum',
-                'defined' => 'Tanimli',
-                'empty' => 'Bos',
-                'invalid' => 'Gecersiz',
-                'valid' => 'Gecerli',
-                'ready' => 'Hazir',
+                'defined' => 'Tanımlı',
+                'empty' => 'Boş',
+                'invalid' => 'Geçersiz',
+                'valid' => 'Geçerli',
+                'ready' => 'Hazır',
                 'missing' => 'Eksik',
-                'send_test_email' => 'Test E-posta Gonder',
-                'recipient_email' => 'Alici E-posta',
+                'sent' => 'Gönderildi',
+                'failed' => 'Başarısız',
+                'error' => 'Hata',
+
+                // Test Maili Formu
+                'send_test_email' => 'Test E-posta Gönder',
+                'recipient_email' => 'Alıcı E-posta',
                 'subject' => 'Konu',
                 'message' => 'Mesaj',
                 'default_subject' => 'Kirpi Core Test Maili',
-                'default_message' => 'Bu mesaj Kirpi Core mail modulu testi icin gonderilmistir.',
-                'send_test_button' => 'Test Maili Gonder',
-                'recent_mail_logs' => 'Son Mail Loglari',
+                'default_message' => 'Bu mesaj Kirpi Core mail modülü testi için gönderilmiştir.',
+                'send_test_button' => 'Test Maili Gönder',
+
+                // Loglar ve Tablo Başlıkları
+                'recent_mail_logs' => 'Son Mail Logları',
                 'date' => 'Tarih',
-                'recipient' => 'Alici',
+                'recipient' => 'Alıcı',
                 'transport' => 'Transport',
-                'error' => 'Hata',
-                'no_mail_logs' => 'Henuz mail logu yok.',
-                'sent' => 'Gonderildi',
-                'failed' => 'Basarisiz',
-                'csrf_failed' => 'Guvenlik dogrulamasi basarisiz oldu.',
-                'required_fields' => 'Alici e-posta, konu ve mesaj zorunludur.',
-                'send_failed_default' => 'Test maili gonderilemedi.',
-                'send_success_default' => 'Test maili gonderildi.',
+                'no_mail_logs' => 'Henüz mail logu yok.',
+
+                // Hata ve Başarı Mesajları
+                'csrf_failed' => 'Güvenlik doğrulaması başarısız oldu.',
+                'required_fields' => 'Alıcı e-posta, konu ve mesaj zorunludur.',
+                'send_failed_default' => 'Test maili gönderilemedi.',
+                'send_success_default' => 'Test maili gönderildi.',
             ],
             'en' => [
                 'mail_center' => 'Mail Center',

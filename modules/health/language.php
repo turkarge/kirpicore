@@ -11,25 +11,30 @@ function health_lang(string $key, ?string $default = null): string
     if ($dictionary === null) {
         $dictionary = [
             'tr' => [
-                'system_management' => 'Sistem Yonetimi',
+                // Genel Başlıklar
+                'system_management' => 'Sistem Yönetimi',
                 'health_metrics' => 'Health + Metrics',
                 'system_matrix' => 'Sistem Matrix',
+
+                // Tablo Başlıkları
                 'last_check' => 'Last Check',
-                'component' => 'Bilesen',
+                'component' => 'Bileşen',
                 'status' => 'Status',
                 'latency' => 'Latency',
                 'detail' => 'Detay',
-                'db_connection_ok' => 'Baglanti basarili',
-                'db_query_failed' => 'DB sorgusu basarisiz',
+
+                // Durum ve Hata Mesajları
+                'db_connection_ok' => 'Bağlantı başarılı',
+                'db_query_failed' => 'DB sorgusu başarısız',
                 'queue_table_missing' => 'Queue tablosu yok',
-                'queue_metrics_unreadable' => 'Queue metrikleri okunamadi',
-                'mail_host_empty' => 'MAIL_HOST bos',
-                'mail_host_defined_prefix' => 'SMTP host tanimli: ',
+                'queue_metrics_unreadable' => 'Queue metrikleri okunamadı',
+                'mail_host_empty' => 'MAIL_HOST boş',
+                'mail_host_defined_prefix' => 'SMTP host tanımlı: ',
                 'backup_table_missing' => 'Backup tablosu yok',
-                'backup_metrics_unreadable' => 'Backup metrikleri okunamadi',
-                'disk_unreadable' => 'Disk bilgisi okunamadi',
-                'throttle_disabled_or_missing' => 'Throttle devre disi veya tablo yok',
-                'throttle_metrics_unreadable' => 'Throttle metrikleri okunamadi',
+                'backup_metrics_unreadable' => 'Backup metrikleri okunamadı',
+                'disk_unreadable' => 'Disk bilgisi okunamadı',
+                'throttle_disabled_or_missing' => 'Throttle devre dışı veya tablo yok',
+                'throttle_metrics_unreadable' => 'Throttle metrikleri okunamadı',
             ],
             'en' => [
                 'system_management' => 'System Management',

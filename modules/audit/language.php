@@ -11,27 +11,34 @@ function audit_lang(string $key, ?string $default = null): string
     if ($dictionary === null) {
         $dictionary = [
             'tr' => [
-                'system_management' => 'Sistem Yonetimi',
+                // Genel Başlıklar
+                'system_management' => 'Sistem Yönetimi',
                 'audit_log' => 'Audit Log',
-                'table_missing' => 'Audit log tablosu kurulu degil. Kurulum icin setup veya db:install calistirin.',
+                'records' => 'Audit Kayıtları',
+
+                // Filtreleme ve Arama
                 'filters' => 'Filtreler',
                 'status' => 'Status',
-                'all' => 'Tum',
+                'all' => 'Tüm',
                 'module' => 'Module',
                 'action' => 'Action',
                 'user_id' => 'User ID',
-                'records' => 'Audit Kayitlari',
-                'table_waiting' => 'Audit tablosu hazir oldugunda liste burada gorunecek.',
-                'table_missing_short' => 'Audit log tablosu henuz kurulu degil.',
+
+                // Tablo Başlıkları
                 'date' => 'Tarih',
-                'user' => 'Kullanici',
+                'user' => 'Kullanıcı',
                 'route' => 'Route',
                 'ip' => 'IP',
                 'detail' => 'Detay',
-                'no_records' => 'Kayit bulunamadi.',
-                'view' => 'Gor',
+                'view' => 'Gör',
+                'no_records' => 'Kayıt bulunamadı.',
+
+                // Durum ve Hata Mesajları
+                'table_missing' => 'Audit log tablosu kurulu değil. Kurulum için setup veya db:install çalıştırın.',
+                'table_missing_short' => 'Audit log tablosu henüz kurulu değil.',
+                'table_waiting' => 'Audit tablosu hazır olduğunda liste burada görünecek.',
+                'load_error' => 'Audit kayıtları yüklenirken bir hata oluştu.',
                 'failed' => 'failed',
-                'load_error' => 'Audit kayitlari yuklenirken bir hata olustu.',
             ],
             'en' => [
                 'system_management' => 'System Management',

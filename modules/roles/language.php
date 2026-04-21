@@ -12,45 +12,54 @@ function roles_lang(string $key, ?string $default = null): string
         $dictionary = [
             'tr' => [
                 'system_management' => 'Sistem Yönetimi',
+                'role_management' => 'Rol Yönetimi',
                 'roles' => 'Roller',
                 'new_role' => 'Yeni Rol',
+                'edit_role' => 'Rol Düzenle',
                 'search_placeholder' => 'Rol adı ara...',
                 'all_statuses' => 'Tüm Durumlar',
                 'active' => 'Aktif',
                 'inactive' => 'Pasif',
-                'edit_role' => 'Rol Düzenle',
-                'invalid_role_id' => 'Geçersiz rol ID.',
-                'role_data_load_error' => 'Rol verileri yüklenemedi.',
+
+                // Rol Detayları ve Formlar
                 'role_name' => 'Rol Adı',
                 'role_name_hint' => 'Örnek: İçerik Editörü, Operasyon, Super Admin',
                 'role_active_switch' => 'Rol aktif olsun',
-                'cancel' => 'İptal',
-                'save' => 'Kaydet',
-                'update' => 'Güncelle',
-                'super_admin_name_hint' => 'Super Admin rol adı çekirdek davranış için korunur.',
+                'super_admin_name_hint' => 'Super Admin rol adı sistem davranışı için korunmaktadır.',
+
+                // Tablo Başlıkları
                 'table_role' => 'Rol',
                 'table_status' => 'Durum',
                 'table_user_count' => 'Kullanıcı Sayısı',
                 'table_permission_count' => 'İzin Sayısı',
                 'no_records' => 'Kayıt bulunamadı.',
+
+                // İzinler ve Matris
                 'permissions' => 'İzinler',
-                'edit' => 'Düzenle',
-                'role_management' => 'Rol Yönetimi',
                 'permission_matrix' => 'İzin Matrisi',
-                'role_label' => 'Rol',
-                'back' => 'Geri Dön',
-                'select_all' => 'Tümünü Seç',
-                'clear_all' => 'Tümünü Kaldır',
-                'permission_tables_missing' => 'Permission tabloları henüz kurulu değil. Önce database/permissions.sql dosyasını çalıştırın veya php shell.php db:permissions:install komutunu kullanın.',
-                'super_admin_permissions_info' => 'Super Admin rolü tüm yetkilere doğrudan sahiptir. Bu rol için izin ataması yapılmaz.',
                 'module' => 'Modül',
                 'module_permissions' => 'İzinler',
+                'select_all' => 'Tümünü Seç',
+                'clear_all' => 'Tümünü Kaldır',
                 'select_group_all' => 'Tümünü seç',
+                'super_admin_permissions_info' => 'Super Admin rolü tüm yetkilere sahiptir. Bu rol için izin ataması yapılamaz.',
+
+                // Aksiyonlar
+                'save' => 'Kaydet',
+                'update' => 'Güncelle',
+                'cancel' => 'İptal',
+                'back' => 'Geri Dön',
+                'edit' => 'Düzenle',
+
+                // Hata ve Uyarı Mesajları
+                'invalid_role_id' => 'Geçersiz rol ID.',
+                'role_data_load_error' => 'Rol verileri yüklenemedi.',
+                'table_load_error' => 'Rol listesi yüklenirken bir hata oluştu.',
+                'permission_tables_missing' => 'Permission tabloları henüz kurulu değil. Önce database/permissions.sql dosyasını çalıştırın veya php shell.php db:permissions:install komutunu kullanın.',
                 'page_not_found_title' => '404 - Rol Bulunamadı',
                 'page_not_found_message' => 'Geçersiz rol ID.',
                 'page_error_title' => '500 - Rol Verileri Yüklenemedi',
                 'page_error_message' => 'Rol yetkileri yüklenirken bir hata oluştu.',
-                'table_load_error' => 'Rol listesi yüklenirken bir hata oluştu.',
             ],
             'en' => [
                 'system_management' => 'System Management',

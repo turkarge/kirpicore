@@ -11,36 +11,45 @@ function notifications_lang(string $key, ?string $default = null): string
     if ($dictionary === null) {
         $dictionary = [
             'tr' => [
+                // Genel Başlıklar
                 'communication_center' => 'İletişim Merkezi',
                 'notifications' => 'Bildirimler',
                 'settings' => 'Ayarlar',
-                'mark_all_read' => 'Tümünü Okundu Yap',
-                'tables_missing' => 'Bildirim tabloları henüz kurulu değil. Önce modules/notifications/database/schema.sql dosyasını çalıştırın.',
+
+                // Bildirim Listesi
                 'search_placeholder' => 'Başlık veya mesaj ara...',
                 'all_statuses' => 'Tüm Durumlar',
                 'status_unread' => 'Okunmadı',
                 'status_read' => 'Okundu',
-                'table_waiting' => 'Bildirim tablosu hazır olduğunda liste burada görünecek.',
-                'settings_center' => 'Bildirim Merkezi',
-                'settings_title' => 'Bildirim Ayarları',
-                'back_to_list' => 'Listeye Dön',
-                'settings_table_missing' => 'Bildirim ayarları tablosu henüz kurulu değil. Önce database/notifications.sql dosyasını çalıştırın.',
-                'email_enabled' => 'E-posta bildirimleri açık olsun',
-                'in_app_enabled' => 'Uygulama içi bildirimler açık olsun',
-                'save_settings' => 'Ayarları Kaydet',
-                'table_missing_short' => 'Bildirim tablosu henüz kurulu değil.',
                 'table_notification' => 'Bildirim',
                 'table_channel' => 'Kanal',
                 'table_status' => 'Durum',
                 'table_date' => 'Tarih',
                 'no_records' => 'Kayıt bulunamadı.',
-                'default_channel' => 'in_app',
                 'mark_read' => 'Okundu Yap',
+                'mark_all_read' => 'Tümünü Okundu Yap',
+
+                // Bildirim Ayarları
+                'settings_center' => 'Bildirim Merkezi',
+                'settings_title' => 'Bildirim Ayarları',
+                'back_to_list' => 'Listeye Dön',
+                'email_enabled' => 'E-posta bildirimleri açık olsun',
+                'in_app_enabled' => 'Uygulama içi bildirimler açık olsun',
+                'save_settings' => 'Ayarları Kaydet',
+                'default_channel' => 'in_app',
+
+                // Hata ve Bilgilendirme Mesajları
+                'tables_missing' => 'Bildirim tabloları henüz kurulu değil. Önce modules/notifications/database/schema.sql dosyasını çalıştırın.',
+                'table_missing_short' => 'Bildirim tablosu henüz kurulu değil.',
+                'table_waiting' => 'Bildirim tablosu hazır olduğunda liste burada görünecek.',
+                'settings_table_missing' => 'Bildirim ayarları tablosu henüz kurulu değil. Önce database/notifications.sql dosyasını çalıştırın.',
+                'table_not_ready' => 'Bildirim tablosu henüz kurulu değil.',
+                'settings_table_not_ready' => 'Bildirim ayarları tablosu henüz kurulu değil.',
+
+                // Aksiyon ve Hata Bildirimleri
                 'csrf_failed' => 'Güvenlik doğrulaması başarısız oldu.',
                 'invalid_request' => 'Geçersiz istek.',
                 'invalid_session' => 'Geçersiz kullanıcı oturumu.',
-                'table_not_ready' => 'Bildirim tablosu henüz kurulu değil.',
-                'settings_table_not_ready' => 'Bildirim ayarları tablosu henüz kurulu değil.',
                 'mark_read_success' => 'Bildirim okundu olarak işaretlendi.',
                 'mark_read_error' => 'Bildirim güncellenirken bir hata oluştu.',
                 'mark_all_read_success' => 'Tüm bildirimler okundu olarak işaretlendi.',

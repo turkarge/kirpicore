@@ -11,45 +11,58 @@ function backup_lang(string $key, ?string $default = null): string
     if ($dictionary === null) {
         $dictionary = [
             'tr' => [
-                'system_management' => 'Sistem Yonetimi',
+                // Genel Başlıklar
+                'system_management' => 'Sistem Yönetimi',
                 'backup_restore' => 'Backup / Restore',
-                'backup_tables_missing' => 'Backup tablolari kurulu degil. Kurulum icin setup veya db:install calistirin.',
                 'new_backup' => 'Yeni Backup',
+                'recent_backups' => 'Son Backup Kayıtları',
+                'recent_restores' => 'Son Restore Logları',
+
+                // Form Alanları ve Etiketler
                 'label' => 'Etiket',
-                'label_placeholder' => 'ornek: deploy_oncesi',
-                'create_backup' => 'Backup Olustur',
-                'recent_backups' => 'Son Backup Kayitlari',
+                'label_placeholder' => 'örnek: deploy_öncesi',
+                'create_backup' => 'Backup Oluştur',
+
+                // Tablo Başlıkları
                 'file' => 'Dosya',
                 'size' => 'Boyut',
                 'status' => 'Durum',
                 'date' => 'Tarih',
-                'created_by' => 'Olusturan',
-                'no_records' => 'Kayit bulunamadi.',
-                'download' => 'Indir',
-                'verify' => 'Dogrula',
+                'created_by' => 'Oluşturan',
+                'restored_by' => 'Restore Eden',
+                'no_records' => 'Kayıt bulunamadı.',
+
+                // Aksiyonlar
+                'download' => 'İndir',
+                'verify' => 'Doğrula',
                 'restore' => 'Restore',
                 'delete' => 'Sil',
-                'verify_confirm' => 'Bu backup dosyasi checksum ve dry-run restore ile dogrulanacak. Emin misiniz?',
-                'restore_confirm' => 'Bu backup geri yuklenecek. Emin misiniz?',
-                'delete_confirm' => 'Bu backup kaydi silinecek. Emin misiniz?',
-                'recent_restores' => 'Son Restore Loglari',
-                'restored_by' => 'Restore Eden',
-                'invalid_backup_record' => 'Gecersiz backup kaydi.',
-                'table_not_ready' => 'Backup tablosu henuz kurulu degil.',
-                'record_not_found' => 'Backup kaydi bulunamadi.',
-                'file_path_invalid' => 'Backup dosya yolu gecersiz.',
-                'file_not_found' => 'Backup dosyasi bulunamadi.',
-                'download_error' => 'Backup indirilirken bir hata olustu.',
-                'csrf_failed' => 'Guvenlik dogrulamasi basarisiz oldu.',
-                'create_failed_default' => 'Backup olusturulamadi.',
-                'delete_failed' => 'Backup silinirken bir hata olustu.',
-                'restore_failed_default' => 'Restore islemi basarisiz.',
-                'verify_failed_default' => 'Backup dogrulama basarisiz.',
-                'delete_success' => 'Backup kaydi silindi.',
-                'restore_success' => 'Restore komutu calistirildi.',
-                'verify_success_default' => 'Backup dogrulandi.',
-                'create_success_prefix' => 'Backup olusturuldu. ID: ',
-                'retention_deleted_prefix' => ' Retention temizligi: ',
+
+                // Onay Mesajları
+                'verify_confirm' => 'Bu backup dosyası checksum ve dry-run restore ile doğrulanacak. Emin misiniz?',
+                'restore_confirm' => 'Bu backup geri yüklenecek. Emin misiniz?',
+                'delete_confirm' => 'Bu backup kaydı silinecek. Emin misiniz?',
+
+                // Hata ve Bilgilendirme Mesajları
+                'backup_tables_missing' => 'Backup tabloları kurulu değil. Kurulum için setup veya db:install çalıştırın.',
+                'table_not_ready' => 'Backup tablosu henüz kurulu değil.',
+                'record_not_found' => 'Backup kaydı bulunamadı.',
+                'invalid_backup_record' => 'Geçersiz backup kaydı.',
+                'file_path_invalid' => 'Backup dosya yolu geçersiz.',
+                'file_not_found' => 'Backup dosyası bulunamadı.',
+                'download_error' => 'Backup indirilirken bir hata oluştu.',
+                'create_failed_default' => 'Backup oluşturulamadı.',
+                'delete_failed' => 'Backup silinirken bir hata oluştu.',
+                'restore_failed_default' => 'Restore işlemi başarısız.',
+                'verify_failed_default' => 'Backup doğrulama başarısız.',
+                'csrf_failed' => 'Güvenlik doğrulaması başarısız oldu.',
+
+                // Başarı Mesajları ve Log Önekleri
+                'delete_success' => 'Backup kaydı silindi.',
+                'restore_success' => 'Restore komutu çalıştırıldı.',
+                'verify_success_default' => 'Backup doğrulandı.',
+                'create_success_prefix' => 'Backup oluşturuldu. ID: ',
+                'retention_deleted_prefix' => ' Retention temizliği: ',
                 'retention_deleted_suffix' => ' eski backup silindi.',
                 'checksum_prefix' => ' SHA256: ',
                 'dry_run_prefix' => ' Dry-run tablo: ',

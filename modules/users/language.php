@@ -11,29 +11,28 @@ function users_lang(string $key, ?string $default = null): string
     if ($dictionary === null) {
         $dictionary = [
             'tr' => [
+                // Genel Başlıklar ve Yönetim
                 'system_management' => 'Sistem Yönetimi',
                 'users' => 'Kullanıcılar',
                 'new_user' => 'Yeni Kullanıcı',
+                'edit_user' => 'Kullanıcı Düzenle',
+
+                // Arama ve Filtreleme
                 'search_placeholder' => 'Ad, e-posta veya rol ara...',
                 'all_roles' => 'Tüm Roller',
                 'all_statuses' => 'Tüm Durumlar',
                 'active' => 'Aktif',
                 'inactive' => 'Pasif',
                 'status_inactive_suffix' => ' (Pasif)',
+
+                // Tablo Başlıkları
                 'table_user' => 'Kullanıcı',
                 'table_role' => 'Rol',
                 'table_status' => 'Durum',
                 'table_created_at' => 'Oluşturulma',
                 'no_records' => 'Kayıt bulunamadı.',
-                'edit' => 'Düzenle',
-                'session' => 'Oturum',
-                'key' => 'Key',
-                'cancel' => 'İptal',
-                'save' => 'Kaydet',
-                'update' => 'Güncelle',
-                'edit_user' => 'Kullanıcı Düzenle',
-                'invalid_user_id' => 'Geçersiz kullanıcı ID.',
-                'user_data_load_error' => 'Kullanıcı verileri yüklenemedi.',
+
+                // Form Alanları ve İpuçları
                 'name_surname' => 'Ad Soyad',
                 'email' => 'E-posta',
                 'password' => 'Şifre',
@@ -50,13 +49,29 @@ function users_lang(string $key, ?string $default = null): string
                 'select_role' => 'Rol Seçin',
                 'only_active_roles_hint' => 'Yalnızca aktif roller listelenir.',
                 'passive_role_info_hint' => 'Pasif roller yeni atama için listelenmez. Mevcut pasif rol yalnızca bilgilendirme için gösterilir.',
+
+                // Oturum ve Güvenlik Ayarları
+                'session' => 'Oturum',
+                'key' => 'Key',
                 'lock_enabled' => 'Lock Aktif',
                 'lock_disabled' => 'Lock Pasif',
                 'drop_session' => 'Oturumu Sonlandır',
                 'reset_key' => 'Key Sıfırlama',
+
+                // Onay Mesajları
                 'drop_session_confirm' => 'Bu kullanıcının aktif oturumları sonlandırılacak. Emin misiniz?',
-                'reset_key_confirm' => 'Bu kullanıcının lock key ayarı sifirlanacak ve oturum kilitleme pasif olacak. Emin misiniz?',
+                'reset_key_confirm' => 'Bu kullanıcının lock key ayarı sıfırlanacak ve oturum kilitleme pasif olacak. Emin misiniz?',
                 'reset_key_list_confirm' => 'Bu kullanıcının lock key ayarı sıfırlanacak. Emin misiniz?',
+
+                // Aksiyonlar
+                'edit' => 'Düzenle',
+                'cancel' => 'İptal',
+                'save' => 'Kaydet',
+                'update' => 'Güncelle',
+
+                // Hata Mesajları
+                'invalid_user_id' => 'Geçersiz kullanıcı ID.',
+                'user_data_load_error' => 'Kullanıcı verileri yüklenemedi.',
             ],
             'en' => [
                 'system_management' => 'System Management',
