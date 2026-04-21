@@ -380,19 +380,24 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                                 <div class="dropdown-menu">
                                     <?php foreach ($visibleChildren as $child): ?>
                                         <?php if (isset($child['children']) && is_array($child['children'])): ?>
-                                            <div class="dropdown-header d-flex align-items-center gap-2">
-                                                <?php if (!empty($child['icon'])): ?>
-                                                    <i class="<?php echo e($child['icon']); ?>"></i>
-                                                <?php endif; ?>
-                                                <span><?php echo e($child['title']); ?></span>
-                                            </div>
-                                            <?php foreach ($child['children'] as $subChild): ?>
-                                                <a class="dropdown-item ps-4 <?php echo $currentRoutePath === ($subChild['url'] ?? '') ? 'active' : ''; ?>"
-                                                    href="<?php echo base_url($subChild['url']); ?>">
-                                                    <?php echo e($subChild['title']); ?>
+                                            <?php $isNestedActive = $isMenuItemActive($child, $currentRoutePath); ?>
+                                            <div class="dropend">
+                                                <a class="dropdown-item dropdown-toggle <?php echo $isNestedActive ? 'active' : ''; ?>"
+                                                    href="#"
+                                                    data-bs-toggle="dropdown"
+                                                    data-bs-auto-close="outside"
+                                                    aria-expanded="false">
+                                                    <?php echo e($child['title']); ?>
                                                 </a>
-                                            <?php endforeach; ?>
-                                            <div class="dropdown-divider"></div>
+                                                <div class="dropdown-menu">
+                                                    <?php foreach ($child['children'] as $subChild): ?>
+                                                        <a class="dropdown-item <?php echo $currentRoutePath === ($subChild['url'] ?? '') ? 'active' : ''; ?>"
+                                                            href="<?php echo base_url($subChild['url']); ?>">
+                                                            <?php echo e($subChild['title']); ?>
+                                                        </a>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </div>
                                         <?php else: ?>
                                             <a class="dropdown-item <?php echo $currentRoutePath === ($child['url'] ?? '') ? 'active' : ''; ?>"
                                                 href="<?php echo base_url($child['url']); ?>">
