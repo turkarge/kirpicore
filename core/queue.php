@@ -115,11 +115,18 @@ function kirpi_queue_handle_job(array $job): void
     switch ($jobType) {
         case 'mail.send':
             $recipient = trim((string) ($payload['recipient_email'] ?? ''));
-            $subject = trim((string) ($payload['subject'] ?? ''));
-            $body = (string) ($payload['body_html'] ?? '');
             $userId = isset($payload['user_id']) ? (int) $payload['user_id'] : null;
+            $templateKey = trim((string) ($payload['template_key'] ?? ''));
+            $templateVars = (array) ($payload['template_vars'] ?? []);
 
-            $result = kirpi_send_mail($recipient, $subject, $body, $userId);
+            if ($templateKey !== '') {
+                $result = kirpi_send_templated_mail($recipient, $templateKey, $templateVars, $userId);
+            } else {
+                $subject = trim((string) ($payload['subject'] ?? ''));
+                $body = (string) ($payload['body_html'] ?? '');
+                $result = kirpi_send_mail($recipient, $subject, $body, $userId);
+            }
+
             if (!($result['success'] ?? false)) {
                 throw new RuntimeException((string) ($result['message'] ?? 'mail.send failed'));
             }

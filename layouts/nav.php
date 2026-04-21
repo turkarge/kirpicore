@@ -50,6 +50,12 @@ $menu = [
                 'permission' => 'mail.view',
             ],
             [
+                'title' => 'Mail Sablonlari',
+                'icon' => 'ti ti-mail-cog',
+                'url' => 'mail/templates',
+                'permission' => 'mail.view',
+            ],
+            [
                 'title' => 'Ayarlar',
                 'icon' => 'ti ti-adjustments',
                 'url' => 'settings/view',

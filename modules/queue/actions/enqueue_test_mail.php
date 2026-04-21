@@ -34,8 +34,11 @@ $userId = (int) ($currentUser['id'] ?? 0);
 
 $jobId = kirpi_queue_push('mail.send', [
     'recipient_email' => $recipientEmail,
-    'subject' => queue_lang('test_subject'),
-    'body_html' => queue_lang('test_body_html'),
+    'template_key' => 'queue.test_mail',
+    'template_vars' => [
+        'user_name' => (string) ($currentUser['name'] ?? 'Kullanici'),
+        'sent_at' => date('Y-m-d H:i:s'),
+    ],
     'user_id' => $userId > 0 ? $userId : null,
 ]);
 

@@ -84,15 +84,16 @@ try {
         ]);
 
         $resetLink = base_url('auth/reset-password?token=' . urlencode($rawToken));
-        $mailSubject = app_name() . ' - ' . auth_lang('reset_title');
-        $safeName = htmlspecialchars((string) ($user['name'] ?? ''), ENT_QUOTES, 'UTF-8');
-        $safeLink = htmlspecialchars($resetLink, ENT_QUOTES, 'UTF-8');
-        $mailBody = '<p>' . $safeName . ' merhaba,</p>'
-            . '<p>Şifrenizi sıfırlamak için aşağıdaki bağlantıyı kullanın:</p>'
-            . '<p><a href="' . $safeLink . '">' . $safeLink . '</a></p>'
-            . '<p>Bağlantı 60 dakika geçerlidir.</p>';
-
-        $mailResult = kirpi_send_mail((string) ($user['email'] ?? ''), $mailSubject, $mailBody, (int) ($user['id'] ?? 0));
+        $mailResult = kirpi_send_templated_mail(
+            (string) ($user['email'] ?? ''),
+            'auth.password_reset',
+            [
+                'user_name' => (string) ($user['name'] ?? ''),
+                'reset_link' => $resetLink,
+                'expires_minutes' => '60',
+            ],
+            (int) ($user['id'] ?? 0)
+        );
 
         kirpi_audit_log('forgot_password_request', 'auth', [
             'email' => $email,

@@ -86,6 +86,17 @@ try {
         'Yetkili bir kullanici oturum kilitleme keyinizi sifirladi ve ozelligi pasif yapti.'
     );
 
+    if (!empty($targetUser['email'])) {
+        kirpi_send_templated_mail(
+            (string) $targetUser['email'],
+            'users.lock_key_reset',
+            [
+                'user_name' => (string) ($targetUser['name'] ?? ''),
+            ],
+            $targetUserId > 0 ? $targetUserId : null
+        );
+    }
+
     kirpi_audit_log('reset_lock_key', 'users', [
         'target_user_id' => $targetUserId,
         'target_email' => (string) ($targetUser['email'] ?? ''),

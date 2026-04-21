@@ -32,6 +32,13 @@ if (db_table_exists('mail_logs')) {
                 <div class="page-pretitle"><?php echo e(mail_lang('mail_center')); ?></div>
                 <h2 class="page-title"><?php echo e(mail_lang('mail_test_status')); ?></h2>
             </div>
+            <?php if (route_exists('mail/templates') && check_permission('mail.view')): ?>
+                <div class="col-auto ms-auto d-print-none">
+                    <a href="<?php echo base_url('mail/templates'); ?>" class="btn btn-outline-primary">
+                        <?php echo e(mail_lang('manage_templates')); ?>
+                    </a>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>

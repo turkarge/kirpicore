@@ -28,8 +28,16 @@ if ($recipientEmail === '' || $subject === '' || $message === '') {
 $currentUser = current_user();
 $userId = (int) ($currentUser['id'] ?? 0);
 
-$htmlBody = nl2br(e($message));
-$sendResult = kirpi_send_mail($recipientEmail, $subject, $htmlBody, $userId > 0 ? $userId : null);
+$sendResult = kirpi_send_templated_mail(
+    $recipientEmail,
+    'mail.test_manual',
+    [
+        'message_html' => nl2br(e($message)),
+        'recipient_email' => $recipientEmail,
+    ],
+    $userId > 0 ? $userId : null,
+    $subject
+);
 
 if (!($sendResult['success'] ?? false)) {
     kirpi_audit_log('send_test_failed', 'mail', [

@@ -402,3 +402,215 @@ function kirpi_send_mail(string $to, string $subject, string $htmlBody, ?int $us
         'transport' => (string) ($result['transport'] ?? 'unknown'),
     ];
 }
+
+function kirpi_mail_templates_table_ready(): bool
+{
+    return db_table_exists('mail_templates');
+}
+
+function kirpi_mail_default_templates(): array
+{
+    return [
+        'auth.password_reset' => [
+            'name' => 'Auth - Password Reset',
+            'subject' => '{{app_name}} - Sifre Sifirlama',
+            'html_body' => '<p>Merhaba {{user_name}},</p><p>Sifrenizi sifirlamak icin asagidaki baglantiyi kullanin:</p><p><a href="{{reset_link}}">{{reset_link}}</a></p><p>Bu baglanti {{expires_minutes}} dakika gecerlidir.</p>',
+            'is_active' => 1,
+            'is_system' => 1,
+        ],
+        'queue.test_mail' => [
+            'name' => 'Queue - Test Mail',
+            'subject' => '{{app_name}} Queue Test',
+            'html_body' => '<p>Merhaba {{user_name}},</p><p>Bu e-posta kuyruk (queue) sistemi uzerinden gonderildi.</p><p>Tarih: {{sent_at}}</p>',
+            'is_active' => 1,
+            'is_system' => 1,
+        ],
+        'mail.test_manual' => [
+            'name' => 'Mail - Manual Test',
+            'subject' => '{{app_name}} Test Maili',
+            'html_body' => '<p>{{{message_html}}}</p>',
+            'is_active' => 1,
+            'is_system' => 1,
+        ],
+        'users.session_dropped' => [
+            'name' => 'Users - Session Dropped',
+            'subject' => '{{app_name}} - Oturum Sonlandirildi',
+            'html_body' => '<p>Merhaba {{user_name}},</p><p>Oturumlariniz bir yonetici tarafindan sonlandirildi.</p><p>Lutfen yeniden giris yapin.</p>',
+            'is_active' => 1,
+            'is_system' => 1,
+        ],
+        'users.lock_key_reset' => [
+            'name' => 'Users - Lock Key Reset',
+            'subject' => '{{app_name}} - Kilit Key Sifirlandi',
+            'html_body' => '<p>Merhaba {{user_name}},</p><p>Oturum kilitleme key bilginiz yonetici tarafindan sifirlandi.</p><p>Profil ekranindan yeni key olusturabilirsiniz.</p>',
+            'is_active' => 1,
+            'is_system' => 1,
+        ],
+    ];
+}
+
+function kirpi_mail_sync_system_templates(): void
+{
+    if (!kirpi_mail_templates_table_ready()) {
+        return;
+    }
+
+    try {
+        $stmt = db()->prepare("
+            INSERT INTO mail_templates (template_key, name, subject, html_body, is_active, is_system)
+            VALUES (:template_key, :name, :subject, :html_body, :is_active, :is_system)
+            ON DUPLICATE KEY UPDATE
+                is_system = VALUES(is_system),
+                updated_at = updated_at
+        ");
+
+        foreach (kirpi_mail_default_templates() as $templateKey => $template) {
+            $stmt->execute([
+                ':template_key' => (string) $templateKey,
+                ':name' => (string) ($template['name'] ?? $templateKey),
+                ':subject' => (string) ($template['subject'] ?? ''),
+                ':html_body' => (string) ($template['html_body'] ?? ''),
+                ':is_active' => (int) ($template['is_active'] ?? 1),
+                ':is_system' => (int) ($template['is_system'] ?? 1),
+            ]);
+        }
+    } catch (Throwable $e) {
+        error_log('mail system templates sync error: ' . $e->getMessage());
+    }
+}
+
+function kirpi_mail_get_template(string $templateKey, bool $mustBeActive = true): ?array
+{
+    $templateKey = trim($templateKey);
+    if ($templateKey === '') {
+        return null;
+    }
+
+    if (kirpi_mail_templates_table_ready()) {
+        kirpi_mail_sync_system_templates();
+
+        try {
+            $sql = "
+                SELECT id, template_key, name, subject, html_body, is_active, is_system, updated_at
+                FROM mail_templates
+                WHERE template_key = :template_key
+            ";
+            if ($mustBeActive) {
+                $sql .= " AND is_active = 1";
+            }
+            $sql .= " LIMIT 1";
+
+            $stmt = db()->prepare($sql);
+            $stmt->execute([
+                ':template_key' => $templateKey,
+            ]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($row) {
+                return $row;
+            }
+        } catch (Throwable $e) {
+            error_log('mail template read error: ' . $e->getMessage());
+        }
+    }
+
+    $defaults = kirpi_mail_default_templates();
+    if (!isset($defaults[$templateKey])) {
+        return null;
+    }
+
+    $default = $defaults[$templateKey];
+    if ($mustBeActive && (int) ($default['is_active'] ?? 1) !== 1) {
+        return null;
+    }
+
+    return [
+        'id' => null,
+        'template_key' => $templateKey,
+        'name' => (string) ($default['name'] ?? $templateKey),
+        'subject' => (string) ($default['subject'] ?? ''),
+        'html_body' => (string) ($default['html_body'] ?? ''),
+        'is_active' => (int) ($default['is_active'] ?? 1),
+        'is_system' => (int) ($default['is_system'] ?? 1),
+        'updated_at' => null,
+    ];
+}
+
+function kirpi_mail_render_placeholders(string $content, array $variables): string
+{
+    if ($content === '') {
+        return '';
+    }
+
+    $replaceEscapedMap = [];
+    $replaceRawMap = [];
+    foreach ($variables as $key => $value) {
+        $varKey = trim((string) $key);
+        if ($varKey === '') {
+            continue;
+        }
+
+        if (is_scalar($value) || $value === null) {
+            $stringValue = (string) ($value ?? '');
+            $replaceEscapedMap['{{' . $varKey . '}}'] = htmlspecialchars($stringValue, ENT_QUOTES, 'UTF-8');
+            $replaceRawMap['{{{' . $varKey . '}}}'] = $stringValue;
+        }
+    }
+
+    if (!empty($replaceRawMap)) {
+        $content = strtr($content, $replaceRawMap);
+    }
+
+    return strtr($content, $replaceEscapedMap);
+}
+
+function kirpi_mail_extract_placeholders(string $content): array
+{
+    if ($content === '') {
+        return [];
+    }
+
+    if (preg_match_all('/\{\{\{?\s*([a-zA-Z0-9_.-]+)\s*\}?\}\}/', $content, $matches) !== 1) {
+        return [];
+    }
+
+    $keys = array_map(static fn($item): string => (string) $item, $matches[1] ?? []);
+    $keys = array_values(array_unique($keys));
+    sort($keys);
+
+    return $keys;
+}
+
+function kirpi_send_templated_mail(
+    string $to,
+    string $templateKey,
+    array $variables = [],
+    ?int $userId = null,
+    ?string $subjectOverride = null
+): array {
+    $template = kirpi_mail_get_template($templateKey, true);
+    if (!$template) {
+        return [
+            'success' => false,
+            'message' => 'Mail sablonu bulunamadi veya pasif.',
+            'transport' => 'none',
+        ];
+    }
+
+    $defaultVars = [
+        'app_name' => app_name(),
+        'app_url' => BASE_URL,
+        'year' => date('Y'),
+    ];
+    $allVars = array_merge($defaultVars, $variables);
+
+    $subjectTemplate = trim((string) ($template['subject'] ?? ''));
+    $subject = trim((string) ($subjectOverride ?? ''));
+    if ($subject === '') {
+        $subject = kirpi_mail_render_placeholders($subjectTemplate, $allVars);
+    }
+
+    $htmlTemplate = (string) ($template['html_body'] ?? '');
+    $htmlBody = kirpi_mail_render_placeholders($htmlTemplate, $allVars);
+
+    return kirpi_send_mail($to, $subject, $htmlBody, $userId);
+}
