@@ -25,6 +25,8 @@ if ($tableReady) {
 }
 ?>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/grapesjs@0.21.9/dist/css/grapes.min.css">
+
 <div class="page-header d-print-none">
     <div class="container-xl">
         <div class="row g-2 align-items-center">
@@ -71,8 +73,13 @@ if ($tableReady) {
                             </div>
                             <div class="col-12">
                                 <label class="form-label"><?php echo e(mail_lang('html_body')); ?></label>
-                                <textarea name="html_body" rows="8" class="form-control" required></textarea>
+                                <textarea id="mail-template-create-html-body" name="html_body" rows="8" class="form-control js-mail-template-html" required></textarea>
                                 <small class="text-secondary"><?php echo e(mail_lang('template_vars_hint')); ?></small>
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm js-open-grapes-builder" data-textarea-id="mail-template-create-html-body">
+                                        GrapesJS Editor
+                                    </button>
+                                </div>
                             </div>
                             <div class="col-12">
                                 <label class="form-check">
@@ -146,7 +153,13 @@ if ($tableReady) {
                                                     </div>
                                                     <div class="col-12">
                                                         <label class="form-label"><?php echo e(mail_lang('html_body')); ?></label>
-                                                        <textarea name="html_body" rows="8" class="form-control" required><?php echo e($bodyRaw); ?></textarea>
+                                                        <?php $textareaId = 'mail-template-html-body-' . $templateId; ?>
+                                                        <textarea id="<?php echo e($textareaId); ?>" name="html_body" rows="8" class="form-control js-mail-template-html" required><?php echo e($bodyRaw); ?></textarea>
+                                                        <div class="mt-2">
+                                                            <button type="button" class="btn btn-outline-secondary btn-sm js-open-grapes-builder" data-textarea-id="<?php echo e($textareaId); ?>">
+                                                                GrapesJS Editor
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                     <div class="col-12 d-flex align-items-center justify-content-between">
                                                         <label class="form-check">
@@ -191,3 +204,120 @@ if ($tableReady) {
         <?php endif; ?>
     </div>
 </div>
+
+<div class="modal modal-blur fade" id="grapesjs-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">GrapesJS Email Builder</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-2">
+                <div id="grapesjs-editor" style="min-height:70vh;border:1px solid #e6e7e9;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><?php echo e(mail_lang('cancel')); ?></button>
+                <button type="button" class="btn btn-primary" id="grapesjs-apply"><?php echo e(mail_lang('save_template')); ?></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/grapesjs@0.21.9/dist/grapes.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/grapesjs-preset-newsletter@1.0.2/dist/grapesjs-preset-newsletter.min.js"></script>
+<script>
+(function () {
+    let grapesEditor = null;
+    let currentTextarea = null;
+    let modalInstance = null;
+
+    function getModalInstance() {
+        const modalEl = document.getElementById('grapesjs-modal');
+        if (!modalEl || !(window.bootstrap && bootstrap.Modal)) {
+            return null;
+        }
+
+        if (!modalInstance) {
+            modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+        }
+
+        return modalInstance;
+    }
+
+    function initEditor() {
+        if (grapesEditor) {
+            return grapesEditor;
+        }
+
+        grapesEditor = grapesjs.init({
+            container: '#grapesjs-editor',
+            height: '70vh',
+            fromElement: false,
+            storageManager: false,
+            plugins: ['gjs-preset-newsletter'],
+            pluginsOpts: {
+                'gjs-preset-newsletter': {}
+            },
+            panels: {
+                defaults: []
+            }
+        });
+
+        return grapesEditor;
+    }
+
+    function openBuilder(textarea) {
+        if (!textarea) {
+            return;
+        }
+
+        const editor = initEditor();
+        currentTextarea = textarea;
+
+        const rawHtml = textarea.value || '';
+        editor.setComponents(rawHtml);
+        editor.setStyle('');
+
+        const instance = getModalInstance();
+        if (instance) {
+            instance.show();
+        }
+    }
+
+    function applyBuilder() {
+        if (!grapesEditor || !currentTextarea) {
+            return;
+        }
+
+        const html = grapesEditor.getHtml();
+        const css = grapesEditor.getCss();
+        currentTextarea.value = css ? ('<style>' + css + '</style>' + html) : html;
+
+        const instance = getModalInstance();
+        if (instance) {
+            instance.hide();
+        }
+    }
+
+    document.addEventListener('click', function (event) {
+        const trigger = event.target.closest('.js-open-grapes-builder');
+        if (!trigger) {
+            return;
+        }
+
+        event.preventDefault();
+        const textareaId = trigger.getAttribute('data-textarea-id') || '';
+        const textarea = document.getElementById(textareaId);
+        if (!textarea) {
+            return;
+        }
+
+        openBuilder(textarea);
+    });
+
+    const applyButton = document.getElementById('grapesjs-apply');
+    if (applyButton) {
+        applyButton.addEventListener('click', applyBuilder);
+    }
+})();
+</script>
