@@ -13,6 +13,7 @@
     "menu":  [
                  {
                      "title":  "Audit Log",
+                     "title_key":  "audit_log",
                      "icon":  "ti ti-list-details",
                      "url":  "audit/list",
                      "permission":  "audit.view",

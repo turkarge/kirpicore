@@ -13,6 +13,7 @@
     "menu":  [
                  {
                      "title":  "Jobs Queue",
+                     "title_key":  "jobs_queue",
                      "icon":  "ti ti-clock-play",
                      "url":  "queue/view",
                      "permission":  "queue.view",

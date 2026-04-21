@@ -13,6 +13,7 @@
     "menu":  [
                  {
                      "title":  "Backup Restore",
+                     "title_key":  "backup_restore",
                      "icon":  "ti ti-database-export",
                      "url":  "backup/view",
                      "permission":  "backup.view",

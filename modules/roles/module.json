@@ -13,6 +13,7 @@
     "menu":  [
                  {
                      "title":  "Roller",
+                     "title_key":  "roles",
                      "icon":  "ti ti-shield",
                      "url":  "roles/view",
                      "permission":  "roles.view",

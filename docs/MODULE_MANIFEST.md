@@ -71,6 +71,7 @@ Sabit kurallar:
 `menu` öğesi alanları:
 
 - `title` (string, zorunlu): Menüde görünen başlık
+- `title_key` (string, opsiyonel): Modül `language.php` içindeki çeviri anahtarı. Varsa başlık bununla çözülür.
 - `icon` (string, opsiyonel): Tabler icon class (örn: `ti ti-users`)
 - `url` (string, zorunlu): Route path (örn: `users/view`)
 - `permission` (string|null, opsiyonel): Yetki kontrol anahtarı
@@ -83,6 +84,7 @@ Notlar:
 - `placement=top`: Dashboard ile Yönetim arasında üst menüde gösterilir.
 - `placement=management`: Yönetim dropdown içinde gösterilir.
 - `group=monitoring`: Yönetim altında `Monitoring / İzleme` alt grubuna otomatik alınır.
+- `title_key` kullanıldığında menü etiketi `<module>_lang('<title_key>')` ile çekilir.
 - Route mevcut değilse veya kullanıcının yetkisi yoksa menü öğesi otomatik gizlenir.
 
 Örnek:

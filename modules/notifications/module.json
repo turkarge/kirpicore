@@ -13,6 +13,7 @@
     "menu":  [
                  {
                      "title":  "Bildirimler",
+                     "title_key":  "notifications",
                      "icon":  "ti ti-bell",
                      "url":  "notifications/list",
                      "permission":  "notifications.view",

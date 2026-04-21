@@ -13,6 +13,7 @@
     "menu":  [
                  {
                      "title":  "Kullanicilar",
+                     "title_key":  "users",
                      "icon":  "ti ti-users",
                      "url":  "users/view",
                      "permission":  "users.view",

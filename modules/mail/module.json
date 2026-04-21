@@ -13,6 +13,7 @@
     "menu":  [
                  {
                      "title":  "Mail Test",
+                     "title_key":  "mail_test_status",
                      "icon":  "ti ti-mail",
                      "url":  "mail/test",
                      "permission":  "mail.view",
@@ -22,6 +23,7 @@
                  },
                  {
                      "title":  "Mail Sablonlari",
+                     "title_key":  "mail_templates",
                      "icon":  "ti ti-mail-cog",
                      "url":  "mail/templates",
                      "permission":  "mail.view",

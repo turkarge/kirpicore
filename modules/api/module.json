@@ -13,6 +13,7 @@
     "menu":  [
                  {
                      "title":  "API Metrics",
+                     "title_key":  "metrics_title",
                      "icon":  "ti ti-chart-line",
                      "url":  "api/metrics",
                      "permission":  "health.view",

@@ -65,6 +65,7 @@ $managementMenus = array_values(array_filter($moduleMenus, static fn(array $item
                     <thead>
                         <tr>
                             <th><?php echo e(settings_lang('name')); ?></th>
+                            <th><?php echo e(settings_lang('title_key')); ?></th>
                             <th><?php echo e(settings_lang('module')); ?></th>
                             <th><?php echo e(settings_lang('placement')); ?></th>
                             <th><?php echo e(settings_lang('group')); ?></th>
@@ -75,12 +76,13 @@ $managementMenus = array_values(array_filter($moduleMenus, static fn(array $item
                     <tbody>
                         <?php if (empty($topMenus)): ?>
                             <tr>
-                                <td colspan="6" class="text-secondary"><?php echo e(settings_lang('no_menu_item')); ?></td>
+                                <td colspan="7" class="text-secondary"><?php echo e(settings_lang('no_menu_item')); ?></td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($topMenus as $menuItem): ?>
                                 <tr>
                                     <td><?php echo e((string) ($menuItem['title'] ?? '')); ?></td>
+                                    <td><code><?php echo e((string) ($menuItem['title_key'] ?? '')); ?></code></td>
                                     <td><code><?php echo e((string) ($menuItem['module'] ?? '')); ?></code></td>
                                     <td><?php echo e((string) ($menuItem['placement'] ?? '')); ?></td>
                                     <td><?php echo e((string) ($menuItem['group'] ?? 'default')); ?></td>
@@ -103,6 +105,7 @@ $managementMenus = array_values(array_filter($moduleMenus, static fn(array $item
                     <thead>
                         <tr>
                             <th><?php echo e(settings_lang('name')); ?></th>
+                            <th><?php echo e(settings_lang('title_key')); ?></th>
                             <th><?php echo e(settings_lang('module')); ?></th>
                             <th><?php echo e(settings_lang('placement')); ?></th>
                             <th><?php echo e(settings_lang('group')); ?></th>
@@ -113,12 +116,13 @@ $managementMenus = array_values(array_filter($moduleMenus, static fn(array $item
                     <tbody>
                         <?php if (empty($managementMenus)): ?>
                             <tr>
-                                <td colspan="6" class="text-secondary"><?php echo e(settings_lang('no_menu_item')); ?></td>
+                                <td colspan="7" class="text-secondary"><?php echo e(settings_lang('no_menu_item')); ?></td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($managementMenus as $menuItem): ?>
                                 <tr>
                                     <td><?php echo e((string) ($menuItem['title'] ?? '')); ?></td>
+                                    <td><code><?php echo e((string) ($menuItem['title_key'] ?? '')); ?></code></td>
                                     <td><code><?php echo e((string) ($menuItem['module'] ?? '')); ?></code></td>
                                     <td><?php echo e((string) ($menuItem['placement'] ?? '')); ?></td>
                                     <td><?php echo e((string) ($menuItem['group'] ?? 'default')); ?></td>

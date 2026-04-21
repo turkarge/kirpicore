@@ -60,8 +60,9 @@ function kirpi_load_module_manifest(string $moduleDir): array
             }
 
             $title = trim((string) ($menuItem['title'] ?? ''));
+            $titleKey = trim((string) ($menuItem['title_key'] ?? ''));
             $url = trim((string) ($menuItem['url'] ?? ''));
-            if ($title === '' || $url === '') {
+            if (($title === '' && $titleKey === '') || $url === '') {
                 continue;
             }
 
@@ -77,6 +78,7 @@ function kirpi_load_module_manifest(string $moduleDir): array
 
             $merged['menu'][] = [
                 'title' => $title,
+                'title_key' => $titleKey,
                 'icon' => trim((string) ($menuItem['icon'] ?? 'ti ti-point')),
                 'url' => $url,
                 'permission' => isset($menuItem['permission']) ? trim((string) $menuItem['permission']) : null,

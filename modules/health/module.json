@@ -13,6 +13,7 @@
     "menu":  [
                  {
                      "title":  "Health Metrics",
+                     "title_key":  "health_metrics",
                      "icon":  "ti ti-activity-heartbeat",
                      "url":  "health/view",
                      "permission":  "health.view",

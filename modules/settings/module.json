@@ -13,6 +13,7 @@
     "menu":  [
                  {
                      "title":  "Ayarlar",
+                     "title_key":  "settings",
                      "icon":  "ti ti-adjustments",
                      "url":  "settings/view",
                      "permission":  "settings.view",
@@ -22,6 +23,7 @@
                  },
                  {
                      "title":  "API Test",
+                     "title_key":  "api_test_center",
                      "icon":  "ti ti-api",
                      "url":  "settings/api-test",
                      "permission":  "settings.view",
@@ -31,6 +33,7 @@
                  },
                  {
                      "title":  "Moduller",
+                     "title_key":  "modules",
                      "icon":  "ti ti-packages",
                      "url":  "settings/modules",
                      "permission":  "settings.view",
@@ -40,6 +43,7 @@
                  },
                  {
                      "title":  "Menu Yonetimi",
+                     "title_key":  "menu_management",
                      "icon":  "ti ti-layout-navbar",
                      "url":  "settings/menu-management",
                      "permission":  "settings.view",

@@ -1,5 +1,45 @@
 <?php
 
+function kirpi_module_translate(string $moduleKey, string $key, ?string $default = null): string
+{
+    $moduleKey = trim($moduleKey);
+    $key = trim($key);
+    if ($moduleKey === '' || $key === '') {
+        return $default ?? $key;
+    }
+
+    static $loadedLanguageFiles = [];
+    if (!isset($loadedLanguageFiles[$moduleKey])) {
+        $langFile = BASE_PATH . '/modules/' . $moduleKey . '/language.php';
+        if (is_file($langFile)) {
+            require_once $langFile;
+        }
+        $loadedLanguageFiles[$moduleKey] = true;
+    }
+
+    $langFunction = $moduleKey . '_lang';
+    if (function_exists($langFunction)) {
+        $translated = $langFunction($key, $default ?? $key);
+        if (is_string($translated) && trim($translated) !== '') {
+            return $translated;
+        }
+    }
+
+    return $default ?? $key;
+}
+
+function kirpi_navigation_resolve_item_title(string $moduleKey, array $menuItem): string
+{
+    $fallbackTitle = trim((string) ($menuItem['title'] ?? ''));
+    $titleKey = trim((string) ($menuItem['title_key'] ?? ''));
+
+    if ($titleKey !== '') {
+        return kirpi_module_translate($moduleKey, $titleKey, $fallbackTitle !== '' ? $fallbackTitle : $titleKey);
+    }
+
+    return $fallbackTitle;
+}
+
 function kirpi_navigation_group_meta(string $groupKey): array
 {
     $groupKey = strtolower(trim($groupKey));
@@ -36,14 +76,21 @@ function kirpi_collect_module_menu_items(): array
             }
 
             $title = trim((string) ($menuItem['title'] ?? ''));
+            $titleKey = trim((string) ($menuItem['title_key'] ?? ''));
             $url = trim((string) ($menuItem['url'] ?? ''));
-            if ($title === '' || $url === '') {
+            if (($title === '' && $titleKey === '') || $url === '') {
+                continue;
+            }
+
+            $resolvedTitle = kirpi_navigation_resolve_item_title($moduleKey, $menuItem);
+            if ($resolvedTitle === '') {
                 continue;
             }
 
             $items[] = [
                 'module' => $moduleKey,
-                'title' => $title,
+                'title' => $resolvedTitle,
+                'title_key' => $titleKey,
                 'icon' => trim((string) ($menuItem['icon'] ?? 'ti ti-point')),
                 'url' => $url,
                 'permission' => isset($menuItem['permission']) && trim((string) $menuItem['permission']) !== ''
