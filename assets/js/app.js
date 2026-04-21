@@ -410,7 +410,25 @@
                     }
                 });
 
-                const result = await response.json();
+                const contentType = (response.headers.get("content-type") || "").toLowerCase();
+                let result = null;
+
+                if (contentType.includes("application/json")) {
+                    result = await response.json();
+                } else {
+                    const responseText = await response.text();
+                    if (!response.ok) {
+                        this.toast(`Islem basarisiz oldu (HTTP ${response.status}).`, "error");
+                        return;
+                    }
+
+                    try {
+                        result = JSON.parse(responseText);
+                    } catch (parseError) {
+                        this.toast("Sunucu beklenmeyen bir yanit dondurdu.", "error");
+                        return;
+                    }
+                }
 
                 if (result.message) {
                     this.toast(result.message, result.status || "info");
