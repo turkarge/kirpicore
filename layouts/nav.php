@@ -387,7 +387,10 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                                                     data-bs-toggle="dropdown"
                                                     data-bs-auto-close="outside"
                                                     aria-expanded="false">
-                                                    <?php echo e($child['title']); ?>
+                                                    <span class="d-flex align-items-center justify-content-between w-100">
+                                                        <span><?php echo e($child['title']); ?></span>
+                                                        <i class="ti ti-chevron-right opacity-75"></i>
+                                                    </span>
                                                 </a>
                                                 <div class="dropdown-menu">
                                                     <?php foreach ($child['children'] as $subChild): ?>
