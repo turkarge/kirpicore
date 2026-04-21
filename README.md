@@ -1,10 +1,10 @@
 ﻿# Kirpi Core
 
-Kurumsal, moduler ve Docker-odakli PHP yonetim altyapisi.
+Kurumsal, modüler ve Docker-odaklı PHP yönetim altyapısı.
 
-Bu dokuman, Kirpi Core sistemini lokal ortamda ve Dokploy uzerinden uretim ortaminda calistirmak icin tek kaynak kurulum kilavuzudur.
+Bu doküman, Kirpi Core sistemini yerel ortamda ve Dokploy üzerinden üretim ortamında çalıştırmak için tek kaynak kurulum kılavuzudur.
 
-## 1. Genel Bakis
+## 1. Genel Bakış
 
 Kirpi Core modulleri:
 
@@ -23,49 +23,49 @@ Kirpi Core modulleri:
 - `throttle`
 - `api`
 
-Yapi ozellikleri:
+Yapı özellikleri:
 
-- Modul manifest destegi (`modules/<module>/module.json`)
-- Dinamik modul etkinlestirme/devre disi birakma
-- Web tabanli setup + shell tabanli setup
-- API token ve scope yonetimi
+- Modul manifest desteği (`modules/<module>/module.json`)
+- Dinamik modul etkinleştirme/devre dışı bırakma
+- Web tabanlı setup + shell tabanlı setup
+- API token ve scope yönetimi
 - Backup/restore, health metrics, throttle ve audit log
 
-## 2. On Kosullar
+## 2. Ön Koşullar
 
 - Docker + Docker Compose
-- Dokploy (uretim kurulumu icin)
+- Dokploy (üretim kurulumu için)
 - MySQL 8.x (compose ile gelir)
-- Domain + TLS (uretim ortami icin onerilir)
+- Domain + TLS (üretim ortamı için önerilir)
 
-## 3. Hizli Baslangic (Lokal Docker)
+## 3. Hızlı Başlangıç (Yerel Docker)
 
 ```bash
 docker compose up -d --build
 ```
 
-Erisim:
+Erişim:
 
 - Uygulama: `http://localhost:8080`
-- DB host (container ici): `db:3306`
+- DB host (container içi): `db:3306`
 
-Ilk kurulum:
+İlk kurulum:
 
 - `http://localhost:8080/setup.php`
 
 ## 4. Dokploy ile Kurulum
 
-### 4.1 Uygulama Olusturma
+### 4.1 Uygulama Oluşturma
 
-1. Dokploy panelinde yeni bir **Compose Application** olusturun.
-2. Repository olarak bu projeyi secin.
+1. Dokploy panelinde yeni bir **Compose Application** oluşturun.
+2. Repository olarak bu projeyi seçin.
 3. Compose file olarak `docker-compose.yml` belirleyin.
 
 ### 4.2 Environment Settings
 
-Asagidaki degerleri Dokploy `Environment Settings` alanina girin.
+Aşağıdaki değerleri Dokploy `Environment Settings` alanına giriniz.
 
-### Zorunlu Degiskenler
+### Zorunlu Değişkenler
 
 ```env
 APP_NAME="Kirpi Core"
@@ -95,7 +95,7 @@ MAIL_FROM_ADDRESS=your_mail@example.com
 MAIL_FROM_NAME="Kirpi Core"
 ```
 
-### Guvenlik ve Session
+### Güvenlik ve Session
 
 ```env
 SESSION_COOKIE_DOMAIN=
@@ -105,7 +105,7 @@ SECURITY_HEADERS_ENABLED=true
 AUTH_LOGIN_COVER_IMAGE=https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=80
 ```
 
-### Setup ve Otomatik DB Kontrolleri
+### Kurulum ve Otomatik DB Kontrolleri
 
 ```env
 AUTO_WEB_SETUP=false
@@ -116,10 +116,10 @@ AUTO_DB_ENSURE_INDEXES=true
 
 Not:
 
-- `AUTO_WEB_SETUP=true` yaparsaniz `setup.php` web arayuzu production'da acik olur.
-- Production icin setup tamamlandiktan sonra `AUTO_WEB_SETUP=false` onerilir.
+- `AUTO_WEB_SETUP=true` yaparsanız `setup.php` web arayüzü üretimde açık olur.
+- Üretim için setup tamamlandıktan sonra `AUTO_WEB_SETUP=false` önerilir.
 
-### Backup Ayarlari
+### Backup Ayarları
 
 ```env
 BACKUP_RETENTION_COUNT=20
@@ -127,7 +127,7 @@ BACKUP_VERIFY_DRY_RUN=true
 BACKUP_INCLUDE_SYSTEM_TABLES=false
 ```
 
-### Throttle Ayarlari
+### Throttle Ayarları
 
 ```env
 THROTTLE_ENABLED=true
@@ -148,40 +148,40 @@ THROTTLE_API_AUTH_WINDOW=300
 THROTTLE_API_AUTH_BLOCK=600
 ```
 
-### API Ayarlari
+### API Ayarları
 
 ```env
 API_TOKEN_TTL_SECONDS=2592000
 API_REQUEST_LOG_RETENTION_DAYS=90
 ```
 
-### 4.3 Deploy
+### 4.3 Dağıtım
 
-Deploy sonrasi container acilis akisi:
+Dağıtım sonrası container açılış akışı:
 
-1. DB baglantisini bekler
-2. `php shell.php db:install` ile core + modul semalarini kurar
-3. Uygulamayi Apache ile ayaga kaldirir
+1. DB bağlantısını bekler
+2. `php shell.php db:install` ile core + modül şemalarını kurar
+3. Uygulamayı Apache ile ayağa kaldırır
 
-Health endpoint:
+Sağlık uç noktası:
 
 - `GET /healthz`
 
-## 5. Setup (Web ve CLI)
+## 5. Kurulum (Web ve CLI)
 
-### Web Setup
+### Web Kurulumu
 
 - URL: `/setup.php`
-- Beklenen: setup key + admin bilgileri
-- Sonuc: temel tablolar, roller, admin kullanicisi
+- Beklenen: kurulum anahtarı + admin bilgileri
+- Sonuç: temel tablolar, roller, admin kullanıcısı
 
-### CLI Setup
+### CLI Kurulumu
 
 ```bash
 php shell.php db:install
 ```
 
-Parcali komutlar:
+Parçalı komutlar:
 
 ```bash
 php shell.php db:create
@@ -191,19 +191,19 @@ php shell.php db:status
 php shell.php db:tables
 ```
 
-## 6. Yonetim Menusu ve Kritik Moduller
+## 6. Yönetim Menüsü ve Kritik Modüller
 
-- `settings/view`: genel ayarlar + eksik tablo/index kurulum araci
-- `settings/modules`: modul yonetimi (enable/disable, dependency kontrolu)
-- `security/view`: guvenlik izleme paneli
-- `health/view`: health + metrics paneli
+- `settings/view`: genel ayarlar + eksik tablo/index kurulum aracı
+- `settings/modules`: modül yönetimi (enable/disable, bağımlılık kontrolü)
+- `security/view`: güvenlik izleme paneli
+- `health/view`: sağlık + metrikler paneli
 - `backup/view`: backup/restore/download/delete
-- `queue/view`: job queue yonetimi
-- `mail/test` ve `mail/templates`: mail test + template yonetimi
+- `queue/view`: iş kuyruğu yönetimi
+- `mail/test` ve `mail/templates`: posta testi + şablon yönetimi
 
 ## 7. REST API (v1)
 
-Base route: `api/v1`
+Temel rota: `api/v1`
 
 Temel endpointler:
 
@@ -221,7 +221,7 @@ Ek endpointler:
 - `GET /api/v1/postman`
 - `GET /api/v1/postman-collection.json`
 
-Dokumanlar:
+Dokümanlar:
 
 - `docs/API_USERS.md`
 - `docs/API_RELEASE_CHECKLIST.md`
@@ -246,36 +246,36 @@ php shell.php backup:cleanup [keep_count]
 
 Panel:
 
-- Olustur
-- Dogrula (checksum + dry-run)
-- Restore
-- Indir
+- Oluştur
+- Doğrula (checksum + dry-run)
+- Geri Yükle
+- İndir
 - Sil
 
 ## 9. Sorun Giderme
 
-### 9.1 "Guvenlik dogrulamasi basarisiz oldu"
+### 9.1 "Güvenlik doğrulaması başarısız oldu"
 
 Neden:
 
-- Eski/yanlis cookie
-- Domain degisimi sonrasi session uyumsuzlugu
+- Eski/yanlış çerez
+- Domain değişikliği sonrası oturum uyumsuzluğu
 
-Cozum:
+Çözüm:
 
-1. Tarayici cookie temizleyin
-2. `SESSION_COOKIE_DOMAIN` degerini bos birakin (onerilen)
-3. Yeniden deploy edin
-4. Tekrar giris yapin
+1. Tarayıcı çerezini temizleyin
+2. `SESSION_COOKIE_DOMAIN` değerini boş bırakın (önerilen)
+3. Yeniden dağıtın
+4. Tekrar giriş yapın
 
-### 9.2 MySQL container unhealthy
+### 9.2 MySQL kapsayıcısı sağlıklı değil
 
-Logda `unknown variable 'default-authentication-plugin=mysql_native_password'` goruluyorsa:
+Logda `unknown variable 'default-authentication-plugin=mysql_native_password'` görülüyorsa:
 
-- MySQL 8.4 ile uyumsuz eski startup argumanlari kaldirin.
-- DB volume bozuk/eski ise temiz volume ile yeniden baslatin.
+- MySQL 8.4 ile uyumsuz eski başlatma argümanlarını kaldırın.
+- DB birimi bozuk/eski ise temiz birim ile yeniden başlatın.
 
-### 9.3 Upload dizini olusturulamadi
+### 9.3 Yükleme dizini oluşturulamadı
 
 Kontrol edin:
 
@@ -284,20 +284,20 @@ Kontrol edin:
 - `logs`
 - `storage`
 
-Container kullanicisinin (`www-data`) yazma izni olmali.
+Kapsayıcı kullanıcısının (`www-data`) yazma izni olmalı.
 
-## 10. Guvenlik Onerileri (Production)
+## 10. Güvenlik Önerileri (Üretim)
 
 - `APP_ENV=production`
 - `APP_DEBUG=false`
 - `AUTO_WEB_SETUP=false`
-- `SETUP_KEY` bos veya rotate edilmis
-- Guclu `DB_PASS`
-- Guclu SMTP sifresi / app password
-- Reverse proxy arkasinda `APP_TRUST_PROXY=true`
-- Duzenli backup + restore testi
+- `SETUP_KEY` boş veya döndürülmüş
+- Güçlü `DB_PASS`
+- Güçlü SMTP şifresi / uygulama şifresi
+- Ters proxy arkasında `APP_TRUST_PROXY=true`
+- Düzenli yedekleme + geri yükleme testi
 
-## 11. Ilgili Dokumanlar
+## 11. İlgili Dokümanlar
 
 - [SETUP.md](SETUP.md)
 - [docs/MODULE_MANIFEST.md](docs/MODULE_MANIFEST.md)
@@ -306,5 +306,5 @@ Container kullanicisinin (`www-data`) yazma izni olmali.
 
 ## 12. Notlar
 
-- Modul mimarisinde `module.json` geriye uyumlu tasarlanmistir; olmayan moduller yine calisir.
-- Core modul bagimliliklari nedeniyle bazi moduller devre disi birakilamaz.
+- Modül mimarisinde `module.json` geriye uyumlu tasarlanmıştır; olmayan modüller yine çalışır.
+- Çekirdek modül bağımlılıkları nedeniyle bazı modüller devre dışı bırakılamaz.

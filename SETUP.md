@@ -1,12 +1,12 @@
 ﻿# Kirpi Core Setup Guide
 
-Bu dokuman, Kirpi Core sisteminin lokal ve Dokploy uretim ortaminda standart kurulum akisini tanimlar.
+Bu doküman, Kirpi Core sisteminin lokal ve Dokploy üretim ortamında standart kurulum akışını tanımlar.
 
-## 1. Kurulum Modlari
+## 1. Kurulum Modları
 
-- Lokal Docker kurulumu (gelistirme/test)
-- Dokploy uzerinden production kurulumu
-- CLI ile veritabani kurulum/onarim islemleri
+- Lokal Docker kurulumu (geliştirme/test)
+- Dokploy üzerinden production kurulumu
+- CLI ile veritabanı kurulum/onarım işlemleri
 
 ## 2. Lokal Kurulum (Docker)
 
@@ -14,22 +14,22 @@ Bu dokuman, Kirpi Core sisteminin lokal ve Dokploy uretim ortaminda standart kur
 docker compose up -d --build
 ```
 
-Erisim:
+Erişim:
 
 - Uygulama: `http://localhost:8080`
 - Setup: `http://localhost:8080/setup.php`
 
 ## 3. Dokploy Kurulumu
 
-### 3.1 Uygulama Olusturma
+### 3.1 Uygulama Oluşturma
 
-1. Dokploy panelinde yeni `Compose Application` olusturun.
-2. Repo olarak Kirpi Core reposunu secin.
+1. Dokploy panelinde yeni `Compose Application` oluşturun.
+2. Repo olarak Kirpi Core reposunu seçin.
 3. Compose file: `docker-compose.yml`.
 
 ### 3.2 Environment Settings
 
-Asagidaki blok, Dokploy icin referans production baseline'dir.
+Aşağıdaki blok, Dokploy için referans production baseline'dir.
 
 ```env
 APP_NAME="Kirpi Core"
@@ -94,13 +94,13 @@ API_TOKEN_TTL_SECONDS=2592000
 API_REQUEST_LOG_RETENTION_DAYS=90
 ```
 
-### 3.3 Deploy Sonrasi Akis
+### 3.3 Deploy Sonrası Akış
 
-Container acilisinda sistem:
+Container açılışında sistem:
 
-1. DB baglantisini bekler
-2. `php shell.php db:install` calistirir
-3. Uygulamayi ayaga kaldirir
+1. DB bağlantısını bekler
+2. `php shell.php db:install` çalıştırır
+3. Uygulamayı ayağa kaldırır
 
 Saglik endpoint:
 
@@ -110,22 +110,22 @@ Saglik endpoint:
 
 `AUTO_WEB_SETUP=true` iken:
 
-- `/setup.php` uzerinden setup key ile kurulum yapilabilir.
+- `/setup.php` üzerinden setup key ile kurulum yapılabilir.
 
-Guvenlik onerisi:
+Güvenlik önerisi:
 
 - Kurulum bittikten sonra `AUTO_WEB_SETUP=false`
-- `SETUP_KEY` degerini bosaltin veya degistirin
+- `SETUP_KEY` değerini boşaltın veya değiştirin
 
-## 5. CLI Setup ve Bakim Komutlari
+## 5. CLI Setup ve Bakım Komutları
 
-Tum kurulum:
+Tüm kurulum:
 
 ```bash
 php shell.php db:install
 ```
 
-Parcali kurulum:
+Parçalı kurulum:
 
 ```bash
 php shell.php db:create
@@ -133,7 +133,7 @@ php shell.php db:core:install
 php shell.php db:modules:install
 ```
 
-Tek modul kurulumu:
+Tek modül kurulumu:
 
 ```bash
 php shell.php db:modules:install notifications
@@ -146,29 +146,29 @@ php shell.php db:status
 php shell.php db:tables
 ```
 
-## 6. Dogrulama Checklist
+## 6. Doğrulama Checklist
 
-- `BASE_URL` dogru mu?
-- `DB_*` bilgileri dogru mu?
-- `MAIL_*` bilgileri dogru mu?
+- `BASE_URL` doğru mu?
+- `DB_*` bilgileri doğru mu?
+- `MAIL_*` bilgileri doğru mu?
 - `APP_ENV=production` ve `APP_DEBUG=false` mi?
-- `/healthz` endpoint'i `200` donuyor mu?
-- Admin girisi ve temel sayfalar aciliyor mu?
+- `/healthz` endpoint'i `200` dönüyor mu?
+- Admin girişi ve temel sayfalar açılıyor mu?
 
-## 7. Sik Karsilasilan Sorunlar
+## 7. Sık Karşılaşılan Sorunlar
 
-### "Guvenlik dogrulamasi basarisiz oldu"
+### "Güvenlik doğrulaması başarısız oldu"
 
-1. Tarayici cookie temizleyin
-2. `SESSION_COOKIE_DOMAIN` degerini bos birakin
+1. Tarayıcı cookie temizleyin
+2. `SESSION_COOKIE_DOMAIN` değerini boş bırakın
 3. Yeniden deploy edin
 
-### MySQL unhealthy / privilege table hatalari
+### MySQL unhealthy / privilege table hataları
 
-- Eski/uyumsuz MySQL startup argumanlarini kaldirin
-- Bozuk/eski DB volume kullaniyorsaniz temiz volume ile yeniden baslatin
+- Eski/uyumsuz MySQL startup argümanlarını kaldırın
+- Bozuk/eski DB volume kullanıyorsanız temiz volume ile yeniden başlatın
 
-### "Yukleme dizini olusturulamadi"
+### "Yükleme dizini oluşturulamadı"
 
 - `uploads`, `uploads/avatars`, `logs`, `storage` dizinlerini ve yazma izinlerini kontrol edin
 

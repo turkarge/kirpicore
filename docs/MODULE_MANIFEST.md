@@ -1,16 +1,16 @@
 ﻿# KirpiCore Module Manifest (`module.json`)
 
-Bu dokuman, moduller icin opsiyonel manifest yapisini tanimlar.
-Mevcut sistemi bozmaz; `module.json` olmayan modul de varsayilan degerlerle yuklenir.
-Bu belge ayni zamanda KirpiCore modullerinin gelistirme standardini tanimlar.
+Bu doküman, modüller için opsiyonel manifest yapısını tanımlar.
+Mevcut sistemi bozmaz; `module.json` olmayan modül de varsayılan değerlerle yüklenir.
+Bu belge aynı zamanda KirpiCore modüllerinin geliştirme standardını tanımlar.
 
 ## Dosya Konumu
 
 - `modules/<module_key>/module.json`
 
-## Modul Gelistirme Standardi
+## Modül Geliştirme Standardı
 
-Her modul, asagidaki yapidan ihtiyacina uygun olan dosyalari icermelidir:
+Her modül, aşağıdaki yapıdan ihtiyacına uygun olan dosyaları içermelidir:
 
 - `modules/<module_key>/module.json`
 - `modules/<module_key>/language.php`
@@ -25,17 +25,17 @@ Her modul, asagidaki yapidan ihtiyacina uygun olan dosyalari icermelidir:
 
 Notlar:
 
-- `language.php` dosyasi modul seviyesinde zorunlu standarttir.
-- Bir modulde UI veya action yoksa ilgili klasorlerin bos olmasi sorun degildir.
-- `database/*` dosyalari yoksa setup bu modulu veritabani adiminda pas gecer.
+- `language.php` dosyası modül seviyesinde zorunlu standarttır.
+- Bir modülde UI veya action yoksa ilgili klasörlerin boş olması sorun değildir.
+- `database/*` dosyaları yoksa setup bu modülü veritabanı adımında pas geçer.
 
-## Ornek
+## Örnek
 
 ```json
 {
   "key": "users",
   "name": "Users",
-  "description": "Kullanici yonetimi",
+  "description": "Kullanıcı yönetimi",
   "version": "1.0.0",
   "enabled": true,
   "core": true,
@@ -47,68 +47,68 @@ Notlar:
 
 ## Alanlar
 
-- `key` (string): Modul teknik anahtari.
+- `key` (string): Modül teknik anahtarı.
 - `name` (string): Panel/insan okunur ad.
-- `description` (string): Kisa aciklama.
-- `version` (string): Modul versiyonu.
-- `enabled` (bool): `false` ise module ait `routes.php` yuklenmez.
-- `core` (bool): Core modul mu bilgisi.
-- `load_order` (int): Modul yukleme sirasi (kucukten buyuge).
-- `requires` (array<string>): Gelecekte bagimlilik kontrolu icin ayrilan alan.
-- `author` (string): Modul gelistirici bilgisi.
+- `description` (string): Kısa açıklama.
+- `version` (string): Modül versiyonu.
+- `enabled` (bool): `false` ise module ait `routes.php` yüklenmez.
+- `core` (bool): Core modül mü bilgisi.
+- `load_order` (int): Modül yükleme sırası (küçükten büyüğe).
+- `requires` (array<string>): Gelecekte bağımlılık kontrolü için ayrılan alan.
+- `author` (string): Modül geliştirici bilgisi.
 
-## Dil Dosyasi Standardi (`language.php`)
+## Dil Dosyası Standardı (`language.php`)
 
-Her modul, kendi ceviri fonksiyonunu saglar:
+Her modül, kendi çeviri fonksiyonunu sağlar:
 
-- Fonksiyon adi modul bazli olmalidir. Ornek: `users_lang()`, `auth_lang()`, `api_lang()`.
-- Imza: `function <module>_lang(string $key, ?string $default = null): string`
-- `tr` ve `en` sozlukleri ayni anahtar setini korumaya calismalidir.
-- Locale kaynagi: `APP_LOCALE` (`tr` varsayilan).
-- Bulunamayan anahtarlarda geri donus sirasi:
+- Fonksiyon adı modül bazlı olmalıdır. Örnek: `users_lang()`, `auth_lang()`, `api_lang()`.
+- İmza: `function <module>_lang(string $key, ?string $default = null): string`
+- `tr` ve `en` sözlükleri aynı anahtar setini korumaya çalışmalıdır.
+- Locale kaynağı: `APP_LOCALE` (`tr` varsayılan).
+- Bulunamayan anahtarlarda geri dönüş sırası:
   - aktif locale
   - `tr`
   - `$default`
   - `$key`
 
-Kullanim:
+Kullanım:
 
-- Sayfa/action basinda: `require_once BASE_PATH . '/modules/<module_key>/language.php';`
-- Sabit metinler dogrudan yazilmak yerine `*_lang('key')` ile okunur.
+- Sayfa/action başında: `require_once BASE_PATH . '/modules/<module_key>/language.php';`
+- Sabit metinler doğrudan yazılmak yerine `*_lang('key')` ile okunur.
 
 ## Geriye Uyumluluk
 
-- `module.json` yoksa default degerler kullanilir.
-- Mevcut route yapisi ve modul dizin yapisi aynen korunur.
-- `language.php` olmayan eski moduller teknik olarak calisabilir; ancak yeni standartta eklenmesi gerekir.
+- `module.json` yoksa default değerler kullanılır.
+- Mevcut route yapısı ve modül dizin yapısı aynen korunur.
+- `language.php` olmayan eski modüller teknik olarak çalışabilir; ancak yeni standartta eklenmesi gerekir.
 
 ## Registry ve Runtime
 
 - DB registry tablosu: `app_modules`
-- Runtime'da modul listesi:
-  - Manifest degerleri
-  - `app_modules` override degerleri (`is_enabled`, `load_order`, `is_core`)
-- Route yukleme yalnizca `enabled=true` moduller icin yapilir.
+- Runtime'da modül listesi:
+  - Manifest değerleri
+  - `app_modules` override değerleri (`is_enabled`, `load_order`, `is_core`)
+- Route yükleme yalnızca `enabled=true` modüller için yapılır.
 
-## Kurulum ve Schema Davranisi
+## Kurulum ve Schema Davranışı
 
 - Core kurulum: `database/core.sql`
-- Modul schema kurulumlari: `modules/*/database/schema.sql`
-- Modul permission kurulumlari: `modules/*/database/permissions.sql`
-- Setup su kurallarla calisir:
-  - Dosya yoksa atlanir.
-  - Dosya varsa statement bazinda calistirilir.
+- Modül schema kurulumları: `modules/*/database/schema.sql`
+- Modül permission kurulumları: `modules/*/database/permissions.sql`
+- Setup şu kurallarla çalışır:
+  - Dosya yoksa atlanır.
+  - Dosya varsa statement bazında çalıştırılır.
   - Idempotent SQL tercih edilir (`IF NOT EXISTS`, `INSERT IGNORE`, vb.).
 
-## Yonetim Ekrani
+## Yönetim Ekranı
 
 - Route: `settings/modules`
-- Core moduller (`is_core=1`) disable edilemez.
-- Bir modul diger aktif moduller tarafindan `requires` ile kullaniliyorsa disable edilmez.
+- Core modüller (`is_core=1`) disable edilemez.
+- Bir modül diğer aktif modüller tarafından `requires` ile kullanılıyorsa disable edilmez.
 
-## Kodlama Kurallari (Ozet)
+## Kodlama Kuralları (Özet)
 
-- Modul, yalniz kendi alanindaki dil anahtarlarini kullanir.
-- Action cevaplari tutarli JSON formatinda olur (`status`, `message`, opsiyonel `data`).
-- UI metinleri ve tablo basliklari dil dosyasindan gelir.
-- Yeni modul eklerken once `module.json` + `language.php` olusturulur, sonra route/page/action yazilir.
+- Modül, yalnız kendi alanındaki dil anahtarlarını kullanır.
+- Action cevapları tutarlı JSON formatında olur (`status`, `message`, opsiyonel `data`).
+- UI metinleri ve tablo başlıkları dil dosyasından gelir.
+- Yeni modül eklerken önce `module.json` + `language.php` oluşturulur, sonra route/page/action yazılır.

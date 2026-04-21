@@ -1,44 +1,44 @@
 # KirpiCore API Release Checklist
 
-Bu dokuman, API degisikliklerini production ortamina guvenli sekilde almak icin kullanilir.
+Bu doküman, API değişikliklerini üretim ortamına güvenli şekilde almak için kullanılır.
 
-## 1) Pre-Release (Kod Hazirlik)
+## 1) Pre-Release (Kod Hazırlık)
 
-- [ ] Endpoint degisiklikleri `docs/API_USERS.md` icinde guncellendi.
-- [ ] Yeni hata senaryolari icin `error_code` tanimlari eklendi.
-- [ ] Scope degisiklikleri (`profile:read`, `users:*`) dogrulandi.
-- [ ] `php -l` ile degisen PHP dosyalarinda syntax kontrolu temiz.
-- [ ] Gerekli DB schema dosyalari (`modules/*/database/*.sql`) guncellendi.
+- [ ] Endpoint değişiklikleri `docs/API_USERS.md` içinde güncellendi.
+- [ ] Yeni hata senaryoları için `error_code` tanımları eklendi.
+- [ ] Scope değişiklikleri (`profile:read`, `users:*`) doğrulandı.
+- [ ] `php -l` ile değişen PHP dosyalarında syntax kontrolü temiz.
+- [ ] Gerekli DB şema dosyaları (`modules/*/database/*.sql`) güncellendi.
 
-## 2) Deploy Sonrasi Teknik Kontrol
+## 2) Dağıtım Sonrası Teknik Kontrol
 
-- [ ] `Ayarlar -> Eksikleri Kur` calistirildi.
+- [ ] `Ayarlar -> Eksikleri Kur` çalıştırıldı.
 - [ ] API root endpoint: `GET /api/v1` -> `200`.
 - [ ] Postman collection endpoint: `GET /api/v1/postman-collection` -> `200`.
-- [ ] API Metrics sayfasi aciliyor: `api/metrics`.
+- [ ] API Metrics sayfası açılıyor: `api/metrics`.
 
 ## 3) Smoke Test
 
-- [ ] CLI smoke komutu basarili:
+- [ ] CLI smoke komutu başarılı:
 
 ```bash
 php shell.php api:smoke https://core.kirpinetwork.com admin@kirpi.local <SIFRE>
 ```
 
-- [ ] Beklenen adimlar:
-  - full-scope token alinir
-  - `/api/v1/me` ve `/api/v1/users` 200 doner
+- [ ] Beklenen adımlar:
+  - full-scope token alınır
+  - `/api/v1/me` ve `/api/v1/users` 200 döner
   - limited token ile `POST /api/v1/users` -> `403 scope_denied`
 
 ## 4) Operasyonel Kontrol (ilk 24 saat)
 
-- [ ] `Yonetim -> API Metrics` ekraninda 5xx artisi yok.
-- [ ] 401/403 oranlari beklenen seviyede.
-- [ ] 429 oraninda beklenmeyen sicrama yok.
-- [ ] Ortalama response suresi kabul edilebilir seviyede.
+- [ ] `Yönetim -> API Metrics` ekranında 5xx artışı yok.
+- [ ] 401/403 oranları beklenen seviyede.
+- [ ] 429 oranında beklenmeyen sıçrama yok.
+- [ ] Ortalama response süresi kabul edilebilir seviyede.
 
-## 5) Rollback Karari (Gerekiyorsa)
+## 5) Rollback Kararı (Gerekirse)
 
-- [ ] 5xx oraninda kalici yukselis varsa rollback planina gec.
-- [ ] Kritik endpointlerde surekli 401/403 varsa scope/permission degisikliklerini geri al.
-- [ ] DB migration kaynakli problemde son guvenli versiyona don + yedekten dogrula.
+- [ ] 5xx oranında kalıcı yükseliş varsa rollback planına geç.
+- [ ] Kritik endpointlerde sürekli 401/403 varsa scope/permission değişikliklerini geri al.
+- [ ] DB migration kaynaklı problemede son güvenli versiyonuna dön + yedekten doğrula.

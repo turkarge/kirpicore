@@ -1,25 +1,25 @@
-# Mail Sablon Sistemi
+# Mail Şablon Sistemi
 
-KirpiCore mail altyapisinda artik sablon tabanli gonderim desteklenir.
+KirpiCore mail altyapısında artık şablon tabanlı gönderim desteklenir.
 
 ## Genel Mimari
 
-- Sablon tablasi: `mail_templates`
-- Core render/gonderim fonksiyonlari: `core/mail.php`
-- Yonetim ekrani: `mail/templates`
+- Şablon tablosu: `mail_templates`
+- Core render/gönderim fonksiyonları: `core/mail.php`
+- Yönetim ekranı: `mail/templates`
 
-Sablon secenekleri:
+Şablon seçenekleri:
 
 - `template_key` (benzersiz teknik anahtar)
-- `name` (gosterim adi)
+- `name` (gösterim adı)
 - `subject` (placeholder destekli konu)
-- `html_body` (placeholder destekli HTML govde)
+- `html_body` (placeholder destekli HTML gövde)
 - `is_active` (aktif/pasif)
-- `is_system` (core sablonu, silinemez)
+- `is_system` (core şablonu, silinemez)
 
-## Varsayilan Core Sablonlari
+## Varsayılan Core Şablonları
 
-Ilk kurulumda/ilk kullanimda sistem tarafindan senkronlanan ana sablonlar:
+İlk kurulumda/ilk kullanımda sistem tarafından senkronlanan ana şablonlar:
 
 - `auth.password_reset`
 - `queue.test_mail`
@@ -29,44 +29,44 @@ Ilk kurulumda/ilk kullanimda sistem tarafindan senkronlanan ana sablonlar:
 
 Not:
 
-- `is_system=1` sablonlar silinemez.
-- Isterseniz konu/govde alanlari guncellenebilir.
+- `is_system=1` şablonlar silinemez.
+- İsterseniz konu/gövde alanları güncellenebilir.
 
-## Placeholder Kurallari
+## Placeholder Kuralları
 
-Standart degiskenler:
+Standart değişkenler:
 
 - `{{app_name}}`
 - `{{app_url}}`
 - `{{year}}`
 
-Sablon-ozel degiskenler:
+Şablon-özel değişkenler:
 
 - `auth.password_reset`: `{{user_name}}`, `{{reset_link}}`, `{{expires_minutes}}`
 - `queue.test_mail`: `{{user_name}}`, `{{sent_at}}`
 - `users.session_dropped`: `{{user_name}}`
 - `users.lock_key_reset`: `{{user_name}}`
 
-Render kurali:
+Render kuralı:
 
-- `{{var}}` -> HTML escape uygulanir
-- `{{{var}}}` -> raw HTML olarak yazilir
+- `{{var}}` -> HTML escape uygulanır
+- `{{{var}}}` -> raw HTML olarak yazılır
 
-`mail.test_manual` sablonunda bilerek `{{{message_html}}}` kullanilir.
+`mail.test_manual` şablonunda bilerek `{{{message_html}}}` kullanılır.
 
 ## TinyMCE Editor
 
-Sablon duzenleme ekraninda (`mail/templates`) `html_body` alanlari TinyMCE ile acilir.
+Şablon düzenleme ekranında (`mail/templates`) `html_body` alanları TinyMCE ile açılır.
 
-- WYSIWYG + HTML code gorunumu
-- Form submit oncesi editor icerigi otomatik textarea'ya yazilir
+- WYSIWYG + HTML code görünümü
+- Form submit öncesi editor içeriği otomatik textarea'ya yazılır
 - CDN: `https://cdn.jsdelivr.net/npm/tinymce@7.2.1/tinymce.min.js`
 
 Lisans:
 
-- `license_key: 'gpl'` olarak ayarlidir.
+- `license_key: 'gpl'` olarak ayarlıdır.
 
-## Izinler ve Route'lar
+## İzinler ve Route'lar
 
 Ekran:
 
@@ -80,7 +80,7 @@ Actionlar:
 
 Not:
 
-- Sistem sablonlari action tarafinda ek kontrolle silinemez.
+- Sistem şablonları action tarafında ek kontrolle silinemez.
 
 ## Teknik Fonksiyonlar
 
@@ -94,27 +94,27 @@ Not:
 - `kirpi_mail_extract_placeholders()`
 - `kirpi_send_templated_mail()`
 
-## Entegrasyon Noktalari
+## Entegrasyon Noktaları
 
 - Auth forgot-password maili -> `auth.password_reset`
 - Queue test mail job'i -> `queue.test_mail`
-- Users oturum dusurme bildirimi -> `users.session_dropped`
-- Users lock key sifirlama bildirimi -> `users.lock_key_reset`
-- Mail test ekrani manuel gonderim -> `mail.test_manual`
+- Users oturum düşürme bildirimi -> `users.session_dropped`
+- Users lock key sıfırlama bildirimi -> `users.lock_key_reset`
+- Mail test ekranı manuel gönderim -> `mail.test_manual`
 
 ## Sorun Giderme
 
-### Sablon kaydederken hata
+### Şablon kaydederken hata
 
-1. `Ayarlar > Eksikleri Kur` calistirin (`mail_templates` tablosu icin)
-2. Browser cache temizleyin (`Ctrl+F5`)
+1. `Ayarlar > Eksikleri Kur` çalıştırın (`mail_templates` tablosu için)
+2. Tarayıcı önbelleğini temizleyin (`Ctrl+F5`)
 3. CSP nedeniyle editor script'i engelleniyor mu console'dan kontrol edin
 
-### JSON parse hatasi (`Unexpected token '﻿'`)
+### JSON parse hatası (`Unexpected token '﻿'`)
 
-- `assets/js/app.js` tarafinda BOM temizleme aktif.
-- Action dosyalarinin UTF-8 (BOM'suz) kayitli oldugunu dogrulayin.
+- `assets/js/app.js` tarafında BOM temizleme aktif.
+- Action dosyalarının UTF-8 (BOM'suz) kayıtlı olduğunu doğrulayın.
 
-### TinyMCE lisans uyarisi
+### TinyMCE lisans uyarısı
 
-- Editor init config'te `license_key: 'gpl'` ayari bulunur.
+- Editor init config'te `license_key: 'gpl'` ayarı bulunur.
