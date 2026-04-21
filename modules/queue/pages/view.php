@@ -3,6 +3,8 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/queue/language.php';
+
 $queueReady = kirpi_queue_table_ready();
 $stats = [
     'queued' => 0,
@@ -14,7 +16,11 @@ $jobs = [];
 
 if ($queueReady) {
     try {
-        $statStmt = db()->query("\n            SELECT status, COUNT(id) AS cnt\n            FROM jobs_queue\n            GROUP BY status\n        ");
+        $statStmt = db()->query("
+            SELECT status, COUNT(id) AS cnt
+            FROM jobs_queue
+            GROUP BY status
+        ");
 
         foreach ($statStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
             $status = (string) ($row['status'] ?? '');
@@ -23,7 +29,12 @@ if ($queueReady) {
             }
         }
 
-        $jobsStmt = db()->query("\n            SELECT id, queue_name, job_type, attempts, max_attempts, status, last_error, available_at, reserved_at, finished_at, created_at\n            FROM jobs_queue\n            ORDER BY id DESC\n            LIMIT 50\n        ");
+        $jobsStmt = db()->query("
+            SELECT id, queue_name, job_type, attempts, max_attempts, status, last_error, available_at, reserved_at, finished_at, created_at
+            FROM jobs_queue
+            ORDER BY id DESC
+            LIMIT 50
+        ");
         $jobs = $jobsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     } catch (Throwable $e) {
         error_log('queue view page error: ' . $e->getMessage());
@@ -35,8 +46,8 @@ if ($queueReady) {
     <div class="container-xl">
         <div class="row g-2 align-items-center">
             <div class="col">
-                <div class="page-pretitle">Sistem Yonetimi</div>
-                <h2 class="page-title">Jobs Queue</h2>
+                <div class="page-pretitle"><?php echo e(queue_lang('system_management')); ?></div>
+                <h2 class="page-title"><?php echo e(queue_lang('jobs_queue')); ?></h2>
             </div>
         </div>
     </div>
@@ -46,20 +57,20 @@ if ($queueReady) {
     <div class="container-xl">
         <?php if (!$queueReady): ?>
             <div class="alert alert-warning">
-                Queue tablosu kurulu degil. Kurulum icin setup veya db:install calistirin.
+                <?php echo e(queue_lang('table_missing')); ?>
             </div>
         <?php endif; ?>
 
         <div class="row g-3 mb-4">
-            <div class="col-6 col-md-3"><div class="card card-body"><div class="text-secondary small">Queued</div><div class="h2 mb-0"><?php echo (int) $stats['queued']; ?></div></div></div>
-            <div class="col-6 col-md-3"><div class="card card-body"><div class="text-secondary small">Processing</div><div class="h2 mb-0"><?php echo (int) $stats['processing']; ?></div></div></div>
-            <div class="col-6 col-md-3"><div class="card card-body"><div class="text-secondary small">Completed</div><div class="h2 mb-0"><?php echo (int) $stats['completed']; ?></div></div></div>
-            <div class="col-6 col-md-3"><div class="card card-body"><div class="text-secondary small">Failed</div><div class="h2 mb-0 text-red"><?php echo (int) $stats['failed']; ?></div></div></div>
+            <div class="col-6 col-md-3"><div class="card card-body"><div class="text-secondary small"><?php echo e(queue_lang('queued')); ?></div><div class="h2 mb-0"><?php echo (int) $stats['queued']; ?></div></div></div>
+            <div class="col-6 col-md-3"><div class="card card-body"><div class="text-secondary small"><?php echo e(queue_lang('processing')); ?></div><div class="h2 mb-0"><?php echo (int) $stats['processing']; ?></div></div></div>
+            <div class="col-6 col-md-3"><div class="card card-body"><div class="text-secondary small"><?php echo e(queue_lang('completed')); ?></div><div class="h2 mb-0"><?php echo (int) $stats['completed']; ?></div></div></div>
+            <div class="col-6 col-md-3"><div class="card card-body"><div class="text-secondary small"><?php echo e(queue_lang('failed')); ?></div><div class="h2 mb-0 text-red"><?php echo (int) $stats['failed']; ?></div></div></div>
         </div>
 
         <div class="card mb-4">
             <div class="card-header">
-                <h3 class="card-title">Queue Islemleri</h3>
+                <h3 class="card-title"><?php echo e(queue_lang('queue_operations')); ?></h3>
             </div>
             <div class="card-body">
                 <div class="row g-3">
@@ -68,11 +79,11 @@ if ($queueReady) {
                             <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                             <div class="row g-2">
                                 <div class="col-12">
-                                    <label class="form-label">Test Mail Alici</label>
+                                    <label class="form-label"><?php echo e(queue_lang('test_mail_recipient')); ?></label>
                                     <input type="email" name="recipient_email" class="form-control" required value="<?php echo e((string) (current_user()['email'] ?? '')); ?>" <?php echo !$queueReady ? 'disabled' : ''; ?>>
                                 </div>
                                 <div class="col-12">
-                                    <button type="submit" class="btn btn-primary" <?php echo !$queueReady ? 'disabled' : ''; ?>>Mail Job Kuyruga Ekle</button>
+                                    <button type="submit" class="btn btn-primary" <?php echo !$queueReady ? 'disabled' : ''; ?>><?php echo e(queue_lang('enqueue_mail_job')); ?></button>
                                 </div>
                             </div>
                         </form>
@@ -82,12 +93,12 @@ if ($queueReady) {
                         <div class="d-flex gap-2 flex-wrap">
                             <form action="<?php echo base_url('queue/actions/work-once'); ?>" method="post" data-ajax="true">
                                 <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
-                                <button type="submit" class="btn btn-outline-primary" <?php echo !$queueReady ? 'disabled' : ''; ?>>Worker Run Once</button>
+                                <button type="submit" class="btn btn-outline-primary" <?php echo !$queueReady ? 'disabled' : ''; ?>><?php echo e(queue_lang('worker_run_once')); ?></button>
                             </form>
 
                             <form action="<?php echo base_url('queue/actions/retry-failed'); ?>" method="post" data-ajax="true">
                                 <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
-                                <button type="submit" class="btn btn-outline-warning" <?php echo !$queueReady ? 'disabled' : ''; ?>>Failed Joblari Retry</button>
+                                <button type="submit" class="btn btn-outline-warning" <?php echo !$queueReady ? 'disabled' : ''; ?>><?php echo e(queue_lang('retry_failed_jobs')); ?></button>
                             </form>
                         </div>
                     </div>
@@ -97,24 +108,24 @@ if ($queueReady) {
 
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Son 50 Job</h3>
+                <h3 class="card-title"><?php echo e(queue_lang('last_50_jobs')); ?></h3>
             </div>
             <div class="table-responsive">
                 <table class="table table-vcenter card-table table-striped">
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Queue</th>
-                            <th>Type</th>
-                            <th>Attempts</th>
-                            <th>Status</th>
-                            <th>Error</th>
-                            <th>Tarih</th>
+                            <th><?php echo e(queue_lang('queue')); ?></th>
+                            <th><?php echo e(queue_lang('type')); ?></th>
+                            <th><?php echo e(queue_lang('attempts')); ?></th>
+                            <th><?php echo e(queue_lang('status')); ?></th>
+                            <th><?php echo e(queue_lang('error')); ?></th>
+                            <th><?php echo e(queue_lang('date')); ?></th>
                         </tr>
                     </thead>
                     <tbody>
                     <?php if (empty($jobs)): ?>
-                        <tr><td colspan="7" class="text-secondary text-center py-4">Kayit bulunamadi.</td></tr>
+                        <tr><td colspan="7" class="text-secondary text-center py-4"><?php echo e(queue_lang('no_records')); ?></td></tr>
                     <?php else: ?>
                         <?php foreach ($jobs as $job): ?>
                             <tr>

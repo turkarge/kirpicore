@@ -3,6 +3,8 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/notifications/language.php';
+
 $currentUser = current_user();
 $userId = (int) ($currentUser['id'] ?? 0);
 $settingsTableReady = db_table_exists('notification_settings');
@@ -37,13 +39,13 @@ if ($settingsTableReady && $userId > 0) {
     <div class="container-xl">
         <div class="row g-2 align-items-center">
             <div class="col">
-                <div class="page-pretitle">Bildirim Merkezi</div>
-                <h2 class="page-title">Bildirim Ayarları</h2>
+                <div class="page-pretitle"><?php echo e(notifications_lang('settings_center')); ?></div>
+                <h2 class="page-title"><?php echo e(notifications_lang('settings_title')); ?></h2>
             </div>
 
             <div class="col-auto ms-auto d-print-none">
                 <div class="btn-list">
-                    <a href="<?php echo base_url('notifications/list'); ?>" class="btn">Listeye Dön</a>
+                    <a href="<?php echo base_url('notifications/list'); ?>" class="btn"><?php echo e(notifications_lang('back_to_list')); ?></a>
                 </div>
             </div>
         </div>
@@ -54,8 +56,7 @@ if ($settingsTableReady && $userId > 0) {
     <div class="container-xl">
         <?php if (!$settingsTableReady): ?>
             <div class="alert alert-warning">
-                Bildirim ayarları tablosu henüz kurulu değil. Önce
-                <code>database/notifications.sql</code> dosyasını çalıştırın.
+                <?php echo e(notifications_lang('settings_table_missing')); ?>
             </div>
         <?php endif; ?>
 
@@ -80,7 +81,7 @@ if ($settingsTableReady && $userId > 0) {
                                     <?php echo (int) ($settings['email_enabled'] ?? 0) === 1 ? 'checked' : ''; ?>
                                     <?php echo !$settingsTableReady ? 'disabled' : ''; ?>
                                 >
-                                <span class="form-check-label">E-posta bildirimleri açık olsun</span>
+                                <span class="form-check-label"><?php echo e(notifications_lang('email_enabled')); ?></span>
                             </label>
                         </div>
 
@@ -94,7 +95,7 @@ if ($settingsTableReady && $userId > 0) {
                                     <?php echo (int) ($settings['in_app_enabled'] ?? 0) === 1 ? 'checked' : ''; ?>
                                     <?php echo !$settingsTableReady ? 'disabled' : ''; ?>
                                 >
-                                <span class="form-check-label">Uygulama içi bildirimler açık olsun</span>
+                                <span class="form-check-label"><?php echo e(notifications_lang('in_app_enabled')); ?></span>
                             </label>
                         </div>
                     </div>
@@ -102,7 +103,7 @@ if ($settingsTableReady && $userId > 0) {
 
                 <div class="card-footer text-end">
                     <button type="submit" class="btn btn-primary" <?php echo !$settingsTableReady ? 'disabled' : ''; ?>>
-                        Ayarları Kaydet
+                        <?php echo e(notifications_lang('save_settings')); ?>
                     </button>
                 </div>
             </form>

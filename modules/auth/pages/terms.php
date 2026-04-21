@@ -1,13 +1,15 @@
-<?php
+﻿<?php
 if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
+
+require_once BASE_PATH . '/modules/auth/language.php';
 ?>
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="<?php echo e(strtolower((string) env('APP_LOCALE', 'tr'))); ?>">
 <head>
     <meta charset="UTF-8">
-    <title><?php echo e(app_name()); ?> - Kullanım Şartları</title>
+    <title><?php echo e(app_name()); ?> - <?php echo e(auth_lang('terms_title')); ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link href="<?php echo asset_url('css/tabler.min.css'); ?>" rel="stylesheet">
@@ -21,11 +23,11 @@ if (!defined('KIRPI_CORE_ENTRY')) {
             <div class="container-xl">
                 <div class="row g-2 align-items-center">
                     <div class="col">
-                        <h2 class="page-title">Kullanım Şartları</h2>
+                        <h2 class="page-title"><?php echo e(auth_lang('terms_title')); ?></h2>
                         <div class="text-secondary mt-1"><?php echo e(app_name()); ?></div>
                     </div>
                     <div class="col-auto ms-auto">
-                        <a href="<?php echo base_url('auth/login'); ?>" class="btn btn-primary">Girişe Dön</a>
+                        <a href="<?php echo base_url('auth/login'); ?>" class="btn btn-primary"><?php echo e(auth_lang('back_to_login_button')); ?></a>
                     </div>
                 </div>
             </div>
@@ -35,24 +37,24 @@ if (!defined('KIRPI_CORE_ENTRY')) {
             <div class="container-xl">
                 <div class="card">
                     <div class="card-body">
-                        <h3>1. Genel Hükümler</h3>
+                        <h3><?php echo e(auth_lang('terms_h1')); ?></h3>
                         <p>
-                            Bu uygulamayı kullanan tüm kullanıcılar, sistemin güvenli ve yetkili kullanımından sorumludur.
+                            <?php echo e(auth_lang('terms_p1')); ?>
                         </p>
 
-                        <h3>2. Hesap Güvenliği</h3>
+                        <h3><?php echo e(auth_lang('terms_h2')); ?></h3>
                         <p>
-                            Kullanıcılar, oturum bilgilerini korumakla yükümlüdür. Yetkisiz erişim şüphesi halinde sistem yöneticisine bilgi verilmelidir.
+                            <?php echo e(auth_lang('terms_p2')); ?>
                         </p>
 
-                        <h3>3. Veri Kullanımı</h3>
+                        <h3><?php echo e(auth_lang('terms_h3')); ?></h3>
                         <p>
-                            Sistem üzerinde oluşturulan, görüntülenen veya işlenen tüm veriler kurum politikalarına ve ilgili mevzuata uygun şekilde kullanılmalıdır.
+                            <?php echo e(auth_lang('terms_p3')); ?>
                         </p>
 
-                        <h3>4. Son Hüküm</h3>
+                        <h3><?php echo e(auth_lang('terms_h4')); ?></h3>
                         <p class="mb-0">
-                            Bu metin başlangıç sürümüdür. Nihai kullanım şartları daha sonra uygulamaya özel şekilde genişletilebilir.
+                            <?php echo e(auth_lang('terms_p4')); ?>
                         </p>
                     </div>
                 </div>

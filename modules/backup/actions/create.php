@@ -3,12 +3,14 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/backup/language.php';
+
 require_action('POST', true);
 
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Guvenlik dogrulamasi basarisiz oldu.',
+        'message' => backup_lang('csrf_failed'),
     ], 419);
 }
 
@@ -25,7 +27,7 @@ if (!($result['success'] ?? false)) {
 
     json_response([
         'status' => 'error',
-        'message' => (string) ($result['message'] ?? 'Backup olusturulamadi.'),
+        'message' => (string) ($result['message'] ?? backup_lang('create_failed_default')),
     ], 422);
 }
 
@@ -37,9 +39,9 @@ kirpi_audit_log('create', 'backup', [
     'retention_deleted_count' => $retentionDeletedCount,
 ], 'backup', $backupId, 'success');
 
-$message = 'Backup olusturuldu. ID: ' . $backupId;
+$message = backup_lang('create_success_prefix') . $backupId;
 if ($retentionDeletedCount > 0) {
-    $message .= ' Retention temizligi: ' . $retentionDeletedCount . ' eski backup silindi.';
+    $message .= backup_lang('retention_deleted_prefix') . $retentionDeletedCount . backup_lang('retention_deleted_suffix');
 }
 
 json_response([

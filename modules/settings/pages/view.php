@@ -3,6 +3,8 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/settings/language.php';
+
 $tableReady = kirpi_settings_table_ready();
 
 $appName = trim((string) kirpi_setting_get('app.name', APP_NAME));
@@ -32,8 +34,8 @@ $missingIndexesByTable = (array) ($indexReport['missing_by_table'] ?? []);
     <div class="container-xl">
         <div class="row g-2 align-items-center">
             <div class="col">
-                <div class="page-pretitle">Sistem Yonetimi</div>
-                <h2 class="page-title">Ayarlar</h2>
+                <div class="page-pretitle"><?php echo e(settings_lang('system_management')); ?></div>
+                <h2 class="page-title"><?php echo e(settings_lang('settings')); ?></h2>
             </div>
             <div class="col-auto ms-auto d-print-none">
                 <a
@@ -42,7 +44,7 @@ $missingIndexesByTable = (array) ($indexReport['missing_by_table'] ?? []);
                     data-url="/ajax/settings/session"
                     data-size="modal-lg"
                 >
-                    Session Verileri
+                    <?php echo e(settings_lang('session_data')); ?>
                 </a>
             </div>
         </div>
@@ -53,34 +55,34 @@ $missingIndexesByTable = (array) ($indexReport['missing_by_table'] ?? []);
     <div class="container-xl">
         <?php if (!$tableReady): ?>
             <div class="alert alert-warning">
-                Ayarlar tablosu kurulu degil. Kurulum icin setup veya db:install calistirin.
+                <?php echo e(settings_lang('settings_table_missing')); ?>
             </div>
         <?php endif; ?>
 
         <div class="card mb-4">
             <div class="card-header">
-                <h3 class="card-title">Sistem Kontrol ve Eksik Kurulum</h3>
+                <h3 class="card-title"><?php echo e(settings_lang('system_check')); ?></h3>
             </div>
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-12 col-md-2">
-                        <div class="text-secondary small">Beklenen Toplam Tablo</div>
+                        <div class="text-secondary small"><?php echo e(settings_lang('required_total_tables')); ?></div>
                         <div class="h3 mb-0"><?php echo (int) ($schemaReport['required_table_count'] ?? 0); ?></div>
                     </div>
                     <div class="col-12 col-md-2">
-                        <div class="text-secondary small">Eksik Tablo</div>
+                        <div class="text-secondary small"><?php echo e(settings_lang('missing_table')); ?></div>
                         <div class="h3 mb-0 <?php echo count($missingTables) > 0 ? 'text-red' : 'text-green'; ?>">
                             <?php echo count($missingTables); ?>
                         </div>
                     </div>
                     <div class="col-12 col-md-2">
-                        <div class="text-secondary small">Eksik Indeks / Beklenen</div>
+                        <div class="text-secondary small"><?php echo e(settings_lang('missing_index_expected')); ?></div>
                         <div class="h3 mb-0 <?php echo $missingIndexCount > 0 ? 'text-red' : 'text-green'; ?>">
                             <?php echo $missingIndexCount; ?> / <?php echo $requiredIndexCount; ?>
                         </div>
                     </div>
                     <div class="col-12 col-md-2">
-                        <div class="text-secondary small">Eksik Kolon / Beklenen</div>
+                        <div class="text-secondary small"><?php echo e(settings_lang('missing_column_expected')); ?></div>
                         <div class="h3 mb-0 <?php echo $missingColumnCount > 0 ? 'text-red' : 'text-green'; ?>">
                             <?php echo $missingColumnCount; ?> / <?php echo $requiredColumnCount; ?>
                         </div>
@@ -94,7 +96,7 @@ $missingIndexesByTable = (array) ($indexReport['missing_by_table'] ?? []);
                         >
                             <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                             <button type="submit" class="btn btn-outline-primary w-100">
-                                Eksikleri Kur
+                                <?php echo e(settings_lang('install_missing')); ?>
                             </button>
                         </form>
                     </div>
@@ -102,7 +104,7 @@ $missingIndexesByTable = (array) ($indexReport['missing_by_table'] ?? []);
 
                 <?php if (!empty($missingByFile)): ?>
                     <hr class="my-4">
-                    <div class="text-secondary mb-2">Eksik tablo bulunan schema dosyalari:</div>
+                    <div class="text-secondary mb-2"><?php echo e(settings_lang('missing_schema_files')); ?></div>
                     <ul class="mb-0">
                         <?php foreach ($missingByFile as $item): ?>
                             <li>
@@ -115,7 +117,7 @@ $missingIndexesByTable = (array) ($indexReport['missing_by_table'] ?? []);
 
                 <?php if (!empty($missingIndexesByTable)): ?>
                     <hr class="my-4">
-                    <div class="text-secondary mb-2">Eksik indeksler:</div>
+                    <div class="text-secondary mb-2"><?php echo e(settings_lang('missing_indexes')); ?></div>
                     <ul class="mb-0">
                         <?php foreach ($missingIndexesByTable as $tableName => $indexes): ?>
                             <?php foreach ((array) $indexes as $index): ?>
@@ -131,7 +133,7 @@ $missingIndexesByTable = (array) ($indexReport['missing_by_table'] ?? []);
 
                 <?php if (!empty($missingColumnsByTable)): ?>
                     <hr class="my-4">
-                    <div class="text-secondary mb-2">Eksik kolonlar:</div>
+                    <div class="text-secondary mb-2"><?php echo e(settings_lang('missing_columns')); ?></div>
                     <ul class="mb-0">
                         <?php foreach ($missingColumnsByTable as $tableName => $columns): ?>
                             <?php foreach ((array) $columns as $column): ?>
@@ -151,23 +153,23 @@ $missingIndexesByTable = (array) ($indexReport['missing_by_table'] ?? []);
                 <div class="card-body">
                     <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
 
-                    <h3 class="mb-3">Uygulama</h3>
+                    <h3 class="mb-3"><?php echo e(settings_lang('application')); ?></h3>
                     <div class="row g-3 mb-4">
                         <div class="col-12 col-md-6">
-                            <label class="form-label">Uygulama Adi</label>
+                            <label class="form-label"><?php echo e(settings_lang('application_name')); ?></label>
                             <input type="text" name="app_name" class="form-control" value="<?php echo e($appName); ?>" <?php echo !$tableReady ? 'disabled' : ''; ?>>
                         </div>
                         <div class="col-12 col-md-6">
-                            <label class="form-label d-block">API Durumu</label>
+                            <label class="form-label d-block"><?php echo e(settings_lang('api_status')); ?></label>
                             <label class="form-check form-switch mt-2">
                                 <input class="form-check-input" type="checkbox" name="api_enabled" value="1" <?php echo $apiEnabled ? 'checked' : ''; ?> <?php echo !$tableReady ? 'disabled' : ''; ?>>
-                                <span class="form-check-label">REST API aktif</span>
+                                <span class="form-check-label"><?php echo e(settings_lang('rest_api_active')); ?></span>
                             </label>
-                            <div class="form-hint">Kapali oldugunda /api/v1/* endpointleri 503 doner.</div>
+                            <div class="form-hint"><?php echo e(settings_lang('api_disabled_hint')); ?></div>
                         </div>
                     </div>
 
-                    <h3 class="mb-3">Mail</h3>
+                    <h3 class="mb-3"><?php echo e(settings_lang('mail')); ?></h3>
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
                             <label class="form-label">MAIL_HOST</label>
@@ -195,9 +197,9 @@ $missingIndexesByTable = (array) ($indexReport['missing_by_table'] ?? []);
 
                         <div class="col-12 col-md-6">
                             <label class="form-label">MAIL_PASSWORD</label>
-                            <input type="password" name="mail_password" class="form-control" value="" placeholder="Degistirmek icin yeni sifre girin" <?php echo !$tableReady ? 'disabled' : ''; ?>>
+                            <input type="password" name="mail_password" class="form-control" value="" placeholder="<?php echo e(settings_lang('mail_password_placeholder')); ?>" <?php echo !$tableReady ? 'disabled' : ''; ?>>
                             <div class="form-hint">
-                                <?php echo $mailPasswordStored ? 'Parola tanimli (guvenlik icin gosterilmiyor).' : 'Parola tanimli degil.'; ?>
+                                <?php echo $mailPasswordStored ? e(settings_lang('password_defined')) : e(settings_lang('password_missing')); ?>
                             </div>
                         </div>
 
@@ -214,7 +216,7 @@ $missingIndexesByTable = (array) ($indexReport['missing_by_table'] ?? []);
                 </div>
 
                 <div class="card-footer text-end">
-                    <button type="submit" class="btn btn-primary" <?php echo !$tableReady ? 'disabled' : ''; ?>>Ayarlari Kaydet</button>
+                    <button type="submit" class="btn btn-primary" <?php echo !$tableReady ? 'disabled' : ''; ?>><?php echo e(settings_lang('save_settings')); ?></button>
                 </div>
             </form>
         </div>

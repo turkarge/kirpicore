@@ -3,19 +3,21 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/notifications/language.php';
+
 require_action('POST', true);
 
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Güvenlik doğrulaması başarısız oldu.',
+        'message' => notifications_lang('csrf_failed'),
     ], 419);
 }
 
 if (!db_table_exists('notification_settings')) {
     json_response([
         'status' => 'error',
-        'message' => 'Bildirim ayarları tablosu henüz kurulu değil.',
+        'message' => notifications_lang('settings_table_not_ready'),
     ], 422);
 }
 
@@ -27,7 +29,7 @@ $inAppEnabled = isset($_POST['in_app_enabled']) ? 1 : 0;
 if ($userId <= 0) {
     json_response([
         'status' => 'error',
-        'message' => 'Geçersiz kullanıcı oturumu.',
+        'message' => notifications_lang('invalid_session'),
     ], 422);
 }
 
@@ -47,7 +49,7 @@ try {
 
     json_response([
         'status' => 'success',
-        'message' => 'Bildirim ayarları başarıyla güncellendi.',
+        'message' => notifications_lang('settings_update_success'),
         'reload_page' => true,
     ]);
 } catch (Throwable $e) {
@@ -55,6 +57,6 @@ try {
 
     json_response([
         'status' => 'error',
-        'message' => 'Bildirim ayarları güncellenirken bir hata oluştu.',
+        'message' => notifications_lang('settings_update_error'),
     ], 500);
 }

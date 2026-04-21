@@ -3,17 +3,19 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/backup/language.php';
+
 require_action('GET', true);
 
 $backupId = (int) ($_GET['id'] ?? 0);
 if ($backupId <= 0) {
     http_response_code(422);
-    exit('Gecersiz backup kaydi.');
+    exit(backup_lang('invalid_backup_record'));
 }
 
 if (!kirpi_backup_table_ready()) {
     http_response_code(422);
-    exit('Backup tablosu henuz kurulu degil.');
+    exit(backup_lang('table_not_ready'));
 }
 
 try {
@@ -30,7 +32,7 @@ try {
     $backup = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$backup) {
         http_response_code(404);
-        exit('Backup kaydi bulunamadi.');
+        exit(backup_lang('record_not_found'));
     }
 
     $filePath = (string) ($backup['file_path'] ?? '');
@@ -41,12 +43,12 @@ try {
 
     if ($backupDir === '' || $realFile === '' || !str_starts_with($realFile, $backupDir . DIRECTORY_SEPARATOR)) {
         http_response_code(403);
-        exit('Backup dosya yolu gecersiz.');
+        exit(backup_lang('file_path_invalid'));
     }
 
     if (!is_file($realFile) || !is_readable($realFile)) {
         http_response_code(404);
-        exit('Backup dosyasi bulunamadi.');
+        exit(backup_lang('file_not_found'));
     }
 
     kirpi_audit_log('download', 'backup', [
@@ -67,5 +69,5 @@ try {
 } catch (Throwable $e) {
     error_log('backup download error: ' . $e->getMessage());
     http_response_code(500);
-    exit('Backup indirilirken bir hata olustu.');
+    exit(backup_lang('download_error'));
 }

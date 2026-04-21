@@ -3,60 +3,62 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/api/language.php';
+
 require_action('GET', false);
 
-api_response(200, 'KirpiCore API v1', [
+api_response(200, api_lang('v1_title'), [
     'enabled' => api_is_enabled(),
     'endpoints' => [
         [
             'method' => 'POST',
             'path' => '/api/v1/auth/token',
-            'description' => 'Email+password ile bearer token alir',
+            'description' => api_lang('desc_token'),
         ],
         [
             'method' => 'GET',
             'path' => '/api/v1/me',
-            'description' => 'Token sahibinin profil bilgisi',
+            'description' => api_lang('desc_me'),
             'required_scope' => 'profile:read',
         ],
         [
             'method' => 'GET',
             'path' => '/api/v1/users',
-            'description' => 'Kullanici listesi (users.view)',
+            'description' => api_lang('desc_users_list'),
             'required_scope' => 'users:read',
         ],
         [
             'method' => 'POST',
             'path' => '/api/v1/users',
-            'description' => 'Kullanici olusturur (users.create)',
+            'description' => api_lang('desc_users_create'),
             'required_scope' => 'users:create',
         ],
         [
             'method' => 'PATCH',
             'path' => '/api/v1/users/{id}',
-            'description' => 'Kullanici gunceller (users.edit)',
+            'description' => api_lang('desc_users_update'),
             'required_scope' => 'users:update',
         ],
         [
             'method' => 'POST',
             'path' => '/api/v1/users/{id}/status',
-            'description' => 'Aktif/pasif durum gunceller (users.status)',
+            'description' => api_lang('desc_users_status'),
             'required_scope' => 'users:status',
         ],
         [
             'method' => 'GET',
             'path' => '/api/v1/postman-collection',
-            'description' => 'Hazir Postman collection dosyasini indirir',
+            'description' => api_lang('desc_postman_download'),
         ],
         [
             'method' => 'GET',
             'path' => '/api/v1/postman',
-            'description' => 'Postman collection icin uyumluluk endpointi',
+            'description' => api_lang('desc_postman_compat'),
         ],
         [
             'method' => 'GET',
             'path' => '/api/v1/postman-collection.json',
-            'description' => 'Postman collection icin uyumluluk endpointi',
+            'description' => api_lang('desc_postman_compat'),
         ],
     ],
 ]);

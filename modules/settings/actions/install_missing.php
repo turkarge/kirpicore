@@ -3,12 +3,14 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/settings/language.php';
+
 require_action('POST', true);
 
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Guvenlik dogrulamasi basarisiz oldu.',
+        'message' => settings_lang('csrf_failed'),
     ], 419);
 }
 
@@ -36,7 +38,7 @@ try {
     if ($beforeMissing <= 0 && $beforeMissingColumns <= 0 && $beforeMissingIndexes <= 0) {
         json_response([
             'status' => 'success',
-            'message' => 'Eksik tablo, kolon veya indeks yok. Sistem zaten tam.',
+            'message' => settings_lang('no_missing_schema'),
             'reload_page' => true,
         ]);
     }
@@ -44,14 +46,14 @@ try {
     if ($afterMissing <= 0 && $afterMissingColumns <= 0 && $afterMissingIndexes <= 0) {
         json_response([
             'status' => 'success',
-            'message' => 'Eksik tablo, kolon ve indeksler basariyla kuruldu.',
+            'message' => settings_lang('missing_installed'),
             'reload_page' => true,
         ]);
     }
 
     json_response([
         'status' => 'warning',
-        'message' => 'Kurulum denendi ancak halen eksikler var. Loglari kontrol edin.',
+        'message' => settings_lang('still_missing'),
         'reload_page' => true,
     ]);
 } catch (Throwable $e) {
@@ -63,6 +65,6 @@ try {
 
     json_response([
         'status' => 'error',
-        'message' => 'Eksik tablolar kurulurken bir hata olustu.',
+        'message' => settings_lang('install_missing_error'),
     ], 500);
 }

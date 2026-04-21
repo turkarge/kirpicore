@@ -3,19 +3,21 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/settings/language.php';
+
 require_action('POST', true);
 
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Guvenlik dogrulamasi basarisiz oldu.',
+        'message' => settings_lang('csrf_failed'),
     ], 419);
 }
 
 if (!kirpi_settings_table_ready()) {
     json_response([
         'status' => 'error',
-        'message' => 'Ayarlar tablosu henuz kurulu degil.',
+        'message' => settings_lang('settings_table_not_ready'),
     ], 422);
 }
 
@@ -32,28 +34,28 @@ $apiEnabled = isset($_POST['api_enabled']) ? '1' : '0';
 if ($appName === '') {
     json_response([
         'status' => 'error',
-        'message' => 'Uygulama adi bos olamaz.',
+        'message' => settings_lang('app_name_required'),
     ], 422);
 }
 
 if ($mailPort !== '' && (!ctype_digit($mailPort) || (int) $mailPort <= 0)) {
     json_response([
         'status' => 'error',
-        'message' => 'MAIL_PORT sayisal ve pozitif olmalidir.',
+        'message' => settings_lang('mail_port_invalid'),
     ], 422);
 }
 
 if (!in_array($mailEncryption, ['tls', 'ssl', 'none'], true)) {
     json_response([
         'status' => 'error',
-        'message' => 'MAIL_ENCRYPTION gecersiz.',
+        'message' => settings_lang('mail_encryption_invalid'),
     ], 422);
 }
 
 if ($mailFromAddress !== '' && !filter_var($mailFromAddress, FILTER_VALIDATE_EMAIL)) {
     json_response([
         'status' => 'error',
-        'message' => 'MAIL_FROM_ADDRESS gecersiz bir e-posta adresi.',
+        'message' => settings_lang('mail_from_invalid'),
     ], 422);
 }
 
@@ -99,7 +101,7 @@ try {
 
     json_response([
         'status' => 'success',
-        'message' => 'Ayarlar basariyla guncellendi.',
+        'message' => settings_lang('settings_updated'),
         'reload_page' => true,
     ]);
 } catch (Throwable $e) {
@@ -107,6 +109,6 @@ try {
 
     json_response([
         'status' => 'error',
-        'message' => 'Ayarlar guncellenirken bir hata olustu.',
+        'message' => settings_lang('settings_update_error'),
     ], 500);
 }

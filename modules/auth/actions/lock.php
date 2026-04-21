@@ -3,12 +3,14 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/auth/language.php';
+
 require_action('POST', true);
 
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Guvenlik dogrulamasi basarisiz oldu.',
+        'message' => auth_lang('csrf_failed'),
     ], 419);
 }
 
@@ -17,24 +19,19 @@ $userId = (int) ($user['id'] ?? 0);
 if ($userId <= 0) {
     json_response([
         'status' => 'error',
-        'message' => 'Gecerli bir oturum bulunamadi.',
+        'message' => auth_lang('invalid_session'),
     ], 403);
 }
 
 if (!kirpi_auth_lock_schema_ready()) {
     json_response([
         'status' => 'error',
-        'message' => 'Oturum kilitleme altyapisi hazir degil. Ayarlar > Eksikleri Kur calistirin.',
+        'message' => auth_lang('lock_infra_missing'),
     ], 422);
 }
 
 try {
-    $stmt = db()->prepare("
-        SELECT lock_enabled, lock_pin_hash
-        FROM users
-        WHERE id = :id
-        LIMIT 1
-    ");
+    $stmt = db()->prepare("\n        SELECT lock_enabled, lock_pin_hash\n        FROM users\n        WHERE id = :id\n        LIMIT 1\n    ");
     $stmt->execute([
         ':id' => $userId,
     ]);
@@ -46,7 +43,7 @@ try {
     if (!$lockEnabled || $pinHash === '') {
         json_response([
             'status' => 'warning',
-            'message' => 'Oturum kilitleme aktif degil. Profilinizden 4 haneli key tanimlayin.',
+            'message' => auth_lang('lock_not_active'),
             'redirect' => base_url('profile/view'),
         ]);
     }
@@ -59,7 +56,7 @@ try {
 
     json_response([
         'status' => 'success',
-        'message' => 'Oturum kilitlendi.',
+        'message' => auth_lang('session_locked'),
         'redirect' => base_url('auth/lock'),
     ]);
 } catch (Throwable $e) {
@@ -67,6 +64,6 @@ try {
 
     json_response([
         'status' => 'error',
-        'message' => 'Oturum kilitlenirken bir hata olustu.',
+        'message' => auth_lang('lock_error'),
     ], 500);
 }

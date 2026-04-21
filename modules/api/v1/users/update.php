@@ -3,12 +3,14 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/api/language.php';
+
 require_action('PATCH', false);
 
 $actor = api_require_token('users.edit', 'users:update');
 $id = (int) ($_GET['id'] ?? 0);
 if ($id <= 0) {
-    api_error(422, 'Gecersiz kullanici id.');
+    api_error(422, api_lang('invalid_user_id'));
 }
 
 $input = api_json_input();
@@ -21,7 +23,7 @@ $hasRoleId = array_key_exists('role_id', $input);
 $hasIsActive = array_key_exists('is_active', $input);
 
 if (!$hasName && !$hasEmail && !$hasPassword && !$hasRoleId && !$hasIsActive) {
-    api_error(422, 'Guncellenecek en az bir alan gonderin.');
+    api_error(422, api_lang('no_fields_to_update'));
 }
 
 $name = $hasName ? trim((string) ($input['name'] ?? '')) : null;
@@ -32,30 +34,30 @@ $roleId = $hasRoleId ? $input['role_id'] : null;
 $isActive = $hasIsActive ? $input['is_active'] : null;
 
 if ($hasName && $name === '') {
-    api_error(422, 'name bos olamaz.');
+    api_error(422, api_lang('name_empty'));
 }
 
 if ($hasEmail) {
     if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        api_error(422, 'Gecerli bir email girin.');
+        api_error(422, api_lang('invalid_email'));
     }
 }
 
 if ($hasPassword) {
     if ($password === null || mb_strlen($password) < 6) {
-        api_error(422, 'Password en az 6 karakter olmalidir.');
+        api_error(422, api_lang('password_min_6'));
     }
 
     $compare = $hasPasswordConfirm ? $passwordConfirm : $password;
     if ($password !== $compare) {
-        api_error(422, 'Password alanlari uyusmuyor.');
+        api_error(422, api_lang('password_mismatch'));
     }
 }
 
 if ($hasRoleId && $roleId !== null && $roleId !== '') {
     $roleId = (int) $roleId;
     if ($roleId <= 0) {
-        api_error(422, 'role_id gecersiz.');
+        api_error(422, api_lang('role_id_invalid'));
     }
 } elseif ($hasRoleId) {
     $roleId = null;
@@ -75,7 +77,7 @@ try {
     $existingUser = $userStmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$existingUser) {
-        api_error(404, 'Kullanici bulunamadi.');
+        api_error(404, api_lang('user_not_found'));
     }
 
     if ($hasEmail) {
@@ -85,7 +87,7 @@ try {
             ':id' => $id,
         ]);
         if ((int) $checkStmt->fetchColumn() > 0) {
-            api_error(422, 'Bu email baska bir kullanici tarafindan kullaniliyor.');
+            api_error(422, api_lang('email_used_elsewhere'));
         }
     }
 
@@ -95,18 +97,18 @@ try {
         $roleStmt->execute([':id' => $roleId]);
         $selectedRole = $roleStmt->fetch(PDO::FETCH_ASSOC);
         if (!$selectedRole) {
-            api_error(422, 'Secilen rol gecersiz.');
+            api_error(422, api_lang('role_invalid'));
         }
 
         $roleChanged = (int) ($existingUser['role_id'] ?? 0) !== $roleId;
         if ($roleChanged && isset($selectedRole['is_active']) && (int) $selectedRole['is_active'] !== 1) {
-            api_error(422, 'Pasif rol atanamaz.');
+            api_error(422, api_lang('role_inactive_assign'));
         }
     }
 
     $isSuperAdminUser = ((string) ($existingUser['role_name'] ?? '')) === 'Super Admin';
     if ($isSuperAdminUser && $hasIsActive && !$isActive) {
-        api_error(422, 'Super Admin kullanici pasife alinamaz.');
+        api_error(422, api_lang('super_admin_cannot_disable'));
     }
 
     $isLeavingSuperAdminRole = $isSuperAdminUser
@@ -117,7 +119,7 @@ try {
         $countStmt = db()->query("\n            SELECT COUNT(u.id)\n            FROM users u\n            INNER JOIN roles r ON r.id = u.role_id\n            WHERE r.name = 'Super Admin'\n              AND u.is_active = 1\n        ");
         $activeSuperAdminCount = (int) $countStmt->fetchColumn();
         if ($activeSuperAdminCount <= 1) {
-            api_error(422, 'Sistemde en az bir aktif Super Admin kalmalidir.');
+            api_error(422, api_lang('super_admin_min_one'));
         }
     }
 
@@ -146,7 +148,7 @@ try {
     }
 
     if (empty($fields)) {
-        api_error(422, 'Guncellenecek alan bulunamadi.');
+        api_error(422, api_lang('no_updatable_field'));
     }
 
     $sql = 'UPDATE users SET ' . implode(', ', $fields) . ' WHERE id = :id';
@@ -163,7 +165,7 @@ try {
         'changed_fields' => array_values(array_map(static fn(string $f) => trim(str_replace(' = :' . explode(' = :', $f)[1], '', $f)), $fields)),
     ], 'user', $id, 'success');
 
-    api_response(200, 'Kullanici guncellendi.', [
+    api_response(200, api_lang('user_updated'), [
         'user' => [
             'id' => (int) ($updated['id'] ?? 0),
             'name' => (string) ($updated['name'] ?? ''),
@@ -177,7 +179,7 @@ try {
     ]);
 } catch (Throwable $e) {
     error_log('api users update error: ' . $e->getMessage());
-    api_error(500, 'Kullanici guncellenemedi.');
+    api_error(500, api_lang('user_update_failed'));
 }
 
 

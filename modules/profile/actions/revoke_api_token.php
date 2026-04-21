@@ -3,10 +3,12 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/profile/language.php';
+
 require_action('POST', true);
 
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
-    set_flash_message('danger', 'Guvenlik dogrulamasi basarisiz oldu.');
+    set_flash_message('danger', profile_lang('csrf_failed'));
     redirect(base_url('profile/view'));
 }
 
@@ -16,24 +18,24 @@ $roleName = (string) ($currentUser['role_name'] ?? '');
 $tokenId = (int) ($_POST['token_id'] ?? 0);
 
 if ($userId <= 0 || $roleName !== 'Super Admin') {
-    set_flash_message('danger', 'Sadece Super Admin API token yonetebilir.');
+    set_flash_message('danger', profile_lang('super_admin_only_manage'));
     redirect(base_url('profile/view'));
 }
 
 if ($tokenId <= 0) {
-    set_flash_message('warning', 'Gecersiz token kaydi.');
+    set_flash_message('warning', profile_lang('invalid_token_record'));
     redirect(base_url('profile/view'));
 }
 
 if (!api_token_table_ready()) {
-    set_flash_message('warning', 'API token tablosu hazir degil.');
+    set_flash_message('warning', profile_lang('token_table_not_ready'));
     redirect(base_url('profile/view'));
 }
 
 try {
     $ok = api_revoke_token_for_user($tokenId, $userId);
     if (!$ok) {
-        set_flash_message('warning', 'Token bulunamadi veya zaten iptal edilmis.');
+        set_flash_message('warning', profile_lang('token_not_found_or_revoked'));
         redirect(base_url('profile/view'));
     }
 
@@ -45,7 +47,7 @@ try {
         'token_id' => $tokenId,
     ], 'api_token', $tokenId, 'success');
 
-    set_flash_message('success', 'API token iptal edildi.');
+    set_flash_message('success', profile_lang('token_revoked'));
     redirect(base_url('profile/view'));
 } catch (Throwable $e) {
     error_log('profile revoke api token error: ' . $e->getMessage());
@@ -55,6 +57,6 @@ try {
         'error' => $e->getMessage(),
     ], 'api_token', $tokenId, 'failed');
 
-    set_flash_message('danger', 'Token iptal edilirken bir hata olustu.');
+    set_flash_message('danger', profile_lang('token_revoke_error'));
     redirect(base_url('profile/view'));
 }

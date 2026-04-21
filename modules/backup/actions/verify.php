@@ -3,12 +3,14 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/backup/language.php';
+
 require_action('POST', true);
 
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Guvenlik dogrulamasi basarisiz oldu.',
+        'message' => backup_lang('csrf_failed'),
     ], 419);
 }
 
@@ -16,7 +18,7 @@ $backupId = (int) ($_POST['backup_id'] ?? 0);
 if ($backupId <= 0) {
     json_response([
         'status' => 'error',
-        'message' => 'Gecersiz backup kaydi.',
+        'message' => backup_lang('invalid_backup_record'),
     ], 422);
 }
 
@@ -32,20 +34,20 @@ if (!($result['success'] ?? false)) {
 
     json_response([
         'status' => 'error',
-        'message' => (string) ($result['message'] ?? 'Backup dogrulama basarisiz.'),
+        'message' => (string) ($result['message'] ?? backup_lang('verify_failed_default')),
     ], 422);
 }
 
-$message = (string) ($result['message'] ?? 'Backup dogrulandi.');
+$message = (string) ($result['message'] ?? backup_lang('verify_success_default'));
 $checksum = (string) ($result['checksum'] ?? '');
 $dryRun = (bool) ($result['dry_run'] ?? false);
 $tableCount = (int) ($result['dry_run_table_count'] ?? 0);
 
 if ($checksum !== '') {
-    $message .= ' SHA256: ' . substr($checksum, 0, 12) . '...';
+    $message .= backup_lang('checksum_prefix') . substr($checksum, 0, 12) . '...';
 }
 if ($dryRun) {
-    $message .= ' Dry-run tablo: ' . $tableCount . '.';
+    $message .= backup_lang('dry_run_prefix') . $tableCount . backup_lang('dry_run_suffix');
 }
 
 kirpi_audit_log('verify', 'backup', [
@@ -59,4 +61,3 @@ json_response([
     'status' => 'success',
     'message' => $message,
 ]);
-

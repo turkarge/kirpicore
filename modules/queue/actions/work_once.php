@@ -3,12 +3,14 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/queue/language.php';
+
 require_action('POST', true);
 
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Guvenlik dogrulamasi basarisiz oldu.',
+        'message' => queue_lang('csrf_failed'),
     ], 419);
 }
 
@@ -20,7 +22,7 @@ if ($status === 'failed') {
 
     json_response([
         'status' => 'error',
-        'message' => (string) ($result['message'] ?? 'Queue job failed.'),
+        'message' => (string) ($result['message'] ?? queue_lang('work_failed_default')),
         'reload_page' => true,
     ], 422);
 }
@@ -30,13 +32,13 @@ if ($status === 'processed') {
 
     json_response([
         'status' => 'success',
-        'message' => 'Queue job calistirildi. Job ID: ' . (int) ($result['job_id'] ?? 0),
+        'message' => queue_lang('work_processed_prefix') . (int) ($result['job_id'] ?? 0),
         'reload_page' => true,
     ]);
 }
 
 json_response([
     'status' => 'info',
-    'message' => (string) ($result['message'] ?? 'Queue idle.'),
+    'message' => (string) ($result['message'] ?? queue_lang('queue_idle')),
     'reload_page' => true,
 ]);

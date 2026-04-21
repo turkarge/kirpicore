@@ -44,10 +44,13 @@ document.addEventListener("DOMContentLoaded", function () {
             const html = await response.text();
             tableContainer.innerHTML = html;
         } catch (error) {
+            const i18n = window.KIRPI_NOTIFICATIONS_I18N || {};
+            const loadErrorText = i18n.listLoadError || "Bildirim listesi yuklenirken bir hata olustu.";
+
             tableContainer.innerHTML = `
                 <div class="p-4">
                     <div class="alert alert-danger mb-0">
-                        Bildirim listesi yüklenirken bir hata oluştu.
+                        ${loadErrorText}
                     </div>
                 </div>
             `;

@@ -3,6 +3,8 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/roles/language.php';
+
 $page = max(1, (int) ($_GET['page'] ?? 1));
 $search = trim((string) ($_GET['search'] ?? ''));
 $status = trim((string) ($_GET['status'] ?? ''));
@@ -86,10 +88,10 @@ try {
     <table class="table table-vcenter card-table table-striped">
         <thead>
             <tr>
-                <th>Rol</th>
-                <th>Durum</th>
-                <th>Kullanıcı Sayısı</th>
-                <th>İzin Sayısı</th>
+                <th><?php echo e(roles_lang('table_role')); ?></th>
+                <th><?php echo e(roles_lang('table_status')); ?></th>
+                <th><?php echo e(roles_lang('table_user_count')); ?></th>
+                <th><?php echo e(roles_lang('table_permission_count')); ?></th>
                 <th class="w-1"></th>
             </tr>
         </thead>
@@ -97,7 +99,7 @@ try {
             <?php if (empty($roles)): ?>
                 <tr>
                     <td colspan="5" class="text-center text-secondary py-4">
-                        Kayıt bulunamadı.
+                        <?php echo e(roles_lang('no_records')); ?>
                     </td>
                 </tr>
             <?php else: ?>
@@ -140,7 +142,7 @@ try {
                                         href="<?php echo base_url('roles/permissions?id=' . (int) $role['id']); ?>"
                                         class="btn btn-sm btn-outline-secondary"
                                     >
-                                        İzinler
+                                        <?php echo e(roles_lang('permissions')); ?>
                                     </a>
                                 <?php endif; ?>
 
@@ -150,7 +152,7 @@ try {
                                     data-url="/ajax/roles/edit?id=<?php echo (int) $role['id']; ?>"
                                     data-size="modal-md"
                                 >
-                                    Düzenle
+                                    <?php echo e(roles_lang('edit')); ?>
                                 </a>
                             </div>
                         </td>

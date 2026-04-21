@@ -3,12 +3,14 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/auth/language.php';
+
 require_action('POST', true);
 
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Guvenlik dogrulamasi basarisiz oldu.',
+        'message' => auth_lang('csrf_failed'),
     ], 419);
 }
 
@@ -19,7 +21,7 @@ $pin = trim((string) ($_POST['lock_pin'] ?? ''));
 if ($userId <= 0) {
     json_response([
         'status' => 'error',
-        'message' => 'Gecerli bir oturum bulunamadi.',
+        'message' => auth_lang('invalid_session'),
         'redirect' => base_url('auth/login'),
     ], 403);
 }
@@ -27,7 +29,7 @@ if ($userId <= 0) {
 if (!kirpi_session_lock_state()) {
     json_response([
         'status' => 'success',
-        'message' => 'Oturum zaten acik.',
+        'message' => auth_lang('session_already_open'),
         'redirect' => base_url(APP_DEFAULT_ROUTE),
     ]);
 }
@@ -35,14 +37,14 @@ if (!kirpi_session_lock_state()) {
 if (!preg_match('/^\d{4}$/', $pin)) {
     json_response([
         'status' => 'error',
-        'message' => 'Key 4 haneli sayisal olmalidir.',
+        'message' => auth_lang('key_must_be_4_digits'),
     ], 422);
 }
 
 if (!kirpi_auth_lock_schema_ready()) {
     json_response([
         'status' => 'error',
-        'message' => 'Oturum kilitleme altyapisi hazir degil.',
+        'message' => auth_lang('lock_infra_not_ready'),
     ], 422);
 }
 
@@ -66,7 +68,7 @@ try {
 
         json_response([
             'status' => 'warning',
-            'message' => 'Kilitleme ayari devre disi. Oturum acildi.',
+            'message' => auth_lang('lock_disabled_session_opened'),
             'redirect' => base_url(APP_DEFAULT_ROUTE),
         ]);
     }
@@ -79,7 +81,7 @@ try {
 
         json_response([
             'status' => 'error',
-            'message' => 'Key hatali.',
+            'message' => auth_lang('key_wrong'),
         ], 401);
     }
 
@@ -94,7 +96,7 @@ try {
 
     json_response([
         'status' => 'success',
-        'message' => 'Oturum kilidi acildi.',
+        'message' => auth_lang('lock_opened'),
         'redirect' => (string) $redirect,
     ]);
 } catch (Throwable $e) {
@@ -102,6 +104,6 @@ try {
 
     json_response([
         'status' => 'error',
-        'message' => 'Oturum kilidi acilirken bir hata olustu.',
+        'message' => auth_lang('unlock_error'),
     ], 500);
 }

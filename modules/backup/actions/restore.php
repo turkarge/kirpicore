@@ -3,12 +3,14 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/backup/language.php';
+
 require_action('POST', true);
 
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Guvenlik dogrulamasi basarisiz oldu.',
+        'message' => backup_lang('csrf_failed'),
     ], 419);
 }
 
@@ -16,7 +18,7 @@ $backupId = (int) ($_POST['backup_id'] ?? 0);
 if ($backupId <= 0) {
     json_response([
         'status' => 'error',
-        'message' => 'Gecersiz backup kaydi.',
+        'message' => backup_lang('invalid_backup_record'),
     ], 422);
 }
 
@@ -32,7 +34,7 @@ if (!($result['success'] ?? false)) {
 
     json_response([
         'status' => 'error',
-        'message' => (string) ($result['message'] ?? 'Restore islemi basarisiz.'),
+        'message' => (string) ($result['message'] ?? backup_lang('restore_failed_default')),
     ], 422);
 }
 
@@ -42,6 +44,6 @@ kirpi_audit_log('restore', 'backup', [
 
 json_response([
     'status' => 'success',
-    'message' => 'Restore komutu calistirildi.',
+    'message' => backup_lang('restore_success'),
     'reload_page' => true,
 ]);

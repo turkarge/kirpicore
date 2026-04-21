@@ -3,10 +3,12 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/profile/language.php';
+
 require_action('POST', true);
 
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
-    set_flash_message('danger', 'Guvenlik dogrulamasi basarisiz oldu.');
+    set_flash_message('danger', profile_lang('csrf_failed'));
     redirect(base_url('profile/view'));
 }
 
@@ -15,17 +17,17 @@ $userId = (int) ($currentUser['id'] ?? 0);
 $roleName = (string) ($currentUser['role_name'] ?? '');
 
 if ($userId <= 0 || $roleName !== 'Super Admin') {
-    set_flash_message('danger', 'Sadece Super Admin API token olusturabilir.');
+    set_flash_message('danger', profile_lang('super_admin_only_create'));
     redirect(base_url('profile/view'));
 }
 
 if (!api_is_enabled()) {
-    set_flash_message('warning', 'API devre disi oldugu icin token olusturulamadi.');
+    set_flash_message('warning', profile_lang('api_disabled_token'));
     redirect(base_url('profile/view'));
 }
 
 if (!api_token_table_ready()) {
-    set_flash_message('warning', 'API token tablosu hazir degil. Once Eksikleri Kur calistirin.');
+    set_flash_message('warning', profile_lang('api_table_not_ready'));
     redirect(base_url('profile/view'));
 }
 
@@ -56,7 +58,7 @@ $scopes = $scopeMap[$scopeOption] ?? $scopeMap['full_access'];
 try {
     $issued = api_issue_token_for_user($userId, $tokenName, $ttlSeconds, $scopes);
     if (!$issued) {
-        set_flash_message('danger', 'API token olusturulamadi.');
+        set_flash_message('danger', profile_lang('token_create_failed'));
         redirect(base_url('profile/view'));
     }
 
@@ -88,7 +90,7 @@ try {
         'scopes' => (array) ($issued['scopes'] ?? $scopes),
     ], 'api_token', null, 'success');
 
-    set_flash_message('success', 'API token olusturuldu. Profil sayfasinda bir kez gosterilecek.');
+    set_flash_message('success', profile_lang('token_created_once'));
     redirect(base_url('profile/view'));
 } catch (Throwable $e) {
     error_log('profile create api token error: ' . $e->getMessage());
@@ -98,6 +100,6 @@ try {
         'error' => $e->getMessage(),
     ], 'api_token', null, 'failed');
 
-    set_flash_message('danger', 'API token olusturulurken bir hata olustu.');
+    set_flash_message('danger', profile_lang('token_create_error'));
     redirect(base_url('profile/view'));
 }

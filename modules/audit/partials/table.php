@@ -3,11 +3,13 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/audit/language.php';
+
 if (!db_table_exists('audit_logs')) {
     ?>
     <div class="p-4">
         <div class="alert alert-warning mb-0">
-            Audit log tablosu henuz kurulu degil.
+            <?php echo e(audit_lang('table_missing_short')); ?>
         </div>
     </div>
     <?php
@@ -106,20 +108,20 @@ try {
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Tarih</th>
-                <th>Kullanici</th>
-                <th>Module</th>
-                <th>Action</th>
-                <th>Status</th>
-                <th>Route</th>
-                <th>IP</th>
-                <th>Detay</th>
+                <th><?php echo e(audit_lang('date')); ?></th>
+                <th><?php echo e(audit_lang('user')); ?></th>
+                <th><?php echo e(audit_lang('module')); ?></th>
+                <th><?php echo e(audit_lang('action')); ?></th>
+                <th><?php echo e(audit_lang('status')); ?></th>
+                <th><?php echo e(audit_lang('route')); ?></th>
+                <th><?php echo e(audit_lang('ip')); ?></th>
+                <th><?php echo e(audit_lang('detail')); ?></th>
             </tr>
         </thead>
         <tbody>
             <?php if (empty($logs)): ?>
                 <tr>
-                    <td colspan="9" class="text-secondary py-4 text-center">Kayit bulunamadi.</td>
+                    <td colspan="9" class="text-secondary py-4 text-center"><?php echo e(audit_lang('no_records')); ?></td>
                 </tr>
             <?php else: ?>
                 <?php foreach ($logs as $log): ?>
@@ -139,7 +141,7 @@ try {
                             <?php if (($log['status'] ?? '') === 'success'): ?>
                                 <span class="badge bg-green-lt">success</span>
                             <?php else: ?>
-                                <span class="badge bg-red-lt"><?php echo e((string) ($log['status'] ?? 'failed')); ?></span>
+                                <span class="badge bg-red-lt"><?php echo e((string) ($log['status'] ?? audit_lang('failed'))); ?></span>
                             <?php endif; ?>
                         </td>
                         <td>
@@ -149,7 +151,7 @@ try {
                         <td><code><?php echo e((string) ($log['ip_address'] ?? '')); ?></code></td>
                         <td>
                             <details>
-                                <summary>Gor</summary>
+                                <summary><?php echo e(audit_lang('view')); ?></summary>
                                 <pre class="mb-0"><?php echo e((string) ($log['details_json'] ?? '')); ?></pre>
                             </details>
                         </td>

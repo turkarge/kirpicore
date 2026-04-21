@@ -3,17 +3,31 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/backup/language.php';
+
 $backupReady = kirpi_backup_table_ready();
 $backups = [];
 $restores = [];
 
 if ($backupReady) {
     try {
-        $backupsStmt = db()->query("\n            SELECT b.id, b.label, b.file_name, b.file_size, b.status, b.created_at, u.name AS created_by_name\n            FROM db_backups b\n            LEFT JOIN users u ON u.id = b.created_by\n            ORDER BY b.id DESC\n            LIMIT 50\n        ");
+        $backupsStmt = db()->query("
+            SELECT b.id, b.label, b.file_name, b.file_size, b.status, b.created_at, u.name AS created_by_name
+            FROM db_backups b
+            LEFT JOIN users u ON u.id = b.created_by
+            ORDER BY b.id DESC
+            LIMIT 50
+        ");
         $backups = $backupsStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
         if (db_table_exists('db_backup_restores')) {
-            $restoresStmt = db()->query("\n                SELECT r.id, r.backup_id, r.created_at, u.name AS restored_by_name\n                FROM db_backup_restores r\n                LEFT JOIN users u ON u.id = r.restored_by\n                ORDER BY r.id DESC\n                LIMIT 20\n            ");
+            $restoresStmt = db()->query("
+                SELECT r.id, r.backup_id, r.created_at, u.name AS restored_by_name
+                FROM db_backup_restores r
+                LEFT JOIN users u ON u.id = r.restored_by
+                ORDER BY r.id DESC
+                LIMIT 20
+            ");
             $restores = $restoresStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
         }
     } catch (Throwable $e) {
@@ -26,8 +40,8 @@ if ($backupReady) {
     <div class="container-xl">
         <div class="row g-2 align-items-center">
             <div class="col">
-                <div class="page-pretitle">Sistem Yonetimi</div>
-                <h2 class="page-title">Backup / Restore</h2>
+                <div class="page-pretitle"><?php echo e(backup_lang('system_management')); ?></div>
+                <h2 class="page-title"><?php echo e(backup_lang('backup_restore')); ?></h2>
             </div>
         </div>
     </div>
@@ -37,24 +51,24 @@ if ($backupReady) {
     <div class="container-xl">
         <?php if (!$backupReady): ?>
             <div class="alert alert-warning">
-                Backup tablolari kurulu degil. Kurulum icin setup veya db:install calistirin.
+                <?php echo e(backup_lang('backup_tables_missing')); ?>
             </div>
         <?php endif; ?>
 
         <div class="card mb-4">
             <div class="card-header">
-                <h3 class="card-title">Yeni Backup</h3>
+                <h3 class="card-title"><?php echo e(backup_lang('new_backup')); ?></h3>
             </div>
             <form action="<?php echo base_url('backup/actions/create'); ?>" method="post" data-ajax="true">
                 <div class="card-body">
                     <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                     <div class="row g-3">
                         <div class="col-12 col-md-8">
-                            <label class="form-label">Etiket</label>
-                            <input type="text" name="label" class="form-control" placeholder="ornek: deploy_oncesi" <?php echo !$backupReady ? 'disabled' : ''; ?>>
+                            <label class="form-label"><?php echo e(backup_lang('label')); ?></label>
+                            <input type="text" name="label" class="form-control" placeholder="<?php echo e(backup_lang('label_placeholder')); ?>" <?php echo !$backupReady ? 'disabled' : ''; ?>>
                         </div>
                         <div class="col-12 col-md-4 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary w-100" <?php echo !$backupReady ? 'disabled' : ''; ?>>Backup Olustur</button>
+                            <button type="submit" class="btn btn-primary w-100" <?php echo !$backupReady ? 'disabled' : ''; ?>><?php echo e(backup_lang('create_backup')); ?></button>
                         </div>
                     </div>
                 </div>
@@ -63,25 +77,25 @@ if ($backupReady) {
 
         <div class="card mb-4">
             <div class="card-header">
-                <h3 class="card-title">Son Backup Kayitlari</h3>
+                <h3 class="card-title"><?php echo e(backup_lang('recent_backups')); ?></h3>
             </div>
             <div class="table-responsive">
                 <table class="table table-vcenter card-table table-striped">
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Etiket</th>
-                            <th>Dosya</th>
-                            <th>Boyut</th>
-                            <th>Durum</th>
-                            <th>Tarih</th>
-                            <th>Olusturan</th>
+                            <th><?php echo e(backup_lang('label')); ?></th>
+                            <th><?php echo e(backup_lang('file')); ?></th>
+                            <th><?php echo e(backup_lang('size')); ?></th>
+                            <th><?php echo e(backup_lang('status')); ?></th>
+                            <th><?php echo e(backup_lang('date')); ?></th>
+                            <th><?php echo e(backup_lang('created_by')); ?></th>
                             <th class="w-1"></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($backups)): ?>
-                            <tr><td colspan="8" class="text-secondary text-center py-4">Kayit bulunamadi.</td></tr>
+                            <tr><td colspan="8" class="text-secondary text-center py-4"><?php echo e(backup_lang('no_records')); ?></td></tr>
                         <?php else: ?>
                             <?php foreach ($backups as $backup): ?>
                                 <tr>
@@ -94,25 +108,25 @@ if ($backupReady) {
                                     <td><?php echo e((string) ($backup['created_by_name'] ?? '-')); ?></td>
                                     <td>
                                         <div class="d-flex gap-2">
-                                            <a href="<?php echo base_url('backup/actions/download?id=' . (int) ($backup['id'] ?? 0)); ?>" class="btn btn-sm btn-outline-primary">Indir</a>
+                                            <a href="<?php echo base_url('backup/actions/download?id=' . (int) ($backup['id'] ?? 0)); ?>" class="btn btn-sm btn-outline-primary"><?php echo e(backup_lang('download')); ?></a>
 
                                             <form id="backup-verify-form-<?php echo (int) ($backup['id'] ?? 0); ?>" action="<?php echo base_url('backup/actions/verify'); ?>" method="post" data-ajax="true" class="m-0">
                                                 <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                                                 <input type="hidden" name="backup_id" value="<?php echo (int) ($backup['id'] ?? 0); ?>">
                                             </form>
-                                            <a href="#" class="btn btn-sm btn-outline-warning" data-confirm="Bu backup dosyasi checksum ve dry-run restore ile dogrulanacak. Emin misiniz?" data-form="backup-verify-form-<?php echo (int) ($backup['id'] ?? 0); ?>">Dogrula</a>
+                                            <a href="#" class="btn btn-sm btn-outline-warning" data-confirm="<?php echo e(backup_lang('verify_confirm')); ?>" data-form="backup-verify-form-<?php echo (int) ($backup['id'] ?? 0); ?>"><?php echo e(backup_lang('verify')); ?></a>
 
                                             <form id="backup-restore-form-<?php echo (int) ($backup['id'] ?? 0); ?>" action="<?php echo base_url('backup/actions/restore'); ?>" method="post" data-ajax="true" class="m-0">
                                                 <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                                                 <input type="hidden" name="backup_id" value="<?php echo (int) ($backup['id'] ?? 0); ?>">
                                             </form>
-                                            <a href="#" class="btn btn-sm btn-outline-danger" data-confirm="Bu backup geri yuklenecek. Emin misiniz?" data-form="backup-restore-form-<?php echo (int) ($backup['id'] ?? 0); ?>">Restore</a>
+                                            <a href="#" class="btn btn-sm btn-outline-danger" data-confirm="<?php echo e(backup_lang('restore_confirm')); ?>" data-form="backup-restore-form-<?php echo (int) ($backup['id'] ?? 0); ?>"><?php echo e(backup_lang('restore')); ?></a>
 
                                             <form id="backup-delete-form-<?php echo (int) ($backup['id'] ?? 0); ?>" action="<?php echo base_url('backup/actions/delete'); ?>" method="post" data-ajax="true" class="m-0">
                                                 <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                                                 <input type="hidden" name="backup_id" value="<?php echo (int) ($backup['id'] ?? 0); ?>">
                                             </form>
-                                            <a href="#" class="btn btn-sm btn-outline-secondary" data-confirm="Bu backup kaydi silinecek. Emin misiniz?" data-form="backup-delete-form-<?php echo (int) ($backup['id'] ?? 0); ?>">Sil</a>
+                                            <a href="#" class="btn btn-sm btn-outline-secondary" data-confirm="<?php echo e(backup_lang('delete_confirm')); ?>" data-form="backup-delete-form-<?php echo (int) ($backup['id'] ?? 0); ?>"><?php echo e(backup_lang('delete')); ?></a>
                                         </div>
                                     </td>
                                 </tr>
@@ -125,7 +139,7 @@ if ($backupReady) {
 
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Son Restore Loglari</h3>
+                <h3 class="card-title"><?php echo e(backup_lang('recent_restores')); ?></h3>
             </div>
             <div class="table-responsive">
                 <table class="table table-vcenter card-table table-striped">
@@ -133,13 +147,13 @@ if ($backupReady) {
                         <tr>
                             <th>ID</th>
                             <th>Backup ID</th>
-                            <th>Restore Eden</th>
-                            <th>Tarih</th>
+                            <th><?php echo e(backup_lang('restored_by')); ?></th>
+                            <th><?php echo e(backup_lang('date')); ?></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($restores)): ?>
-                            <tr><td colspan="4" class="text-secondary text-center py-4">Kayit bulunamadi.</td></tr>
+                            <tr><td colspan="4" class="text-secondary text-center py-4"><?php echo e(backup_lang('no_records')); ?></td></tr>
                         <?php else: ?>
                             <?php foreach ($restores as $restore): ?>
                                 <tr>

@@ -3,16 +3,18 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/api/language.php';
+
 require_action('GET', false);
 
 $filePath = BASE_PATH . '/postman/KirpiCore_API_v1.postman_collection.json';
 if (!is_file($filePath) || !is_readable($filePath)) {
-    api_error(404, 'Postman collection dosyasi bulunamadi.');
+    api_error(404, api_lang('postman_not_found'));
 }
 
 $content = (string) file_get_contents($filePath);
 if ($content === '') {
-    api_error(500, 'Postman collection dosyasi okunamadi.');
+    api_error(500, api_lang('postman_read_failed'));
 }
 
 header('Content-Type: application/json; charset=UTF-8');
@@ -24,4 +26,3 @@ header('Expires: 0');
 
 echo $content;
 exit;
-

@@ -3,19 +3,21 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/api/language.php';
+
 require_action('POST', false);
 
 $actor = api_require_token('users.status', 'users:status');
 $id = (int) ($_GET['id'] ?? 0);
 if ($id <= 0) {
-    api_error(422, 'Gecersiz kullanici id.');
+    api_error(422, api_lang('invalid_user_id'));
 }
 
 $input = api_json_input();
 $isActiveRaw = $input['is_active'] ?? null;
 
 if ($isActiveRaw === null) {
-    api_error(422, 'is_active zorunludur.');
+    api_error(422, api_lang('is_active_required'));
 }
 
 $isActive = filter_var($isActiveRaw, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
@@ -29,12 +31,12 @@ try {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$user) {
-        api_error(404, 'Kullanici bulunamadi.');
+        api_error(404, api_lang('user_not_found'));
     }
 
     $isSuperAdminUser = ((string) ($user['role_name'] ?? '')) === 'Super Admin';
     if ($isSuperAdminUser && !$isActive) {
-        api_error(422, 'Super Admin kullanici pasife alinamaz.');
+        api_error(422, api_lang('super_admin_cannot_disable'));
     }
 
     $updateStmt = db()->prepare("UPDATE users SET is_active = :is_active WHERE id = :id");
@@ -49,7 +51,7 @@ try {
         'is_active' => $isActive,
     ], 'user', $id, 'success');
 
-    api_response(200, 'Kullanici durumu guncellendi.', [
+    api_response(200, api_lang('user_status_updated'), [
         'user' => [
             'id' => $id,
             'is_active' => $isActive,
@@ -57,7 +59,7 @@ try {
     ]);
 } catch (Throwable $e) {
     error_log('api users status error: ' . $e->getMessage());
-    api_error(500, 'Kullanici durumu guncellenemedi.');
+    api_error(500, api_lang('user_status_failed'));
 }
 
 

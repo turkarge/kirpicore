@@ -1,0 +1,168 @@
+<?php
+
+if (!defined('KIRPI_CORE_ENTRY')) {
+    exit;
+}
+
+function api_lang(string $key, ?string $default = null): string
+{
+    static $dictionary = null;
+
+    if ($dictionary === null) {
+        $dictionary = [
+            'tr' => [
+                'v1_title' => 'KirpiCore API v1',
+                'desc_token' => 'Email+password ile bearer token alir',
+                'desc_me' => 'Token sahibinin profil bilgisi',
+                'desc_users_list' => 'Kullanici listesi (users.view)',
+                'desc_users_create' => 'Kullanici olusturur (users.create)',
+                'desc_users_update' => 'Kullanici gunceller (users.edit)',
+                'desc_users_status' => 'Aktif/pasif durum gunceller (users.status)',
+                'desc_postman_download' => 'Hazir Postman collection dosyasini indirir',
+                'desc_postman_compat' => 'Postman collection icin uyumluluk endpointi',
+                'metrics_pretitle' => 'Sistem Yonetimi',
+                'metrics_title' => 'API Metrics',
+                'window_1h' => '1 Saat',
+                'window_24h' => '24 Saat',
+                'window_7d' => '7 Gun',
+                'table_missing' => 'api_request_logs tablosu kurulu degil. Ayarlar ekranindan Eksikleri Kur calistirin.',
+                'total' => 'Toplam',
+                'token_unique' => 'Token (uniq)',
+                'avg_ms' => 'Avg ms',
+                'critical_codes' => 'Kritik Kodlar',
+                'unique_ip' => 'Unique IP',
+                'top_endpoints' => 'En Cok Cagrilan Endpointler',
+                'method' => 'Method',
+                'path' => 'Path',
+                'hit' => 'Hit',
+                'error' => 'Hata',
+                'no_data' => 'Veri yok',
+                'recent_errors' => 'Son Hatalar',
+                'time' => 'Zaman',
+                'status' => 'Status',
+                'error_code' => 'Error Code',
+                'ip' => 'IP',
+                'no_error_log' => 'Hata kaydi yok',
+                'token_table_missing' => 'API token tablosu hazir degil. Kurulumlari tamamlayin.',
+                'missing_credentials' => 'email ve password zorunludur.',
+                'invalid_email' => 'Gecerli bir email girin.',
+                'invalid_credentials' => 'Kullanici bilgileri hatali.',
+                'user_inactive' => 'Kullanici pasif.',
+                'role_inactive' => 'Kullanici rolu pasif.',
+                'token_create_failed' => 'Token olusturulamadi.',
+                'token_created' => 'Token olusturuldu.',
+                'token_create_exception' => 'Token olusturma sirasinda hata olustu.',
+                'users_list_failed' => 'Kullanicilar listelenemedi.',
+                'users_create_required' => 'name, email ve password zorunludur.',
+                'password_min_6' => 'Password en az 6 karakter olmalidir.',
+                'password_mismatch' => 'Password alanlari uyusmuyor.',
+                'role_id_invalid' => 'role_id gecersiz.',
+                'email_exists' => 'Bu email zaten kayitli.',
+                'role_invalid' => 'Secilen rol gecersiz.',
+                'role_inactive_assign' => 'Pasif rol atanamaz.',
+                'user_created' => 'Kullanici olusturuldu.',
+                'user_create_failed' => 'Kullanici olusturulamadi.',
+                'method_not_allowed' => 'Bu endpoint icin yontem desteklenmiyor.',
+                'invalid_user_id' => 'Gecersiz kullanici id.',
+                'no_fields_to_update' => 'Guncellenecek en az bir alan gonderin.',
+                'name_empty' => 'name bos olamaz.',
+                'email_used_elsewhere' => 'Bu email baska bir kullanici tarafindan kullaniliyor.',
+                'user_not_found' => 'Kullanici bulunamadi.',
+                'super_admin_cannot_disable' => 'Super Admin kullanici pasife alinamaz.',
+                'super_admin_min_one' => 'Sistemde en az bir aktif Super Admin kalmalidir.',
+                'no_updatable_field' => 'Guncellenecek alan bulunamadi.',
+                'user_updated' => 'Kullanici guncellendi.',
+                'user_update_failed' => 'Kullanici guncellenemedi.',
+                'is_active_required' => 'is_active zorunludur.',
+                'user_status_updated' => 'Kullanici durumu guncellendi.',
+                'user_status_failed' => 'Kullanici durumu guncellenemedi.',
+                'postman_not_found' => 'Postman collection dosyasi bulunamadi.',
+                'postman_read_failed' => 'Postman collection dosyasi okunamadi.',
+            ],
+            'en' => [
+                'v1_title' => 'KirpiCore API v1',
+                'desc_token' => 'Issues bearer token with email+password',
+                'desc_me' => 'Returns profile of token owner',
+                'desc_users_list' => 'Lists users (users.view)',
+                'desc_users_create' => 'Creates a user (users.create)',
+                'desc_users_update' => 'Updates a user (users.edit)',
+                'desc_users_status' => 'Updates active/passive status (users.status)',
+                'desc_postman_download' => 'Downloads prepared Postman collection',
+                'desc_postman_compat' => 'Compatibility endpoint for Postman collection',
+                'metrics_pretitle' => 'System Management',
+                'metrics_title' => 'API Metrics',
+                'window_1h' => '1 Hour',
+                'window_24h' => '24 Hours',
+                'window_7d' => '7 Days',
+                'table_missing' => 'api_request_logs table is not installed. Run Install Missing in settings.',
+                'total' => 'Total',
+                'token_unique' => 'Token (uniq)',
+                'avg_ms' => 'Avg ms',
+                'critical_codes' => 'Critical Codes',
+                'unique_ip' => 'Unique IP',
+                'top_endpoints' => 'Top Endpoints',
+                'method' => 'Method',
+                'path' => 'Path',
+                'hit' => 'Hit',
+                'error' => 'Error',
+                'no_data' => 'No data',
+                'recent_errors' => 'Recent Errors',
+                'time' => 'Time',
+                'status' => 'Status',
+                'error_code' => 'Error Code',
+                'ip' => 'IP',
+                'no_error_log' => 'No error log',
+                'token_table_missing' => 'API token table is not ready. Complete setup first.',
+                'missing_credentials' => 'email and password are required.',
+                'invalid_email' => 'Enter a valid email address.',
+                'invalid_credentials' => 'Credentials are invalid.',
+                'user_inactive' => 'User is inactive.',
+                'role_inactive' => 'User role is inactive.',
+                'token_create_failed' => 'Token could not be created.',
+                'token_created' => 'Token created.',
+                'token_create_exception' => 'An error occurred while creating token.',
+                'users_list_failed' => 'Users could not be listed.',
+                'users_create_required' => 'name, email and password are required.',
+                'password_min_6' => 'Password must be at least 6 characters.',
+                'password_mismatch' => 'Password fields do not match.',
+                'role_id_invalid' => 'role_id is invalid.',
+                'email_exists' => 'This email is already registered.',
+                'role_invalid' => 'Selected role is invalid.',
+                'role_inactive_assign' => 'Inactive role cannot be assigned.',
+                'user_created' => 'User created.',
+                'user_create_failed' => 'User could not be created.',
+                'method_not_allowed' => 'Method not supported for this endpoint.',
+                'invalid_user_id' => 'Invalid user id.',
+                'no_fields_to_update' => 'Send at least one field to update.',
+                'name_empty' => 'name cannot be empty.',
+                'email_used_elsewhere' => 'This email is used by another user.',
+                'user_not_found' => 'User not found.',
+                'super_admin_cannot_disable' => 'Super Admin user cannot be disabled.',
+                'super_admin_min_one' => 'At least one active Super Admin must remain.',
+                'no_updatable_field' => 'No updatable field found.',
+                'user_updated' => 'User updated.',
+                'user_update_failed' => 'User could not be updated.',
+                'is_active_required' => 'is_active is required.',
+                'user_status_updated' => 'User status updated.',
+                'user_status_failed' => 'User status could not be updated.',
+                'postman_not_found' => 'Postman collection file not found.',
+                'postman_read_failed' => 'Postman collection file could not be read.',
+            ],
+        ];
+    }
+
+    $locale = strtolower((string) env('APP_LOCALE', 'tr'));
+    if (!isset($dictionary[$locale])) {
+        $locale = 'tr';
+    }
+
+    if (isset($dictionary[$locale][$key])) {
+        return $dictionary[$locale][$key];
+    }
+
+    if (isset($dictionary['tr'][$key])) {
+        return $dictionary['tr'][$key];
+    }
+
+    return $default ?? $key;
+}

@@ -1,58 +1,60 @@
-<?php
+﻿<?php
 if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/security/language.php';
+
 $checks = [];
 
 $checks[] = [
-    'name' => 'Uygulama ortami',
+    'name' => security_lang('check_app_env_name'),
     'value' => APP_ENV,
     'ok' => APP_ENV === 'production',
-    'hint' => 'APP_ENV production olmalidir.',
+    'hint' => security_lang('check_app_env_hint'),
 ];
 
 $checks[] = [
-    'name' => 'Debug modu',
+    'name' => security_lang('check_debug_name'),
     'value' => APP_DEBUG ? 'true' : 'false',
     'ok' => APP_DEBUG === false,
-    'hint' => 'Production ortaminda APP_DEBUG false olmalidir.',
+    'hint' => security_lang('check_debug_hint'),
 ];
 
 $checks[] = [
-    'name' => 'Proxy guven',
+    'name' => security_lang('check_proxy_name'),
     'value' => APP_TRUST_PROXY ? 'true' : 'false',
     'ok' => APP_TRUST_PROXY === true,
-    'hint' => 'Reverse proxy kullaniminda APP_TRUST_PROXY true onerilir.',
+    'hint' => security_lang('check_proxy_hint'),
 ];
 
 $checks[] = [
-    'name' => 'Web setup',
-    'value' => env_bool('AUTO_WEB_SETUP', true) ? 'enabled' : 'disabled',
+    'name' => security_lang('check_web_setup_name'),
+    'value' => env_bool('AUTO_WEB_SETUP', true) ? security_lang('enabled') : security_lang('disabled'),
     'ok' => env_bool('AUTO_WEB_SETUP', true) === false,
-    'hint' => 'Kurulumdan sonra AUTO_WEB_SETUP=false yapin.',
+    'hint' => security_lang('check_web_setup_hint'),
 ];
 
 $setupKey = (string) env('SETUP_KEY', '');
 $checks[] = [
-    'name' => 'Setup key',
-    'value' => $setupKey !== '' ? 'configured' : 'empty',
+    'name' => security_lang('check_setup_key_name'),
+    'value' => $setupKey !== '' ? security_lang('configured') : security_lang('empty'),
     'ok' => $setupKey !== '',
-    'hint' => 'SETUP_KEY bos olmamalidir.',
+    'hint' => security_lang('check_setup_key_hint'),
 ];
 
 $checks[] = [
-    'name' => 'Session secure cookie',
-    'value' => ini_get('session.cookie_secure') === '1' ? 'enabled' : 'disabled',
+    'name' => security_lang('check_session_secure_name'),
+    'value' => ini_get('session.cookie_secure') === '1' ? security_lang('enabled') : security_lang('disabled'),
     'ok' => ini_get('session.cookie_secure') === '1',
-    'hint' => 'HTTPS icin session.cookie_secure=1 olmalidir.',
+    'hint' => security_lang('check_session_secure_hint'),
 ];
 
 $checks[] = [
-    'name' => 'Session samesite',
+    'name' => security_lang('check_session_samesite_name'),
     'value' => (string) ini_get('session.cookie_samesite'),
     'ok' => strtolower((string) ini_get('session.cookie_samesite')) === 'lax',
-    'hint' => 'session.cookie_samesite=Lax onerilir.',
+    'hint' => security_lang('check_session_samesite_hint'),
 ];
 
 $dirChecks = [];
@@ -95,8 +97,8 @@ try {
     <div class="container-xl">
         <div class="row g-2 align-items-center">
             <div class="col">
-                <div class="page-pretitle">Sistem Yonetimi</div>
-                <h2 class="page-title">Guvenlik Izleme</h2>
+                <div class="page-pretitle"><?php echo e(security_lang('page_pretitle')); ?></div>
+                <h2 class="page-title"><?php echo e(security_lang('page_title')); ?></h2>
             </div>
         </div>
     </div>
@@ -106,16 +108,16 @@ try {
     <div class="container-xl">
         <div class="card mb-4">
             <div class="card-header">
-                <h3 class="card-title">Guvenlik Kontrolleri</h3>
+                <h3 class="card-title"><?php echo e(security_lang('security_checks_title')); ?></h3>
             </div>
             <div class="table-responsive">
                 <table class="table table-vcenter card-table table-striped">
                     <thead>
                     <tr>
-                        <th>Kontrol</th>
-                        <th>Deger</th>
-                        <th>Durum</th>
-                        <th>Not</th>
+                        <th><?php echo e(security_lang('col_check')); ?></th>
+                        <th><?php echo e(security_lang('col_value')); ?></th>
+                        <th><?php echo e(security_lang('col_status')); ?></th>
+                        <th><?php echo e(security_lang('col_note')); ?></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -127,7 +129,7 @@ try {
                                 <?php if ($check['ok']): ?>
                                     <span class="badge bg-green-lt">OK</span>
                                 <?php else: ?>
-                                    <span class="badge bg-red-lt">Uyari</span>
+                                    <span class="badge bg-red-lt"><?php echo e(security_lang('status_warn')); ?></span>
                                 <?php endif; ?>
                             </td>
                             <td class="text-secondary"><?php echo e($check['hint']); ?></td>
@@ -140,17 +142,17 @@ try {
 
         <div class="card mb-4">
             <div class="card-header">
-                <h3 class="card-title">Dosya ve Klasor Izinleri</h3>
+                <h3 class="card-title"><?php echo e(security_lang('dirs_title')); ?></h3>
             </div>
             <div class="table-responsive">
                 <table class="table table-vcenter card-table table-striped">
                     <thead>
                     <tr>
-                        <th>Klasor</th>
-                        <th>Yol</th>
-                        <th>Var mi</th>
-                        <th>Yazilabilir mi</th>
-                        <th>Perm</th>
+                        <th><?php echo e(security_lang('col_folder')); ?></th>
+                        <th><?php echo e(security_lang('col_path')); ?></th>
+                        <th><?php echo e(security_lang('col_exists')); ?></th>
+                        <th><?php echo e(security_lang('col_writable')); ?></th>
+                        <th><?php echo e(security_lang('col_perm')); ?></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -158,8 +160,8 @@ try {
                         <tr>
                             <td><?php echo e($d['name']); ?></td>
                             <td><code><?php echo e($d['path']); ?></code></td>
-                            <td><?php echo $d['exists'] ? '<span class="badge bg-green-lt">Evet</span>' : '<span class="badge bg-red-lt">Hayir</span>'; ?></td>
-                            <td><?php echo $d['writable'] ? '<span class="badge bg-green-lt">Evet</span>' : '<span class="badge bg-red-lt">Hayir</span>'; ?></td>
+                            <td><?php echo $d['exists'] ? '<span class="badge bg-green-lt">' . e(security_lang('yes')) . '</span>' : '<span class="badge bg-red-lt">' . e(security_lang('no')) . '</span>'; ?></td>
+                            <td><?php echo $d['writable'] ? '<span class="badge bg-green-lt">' . e(security_lang('yes')) . '</span>' : '<span class="badge bg-red-lt">' . e(security_lang('no')) . '</span>'; ?></td>
                             <td><code><?php echo e($d['perm']); ?></code></td>
                         </tr>
                     <?php endforeach; ?>
@@ -170,11 +172,11 @@ try {
 
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Veritabani Tablolari</h3>
+                <h3 class="card-title"><?php echo e(security_lang('db_tables_title')); ?></h3>
             </div>
             <div class="card-body">
                 <?php if (empty($dbTables)): ?>
-                    <div class="text-secondary">Tablo bulunamadi veya veritabani okunamadi.</div>
+                    <div class="text-secondary"><?php echo e(security_lang('db_empty')); ?></div>
                 <?php else: ?>
                     <div class="d-flex flex-wrap gap-2">
                         <?php foreach ($dbTables as $table): ?>

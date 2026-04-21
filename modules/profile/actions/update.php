@@ -3,12 +3,14 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/profile/language.php';
+
 require_action('POST', true);
 
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Güvenlik doğrulaması başarısız oldu.',
+        'message' => profile_lang('csrf_failed'),
     ], 419);
 }
 
@@ -22,21 +24,21 @@ $passwordConfirm = (string) ($_POST['password_confirm'] ?? '');
 if ($id <= 0) {
     json_response([
         'status' => 'error',
-        'message' => 'Geçersiz kullanıcı oturumu.',
+        'message' => profile_lang('invalid_session'),
     ], 403);
 }
 
 if ($name === '' || $email === '') {
     json_response([
         'status' => 'error',
-        'message' => 'Ad soyad ve e-posta alanları zorunludur.',
+        'message' => profile_lang('required_fields'),
     ], 422);
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     json_response([
         'status' => 'error',
-        'message' => 'Geçerli bir e-posta adresi girin.',
+        'message' => profile_lang('invalid_email'),
     ], 422);
 }
 
@@ -46,14 +48,14 @@ if ($passwordWillChange) {
     if (mb_strlen($password) < 6) {
         json_response([
             'status' => 'error',
-            'message' => 'Yeni şifre en az 6 karakter olmalıdır.',
+            'message' => profile_lang('password_min'),
         ], 422);
     }
 
     if ($password !== $passwordConfirm) {
         json_response([
             'status' => 'error',
-            'message' => 'Yeni şifreler uyuşmuyor.',
+            'message' => profile_lang('password_mismatch'),
         ], 422);
     }
 }
@@ -62,12 +64,7 @@ $newAvatarFileName = null;
 $oldAvatarFileName = null;
 
 try {
-    $userStmt = db()->prepare("
-        SELECT id, avatar, role_id
-        FROM users
-        WHERE id = :id
-        LIMIT 1
-    ");
+    $userStmt = db()->prepare("\n        SELECT id, avatar, role_id\n        FROM users\n        WHERE id = :id\n        LIMIT 1\n    ");
     $userStmt->execute([
         ':id' => $id,
     ]);
@@ -77,18 +74,13 @@ try {
     if (!$existingUser) {
         json_response([
             'status' => 'error',
-            'message' => 'Kullanıcı bulunamadı.',
+            'message' => profile_lang('user_not_found'),
         ], 404);
     }
 
     $oldAvatarFileName = $existingUser['avatar'] ?? null;
 
-    $checkStmt = db()->prepare("
-        SELECT COUNT(id)
-        FROM users
-        WHERE email = :email
-          AND id != :id
-    ");
+    $checkStmt = db()->prepare("\n        SELECT COUNT(id)\n        FROM users\n        WHERE email = :email\n          AND id != :id\n    ");
     $checkStmt->execute([
         ':email' => $email,
         ':id' => $id,
@@ -97,7 +89,7 @@ try {
     if ((int) $checkStmt->fetchColumn() > 0) {
         json_response([
             'status' => 'error',
-            'message' => 'Bu e-posta adresi başka bir kullanıcı tarafından kullanılıyor.',
+            'message' => profile_lang('email_in_use'),
         ], 422);
     }
 
@@ -169,7 +161,7 @@ try {
 
     json_response([
         'status' => 'success',
-        'message' => 'Profil başarıyla güncellendi.',
+        'message' => profile_lang('profile_updated'),
         'reload_page' => true,
     ]);
 } catch (Throwable $e) {
@@ -181,6 +173,6 @@ try {
 
     json_response([
         'status' => 'error',
-        'message' => 'Profil güncellenirken bir hata oluştu.',
+        'message' => profile_lang('profile_update_error'),
     ], 500);
 }

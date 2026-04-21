@@ -54,10 +54,13 @@ document.addEventListener("DOMContentLoaded", function () {
             const html = await response.text();
             tableContainer.innerHTML = html;
         } catch (error) {
+            const i18n = window.KIRPI_AUDIT_I18N || {};
+            const loadErrorText = i18n.loadError || "Audit kayitlari yuklenirken bir hata olustu.";
+
             tableContainer.innerHTML = `
                 <div class="p-4">
                     <div class="alert alert-danger mb-0">
-                        Audit kayitlari yuklenirken bir hata olustu.
+                        ${loadErrorText}
                     </div>
                 </div>
             `;

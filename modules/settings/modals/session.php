@@ -3,6 +3,8 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/settings/language.php';
+
 if (!function_exists('kirpi_mask_session_value')) {
     function kirpi_mask_session_value(mixed $value, string $path = ''): mixed
     {
@@ -57,19 +59,19 @@ if ($jsonSession === false) {
 ?>
 
 <div class="modal-header">
-    <h5 class="modal-title">Session Verileri</h5>
+    <h5 class="modal-title"><?php echo e(settings_lang('session_modal_title')); ?></h5>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 
 <div class="modal-body">
     <div class="alert alert-info mb-3">
-        Hassas alanlar otomatik olarak maskelenir.
+        <?php echo e(settings_lang('session_mask_info')); ?>
     </div>
 
     <pre class="bg-dark-lt p-3 rounded mb-0" style="max-height: 60vh; overflow: auto;"><code><?php echo e($jsonSession); ?></code></pre>
 </div>
 
 <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo e(settings_lang('close')); ?></button>
 </div>
 

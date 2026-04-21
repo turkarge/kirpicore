@@ -3,11 +3,13 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/notifications/language.php';
+
 if (!db_table_exists('notifications')) {
     ?>
     <div class="p-4">
         <div class="alert alert-warning mb-0">
-            Bildirim tablosu henüz kurulu değil.
+            <?php echo e(notifications_lang('table_missing_short')); ?>
         </div>
     </div>
     <?php
@@ -93,10 +95,10 @@ try {
     <table class="table table-vcenter card-table table-striped">
         <thead>
             <tr>
-                <th>Bildirim</th>
-                <th>Kanal</th>
-                <th>Durum</th>
-                <th>Tarih</th>
+                <th><?php echo e(notifications_lang('table_notification')); ?></th>
+                <th><?php echo e(notifications_lang('table_channel')); ?></th>
+                <th><?php echo e(notifications_lang('table_status')); ?></th>
+                <th><?php echo e(notifications_lang('table_date')); ?></th>
                 <th class="w-1"></th>
             </tr>
         </thead>
@@ -104,7 +106,7 @@ try {
             <?php if (empty($notifications)): ?>
                 <tr>
                     <td colspan="5" class="text-center text-secondary py-4">
-                        Kayıt bulunamadı.
+                        <?php echo e(notifications_lang('no_records')); ?>
                     </td>
                 </tr>
             <?php else: ?>
@@ -115,13 +117,13 @@ try {
                             <div class="text-secondary"><?php echo e($notification['message']); ?></div>
                         </td>
                         <td>
-                            <?php echo e($notification['channel'] ?: 'in_app'); ?>
+                            <?php echo e($notification['channel'] ?: notifications_lang('default_channel')); ?>
                         </td>
                         <td>
                             <?php if (!empty($notification['read_at'])): ?>
-                                <span class="badge bg-green-lt">Okundu</span>
+                                <span class="badge bg-green-lt"><?php echo e(notifications_lang('status_read')); ?></span>
                             <?php else: ?>
-                                <span class="badge bg-yellow-lt">Okunmadı</span>
+                                <span class="badge bg-yellow-lt"><?php echo e(notifications_lang('status_unread')); ?></span>
                             <?php endif; ?>
                         </td>
                         <td>
@@ -138,7 +140,7 @@ try {
                                     <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                                     <input type="hidden" name="id" value="<?php echo (int) $notification['id']; ?>">
                                     <button type="submit" class="btn btn-sm btn-outline-primary">
-                                        Okundu Yap
+                                        <?php echo e(notifications_lang('mark_read')); ?>
                                     </button>
                                 </form>
                             <?php endif; ?>

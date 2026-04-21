@@ -3,12 +3,14 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/api/language.php';
+
 $tableReady = db_table_exists('api_request_logs');
 $window = trim((string) ($_GET['window'] ?? '24h'));
 $windowMap = [
-    '1h' => ['sql' => '1 HOUR', 'label' => '1 Saat'],
-    '24h' => ['sql' => '24 HOUR', 'label' => '24 Saat'],
-    '7d' => ['sql' => '7 DAY', 'label' => '7 Gun'],
+    '1h' => ['sql' => '1 HOUR', 'label' => api_lang('window_1h')],
+    '24h' => ['sql' => '24 HOUR', 'label' => api_lang('window_24h')],
+    '7d' => ['sql' => '7 DAY', 'label' => api_lang('window_7d')],
 ];
 if (!isset($windowMap[$window])) {
     $window = '24h';
@@ -92,14 +94,14 @@ if ($tableReady) {
     <div class="container-xl">
         <div class="row g-2 align-items-center">
             <div class="col">
-                <div class="page-pretitle">Sistem Yonetimi</div>
-                <h2 class="page-title">API Metrics (<?php echo e($windowLabel); ?>)</h2>
+                <div class="page-pretitle"><?php echo e(api_lang('metrics_pretitle')); ?></div>
+                <h2 class="page-title"><?php echo e(api_lang('metrics_title')); ?> (<?php echo e($windowLabel); ?>)</h2>
             </div>
             <div class="col-auto ms-auto d-print-none">
                 <div class="btn-group" role="group" aria-label="Window Filter">
-                    <a href="<?php echo base_url('api/metrics?window=1h'); ?>" class="btn <?php echo $window === '1h' ? 'btn-primary' : 'btn-outline-primary'; ?>">1 Saat</a>
-                    <a href="<?php echo base_url('api/metrics?window=24h'); ?>" class="btn <?php echo $window === '24h' ? 'btn-primary' : 'btn-outline-primary'; ?>">24 Saat</a>
-                    <a href="<?php echo base_url('api/metrics?window=7d'); ?>" class="btn <?php echo $window === '7d' ? 'btn-primary' : 'btn-outline-primary'; ?>">7 Gun</a>
+                    <a href="<?php echo base_url('api/metrics?window=1h'); ?>" class="btn <?php echo $window === '1h' ? 'btn-primary' : 'btn-outline-primary'; ?>"><?php echo e(api_lang('window_1h')); ?></a>
+                    <a href="<?php echo base_url('api/metrics?window=24h'); ?>" class="btn <?php echo $window === '24h' ? 'btn-primary' : 'btn-outline-primary'; ?>"><?php echo e(api_lang('window_24h')); ?></a>
+                    <a href="<?php echo base_url('api/metrics?window=7d'); ?>" class="btn <?php echo $window === '7d' ? 'btn-primary' : 'btn-outline-primary'; ?>"><?php echo e(api_lang('window_7d')); ?></a>
                 </div>
             </div>
         </div>
@@ -110,7 +112,7 @@ if ($tableReady) {
     <div class="container-xl">
         <?php if (!$tableReady): ?>
             <div class="alert alert-warning">
-                <code>api_request_logs</code> tablosu kurulu degil. Ayarlar ekranindan <strong>Eksikleri Kur</strong> calistirin.
+                <?php echo e(api_lang('table_missing')); ?>
             </div>
         <?php endif; ?>
 
@@ -118,7 +120,7 @@ if ($tableReady) {
             <div class="col-sm-6 col-lg-2">
                 <div class="card">
                     <div class="card-body">
-                        <div class="text-secondary">Toplam</div>
+                        <div class="text-secondary"><?php echo e(api_lang('total')); ?></div>
                         <div class="h1 m-0"><?php echo (int) $summary['total']; ?></div>
                     </div>
                 </div>
@@ -150,7 +152,7 @@ if ($tableReady) {
             <div class="col-sm-6 col-lg-2">
                 <div class="card">
                     <div class="card-body">
-                        <div class="text-secondary">Token (uniq)</div>
+                        <div class="text-secondary"><?php echo e(api_lang('token_unique')); ?></div>
                         <div class="h1 m-0"><?php echo (int) $summary['unique_tokens']; ?></div>
                     </div>
                 </div>
@@ -158,7 +160,7 @@ if ($tableReady) {
             <div class="col-sm-6 col-lg-2">
                 <div class="card">
                     <div class="card-body">
-                        <div class="text-secondary">Avg ms</div>
+                        <div class="text-secondary"><?php echo e(api_lang('avg_ms')); ?></div>
                         <div class="h1 m-0"><?php echo (int) $summary['avg_duration_ms']; ?></div>
                     </div>
                 </div>
@@ -169,7 +171,7 @@ if ($tableReady) {
             <div class="col-12 col-lg-6">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Kritik Kodlar (<?php echo e($windowLabel); ?>)</h3>
+                        <h3 class="card-title"><?php echo e(api_lang('critical_codes')); ?> (<?php echo e($windowLabel); ?>)</h3>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
@@ -186,7 +188,7 @@ if ($tableReady) {
                                 <div class="h2 m-0"><?php echo (int) $summary['status_429']; ?></div>
                             </div>
                             <div class="col-12 mt-2 text-secondary">
-                                Unique IP: <strong><?php echo (int) $summary['unique_ips']; ?></strong>
+                                <?php echo e(api_lang('unique_ip')); ?>: <strong><?php echo (int) $summary['unique_ips']; ?></strong>
                             </div>
                         </div>
                     </div>
@@ -196,21 +198,21 @@ if ($tableReady) {
             <div class="col-12 col-lg-6">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">En Cok Cagrilan Endpointler</h3>
+                        <h3 class="card-title"><?php echo e(api_lang('top_endpoints')); ?></h3>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-vcenter card-table table-striped mb-0">
                             <thead>
                             <tr>
-                                <th>Method</th>
-                                <th>Path</th>
-                                <th>Hit</th>
-                                <th>Hata</th>
+                                <th><?php echo e(api_lang('method')); ?></th>
+                                <th><?php echo e(api_lang('path')); ?></th>
+                                <th><?php echo e(api_lang('hit')); ?></th>
+                                <th><?php echo e(api_lang('error')); ?></th>
                             </tr>
                             </thead>
                             <tbody>
                             <?php if (empty($topEndpoints)): ?>
-                                <tr><td colspan="4" class="text-secondary text-center py-4">Veri yok</td></tr>
+                                <tr><td colspan="4" class="text-secondary text-center py-4"><?php echo e(api_lang('no_data')); ?></td></tr>
                             <?php else: ?>
                                 <?php foreach ($topEndpoints as $row): ?>
                                     <tr>
@@ -230,23 +232,23 @@ if ($tableReady) {
 
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Son Hatalar (<?php echo e($windowLabel); ?>)</h3>
+                <h3 class="card-title"><?php echo e(api_lang('recent_errors')); ?> (<?php echo e($windowLabel); ?>)</h3>
             </div>
             <div class="table-responsive">
                 <table class="table table-vcenter card-table table-striped mb-0">
                     <thead>
                     <tr>
-                        <th>Zaman</th>
-                        <th>Method</th>
-                        <th>Path</th>
-                        <th>Status</th>
-                        <th>Error Code</th>
-                        <th>IP</th>
+                        <th><?php echo e(api_lang('time')); ?></th>
+                        <th><?php echo e(api_lang('method')); ?></th>
+                        <th><?php echo e(api_lang('path')); ?></th>
+                        <th><?php echo e(api_lang('status')); ?></th>
+                        <th><?php echo e(api_lang('error_code')); ?></th>
+                        <th><?php echo e(api_lang('ip')); ?></th>
                     </tr>
                     </thead>
                     <tbody>
                     <?php if (empty($recentErrors)): ?>
-                        <tr><td colspan="6" class="text-secondary text-center py-4">Hata kaydi yok</td></tr>
+                        <tr><td colspan="6" class="text-secondary text-center py-4"><?php echo e(api_lang('no_error_log')); ?></td></tr>
                     <?php else: ?>
                         <?php foreach ($recentErrors as $row): ?>
                             <tr>

@@ -3,12 +3,14 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/backup/language.php';
+
 require_action('POST', true);
 
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Guvenlik dogrulamasi basarisiz oldu.',
+        'message' => backup_lang('csrf_failed'),
     ], 419);
 }
 
@@ -16,14 +18,14 @@ $backupId = (int) ($_POST['backup_id'] ?? 0);
 if ($backupId <= 0) {
     json_response([
         'status' => 'error',
-        'message' => 'Gecersiz backup kaydi.',
+        'message' => backup_lang('invalid_backup_record'),
     ], 422);
 }
 
 if (!kirpi_backup_table_ready()) {
     json_response([
         'status' => 'error',
-        'message' => 'Backup tablosu henuz kurulu degil.',
+        'message' => backup_lang('table_not_ready'),
     ], 422);
 }
 
@@ -42,7 +44,7 @@ try {
     if (!$backup) {
         json_response([
             'status' => 'error',
-            'message' => 'Backup kaydi bulunamadi.',
+            'message' => backup_lang('record_not_found'),
         ], 404);
     }
 
@@ -69,7 +71,7 @@ try {
 
     json_response([
         'status' => 'success',
-        'message' => 'Backup kaydi silindi.',
+        'message' => backup_lang('delete_success'),
         'reload_page' => true,
     ]);
 } catch (Throwable $e) {
@@ -82,6 +84,6 @@ try {
 
     json_response([
         'status' => 'error',
-        'message' => 'Backup silinirken bir hata olustu.',
+        'message' => backup_lang('delete_failed'),
     ], 500);
 }

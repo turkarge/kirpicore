@@ -3,12 +3,14 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/auth/language.php';
+
 require_action('POST', false);
 
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'GÃ¼venlik doÄŸrulamasÄ± baÅŸarÄ±sÄ±z oldu. SayfayÄ± yenileyip tekrar deneyin.',
+        'message' => auth_lang('csrf_failed_refresh'),
     ], 419);
 }
 
@@ -18,14 +20,14 @@ $password = (string)($_POST['password'] ?? '');
 if ($email === '' || $password === '') {
     json_response([
         'status' => 'error',
-        'message' => 'E-posta ve ÅŸifre alanlarÄ± zorunludur.',
+        'message' => auth_lang('email_password_required'),
     ], 422);
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     json_response([
         'status' => 'error',
-        'message' => 'GeÃ§erli bir e-posta adresi girin.',
+        'message' => auth_lang('invalid_email'),
     ], 422);
 }
 
@@ -35,22 +37,7 @@ try {
         ? "u.lock_enabled, u.session_version,"
         : "0 AS lock_enabled, 0 AS session_version,";
 
-    $stmt = db()->prepare("
-    SELECT 
-        u.id,
-        u.name,
-        u.email,
-        u.password,
-        u.role_id,
-        {$lockSelectSql}
-        r.name AS role_name,
-        r.is_active AS role_is_active
-    FROM users u
-    LEFT JOIN roles r ON r.id = u.role_id
-    WHERE u.email = :email
-      AND u.is_active = 1
-    LIMIT 1
-");
+    $stmt = db()->prepare("\n    SELECT \n        u.id,\n        u.name,\n        u.email,\n        u.password,\n        u.role_id,\n        {$lockSelectSql}\n        r.name AS role_name,\n        r.is_active AS role_is_active\n    FROM users u\n    LEFT JOIN roles r ON r.id = u.role_id\n    WHERE u.email = :email\n      AND u.is_active = 1\n    LIMIT 1\n");
     $stmt->execute([
         ':email' => $email,
     ]);
@@ -65,7 +52,7 @@ try {
 
         json_response([
             'status' => 'error',
-            'message' => 'E-posta veya ÅŸifre hatalÄ±.',
+            'message' => auth_lang('invalid_credentials'),
         ], 401);
     }
 
@@ -78,7 +65,7 @@ try {
 
         json_response([
             'status' => 'error',
-            'message' => 'Bu kullanÄ±cÄ±ya baÄŸlÄ± rol pasif durumda.',
+            'message' => auth_lang('role_inactive'),
         ], 403);
     }
 
@@ -147,14 +134,14 @@ try {
 
     json_response([
         'status' => 'success',
-        'message' => 'GiriÅŸ baÅŸarÄ±lÄ±. YÃ¶nlendiriliyorsunuz.',
+        'message' => auth_lang('login_success_redirect'),
         'redirect' => $redirect,
     ]);
 } catch (Throwable $e) {
-    error_log('Login action hatasÄ±: ' . $e->getMessage());
+    error_log('Login action error: ' . $e->getMessage());
 
     json_response([
         'status' => 'error',
-        'message' => 'GiriÅŸ iÅŸlemi sÄ±rasÄ±nda bir hata oluÅŸtu.',
+        'message' => auth_lang('login_error'),
     ], 500);
 }

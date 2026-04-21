@@ -3,11 +3,13 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/health/language.php';
+
 $metrics = [];
 $now = date('Y-m-d H:i:s');
 
 $dbStatus = 'OK';
-$dbDetail = 'Baglanti basarili';
+$dbDetail = health_lang('db_connection_ok');
 $dbLatency = '-';
 
 try {
@@ -16,7 +18,7 @@ try {
     $dbLatency = number_format((microtime(true) - $start) * 1000, 2) . ' ms';
 } catch (Throwable $e) {
     $dbStatus = 'FAIL';
-    $dbDetail = 'DB sorgusu basarisiz';
+    $dbDetail = health_lang('db_query_failed');
 }
 
 $metrics[] = [
@@ -33,7 +35,7 @@ $metrics[] = [
     'detail' => $dbDetail,
 ];
 
-$queueDetail = 'Queue tablosu yok';
+$queueDetail = health_lang('queue_table_missing');
 $queueStatus = 'WARN';
 $queueLatency = '-';
 
@@ -51,7 +53,7 @@ if (db_table_exists('jobs_queue')) {
         $queueStatus = $failedCount > 0 ? 'WARN' : 'OK';
     } catch (Throwable $e) {
         $queueStatus = 'FAIL';
-        $queueDetail = 'Queue metrikleri okunamadi';
+        $queueDetail = health_lang('queue_metrics_unreadable');
     }
 }
 
@@ -63,11 +65,11 @@ $metrics[] = [
 ];
 
 $mailStatus = 'WARN';
-$mailDetail = 'MAIL_HOST bos';
+$mailDetail = health_lang('mail_host_empty');
 
 if (trim((string) MAIL_HOST) !== '') {
     $mailStatus = 'OK';
-    $mailDetail = 'SMTP host tanimli: ' . MAIL_HOST;
+    $mailDetail = health_lang('mail_host_defined_prefix') . MAIL_HOST;
 }
 
 if (db_table_exists('mail_logs')) {
@@ -96,7 +98,7 @@ $metrics[] = [
 ];
 
 $backupStatus = 'WARN';
-$backupDetail = 'Backup tablosu yok';
+$backupDetail = health_lang('backup_table_missing');
 
 if (db_table_exists('db_backups')) {
     try {
@@ -113,7 +115,7 @@ if (db_table_exists('db_backups')) {
         $backupStatus = $count > 0 ? 'OK' : 'WARN';
     } catch (Throwable $e) {
         $backupStatus = 'FAIL';
-        $backupDetail = 'Backup metrikleri okunamadi';
+        $backupDetail = health_lang('backup_metrics_unreadable');
     }
 }
 
@@ -126,7 +128,7 @@ $metrics[] = [
 
 $storagePath = BASE_PATH . '/storage';
 $diskStatus = 'WARN';
-$diskDetail = 'Disk bilgisi okunamadi';
+$diskDetail = health_lang('disk_unreadable');
 
 if (is_dir($storagePath)) {
     $total = @disk_total_space($storagePath);
@@ -160,7 +162,7 @@ $metrics[] = [
 ];
 
 $throttleStatus = 'WARN';
-$throttleDetail = 'Throttle devre disi veya tablo yok';
+$throttleDetail = health_lang('throttle_disabled_or_missing');
 
 if (kirpi_throttle_enabled() && kirpi_throttle_table_ready()) {
     try {
@@ -172,7 +174,7 @@ if (kirpi_throttle_enabled() && kirpi_throttle_table_ready()) {
         $throttleDetail = 'rows=' . $totalRows . ', active_blocks=' . $activeBlocks;
     } catch (Throwable $e) {
         $throttleStatus = 'FAIL';
-        $throttleDetail = 'Throttle metrikleri okunamadi';
+        $throttleDetail = health_lang('throttle_metrics_unreadable');
     }
 }
 
@@ -200,8 +202,8 @@ $statusBadge = static function (string $status): string {
     <div class="container-xl">
         <div class="row g-2 align-items-center">
             <div class="col">
-                <div class="page-pretitle">Sistem Yonetimi</div>
-                <h2 class="page-title">Health + Metrics</h2>
+                <div class="page-pretitle"><?php echo e(health_lang('system_management')); ?></div>
+                <h2 class="page-title"><?php echo e(health_lang('health_metrics')); ?></h2>
             </div>
         </div>
     </div>
@@ -211,17 +213,17 @@ $statusBadge = static function (string $status): string {
     <div class="container-xl">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Sistem Matrix</h3>
-                <div class="card-actions text-secondary">Last Check: <?php echo e($now); ?></div>
+                <h3 class="card-title"><?php echo e(health_lang('system_matrix')); ?></h3>
+                <div class="card-actions text-secondary"><?php echo e(health_lang('last_check')); ?>: <?php echo e($now); ?></div>
             </div>
             <div class="table-responsive">
                 <table class="table table-vcenter card-table table-striped">
                     <thead>
                     <tr>
-                        <th>Bilesen</th>
-                        <th>Status</th>
-                        <th>Latency</th>
-                        <th>Detay</th>
+                        <th><?php echo e(health_lang('component')); ?></th>
+                        <th><?php echo e(health_lang('status')); ?></th>
+                        <th><?php echo e(health_lang('latency')); ?></th>
+                        <th><?php echo e(health_lang('detail')); ?></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -243,4 +245,3 @@ $statusBadge = static function (string $status): string {
         </div>
     </div>
 </div>
-

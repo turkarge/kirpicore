@@ -3,6 +3,8 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/auth/language.php';
+
 require_action('POST', true);
 
 $logoutUser = current_user();
@@ -14,11 +16,11 @@ if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     if ($isAjax) {
         json_response([
             'status' => 'error',
-            'message' => 'Güvenlik doğrulaması başarısız oldu.',
+            'message' => auth_lang('csrf_failed'),
         ], 419);
     }
 
-    set_flash_message('danger', 'Güvenlik doğrulaması başarısız oldu.');
+    set_flash_message('danger', auth_lang('csrf_failed'));
     redirect(base_url('auth/login'));
 }
 
@@ -50,7 +52,7 @@ session_destroy();
 if ($isAjax) {
     json_response([
         'status' => 'success',
-        'message' => 'Oturum kapatıldı.',
+        'message' => auth_lang('logout_success'),
         'redirect' => base_url('auth/login'),
     ]);
 }

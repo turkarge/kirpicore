@@ -3,12 +3,14 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/roles/language.php';
+
 $id = (int) ($_GET['id'] ?? 0);
 
 if ($id <= 0) {
     display_error_page(
-        '404 - Rol Bulunamadı',
-        'Geçersiz rol ID.',
+        roles_lang('page_not_found_title'),
+        roles_lang('page_not_found_message'),
         404,
         true
     );
@@ -34,7 +36,7 @@ try {
     $role = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$role) {
-        throw new RuntimeException('Rol bulunamadı.');
+        throw new RuntimeException('Role not found.');
     }
 
     $isSuperAdminRole = ($role['name'] ?? '') === 'Super Admin';
@@ -46,8 +48,8 @@ try {
     error_log('roles permissions page error: ' . $e->getMessage());
 
     display_error_page(
-        '500 - Rol Verileri Yüklenemedi',
-        'Rol yetkileri yüklenirken bir hata oluştu.',
+        roles_lang('page_error_title'),
+        roles_lang('page_error_message'),
         500,
         true
     );
@@ -58,17 +60,17 @@ try {
     <div class="container-xl">
         <div class="row g-2 align-items-center">
             <div class="col">
-                <div class="page-pretitle">Rol Yönetimi</div>
-                <h2 class="page-title">İzin Matrisi</h2>
+                <div class="page-pretitle"><?php echo e(roles_lang('role_management')); ?></div>
+                <h2 class="page-title"><?php echo e(roles_lang('permission_matrix')); ?></h2>
                 <div class="text-secondary mt-1">
-                    Rol: <?php echo e($role['name']); ?>
+                    <?php echo e(roles_lang('role_label')); ?>: <?php echo e($role['name']); ?>
                 </div>
             </div>
 
             <div class="col-auto ms-auto d-print-none">
                 <div class="btn-list">
                     <a href="<?php echo base_url('roles/view'); ?>" class="btn">
-                        Geri Dön
+                        <?php echo e(roles_lang('back')); ?>
                     </a>
                     <?php if (!$isSuperAdminRole && $permissionSchemaReady): ?>
                         <button
@@ -76,14 +78,14 @@ try {
                             class="btn btn-outline-secondary"
                             id="roles-permissions-select-all"
                         >
-                            Tümünü Seç
+                            <?php echo e(roles_lang('select_all')); ?>
                         </button>
                         <button
                             type="button"
                             class="btn btn-outline-secondary"
                             id="roles-permissions-clear-all"
                         >
-                            Tümünü Kaldır
+                            <?php echo e(roles_lang('clear_all')); ?>
                         </button>
                     <?php endif; ?>
                     <?php if (!$isSuperAdminRole && $permissionSchemaReady): ?>
@@ -92,7 +94,7 @@ try {
                             form="roles-permissions-form"
                             class="btn btn-primary"
                         >
-                            Kaydet
+                            <?php echo e(roles_lang('save')); ?>
                         </button>
                     <?php endif; ?>
                 </div>
@@ -105,13 +107,11 @@ try {
     <div class="container-xl">
         <?php if (!$permissionSchemaReady): ?>
             <div class="alert alert-warning">
-                Permission tabloları henüz kurulu değil. Önce
-                <code>database/permissions.sql</code> dosyasını çalıştırın veya
-                <code>php shell.php db:permissions:install</code> komutunu kullanın.
+                <?php echo e(roles_lang('permission_tables_missing')); ?>
             </div>
         <?php elseif ($isSuperAdminRole): ?>
             <div class="alert alert-info">
-                Super Admin rolü tüm yetkilere doğrudan sahiptir. Bu rol için izin ataması yapılmaz.
+                <?php echo e(roles_lang('super_admin_permissions_info')); ?>
             </div>
         <?php endif; ?>
 
@@ -129,8 +129,8 @@ try {
                     <table class="table table-vcenter card-table table-striped">
                         <thead>
                             <tr>
-                                <th style="min-width: 220px;">Modül</th>
-                                <th>İzinler</th>
+                                <th style="min-width: 220px;"><?php echo e(roles_lang('module')); ?></th>
+                                <th><?php echo e(roles_lang('module_permissions')); ?></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -146,7 +146,7 @@ try {
                                                     class="form-check-input roles-permissions-group-toggle"
                                                     data-group="<?php echo e($groupKey); ?>"
                                                 >
-                                                <span class="form-check-label">Tümünü seç</span>
+                                                <span class="form-check-label"><?php echo e(roles_lang('select_group_all')); ?></span>
                                             </label>
                                         <?php endif; ?>
                                     </td>

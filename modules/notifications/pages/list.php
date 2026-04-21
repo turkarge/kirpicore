@@ -3,22 +3,30 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/notifications/language.php';
+
 $notificationsTableReady = db_table_exists('notifications');
 ?>
+
+<script>
+window.KIRPI_NOTIFICATIONS_I18N = {
+    listLoadError: <?php echo json_encode(notifications_lang('list_load_error')); ?>
+};
+</script>
 
 <div class="page-header d-print-none">
     <div class="container-xl">
         <div class="row g-2 align-items-center">
             <div class="col">
-                <div class="page-pretitle">İletişim Merkezi</div>
-                <h2 class="page-title">Bildirimler</h2>
+                <div class="page-pretitle"><?php echo e(notifications_lang('communication_center')); ?></div>
+                <h2 class="page-title"><?php echo e(notifications_lang('notifications')); ?></h2>
             </div>
 
             <div class="col-auto ms-auto d-print-none">
                 <div class="btn-list">
                     <?php if (check_permission('notifications.settings')): ?>
                         <a href="<?php echo base_url('notifications/settings'); ?>" class="btn">
-                            Ayarlar
+                            <?php echo e(notifications_lang('settings')); ?>
                         </a>
                     <?php endif; ?>
 
@@ -32,7 +40,7 @@ $notificationsTableReady = db_table_exists('notifications');
                         >
                             <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                             <button type="submit" class="btn btn-primary">
-                                Tümünü Okundu Yap
+                                <?php echo e(notifications_lang('mark_all_read')); ?>
                             </button>
                         </form>
                     <?php endif; ?>
@@ -46,8 +54,7 @@ $notificationsTableReady = db_table_exists('notifications');
     <div class="container-xl">
         <?php if (!$notificationsTableReady): ?>
             <div class="alert alert-warning">
-                Bildirim tabloları henüz kurulu değil. Önce
-                <code>modules/notifications/database/schema.sql</code> dosyasını çalıştırın.
+                <?php echo e(notifications_lang('tables_missing')); ?>
             </div>
         <?php endif; ?>
 
@@ -59,16 +66,16 @@ $notificationsTableReady = db_table_exists('notifications');
                             type="text"
                             id="notifications-search"
                             class="form-control"
-                            placeholder="Başlık veya mesaj ara..."
+                            placeholder="<?php echo e(notifications_lang('search_placeholder')); ?>"
                             <?php echo !$notificationsTableReady ? 'disabled' : ''; ?>
                         >
                     </div>
 
                     <div class="col-12 col-md-4">
                         <select id="notifications-status-filter" class="form-select" <?php echo !$notificationsTableReady ? 'disabled' : ''; ?>>
-                            <option value="">Tüm Durumlar</option>
-                            <option value="unread">Okunmadı</option>
-                            <option value="read">Okundu</option>
+                            <option value=""><?php echo e(notifications_lang('all_statuses')); ?></option>
+                            <option value="unread"><?php echo e(notifications_lang('status_unread')); ?></option>
+                            <option value="read"><?php echo e(notifications_lang('status_read')); ?></option>
                         </select>
                     </div>
                 </div>
@@ -81,7 +88,7 @@ $notificationsTableReady = db_table_exists('notifications');
                     </div>
                 <?php else: ?>
                     <div class="p-4 text-secondary">
-                        Bildirim tablosu hazır olduğunda liste burada görünecek.
+                        <?php echo e(notifications_lang('table_waiting')); ?>
                     </div>
                 <?php endif; ?>
             </div>

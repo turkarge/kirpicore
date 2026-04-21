@@ -3,19 +3,21 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/queue/language.php';
+
 require_action('POST', true);
 
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Guvenlik dogrulamasi basarisiz oldu.',
+        'message' => queue_lang('csrf_failed'),
     ], 419);
 }
 
 if (!kirpi_queue_table_ready()) {
     json_response([
         'status' => 'error',
-        'message' => 'Queue tablosu henuz kurulu degil.',
+        'message' => queue_lang('table_not_ready'),
     ], 422);
 }
 
@@ -29,6 +31,6 @@ kirpi_audit_log('retry_failed', 'queue', [
 
 json_response([
     'status' => 'success',
-    'message' => 'Retry icin guncellenen failed job sayisi: ' . $affected,
+    'message' => queue_lang('retry_success_prefix') . $affected,
     'reload_page' => true,
 ]);

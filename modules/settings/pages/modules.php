@@ -3,6 +3,8 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/settings/language.php';
+
 $modules = kirpi_list_modules();
 $requiredByMap = [];
 
@@ -43,8 +45,8 @@ foreach ($requiredByMap as $moduleKey => $dependents) {
     <div class="container-xl">
         <div class="row g-2 align-items-center">
             <div class="col">
-                <div class="page-pretitle">Sistem Yonetimi</div>
-                <h2 class="page-title">Modul Yonetimi</h2>
+                <div class="page-pretitle"><?php echo e(settings_lang('system_management')); ?></div>
+                <h2 class="page-title"><?php echo e(settings_lang('module_management')); ?></h2>
             </div>
         </div>
     </div>
@@ -54,33 +56,33 @@ foreach ($requiredByMap as $moduleKey => $dependents) {
     <div class="container-xl">
         <?php if (!kirpi_modules_registry_ready()): ?>
             <div class="alert alert-warning">
-                <code>app_modules</code> tablosu hazir degil. Ayarlar ekranindan <strong>Eksikleri Kur</strong> calistirin.
+                <code>app_modules</code> <?php echo e(settings_lang('app_modules_missing')); ?>
             </div>
         <?php endif; ?>
 
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Moduller</h3>
+                <h3 class="card-title"><?php echo e(settings_lang('modules')); ?></h3>
             </div>
             <div class="table-responsive">
                 <table class="table table-vcenter card-table table-striped mb-0">
                     <thead>
                     <tr>
                         <th>Key</th>
-                        <th>Ad</th>
-                        <th>Versiyon</th>
-                        <th>Sira</th>
-                        <th>Bagimlilik</th>
-                        <th>Kullanan Moduller</th>
-                        <th>Tip</th>
-                        <th>Durum</th>
-                        <th class="w-1">Islem</th>
+                        <th><?php echo e(settings_lang('name')); ?></th>
+                        <th><?php echo e(settings_lang('version')); ?></th>
+                        <th><?php echo e(settings_lang('order')); ?></th>
+                        <th><?php echo e(settings_lang('dependency')); ?></th>
+                        <th><?php echo e(settings_lang('dependent_modules')); ?></th>
+                        <th><?php echo e(settings_lang('type')); ?></th>
+                        <th><?php echo e(settings_lang('status')); ?></th>
+                        <th class="w-1"><?php echo e(settings_lang('operation')); ?></th>
                     </tr>
                     </thead>
                     <tbody>
                     <?php if (empty($modules)): ?>
                         <tr>
-                            <td colspan="9" class="text-center text-secondary py-4">Modul bulunamadi.</td>
+                            <td colspan="9" class="text-center text-secondary py-4"><?php echo e(settings_lang('module_not_found')); ?></td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($modules as $module): ?>
@@ -113,17 +115,17 @@ foreach ($requiredByMap as $moduleKey => $dependents) {
                                 </td>
                                 <td>
                                     <span class="badge <?php echo $isCore ? 'bg-blue-lt' : 'bg-azure-lt'; ?>">
-                                        <?php echo $isCore ? 'Core' : 'Plugin'; ?>
+                                        <?php echo $isCore ? e(settings_lang('core')) : e(settings_lang('plugin')); ?>
                                     </span>
                                 </td>
                                 <td>
                                     <span class="badge <?php echo $isEnabled ? 'bg-green-lt' : 'bg-red-lt'; ?>">
-                                        <?php echo $isEnabled ? 'Aktif' : 'Pasif'; ?>
+                                        <?php echo $isEnabled ? e(settings_lang('active')) : e(settings_lang('passive')); ?>
                                     </span>
                                 </td>
                                 <td>
                                     <?php if ($isCore): ?>
-                                        <span class="text-secondary small">Kilitle</span>
+                                        <span class="text-secondary small"><?php echo e(settings_lang('locked')); ?></span>
                                     <?php else: ?>
                                         <form
                                             id="module-toggle-form-<?php echo e($moduleKey); ?>"
@@ -140,12 +142,12 @@ foreach ($requiredByMap as $moduleKey => $dependents) {
                                             href="#"
                                             class="btn btn-sm <?php echo $isEnabled ? 'btn-outline-danger' : 'btn-outline-success'; ?> <?php echo $hasDisableBlock ? 'disabled' : ''; ?>"
                                             <?php if (!$hasDisableBlock): ?>
-                                                data-confirm="<?php echo $isEnabled ? 'Bu modul devre disi birakilacak. Emin misiniz?' : 'Bu modul aktif edilecek. Emin misiniz?'; ?>"
+                                                data-confirm="<?php echo $isEnabled ? e(settings_lang('disable_confirm')) : e(settings_lang('enable_confirm')); ?>"
                                                 data-form="module-toggle-form-<?php echo e($moduleKey); ?>"
                                             <?php endif; ?>
-                                            title="<?php echo $hasDisableBlock ? e('Disable engelli. Aktif bagimli moduller: ' . implode(', ', $requiredBy)) : ''; ?>"
+                                            title="<?php echo $hasDisableBlock ? e(settings_lang('disable_blocked_title_prefix') . implode(', ', $requiredBy)) : ''; ?>"
                                         >
-                                            <?php echo $hasDisableBlock ? 'Bagimli Modul Var' : ($isEnabled ? 'Disable' : 'Enable'); ?>
+                                            <?php echo $hasDisableBlock ? e(settings_lang('dependent_module_exists')) : ($isEnabled ? e(settings_lang('disable')) : e(settings_lang('enable'))); ?>
                                         </a>
                                     <?php endif; ?>
                                 </td>

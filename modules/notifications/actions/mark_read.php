@@ -3,19 +3,21 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/notifications/language.php';
+
 require_action('POST', true);
 
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Güvenlik doğrulaması başarısız oldu.',
+        'message' => notifications_lang('csrf_failed'),
     ], 419);
 }
 
 if (!db_table_exists('notifications')) {
     json_response([
         'status' => 'error',
-        'message' => 'Bildirim tablosu henüz kurulu değil.',
+        'message' => notifications_lang('table_not_ready'),
     ], 422);
 }
 
@@ -26,7 +28,7 @@ $id = (int) ($_POST['id'] ?? 0);
 if ($id <= 0 || $userId <= 0) {
     json_response([
         'status' => 'error',
-        'message' => 'Geçersiz istek.',
+        'message' => notifications_lang('invalid_request'),
     ], 422);
 }
 
@@ -45,13 +47,13 @@ try {
 
     json_response([
         'status' => 'success',
-        'message' => 'Bildirim okundu olarak işaretlendi.',
+        'message' => notifications_lang('mark_read_success'),
     ]);
 } catch (Throwable $e) {
     error_log('notifications mark read error: ' . $e->getMessage());
 
     json_response([
         'status' => 'error',
-        'message' => 'Bildirim güncellenirken bir hata oluştu.',
+        'message' => notifications_lang('mark_read_error'),
     ], 500);
 }

@@ -3,6 +3,8 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/api/language.php';
+
 $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 
 if ($method === 'GET') {
@@ -93,7 +95,7 @@ if ($method === 'GET') {
         ]);
     } catch (Throwable $e) {
         error_log('api users list error: ' . $e->getMessage());
-        api_error(500, 'Kullanicilar listelenemedi.');
+        api_error(500, api_lang('users_list_failed'));
     }
 }
 
@@ -109,19 +111,19 @@ if ($method === 'POST') {
     $isActiveRaw = $input['is_active'] ?? true;
 
     if ($name === '' || $email === '' || $password === '') {
-        api_error(422, 'name, email ve password zorunludur.');
+        api_error(422, api_lang('users_create_required'));
     }
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        api_error(422, 'Gecerli bir email girin.');
+        api_error(422, api_lang('invalid_email'));
     }
 
     if (mb_strlen($password) < 6) {
-        api_error(422, 'Password en az 6 karakter olmalidir.');
+        api_error(422, api_lang('password_min_6'));
     }
 
     if ($password !== $passwordConfirm) {
-        api_error(422, 'Password alanlari uyusmuyor.');
+        api_error(422, api_lang('password_mismatch'));
     }
 
     $isActive = filter_var($isActiveRaw, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
@@ -133,7 +135,7 @@ if ($method === 'POST') {
     if ($roleIdRaw !== null && $roleIdRaw !== '') {
         $roleId = (int) $roleIdRaw;
         if ($roleId <= 0) {
-            api_error(422, 'role_id gecersiz.');
+            api_error(422, api_lang('role_id_invalid'));
         }
     }
 
@@ -141,7 +143,7 @@ if ($method === 'POST') {
         $checkStmt = db()->prepare("SELECT COUNT(id) FROM users WHERE email = :email");
         $checkStmt->execute([':email' => $email]);
         if ((int) $checkStmt->fetchColumn() > 0) {
-            api_error(422, 'Bu email zaten kayitli.');
+            api_error(422, api_lang('email_exists'));
         }
 
         if ($roleId !== null) {
@@ -150,11 +152,11 @@ if ($method === 'POST') {
             $role = $roleStmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$role) {
-                api_error(422, 'Secilen rol gecersiz.');
+                api_error(422, api_lang('role_invalid'));
             }
 
             if (isset($role['is_active']) && (int) $role['is_active'] !== 1) {
-                api_error(422, 'Pasif rol atanamaz.');
+                api_error(422, api_lang('role_inactive_assign'));
             }
         }
 
@@ -177,7 +179,7 @@ if ($method === 'POST') {
             'is_active' => $isActive,
         ], 'user', $createdId, 'success');
 
-        api_response(201, 'Kullanici olusturuldu.', [
+        api_response(201, api_lang('user_created'), [
             'user' => [
                 'id' => $createdId,
                 'name' => $name,
@@ -188,9 +190,9 @@ if ($method === 'POST') {
         ]);
     } catch (Throwable $e) {
         error_log('api users create error: ' . $e->getMessage());
-        api_error(500, 'Kullanici olusturulamadi.');
+        api_error(500, api_lang('user_create_failed'));
     }
 }
 
-api_error(405, 'Bu endpoint icin yontem desteklenmiyor.');
+api_error(405, api_lang('method_not_allowed'));
 

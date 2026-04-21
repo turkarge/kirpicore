@@ -3,12 +3,14 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/profile/language.php';
+
 require_action('POST', true);
 
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Guvenlik dogrulamasi basarisiz oldu.',
+        'message' => profile_lang('csrf_failed'),
     ], 419);
 }
 
@@ -21,24 +23,19 @@ $lockPinConfirm = trim((string) ($_POST['lock_pin_confirm'] ?? ''));
 if ($userId <= 0) {
     json_response([
         'status' => 'error',
-        'message' => 'Gecerli kullanici oturumu bulunamadi.',
+        'message' => profile_lang('valid_session_required'),
     ], 403);
 }
 
 if (!kirpi_auth_lock_schema_ready()) {
     json_response([
         'status' => 'error',
-        'message' => 'Oturum kilitleme altyapisi hazir degil. Ayarlar > Eksikleri Kur calistirin.',
+        'message' => profile_lang('lock_infra_missing'),
     ], 422);
 }
 
 try {
-    $currentStmt = db()->prepare("
-        SELECT lock_pin_hash
-        FROM users
-        WHERE id = :id
-        LIMIT 1
-    ");
+    $currentStmt = db()->prepare("\n        SELECT lock_pin_hash\n        FROM users\n        WHERE id = :id\n        LIMIT 1\n    ");
     $currentStmt->execute([
         ':id' => $userId,
     ]);
@@ -50,14 +47,14 @@ try {
         if (!preg_match('/^\d{4}$/', $lockPin)) {
             json_response([
                 'status' => 'error',
-                'message' => 'Key sadece rakam olmali ve 4 hane olmalidir.',
+                'message' => profile_lang('key_format_error'),
             ], 422);
         }
 
         if ($lockPin !== $lockPinConfirm) {
             json_response([
                 'status' => 'error',
-                'message' => 'Key tekrar alani uyusmuyor.',
+                'message' => profile_lang('key_repeat_error'),
             ], 422);
         }
     }
@@ -65,7 +62,7 @@ try {
     if ($lockEnabled === 1 && !$updatePin && $currentPinHash === '') {
         json_response([
             'status' => 'error',
-            'message' => 'Oturum kilitlemeyi acmak icin once bir key tanimlamalisiniz.',
+            'message' => profile_lang('key_required_for_enable'),
         ], 422);
     }
 
@@ -97,7 +94,7 @@ try {
 
     json_response([
         'status' => 'success',
-        'message' => 'Oturum kilitleme ayarlari guncellendi.',
+        'message' => profile_lang('lock_settings_updated'),
         'reload_page' => true,
     ]);
 } catch (Throwable $e) {
@@ -105,6 +102,6 @@ try {
 
     json_response([
         'status' => 'error',
-        'message' => 'Ayarlar guncellenirken bir hata olustu.',
+        'message' => profile_lang('settings_update_error'),
     ], 500);
 }

@@ -3,12 +3,14 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/mail/language.php';
+
 require_action('POST', true);
 
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Guvenlik dogrulamasi basarisiz oldu.',
+        'message' => mail_lang('csrf_failed'),
     ], 419);
 }
 
@@ -19,7 +21,7 @@ $message = trim((string) ($_POST['message'] ?? ''));
 if ($recipientEmail === '' || $subject === '' || $message === '') {
     json_response([
         'status' => 'error',
-        'message' => 'Alici e-posta, konu ve mesaj zorunludur.',
+        'message' => mail_lang('required_fields'),
     ], 422);
 }
 
@@ -39,7 +41,7 @@ if (!($sendResult['success'] ?? false)) {
 
     json_response([
         'status' => 'error',
-        'message' => (string) ($sendResult['message'] ?? 'Test maili gonderilemedi.'),
+        'message' => (string) ($sendResult['message'] ?? mail_lang('send_failed_default')),
     ], 422);
 }
 
@@ -51,6 +53,6 @@ kirpi_audit_log('send_test', 'mail', [
 
 json_response([
     'status' => 'success',
-    'message' => (string) ($sendResult['message'] ?? 'Test maili gonderildi.'),
+    'message' => (string) ($sendResult['message'] ?? mail_lang('send_success_default')),
     'reload_page' => true,
 ]);

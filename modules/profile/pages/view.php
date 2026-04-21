@@ -3,34 +3,23 @@ if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
 
+require_once BASE_PATH . '/modules/profile/language.php';
+
 $currentUser = current_user();
 $profile = null;
 $lockSchemaReady = kirpi_auth_lock_schema_ready();
 
 if (!$currentUser || !isset($currentUser['id'])) {
     display_error_page(
-        '403 - Yetkisiz Erişim',
-        'Profil bilgilerine erişilemedi.',
+        profile_lang('forbidden_title'),
+        profile_lang('forbidden_message'),
         403,
         true
     );
 }
 
 try {
-    $stmt = db()->prepare("
-        SELECT
-            u.id,
-            u.name,
-            u.email,
-            u.avatar,
-            u.is_active,
-            " . ($lockSchemaReady ? "u.lock_enabled" : "0 AS lock_enabled") . ",
-            r.name AS role_name
-        FROM users u
-        LEFT JOIN roles r ON r.id = u.role_id
-        WHERE u.id = :id
-        LIMIT 1
-    ");
+    $stmt = db()->prepare("\n        SELECT\n            u.id,\n            u.name,\n            u.email,\n            u.avatar,\n            u.is_active,\n            " . ($lockSchemaReady ? "u.lock_enabled" : "0 AS lock_enabled") . ",\n            r.name AS role_name\n        FROM users u\n        LEFT JOIN roles r ON r.id = u.role_id\n        WHERE u.id = :id\n        LIMIT 1\n    ");
     $stmt->execute([
         ':id' => (int) $currentUser['id'],
     ]);
@@ -38,14 +27,14 @@ try {
     $profile = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$profile) {
-        throw new RuntimeException('Profil bulunamadı.');
+        throw new RuntimeException('Profile not found.');
     }
 } catch (Throwable $e) {
     error_log('profile page error: ' . $e->getMessage());
 
     display_error_page(
-        '500 - Profil Yüklenemedi',
-        'Profil verileri yüklenirken bir hata oluştu.',
+        profile_lang('load_error_title'),
+        profile_lang('load_error_message'),
         500,
         true
     );
@@ -74,8 +63,8 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
     <div class="container-xl">
         <div class="row g-2 align-items-center">
             <div class="col">
-                <div class="page-pretitle">Hesabım</div>
-                <h2 class="page-title">Profil</h2>
+                <div class="page-pretitle"><?php echo e(profile_lang('my_account')); ?></div>
+                <h2 class="page-title"><?php echo e(profile_lang('profile')); ?></h2>
             </div>
         </div>
     </div>
@@ -102,9 +91,9 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
                         <div class="text-secondary"><?php echo e($profile['email']); ?></div>
 
                         <div class="mt-3">
-                            <span class="badge bg-blue-lt"><?php echo e($profile['role_name'] ?: 'Rol Yok'); ?></span>
+                            <span class="badge bg-blue-lt"><?php echo e($profile['role_name'] ?: profile_lang('no_role')); ?></span>
                             <span class="badge <?php echo (int) $profile['is_active'] === 1 ? 'bg-green-lt' : 'bg-red-lt'; ?>">
-                                <?php echo (int) $profile['is_active'] === 1 ? 'Aktif' : 'Pasif'; ?>
+                                <?php echo (int) $profile['is_active'] === 1 ? e(profile_lang('active')) : e(profile_lang('passive')); ?>
                             </span>
                         </div>
                     </div>
@@ -117,10 +106,10 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
                         <div class="card-header">
                             <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs">
                                 <li class="nav-item">
-                                    <a href="#tab-profile-info" class="nav-link active" data-bs-toggle="tab">Profil Bilgileri</a>
+                                    <a href="#tab-profile-info" class="nav-link active" data-bs-toggle="tab"><?php echo e(profile_lang('profile_info')); ?></a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="#tab-profile-api-tokens" class="nav-link" data-bs-toggle="tab">API Tokenleri</a>
+                                    <a href="#tab-profile-api-tokens" class="nav-link" data-bs-toggle="tab"><?php echo e(profile_lang('api_tokens')); ?></a>
                                 </li>
                             </ul>
                         </div>
@@ -132,81 +121,46 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
                 <div class="card <?php echo $isSuperAdmin ? 'border-0 shadow-none' : ''; ?>">
                     <?php if (!$isSuperAdmin): ?>
                     <div class="card-header">
-                        <h3 class="card-title">Profil Bilgileri</h3>
+                        <h3 class="card-title"><?php echo e(profile_lang('profile_info')); ?></h3>
                     </div>
                     <?php endif; ?>
 
-                    <form
-                        id="profile-update-form"
-                        action="<?php echo base_url('profile/actions/update'); ?>"
-                        method="post"
-                        enctype="multipart/form-data"
-                        data-ajax="true"
-                    >
+                    <form id="profile-update-form" action="<?php echo base_url('profile/actions/update'); ?>" method="post" enctype="multipart/form-data" data-ajax="true">
                         <div class="card-body">
                             <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
 
                             <div class="row g-3">
                                 <div class="col-12">
-                                    <label class="form-label form-required">Ad Soyad</label>
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        class="form-control"
-                                        value="<?php echo e($profile['name']); ?>"
-                                        required
-                                    >
+                                    <label class="form-label form-required"><?php echo e(profile_lang('name_surname')); ?></label>
+                                    <input type="text" name="name" class="form-control" value="<?php echo e($profile['name']); ?>" required>
                                 </div>
 
                                 <div class="col-12">
-                                    <label class="form-label form-required">E-posta</label>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        class="form-control"
-                                        value="<?php echo e($profile['email']); ?>"
-                                        required
-                                    >
+                                    <label class="form-label form-required"><?php echo e(profile_lang('email')); ?></label>
+                                    <input type="email" name="email" class="form-control" value="<?php echo e($profile['email']); ?>" required>
                                 </div>
 
                                 <div class="col-12 col-md-6">
-                                    <label class="form-label">Yeni Şifre</label>
-                                    <input
-                                        type="password"
-                                        name="password"
-                                        class="form-control"
-                                        placeholder="Boş bırakılırsa değişmez"
-                                    >
-                                    <small class="form-hint">Şifre değiştirmek istemiyorsanız boş bırakın.</small>
+                                    <label class="form-label"><?php echo e(profile_lang('new_password')); ?></label>
+                                    <input type="password" name="password" class="form-control" placeholder="<?php echo e(profile_lang('password_placeholder')); ?>">
+                                    <small class="form-hint"><?php echo e(profile_lang('password_hint')); ?></small>
                                 </div>
 
                                 <div class="col-12 col-md-6">
-                                    <label class="form-label">Yeni Şifre Tekrar</label>
-                                    <input
-                                        type="password"
-                                        name="password_confirm"
-                                        class="form-control"
-                                        placeholder="Boş bırakılırsa değişmez"
-                                    >
+                                    <label class="form-label"><?php echo e(profile_lang('new_password_repeat')); ?></label>
+                                    <input type="password" name="password_confirm" class="form-control" placeholder="<?php echo e(profile_lang('password_placeholder')); ?>">
                                 </div>
 
                                 <div class="col-12">
-                                    <label class="form-label">Profil Görseli</label>
-                                    <input
-                                        type="file"
-                                        name="avatar"
-                                        class="form-control"
-                                        accept=".jpg,.jpeg,.png,.webp"
-                                    >
-                                    <small class="form-hint">JPG, PNG veya WEBP. Maksimum 2 MB.</small>
+                                    <label class="form-label"><?php echo e(profile_lang('avatar')); ?></label>
+                                    <input type="file" name="avatar" class="form-control" accept=".jpg,.jpeg,.png,.webp">
+                                    <small class="form-hint"><?php echo e(profile_lang('avatar_hint')); ?></small>
                                 </div>
                             </div>
                         </div>
 
                         <div class="card-footer text-end">
-                            <button type="submit" class="btn btn-primary">
-                                Profili Güncelle
-                            </button>
+                            <button type="submit" class="btn btn-primary"><?php echo e(profile_lang('update_profile')); ?></button>
                         </div>
                     </form>
                 </div>
@@ -216,35 +170,25 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
                                 <div class="tab-pane" id="tab-profile-api-tokens">
                                     <div class="card border-0 shadow-none">
                                         <div class="card-header">
-                                            <h3 class="card-title">API Token Yonetimi (Super Admin)</h3>
+                                            <h3 class="card-title"><?php echo e(profile_lang('api_token_management')); ?></h3>
                                         </div>
                                         <div class="card-body">
                                             <?php if (is_array($apiTokenOnce) && !empty($apiTokenOnce['token'])): ?>
                                                 <div class="alert alert-warning">
-                                                    <div class="fw-bold mb-3">Bu token sadece bir kez gosterilir. Guvenli bir yerde saklayin.</div>
+                                                    <div class="fw-bold mb-3"><?php echo e(profile_lang('token_once_warning')); ?></div>
                                                     <div class="mb-2 w-100">
-                                                        <label class="form-label mb-1">Token</label>
+                                                        <label class="form-label mb-1"><?php echo e(profile_lang('token')); ?></label>
                                                         <div class="input-group">
-                                                            <input
-                                                                type="text"
-                                                                class="form-control w-100"
-                                                                readonly
-                                                                value="<?php echo e((string) ($apiTokenOnce['token'] ?? '')); ?>"
-                                                            >
-                                                            <button
-                                                                type="button"
-                                                                class="btn btn-outline-secondary js-token-copy-btn"
-                                                                data-token="<?php echo e((string) ($apiTokenOnce['token'] ?? '')); ?>"
-                                                                title="Kopyala"
-                                                            >
-                                                                Kopyala
+                                                            <input type="text" class="form-control w-100" readonly value="<?php echo e((string) ($apiTokenOnce['token'] ?? '')); ?>">
+                                                            <button type="button" class="btn btn-outline-secondary js-token-copy-btn" data-token="<?php echo e((string) ($apiTokenOnce['token'] ?? '')); ?>" title="<?php echo e(profile_lang('copy_title')); ?>">
+                                                                <?php echo e(profile_lang('copy')); ?>
                                                             </button>
                                                         </div>
                                                     </div>
                                                     <div class="text-secondary small">
-                                                        Token Name: <?php echo e((string) ($apiTokenOnce['token_name'] ?? '-')); ?> |
-                                                        Expires At: <?php echo !empty($apiTokenOnce['is_unlimited']) ? 'Sinirsiz' : e((string) ($apiTokenOnce['expires_at'] ?? '-')); ?> |
-                                                        Scopes: <?php echo e(implode(', ', (array) ($apiTokenOnce['scopes'] ?? ['*']))); ?>
+                                                        <?php echo e(profile_lang('token_name')); ?>: <?php echo e((string) ($apiTokenOnce['token_name'] ?? '-')); ?> |
+                                                        <?php echo e(profile_lang('expires_at')); ?>: <?php echo !empty($apiTokenOnce['is_unlimited']) ? e(profile_lang('unlimited')) : e((string) ($apiTokenOnce['expires_at'] ?? '-')); ?> |
+                                                        <?php echo e(profile_lang('scopes')); ?>: <?php echo e(implode(', ', (array) ($apiTokenOnce['scopes'] ?? ['*']))); ?>
                                                     </div>
                                                 </div>
                                             <?php endif; ?>
@@ -253,41 +197,41 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
                                                 <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                                                 <div class="row g-3">
                                                     <div class="col-12 col-md-6">
-                                                        <label class="form-label">Token Name</label>
+                                                        <label class="form-label"><?php echo e(profile_lang('token_name')); ?></label>
                                                         <input type="text" name="token_name" class="form-control" placeholder="ornek: postman" value="profile-token" <?php echo (!$apiEnabled || !$apiTokenTableReady) ? 'disabled' : ''; ?>>
                                                     </div>
                                                     <div class="col-12 col-md-3">
-                                                        <label class="form-label">Gecerlilik</label>
+                                                        <label class="form-label"><?php echo e(profile_lang('validity')); ?></label>
                                                         <select name="ttl_option" class="form-select" <?php echo (!$apiEnabled || !$apiTokenTableReady) ? 'disabled' : ''; ?>>
                                                             <option value="24h">24 Saat</option>
                                                             <option value="1_month" selected>1 Ay</option>
                                                             <option value="3_months">3 Ay</option>
                                                             <option value="6_months">6 Ay</option>
                                                             <option value="1_year">1 Yil</option>
-                                                            <option value="unlimited">Sinirsiz</option>
+                                                            <option value="unlimited"><?php echo e(profile_lang('unlimited')); ?></option>
                                                         </select>
                                                     </div>
                                                     <div class="col-12 col-md-3">
-                                                        <label class="form-label">Scope</label>
+                                                        <label class="form-label"><?php echo e(profile_lang('scope')); ?></label>
                                                         <select name="scope_option" class="form-select" <?php echo (!$apiEnabled || !$apiTokenTableReady) ? 'disabled' : ''; ?>>
-                                                            <option value="full_access" selected>Tum Yetki (*)</option>
-                                                            <option value="profile_read">Sadece Profil</option>
-                                                            <option value="users_read">Users Read</option>
-                                                            <option value="users_manage">Users Manage</option>
+                                                            <option value="full_access" selected><?php echo e(profile_lang('all_permissions')); ?></option>
+                                                            <option value="profile_read"><?php echo e(profile_lang('profile_only')); ?></option>
+                                                            <option value="users_read"><?php echo e(profile_lang('users_read')); ?></option>
+                                                            <option value="users_manage"><?php echo e(profile_lang('users_manage')); ?></option>
                                                         </select>
                                                     </div>
                                                     <div class="col-12 d-flex align-items-end">
-                                                        <button type="submit" class="btn btn-outline-primary w-100" <?php echo (!$apiEnabled || !$apiTokenTableReady) ? 'disabled' : ''; ?>>API Token Olustur</button>
+                                                        <button type="submit" class="btn btn-outline-primary w-100" <?php echo (!$apiEnabled || !$apiTokenTableReady) ? 'disabled' : ''; ?>><?php echo e(profile_lang('create_api_token')); ?></button>
                                                     </div>
                                                 </div>
                                             </form>
 
                                             <?php if (!$apiEnabled): ?>
-                                                <div class="alert alert-warning mt-3 mb-0">API su an Ayarlar ekranindan kapatildi.</div>
+                                                <div class="alert alert-warning mt-3 mb-0"><?php echo e(profile_lang('api_disabled_warning')); ?></div>
                                             <?php endif; ?>
 
                                             <?php if (!$apiTokenTableReady): ?>
-                                                <div class="alert alert-warning mt-3 mb-0">`api_tokens` tablosu hazir degil. Ayarlar > Eksikleri Kur calistirin.</div>
+                                                <div class="alert alert-warning mt-3 mb-0"><?php echo e(profile_lang('api_table_warning')); ?></div>
                                             <?php endif; ?>
 
                                             <hr class="my-4">
@@ -297,18 +241,18 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
                                                     <tr>
                                                         <th>ID</th>
                                                         <th>Name</th>
-                                                        <th>Created</th>
-                                                        <th>Last Used</th>
-                                                        <th>Expires</th>
-                                                        <th>Scopes</th>
-                                                        <th>Status</th>
+                                                        <th><?php echo e(profile_lang('created')); ?></th>
+                                                        <th><?php echo e(profile_lang('last_used')); ?></th>
+                                                        <th><?php echo e(profile_lang('expires')); ?></th>
+                                                        <th><?php echo e(profile_lang('scopes')); ?></th>
+                                                        <th><?php echo e(profile_lang('status')); ?></th>
                                                         <th class="w-1"></th>
                                                     </tr>
                                                     </thead>
                                                     <tbody>
                                                     <?php if (empty($apiTokenRows)): ?>
                                                         <tr>
-                                                            <td colspan="8" class="text-center text-secondary py-4">API token kaydi yok.</td>
+                                                            <td colspan="8" class="text-center text-secondary py-4"><?php echo e(profile_lang('no_tokens')); ?></td>
                                                         </tr>
                                                     <?php else: ?>
                                                         <?php foreach ($apiTokenRows as $tokenRow): ?>
@@ -317,7 +261,7 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
                                                             $expiresAtRaw = (string) ($tokenRow['expires_at'] ?? '');
                                                             $isUnlimitedToken = $expiresAtRaw !== '' && strtotime($expiresAtRaw) !== false && strtotime($expiresAtRaw) >= strtotime('2099-01-01 00:00:00');
                                                             $isExpired = !$isRevoked && !$isUnlimitedToken && $expiresAtRaw !== '' && strtotime($expiresAtRaw) !== false && strtotime($expiresAtRaw) < time();
-                                                            $statusLabel = $isRevoked ? 'Revoked' : ($isExpired ? 'Expired' : 'Active');
+                                                            $statusLabel = $isRevoked ? profile_lang('revoked') : ($isExpired ? profile_lang('expired') : profile_lang('active_en'));
                                                             $statusClass = $isRevoked ? 'bg-red-lt' : ($isExpired ? 'bg-yellow-lt' : 'bg-green-lt');
                                                             $tokenId = (int) ($tokenRow['id'] ?? 0);
                                                             $copyTokenValue = (string) ($apiTokenCopyMap[(string) $tokenId] ?? '');
@@ -328,7 +272,7 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
                                                                 <td><?php echo e((string) ($tokenRow['token_name'] ?? 'default')); ?></td>
                                                                 <td><?php echo e((string) ($tokenRow['created_at'] ?? '-')); ?></td>
                                                                 <td><?php echo e((string) ($tokenRow['last_used_at'] ?? '-')); ?></td>
-                                                                <td><?php echo e($isUnlimitedToken ? 'Sinirsiz' : ($expiresAtRaw !== '' ? $expiresAtRaw : '-')); ?></td>
+                                                                <td><?php echo e($isUnlimitedToken ? profile_lang('unlimited') : ($expiresAtRaw !== '' ? $expiresAtRaw : '-')); ?></td>
                                                                 <td><code><?php echo e(implode(', ', $tokenScopes)); ?></code></td>
                                                                 <td><span class="badge <?php echo e($statusClass); ?>"><?php echo e($statusLabel); ?></span></td>
                                                                 <td>
@@ -338,7 +282,7 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
                                                                                 type="button"
                                                                                 class="btn btn-sm btn-outline-secondary js-token-copy-btn"
                                                                                 data-token="<?php echo e($copyTokenValue); ?>"
-                                                                                title="<?php echo $copyTokenValue !== '' ? 'Kopyala' : 'Guvenlik nedeniyle sadece bu oturumda olusturulan tokenlar kopyalanabilir'; ?>"
+                                                                                title="<?php echo $copyTokenValue !== '' ? e(profile_lang('copy_title')) : e(profile_lang('copy_disabled_title')); ?>"
                                                                                 <?php echo $copyTokenValue === '' ? 'disabled' : ''; ?>
                                                                             >
                                                                                 <i class="ti ti-copy"></i>
@@ -348,7 +292,7 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
                                                                                 <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                                                                                 <input type="hidden" name="token_id" value="<?php echo $tokenId; ?>">
                                                                             </form>
-                                                                            <a href="#" class="btn btn-sm btn-outline-danger" data-confirm="Bu API token iptal edilecek. Emin misiniz?" data-form="profile-revoke-token-form-<?php echo $tokenId; ?>">Revoke</a>
+                                                                            <a href="#" class="btn btn-sm btn-outline-danger" data-confirm="<?php echo e(profile_lang('revoke_confirm')); ?>" data-form="profile-revoke-token-form-<?php echo $tokenId; ?>"><?php echo e(profile_lang('revoke')); ?></a>
                                                                         </div>
                                                                     <?php else: ?>
                                                                         <span class="text-secondary small">-</span>
@@ -371,7 +315,7 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
                 <?php if ($lockSchemaReady): ?>
                     <div class="card mt-4">
                         <div class="card-header">
-                            <h3 class="card-title">Oturum Kilitleme Key</h3>
+                            <h3 class="card-title"><?php echo e(profile_lang('lock_key_title')); ?></h3>
                         </div>
                         <form action="<?php echo base_url('profile/actions/lock-settings'); ?>" method="post" data-ajax="true">
                             <div class="card-body">
@@ -380,42 +324,24 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
                                 <div class="mb-3">
                                     <label class="form-check form-switch m-0">
                                         <input class="form-check-input" type="checkbox" name="lock_enabled" value="1" <?php echo $lockEnabled ? 'checked' : ''; ?>>
-                                        <span class="form-check-label">Oturum kilitleme aktif</span>
+                                        <span class="form-check-label"><?php echo e(profile_lang('lock_enabled')); ?></span>
                                     </label>
-                                    <div class="form-hint">Navbar'daki user-key ikonu ile ekrani kilitleyebilirsiniz.</div>
+                                    <div class="form-hint"><?php echo e(profile_lang('lock_hint')); ?></div>
                                 </div>
 
                                 <div class="row g-3">
                                     <div class="col-12 col-md-6">
-                                        <label class="form-label">Yeni Key (4 hane)</label>
-                                        <input
-                                            type="password"
-                                            name="lock_pin"
-                                            class="form-control"
-                                            inputmode="numeric"
-                                            pattern="[0-9]{4}"
-                                            minlength="4"
-                                            maxlength="4"
-                                            placeholder="Ornek: 1234"
-                                        >
+                                        <label class="form-label"><?php echo e(profile_lang('new_key')); ?></label>
+                                        <input type="password" name="lock_pin" class="form-control" inputmode="numeric" pattern="[0-9]{4}" minlength="4" maxlength="4" placeholder="<?php echo e(profile_lang('key_placeholder')); ?>">
                                     </div>
                                     <div class="col-12 col-md-6">
-                                        <label class="form-label">Key Tekrar</label>
-                                        <input
-                                            type="password"
-                                            name="lock_pin_confirm"
-                                            class="form-control"
-                                            inputmode="numeric"
-                                            pattern="[0-9]{4}"
-                                            minlength="4"
-                                            maxlength="4"
-                                            placeholder="Ornek: 1234"
-                                        >
+                                        <label class="form-label"><?php echo e(profile_lang('key_repeat')); ?></label>
+                                        <input type="password" name="lock_pin_confirm" class="form-control" inputmode="numeric" pattern="[0-9]{4}" minlength="4" maxlength="4" placeholder="<?php echo e(profile_lang('key_placeholder')); ?>">
                                     </div>
                                 </div>
                             </div>
                             <div class="card-footer text-end">
-                                <button type="submit" class="btn btn-outline-primary">Key Ayarini Kaydet</button>
+                                <button type="submit" class="btn btn-outline-primary"><?php echo e(profile_lang('save_key')); ?></button>
                             </div>
                         </form>
                     </div>
@@ -432,7 +358,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const value = String(button.dataset.token || "");
             if (!value) {
                 if (window.KirpiCore && typeof window.KirpiCore.toast === "function") {
-                    window.KirpiCore.toast("Bu token bu oturumda kopyalanamaz.", "warning");
+                    window.KirpiCore.toast("<?php echo e(profile_lang('copy_not_allowed')); ?>", "warning");
                 }
                 return;
             }
@@ -450,11 +376,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
 
                 if (window.KirpiCore && typeof window.KirpiCore.toast === "function") {
-                    window.KirpiCore.toast("Token panoya kopyalandi.", "success");
+                    window.KirpiCore.toast("<?php echo e(profile_lang('copy_success')); ?>", "success");
                 }
             } catch (error) {
                 if (window.KirpiCore && typeof window.KirpiCore.toast === "function") {
-                    window.KirpiCore.toast("Token kopyalanamadi.", "error");
+                    window.KirpiCore.toast("<?php echo e(profile_lang('copy_error')); ?>", "error");
                 }
             }
         });

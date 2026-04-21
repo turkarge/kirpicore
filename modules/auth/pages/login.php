@@ -1,7 +1,9 @@
-<?php
+﻿<?php
 if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
+
+require_once BASE_PATH . '/modules/auth/language.php';
 
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
@@ -20,10 +22,10 @@ $coverImage = AUTH_LOGIN_COVER_IMAGE !== ''
     : 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=80';
 ?>
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="<?php echo e(strtolower((string) env('APP_LOCALE', 'tr'))); ?>">
 <head>
     <meta charset="UTF-8">
-    <title><?php echo e(app_name()); ?> - Giriş Yap</title>
+    <title><?php echo e(app_name()); ?> - <?php echo e(auth_lang('login_title')); ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link href="<?php echo asset_url('css/tabler.min.css'); ?>" rel="stylesheet">
@@ -48,7 +50,7 @@ window.KIRPI_CONFIG = {
                 </h1>
             </div>
 
-            <h2 class="h1 mb-3">Hesabınıza giriş yapın</h2>
+            <h2 class="h1 mb-3"><?php echo e(auth_lang('login_heading')); ?></h2>
 
             <div id="login-alert-area"></div>
 
@@ -62,12 +64,12 @@ window.KIRPI_CONFIG = {
                 <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
 
                 <div class="mb-3">
-                    <label class="form-label">E-posta adresi</label>
+                    <label class="form-label"><?php echo e(auth_lang('email')); ?></label>
                     <input
                         type="email"
                         class="form-control"
                         name="email"
-                        placeholder="ornek@alanadi.com"
+                        placeholder="<?php echo e(auth_lang('email_placeholder')); ?>"
                         autocomplete="email"
                         required
                     >
@@ -75,9 +77,9 @@ window.KIRPI_CONFIG = {
 
                 <div class="mb-2">
                     <label class="form-label">
-                        Şifre
+                        <?php echo e(auth_lang('password')); ?>
                         <span class="form-label-description">
-                            <a href="<?php echo base_url('auth/forgot-password'); ?>">Şifremi unuttum</a>
+                            <a href="<?php echo base_url('auth/forgot-password'); ?>"><?php echo e(auth_lang('forgot_password')); ?></a>
                         </span>
                     </label>
 
@@ -87,12 +89,12 @@ window.KIRPI_CONFIG = {
                             class="form-control"
                             name="password"
                             id="login-password"
-                            placeholder="Şifreniz"
+                            placeholder="<?php echo e(auth_lang('password_placeholder')); ?>"
                             autocomplete="current-password"
                             required
                         >
                         <span class="input-group-text">
-                            <a href="#" class="link-secondary" id="toggle-login-password" tabindex="-1" aria-label="Şifreyi göster">
+                            <a href="#" class="link-secondary" id="toggle-login-password" tabindex="-1" aria-label="<?php echo e(auth_lang('show_password')); ?>">
                                 <i class="ti ti-eye"></i>
                             </a>
                         </span>
@@ -102,21 +104,21 @@ window.KIRPI_CONFIG = {
                 <div class="mb-3">
                     <label class="form-check">
                         <input type="checkbox" class="form-check-input" name="remember" value="1">
-                        <span class="form-check-label">Bu cihazda beni hatırla</span>
+                        <span class="form-check-label"><?php echo e(auth_lang('remember_me')); ?></span>
                     </label>
                 </div>
 
                 <div class="form-footer">
                     <button type="submit" class="btn btn-primary w-100" id="login-submit-button">
-                        Giriş Yap
+                        <?php echo e(auth_lang('login_button')); ?>
                     </button>
                 </div>
             </form>
 
             <div class="text-secondary mt-4">
-                Giriş yaparak
-                <a href="<?php echo base_url('auth/terms'); ?>">kullanım şartlarını</a>
-                kabul etmiş olursunuz.
+                <?php echo e(auth_lang('terms_accept_prefix')); ?>
+                <a href="<?php echo base_url('auth/terms'); ?>"><?php echo e(auth_lang('terms_accept_link')); ?></a>
+                <?php echo e(auth_lang('terms_accept_suffix')); ?>
             </div>
         </div>
     </div>

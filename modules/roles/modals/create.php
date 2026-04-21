@@ -2,10 +2,12 @@
 if (!defined('KIRPI_CORE_ENTRY')) {
     exit;
 }
+
+require_once BASE_PATH . '/modules/roles/language.php';
 ?>
 
 <div class="modal-header">
-    <h5 class="modal-title">Yeni Rol</h5>
+    <h5 class="modal-title"><?php echo e(roles_lang('new_role')); ?></h5>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 
@@ -20,7 +22,7 @@ if (!defined('KIRPI_CORE_ENTRY')) {
         <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
 
         <div class="mb-3">
-            <label class="form-label form-required">Rol Adı</label>
+            <label class="form-label form-required"><?php echo e(roles_lang('role_name')); ?></label>
             <input
                 type="text"
                 name="name"
@@ -28,7 +30,7 @@ if (!defined('KIRPI_CORE_ENTRY')) {
                 maxlength="100"
                 required
             >
-            <small class="form-hint">Örnek: İçerik Editörü, Operasyon, Super Admin</small>
+            <small class="form-hint"><?php echo e(roles_lang('role_name_hint')); ?></small>
         </div>
 
         <div>
@@ -40,13 +42,13 @@ if (!defined('KIRPI_CORE_ENTRY')) {
                     class="form-check-input"
                     checked
                 >
-                <span class="form-check-label">Rol aktif olsun</span>
+                <span class="form-check-label"><?php echo e(roles_lang('role_active_switch')); ?></span>
             </label>
         </div>
     </div>
 
     <div class="modal-footer">
-        <button type="button" class="btn me-auto" data-bs-dismiss="modal">İptal</button>
-        <button type="submit" class="btn btn-primary">Kaydet</button>
+        <button type="button" class="btn me-auto" data-bs-dismiss="modal"><?php echo e(roles_lang('cancel')); ?></button>
+        <button type="submit" class="btn btn-primary"><?php echo e(roles_lang('save')); ?></button>
     </div>
 </form>
