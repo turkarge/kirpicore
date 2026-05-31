@@ -8,6 +8,13 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'ai/audit' => [
+        'file' => 'modules/ai/pages/audit.php',
+        'layout' => true,
+        'permission' => 'ai.audit.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
     'ai/actions/sync-schema' => [
         'file' => 'modules/ai/actions/sync_schema.php',
         'layout' => false,

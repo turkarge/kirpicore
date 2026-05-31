@@ -67,14 +67,21 @@ $statusBadge = static function (bool $ready): string {
                 <h2 class="page-title"><?php echo e(ai_lang('kirpi_intelligence')); ?></h2>
                 <div class="text-secondary mt-1"><?php echo e(ai_lang('subtitle')); ?></div>
             </div>
-            <?php if (check_permission('ai.schema.manage')): ?>
-                <div class="col-auto ms-auto d-print-none">
-                    <form action="<?php echo base_url('ai/actions/sync-schema'); ?>" method="post" data-ajax="true">
-                        <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
-                        <button type="submit" class="btn btn-outline-primary">
-                            <?php echo e(ai_lang('sync_schema')); ?>
-                        </button>
-                    </form>
+            <?php if (check_permission('ai.schema.manage') || check_permission('ai.audit.view')): ?>
+                <div class="col-auto ms-auto d-print-none d-flex gap-2">
+                    <?php if (check_permission('ai.audit.view')): ?>
+                        <a href="<?php echo base_url('ai/audit'); ?>" class="btn btn-outline-secondary">
+                            <?php echo e(ai_lang('view_audit')); ?>
+                        </a>
+                    <?php endif; ?>
+                    <?php if (check_permission('ai.schema.manage')): ?>
+                        <form action="<?php echo base_url('ai/actions/sync-schema'); ?>" method="post" data-ajax="true">
+                            <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <?php echo e(ai_lang('sync_schema')); ?>
+                            </button>
+                        </form>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
         </div>

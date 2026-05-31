@@ -407,6 +407,115 @@ function kirpi_ai_audit_count(): int
     }
 }
 
+function kirpi_ai_list_audit_logs(array $filters = [], int $page = 1, int $limit = 25): array
+{
+    if (!kirpi_ai_audit_table_ready()) {
+        return [
+            'records' => [],
+            'total' => 0,
+            'page' => 1,
+            'limit' => $limit,
+            'total_pages' => 0,
+        ];
+    }
+
+    $page = max(1, $page);
+    $limit = max(1, min(100, $limit));
+    $offset = ($page - 1) * $limit;
+    $where = [];
+    $params = [];
+
+    $status = trim((string) ($filters['status'] ?? ''));
+    if ($status !== '') {
+        $where[] = 'l.status = :status';
+        $params[':status'] = $status;
+    }
+
+    $action = trim((string) ($filters['action'] ?? ''));
+    if ($action !== '') {
+        $where[] = 'l.action_key LIKE :action_key';
+        $params[':action_key'] = '%' . $action . '%';
+    }
+
+    $modelAdapter = trim((string) ($filters['model_adapter'] ?? ''));
+    if ($modelAdapter !== '') {
+        $where[] = 'l.model_adapter LIKE :model_adapter';
+        $params[':model_adapter'] = '%' . $modelAdapter . '%';
+    }
+
+    $entityType = trim((string) ($filters['entity_type'] ?? ''));
+    if ($entityType !== '') {
+        $where[] = 'l.entity_type LIKE :entity_type';
+        $params[':entity_type'] = '%' . $entityType . '%';
+    }
+
+    $userId = (int) ($filters['user_id'] ?? 0);
+    if ($userId > 0) {
+        $where[] = 'l.user_id = :user_id';
+        $params[':user_id'] = $userId;
+    }
+
+    $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+
+    try {
+        $countStmt = db()->prepare("
+            SELECT COUNT(l.id)
+            FROM ai_audit_logs l
+            {$whereSql}
+        ");
+        foreach ($params as $key => $value) {
+            $countStmt->bindValue($key, $value);
+        }
+        $countStmt->execute();
+        $total = (int) $countStmt->fetchColumn();
+
+        $stmt = db()->prepare("
+            SELECT
+                l.id,
+                l.user_id,
+                l.action_key,
+                l.status,
+                l.model_adapter,
+                l.entity_type,
+                l.entity_id,
+                l.route_path,
+                l.ip_address,
+                l.details_json,
+                l.created_at,
+                u.name AS user_name
+            FROM ai_audit_logs l
+            LEFT JOIN users u ON u.id = l.user_id
+            {$whereSql}
+            ORDER BY l.id DESC
+            LIMIT :limit_rows OFFSET :offset_rows
+        ");
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->bindValue(':limit_rows', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset_rows', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return [
+            'records' => $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [],
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit,
+            'total_pages' => (int) ceil($total / $limit),
+        ];
+    } catch (Throwable $e) {
+        error_log('ai audit list error: ' . $e->getMessage());
+
+        return [
+            'records' => [],
+            'total' => 0,
+            'page' => $page,
+            'limit' => $limit,
+            'total_pages' => 0,
+        ];
+    }
+}
+
 function kirpi_ai_model_adapters(): array
 {
     if (!kirpi_ai_models_table_ready()) {
