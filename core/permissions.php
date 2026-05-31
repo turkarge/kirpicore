@@ -183,6 +183,23 @@ function kirpi_core_permission_catalog(): array
                 ],
             ],
         ],
+        'ai' => [
+            'title' => 'Kirpi Intelligence',
+            'permissions' => [
+                [
+                    'name' => 'AI Panel Goruntuleme',
+                    'slug' => 'ai.view',
+                ],
+                [
+                    'name' => 'AI Schema Registry Yonetimi',
+                    'slug' => 'ai.schema.manage',
+                ],
+                [
+                    'name' => 'AI Audit Log Goruntuleme',
+                    'slug' => 'ai.audit.view',
+                ],
+            ],
+        ],
     ];
 }
 

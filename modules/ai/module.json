@@ -1,0 +1,26 @@
+{
+    "key": "ai",
+    "name": "Kirpi Intelligence",
+    "description": "Core seviyesinde AI, schema registry ve audit altyapisi",
+    "version": "0.1.0",
+    "enabled": true,
+    "core": true,
+    "load_order": 54,
+    "requires": [
+        "audit",
+        "settings"
+    ],
+    "author": "Kirpi Core",
+    "menu": [
+        {
+            "title": "Kirpi Intelligence",
+            "title_key": "kirpi_intelligence",
+            "icon": "ti ti-brain",
+            "url": "ai/view",
+            "permission": "ai.view",
+            "placement": "management",
+            "group": "monitoring",
+            "weight": 540
+        }
+    ]
+}
