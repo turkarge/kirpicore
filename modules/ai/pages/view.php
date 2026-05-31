@@ -11,6 +11,12 @@ $modelsReady = kirpi_ai_models_table_ready();
 $manifestCount = kirpi_ai_schema_manifest_count();
 $entities = kirpi_ai_list_schema_entities(25);
 $adapters = kirpi_ai_model_adapters();
+$discovery = kirpi_ai_discover_schema([
+    'include_sensitive' => false,
+    'limit' => 10,
+]);
+$discoveryEntities = (array) ($discovery['entities'] ?? []);
+$discoveryMeta = (array) ($discovery['meta'] ?? []);
 
 $cards = [
     [
@@ -152,6 +158,66 @@ $statusBadge = static function (bool $ready): string {
                                     <?php endif; ?>
                                 </td>
                                 <td><?php echo e((string) ($entity['updated_at'] ?? '-')); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title"><?php echo e(ai_lang('discovery_preview')); ?></h3>
+                    <div class="text-secondary small mt-1"><?php echo e(ai_lang('discovery_preview_detail')); ?></div>
+                </div>
+                <div class="card-actions text-secondary">
+                    <?php echo e(ai_lang('visible_entities')); ?>:
+                    <strong><?php echo (int) ($discoveryMeta['entity_count'] ?? 0); ?></strong>
+                    ·
+                    <?php echo e(ai_lang('visible_fields')); ?>:
+                    <strong><?php echo (int) ($discoveryMeta['field_count'] ?? 0); ?></strong>
+                    ·
+                    <?php echo e(ai_lang('sensitive_hidden')); ?>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table table-striped mb-0">
+                    <thead>
+                    <tr>
+                        <th><?php echo e(ai_lang('module')); ?></th>
+                        <th><?php echo e(ai_lang('entity')); ?></th>
+                        <th><?php echo e(ai_lang('table')); ?></th>
+                        <th><?php echo e(ai_lang('permission')); ?></th>
+                        <th><?php echo e(ai_lang('visible_field_list')); ?></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php if (empty($discoveryEntities)): ?>
+                        <tr>
+                            <td colspan="5" class="text-center text-secondary py-4">
+                                <?php echo e(ai_lang('no_discovery_schema')); ?>
+                            </td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($discoveryEntities as $entity): ?>
+                            <?php
+                            $fields = array_map(static fn (array $field): string => (string) ($field['name'] ?? ''), (array) ($entity['fields'] ?? []));
+                            $fields = array_values(array_filter($fields, static fn (string $field): bool => $field !== ''));
+                            ?>
+                            <tr>
+                                <td><code><?php echo e((string) ($entity['module'] ?? '')); ?></code></td>
+                                <td><?php echo e((string) ($entity['entity'] ?? '')); ?></td>
+                                <td><code><?php echo e((string) ($entity['table'] ?? '')); ?></code></td>
+                                <td>
+                                    <?php if (trim((string) ($entity['permission'] ?? '')) === ''): ?>
+                                        <span class="text-secondary">-</span>
+                                    <?php else: ?>
+                                        <code><?php echo e((string) $entity['permission']); ?></code>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?php echo e(implode(', ', $fields)); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>

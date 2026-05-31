@@ -29,6 +29,13 @@ return [
         'auth' => false,
         'method' => 'GET',
     ],
+    'api/v1/ai/schema' => [
+        'file' => 'modules/api/v1/ai/schema.php',
+        'layout' => false,
+        'permission' => null,
+        'auth' => false,
+        'method' => 'GET',
+    ],
     'api/v1/users' => [
         'file' => 'modules/api/v1/users/index.php',
         'layout' => false,

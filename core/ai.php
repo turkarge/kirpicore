@@ -463,6 +463,182 @@ function kirpi_ai_list_schema_entities(int $limit = 50): array
     }
 }
 
+function kirpi_ai_user_has_permission(?array $user, ?string $permissionSlug): bool
+{
+    $permissionSlug = trim((string) $permissionSlug);
+    if ($permissionSlug === '') {
+        return true;
+    }
+
+    if (!$user) {
+        return false;
+    }
+
+    if (($user['role_name'] ?? null) === 'Super Admin') {
+        return true;
+    }
+
+    return in_array($permissionSlug, array_map('strval', (array) ($user['permissions'] ?? [])), true);
+}
+
+function kirpi_ai_discover_schema(array $options = [], ?array $user = null): array
+{
+    if (!kirpi_ai_schema_registry_ready()) {
+        return [
+            'status' => 'error',
+            'message' => 'schema_registry_not_ready',
+            'entities' => [],
+            'meta' => [
+                'entity_count' => 0,
+                'field_count' => 0,
+                'sensitive_field_count' => 0,
+            ],
+        ];
+    }
+
+    $user = $user ?? current_user();
+    $includeSensitive = !empty($options['include_sensitive']) && kirpi_ai_user_has_permission($user, 'ai.schema.manage');
+    $filterableOnly = !empty($options['filterable_only']);
+    $search = mb_strtolower(trim((string) ($options['search'] ?? '')));
+    $limit = max(1, min(200, (int) ($options['limit'] ?? 50)));
+
+    try {
+        $stmt = db()->prepare("
+            SELECT
+                e.id AS entity_id,
+                e.module_key,
+                e.entity_key,
+                e.table_name,
+                e.description AS entity_description,
+                e.permission_slug,
+                f.field_name,
+                f.field_type,
+                f.description AS field_description,
+                f.is_sensitive,
+                f.is_filterable
+            FROM ai_schema_entities e
+            LEFT JOIN ai_schema_fields f ON f.entity_id = e.id AND f.is_active = 1
+            WHERE e.is_active = 1
+            ORDER BY e.module_key ASC, e.entity_key ASC, f.field_name ASC
+        ");
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    } catch (Throwable $e) {
+        error_log('ai schema discovery error: ' . $e->getMessage());
+
+        return [
+            'status' => 'error',
+            'message' => 'schema_discovery_failed',
+            'entities' => [],
+            'meta' => [
+                'entity_count' => 0,
+                'field_count' => 0,
+                'sensitive_field_count' => 0,
+            ],
+        ];
+    }
+
+    $entities = [];
+    $sensitiveFieldCount = 0;
+
+    foreach ($rows as $row) {
+        $permissionSlug = trim((string) ($row['permission_slug'] ?? ''));
+        if (!kirpi_ai_user_has_permission($user, $permissionSlug)) {
+            continue;
+        }
+
+        $haystack = mb_strtolower(implode(' ', [
+            (string) ($row['module_key'] ?? ''),
+            (string) ($row['entity_key'] ?? ''),
+            (string) ($row['table_name'] ?? ''),
+            (string) ($row['entity_description'] ?? ''),
+            (string) ($row['field_name'] ?? ''),
+            (string) ($row['field_description'] ?? ''),
+        ]));
+
+        if ($search !== '' && !str_contains($haystack, $search)) {
+            continue;
+        }
+
+        $entityId = (int) ($row['entity_id'] ?? 0);
+        if ($entityId <= 0) {
+            continue;
+        }
+
+        if (!isset($entities[$entityId])) {
+            if (count($entities) >= $limit) {
+                continue;
+            }
+
+            $entities[$entityId] = [
+                'id' => $entityId,
+                'module' => (string) ($row['module_key'] ?? ''),
+                'entity' => (string) ($row['entity_key'] ?? ''),
+                'table' => (string) ($row['table_name'] ?? ''),
+                'description' => (string) ($row['entity_description'] ?? ''),
+                'permission' => $permissionSlug !== '' ? $permissionSlug : null,
+                'fields' => [],
+            ];
+        }
+
+        $fieldName = trim((string) ($row['field_name'] ?? ''));
+        if ($fieldName === '') {
+            continue;
+        }
+
+        $isSensitive = (int) ($row['is_sensitive'] ?? 0) === 1;
+        $isFilterable = (int) ($row['is_filterable'] ?? 0) === 1;
+
+        if ($isSensitive) {
+            $sensitiveFieldCount++;
+        }
+
+        if ($isSensitive && !$includeSensitive) {
+            continue;
+        }
+
+        if ($filterableOnly && !$isFilterable) {
+            continue;
+        }
+
+        $entities[$entityId]['fields'][] = [
+            'name' => $fieldName,
+            'type' => (string) ($row['field_type'] ?? ''),
+            'description' => (string) ($row['field_description'] ?? ''),
+            'is_sensitive' => $isSensitive,
+            'is_filterable' => $isFilterable,
+        ];
+    }
+
+    $entityList = array_values($entities);
+    $fieldCount = 0;
+    foreach ($entityList as $entity) {
+        $fieldCount += count((array) ($entity['fields'] ?? []));
+    }
+
+    kirpi_ai_log_operation('schema_discovery', 'success', [
+        'entity_count' => count($entityList),
+        'field_count' => $fieldCount,
+        'include_sensitive' => $includeSensitive,
+        'filterable_only' => $filterableOnly,
+        'search' => $search,
+    ], null, 'schema_registry', null);
+
+    return [
+        'status' => 'success',
+        'message' => null,
+        'entities' => $entityList,
+        'meta' => [
+            'entity_count' => count($entityList),
+            'field_count' => $fieldCount,
+            'sensitive_field_count' => $sensitiveFieldCount,
+            'include_sensitive' => $includeSensitive,
+            'filterable_only' => $filterableOnly,
+            'search' => $search,
+        ],
+    ];
+}
+
 function kirpi_ai_log_operation(
     string $action,
     string $status,

@@ -23,6 +23,12 @@ api_response(200, api_lang('v1_title'), [
         ],
         [
             'method' => 'GET',
+            'path' => '/api/v1/ai/schema',
+            'description' => 'Discover AI schema metadata allowed for the current token.',
+            'required_scope' => 'ai:schema:read',
+        ],
+        [
+            'method' => 'GET',
             'path' => '/api/v1/users',
             'description' => api_lang('desc_users_list'),
             'required_scope' => 'users:read',

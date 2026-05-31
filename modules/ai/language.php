@@ -43,6 +43,13 @@ function ai_lang(string $key, ?string $default = null): string
                 'schema_sync_success' => 'Schema registry güncellendi: %d entity, %d field.',
                 'schema_sync_partial' => 'Schema registry kısmen güncellendi. Logları kontrol edin.',
                 'schema_sync_error' => 'Schema registry güncellenemedi.',
+                'discovery_preview' => 'Discovery Önizleme',
+                'discovery_preview_detail' => 'Bu liste mevcut kullanıcının yetkilerine göre filtrelenir. Hassas alanlar varsayılan olarak gizlenir.',
+                'visible_entities' => 'Görünen Entity',
+                'visible_fields' => 'Görünen Field',
+                'sensitive_hidden' => 'Hassas alanlar gizli',
+                'visible_field_list' => 'Görünen Alanlar',
+                'no_discovery_schema' => 'Bu kullanıcı için keşfedilebilir schema bulunamadı.',
             ],
             'en' => [
                 'system_management' => 'System Management',
@@ -77,6 +84,13 @@ function ai_lang(string $key, ?string $default = null): string
                 'schema_sync_success' => 'Schema registry updated: %d entities, %d fields.',
                 'schema_sync_partial' => 'Schema registry was partially updated. Check logs.',
                 'schema_sync_error' => 'Schema registry could not be updated.',
+                'discovery_preview' => 'Discovery Preview',
+                'discovery_preview_detail' => 'This list is filtered by the current user permissions. Sensitive fields are hidden by default.',
+                'visible_entities' => 'Visible Entities',
+                'visible_fields' => 'Visible Fields',
+                'sensitive_hidden' => 'Sensitive fields hidden',
+                'visible_field_list' => 'Visible Fields',
+                'no_discovery_schema' => 'No discoverable schema is available for this user.',
             ],
         ];
     }
