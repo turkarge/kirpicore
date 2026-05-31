@@ -1,7 +1,7 @@
 {
     "key": "ai",
     "name": "Kirpi Intelligence",
-    "description": "Core seviyesinde AI, schema registry ve audit altyapisi",
+    "description": "Core seviyesinde AI, schema registry ve audit altyapısı",
     "version": "0.1.0",
     "enabled": true,
     "core": true,
