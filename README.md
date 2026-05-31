@@ -49,6 +49,8 @@ Erişim:
 - Uygulama: `http://localhost:8080`
 - DB host (container içi): `db:3306`
 
+Host üzerinde `8080` doluysa `.env` içinde `APP_HTTP_PORT=8081` gibi boş bir port verilebilir.
+
 İlk kurulum:
 
 - `http://localhost:8080/setup.php`
@@ -75,6 +77,7 @@ APP_DEBUG=false
 APP_TIMEZONE=Europe/Istanbul
 APP_DEFAULT_ROUTE=dashboard/view
 BASE_URL=https://core.kirpinetwork.com
+APP_HTTP_PORT=8080
 APP_TRUST_PROXY=true
 APP_LOCALE=tr
 
