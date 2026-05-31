@@ -49,7 +49,7 @@ Erişim:
 - Uygulama: `http://localhost:8080`
 - DB host (container içi): `db:3306`
 
-Host üzerinde `8080` doluysa `.env` içinde `APP_HTTP_PORT=8081` gibi boş bir port verilebilir.
+Host üzerinde `8080` doluysa `.env` içinde `APP_PORT_MAPPING=8081:80` gibi boş bir port verilebilir.
 
 İlk kurulum:
 
@@ -62,6 +62,11 @@ Host üzerinde `8080` doluysa `.env` içinde `APP_HTTP_PORT=8081` gibi boş bir 
 1. Dokploy panelinde yeni bir **Compose Application** oluşturun.
 2. Repository olarak bu projeyi seçin.
 3. Compose file olarak `docker-compose.yml` belirleyin.
+
+Not:
+
+- Dokploy domain/proxy kullanımında `APP_PORT_MAPPING` tanımlamayın. Compose varsayılanı servis iç portu `80` olarak bildirir.
+- Lokal geliştirmede host portuna bağlamak için `.env` içinde `APP_PORT_MAPPING=8080:80` kullanılabilir.
 
 ### 4.2 Environment Settings
 
@@ -77,7 +82,6 @@ APP_DEBUG=false
 APP_TIMEZONE=Europe/Istanbul
 APP_DEFAULT_ROUTE=dashboard/view
 BASE_URL=https://core.kirpinetwork.com
-APP_HTTP_PORT=8080
 APP_TRUST_PROXY=true
 APP_LOCALE=tr
 

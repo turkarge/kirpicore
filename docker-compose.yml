@@ -35,7 +35,7 @@ services:
       AUTO_WEB_SETUP: ${AUTO_WEB_SETUP:-true}
       SETUP_KEY: ${SETUP_KEY:-}
     ports:
-      - "${APP_HTTP_PORT:-8080}:80"
+      - "${APP_PORT_MAPPING:-80}"
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost/healthz || exit 1"]
       interval: 10s
