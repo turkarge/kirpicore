@@ -6,6 +6,16 @@
       "table": "users",
       "description": "System users and account status metadata",
       "permission": "users.view",
+      "metadata": {
+        "aliases": [
+          "kullanıcı",
+          "kullanici",
+          "kullanıcılar",
+          "kullanicilar",
+          "hesap",
+          "personel"
+        ]
+      },
       "fields": [
         {
           "name": "id",
@@ -32,7 +42,15 @@
         {
           "name": "is_active",
           "type": "tinyint",
-          "description": "Active account flag"
+          "description": "Active account flag",
+          "metadata": {
+            "aliases": [
+              "aktif",
+              "pasif",
+              "durum",
+              "hesap durumu"
+            ]
+          }
         },
         {
           "name": "created_at",

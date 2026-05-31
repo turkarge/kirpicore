@@ -6,6 +6,15 @@
       "table": "roles",
       "description": "Application roles used by RBAC",
       "permission": "roles.view",
+      "metadata": {
+        "aliases": [
+          "rol",
+          "roller",
+          "yetki",
+          "yetkiler",
+          "rbac"
+        ]
+      },
       "fields": [
         {
           "name": "id",
@@ -20,7 +29,15 @@
         {
           "name": "is_active",
           "type": "tinyint",
-          "description": "Active role flag"
+          "description": "Active role flag",
+          "metadata": {
+            "aliases": [
+              "aktif",
+              "pasif",
+              "durum",
+              "rol durumu"
+            ]
+          }
         },
         {
           "name": "created_at",

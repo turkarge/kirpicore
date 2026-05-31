@@ -17,6 +17,11 @@ $discovery = kirpi_ai_discover_schema([
 ]);
 $discoveryEntities = (array) ($discovery['entities'] ?? []);
 $discoveryMeta = (array) ($discovery['meta'] ?? []);
+$searchQuery = trim((string) ($_GET['q'] ?? ''));
+$searchResult = $searchQuery !== ''
+    ? kirpi_ai_search_schema($searchQuery, ['limit' => 10])
+    : ['status' => 'success', 'results' => [], 'meta' => ['result_count' => 0]];
+$searchResults = (array) ($searchResult['results'] ?? []);
 
 $cards = [
     [
@@ -175,10 +180,10 @@ $statusBadge = static function (bool $ready): string {
                 <div class="card-actions text-secondary">
                     <?php echo e(ai_lang('visible_entities')); ?>:
                     <strong><?php echo (int) ($discoveryMeta['entity_count'] ?? 0); ?></strong>
-                    ·
+                    &middot;
                     <?php echo e(ai_lang('visible_fields')); ?>:
                     <strong><?php echo (int) ($discoveryMeta['field_count'] ?? 0); ?></strong>
-                    ·
+                    &middot;
                     <?php echo e(ai_lang('sensitive_hidden')); ?>
                 </div>
             </div>
@@ -224,6 +229,78 @@ $statusBadge = static function (bool $ready): string {
                     </tbody>
                 </table>
             </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <div>
+                    <h3 class="card-title"><?php echo e(ai_lang('metadata_search')); ?></h3>
+                    <div class="text-secondary small mt-1"><?php echo e(ai_lang('metadata_search_detail')); ?></div>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="get" action="<?php echo base_url('ai/view'); ?>">
+                    <div class="row g-2">
+                        <div class="col-12 col-md">
+                            <label class="form-label"><?php echo e(ai_lang('search_query')); ?></label>
+                            <input
+                                type="search"
+                                name="q"
+                                class="form-control"
+                                value="<?php echo e($searchQuery); ?>"
+                                placeholder="<?php echo e(ai_lang('search_placeholder')); ?>"
+                            >
+                        </div>
+                        <div class="col-12 col-md-auto d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <?php echo e(ai_lang('search')); ?>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <?php if ($searchQuery !== ''): ?>
+                <div class="table-responsive">
+                    <table class="table table-vcenter card-table table-striped mb-0">
+                        <thead>
+                        <tr>
+                            <th><?php echo e(ai_lang('score')); ?></th>
+                            <th><?php echo e(ai_lang('module')); ?></th>
+                            <th><?php echo e(ai_lang('entity')); ?></th>
+                            <th><?php echo e(ai_lang('table')); ?></th>
+                            <th><?php echo e(ai_lang('matched_fields')); ?></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php if (empty($searchResults)): ?>
+                            <tr>
+                                <td colspan="5" class="text-center text-secondary py-4">
+                                    <?php echo e(ai_lang('no_search_results')); ?>
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($searchResults as $result): ?>
+                                <?php
+                                $matchedFields = array_map(
+                                    static fn (array $field): string => (string) ($field['name'] ?? ''),
+                                    (array) ($result['matched_fields'] ?? [])
+                                );
+                                $matchedFields = array_values(array_filter($matchedFields, static fn (string $field): bool => $field !== ''));
+                                ?>
+                                <tr>
+                                    <td><?php echo (int) ($result['score'] ?? 0); ?></td>
+                                    <td><code><?php echo e((string) ($result['module'] ?? '')); ?></code></td>
+                                    <td><?php echo e((string) ($result['entity'] ?? '')); ?></td>
+                                    <td><code><?php echo e((string) ($result['table'] ?? '')); ?></code></td>
+                                    <td><?php echo e(implode(', ', $matchedFields)); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>

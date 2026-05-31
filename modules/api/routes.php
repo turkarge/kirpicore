@@ -36,6 +36,13 @@ return [
         'auth' => false,
         'method' => 'GET',
     ],
+    'api/v1/ai/schema/search' => [
+        'file' => 'modules/api/v1/ai/schema_search.php',
+        'layout' => false,
+        'permission' => null,
+        'auth' => false,
+        'method' => 'GET',
+    ],
     'api/v1/users' => [
         'file' => 'modules/api/v1/users/index.php',
         'layout' => false,

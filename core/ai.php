@@ -511,11 +511,13 @@ function kirpi_ai_discover_schema(array $options = [], ?array $user = null): arr
                 e.table_name,
                 e.description AS entity_description,
                 e.permission_slug,
+                e.metadata_json AS entity_metadata_json,
                 f.field_name,
                 f.field_type,
                 f.description AS field_description,
                 f.is_sensitive,
-                f.is_filterable
+                f.is_filterable,
+                f.metadata_json AS field_metadata_json
             FROM ai_schema_entities e
             LEFT JOIN ai_schema_fields f ON f.entity_id = e.id AND f.is_active = 1
             WHERE e.is_active = 1
@@ -552,8 +554,10 @@ function kirpi_ai_discover_schema(array $options = [], ?array $user = null): arr
             (string) ($row['entity_key'] ?? ''),
             (string) ($row['table_name'] ?? ''),
             (string) ($row['entity_description'] ?? ''),
+            (string) ($row['entity_metadata_json'] ?? ''),
             (string) ($row['field_name'] ?? ''),
             (string) ($row['field_description'] ?? ''),
+            (string) ($row['field_metadata_json'] ?? ''),
         ]));
 
         if ($search !== '' && !str_contains($haystack, $search)) {
@@ -577,6 +581,7 @@ function kirpi_ai_discover_schema(array $options = [], ?array $user = null): arr
                 'table' => (string) ($row['table_name'] ?? ''),
                 'description' => (string) ($row['entity_description'] ?? ''),
                 'permission' => $permissionSlug !== '' ? $permissionSlug : null,
+                'metadata' => json_decode((string) ($row['entity_metadata_json'] ?? ''), true) ?: [],
                 'fields' => [],
             ];
         }
@@ -607,6 +612,7 @@ function kirpi_ai_discover_schema(array $options = [], ?array $user = null): arr
             'description' => (string) ($row['field_description'] ?? ''),
             'is_sensitive' => $isSensitive,
             'is_filterable' => $isFilterable,
+            'metadata' => json_decode((string) ($row['field_metadata_json'] ?? ''), true) ?: [],
         ];
     }
 
@@ -635,6 +641,166 @@ function kirpi_ai_discover_schema(array $options = [], ?array $user = null): arr
             'include_sensitive' => $includeSensitive,
             'filterable_only' => $filterableOnly,
             'search' => $search,
+        ],
+    ];
+}
+
+function kirpi_ai_tokenize_search(string $query): array
+{
+    $query = mb_strtolower(trim($query));
+    if ($query === '') {
+        return [];
+    }
+
+    $parts = preg_split('/[^\p{L}\p{N}_]+/u', $query) ?: [];
+    $tokens = [];
+
+    foreach ($parts as $part) {
+        $part = trim((string) $part);
+        if (mb_strlen($part) < 2) {
+            continue;
+        }
+
+        $tokens[] = $part;
+    }
+
+    return array_values(array_unique($tokens));
+}
+
+function kirpi_ai_text_score(string $text, array $tokens, int $exactWeight = 6, int $containsWeight = 2): int
+{
+    $text = mb_strtolower($text);
+    if ($text === '' || empty($tokens)) {
+        return 0;
+    }
+
+    $score = 0;
+    foreach ($tokens as $token) {
+        if ($text === $token) {
+            $score += $exactWeight;
+            continue;
+        }
+
+        if (str_contains($text, $token)) {
+            $score += $containsWeight;
+        }
+    }
+
+    return $score;
+}
+
+function kirpi_ai_search_schema(string $query, array $options = [], ?array $user = null): array
+{
+    $tokens = kirpi_ai_tokenize_search($query);
+    $limit = max(1, min(50, (int) ($options['limit'] ?? 10)));
+
+    if (empty($tokens)) {
+        return [
+            'status' => 'success',
+            'query' => trim($query),
+            'tokens' => [],
+            'results' => [],
+            'meta' => [
+                'result_count' => 0,
+            ],
+        ];
+    }
+
+    $discovery = kirpi_ai_discover_schema([
+        'include_sensitive' => false,
+        'filterable_only' => !empty($options['filterable_only']),
+        'limit' => 200,
+    ], $user);
+
+    if (($discovery['status'] ?? '') !== 'success') {
+        return [
+            'status' => 'error',
+            'query' => trim($query),
+            'tokens' => $tokens,
+            'results' => [],
+            'meta' => [
+                'result_count' => 0,
+            ],
+        ];
+    }
+
+    $results = [];
+    foreach ((array) ($discovery['entities'] ?? []) as $entity) {
+        $entityScore = 0;
+        $entityScore += kirpi_ai_text_score((string) ($entity['module'] ?? ''), $tokens, 8, 3);
+        $entityScore += kirpi_ai_text_score((string) ($entity['entity'] ?? ''), $tokens, 10, 4);
+        $entityScore += kirpi_ai_text_score((string) ($entity['table'] ?? ''), $tokens, 8, 3);
+        $entityScore += kirpi_ai_text_score((string) ($entity['description'] ?? ''), $tokens, 4, 1);
+        $entityScore += kirpi_ai_text_score(json_encode($entity['metadata'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '', $tokens, 5, 2);
+
+        $matchedFields = [];
+        foreach ((array) ($entity['fields'] ?? []) as $field) {
+            $fieldScore = 0;
+            $fieldScore += kirpi_ai_text_score((string) ($field['name'] ?? ''), $tokens, 8, 3);
+            $fieldScore += kirpi_ai_text_score((string) ($field['type'] ?? ''), $tokens, 3, 1);
+            $fieldScore += kirpi_ai_text_score((string) ($field['description'] ?? ''), $tokens, 4, 1);
+            $fieldScore += kirpi_ai_text_score(json_encode($field['metadata'] ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '', $tokens, 5, 2);
+
+            if ($fieldScore <= 0) {
+                continue;
+            }
+
+            $matchedFields[] = [
+                'name' => (string) ($field['name'] ?? ''),
+                'type' => (string) ($field['type'] ?? ''),
+                'description' => (string) ($field['description'] ?? ''),
+                'score' => $fieldScore,
+            ];
+        }
+
+        $score = $entityScore;
+        foreach ($matchedFields as $field) {
+            $score += (int) ($field['score'] ?? 0);
+        }
+
+        if ($score <= 0) {
+            continue;
+        }
+
+        usort($matchedFields, static function (array $a, array $b): int {
+            return ((int) ($b['score'] ?? 0)) <=> ((int) ($a['score'] ?? 0));
+        });
+
+        $results[] = [
+            'score' => $score,
+            'module' => (string) ($entity['module'] ?? ''),
+            'entity' => (string) ($entity['entity'] ?? ''),
+            'table' => (string) ($entity['table'] ?? ''),
+            'description' => (string) ($entity['description'] ?? ''),
+            'permission' => $entity['permission'] ?? null,
+            'matched_fields' => $matchedFields,
+        ];
+    }
+
+    usort($results, static function (array $a, array $b): int {
+        $scoreCompare = ((int) ($b['score'] ?? 0)) <=> ((int) ($a['score'] ?? 0));
+        if ($scoreCompare !== 0) {
+            return $scoreCompare;
+        }
+
+        return strcmp((string) ($a['entity'] ?? ''), (string) ($b['entity'] ?? ''));
+    });
+
+    $results = array_slice($results, 0, $limit);
+
+    kirpi_ai_log_operation('schema_search', 'success', [
+        'query' => trim($query),
+        'tokens' => $tokens,
+        'result_count' => count($results),
+    ], null, 'schema_registry', null);
+
+    return [
+        'status' => 'success',
+        'query' => trim($query),
+        'tokens' => $tokens,
+        'results' => $results,
+        'meta' => [
+            'result_count' => count($results),
         ],
     ];
 }
