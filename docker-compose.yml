@@ -17,8 +17,8 @@ services:
       BASE_URL: ${BASE_URL:-http://localhost}
       SESSION_COOKIE_DOMAIN: ${SESSION_COOKIE_DOMAIN:-}
       AUTH_LOGIN_COVER_IMAGE: ${AUTH_LOGIN_COVER_IMAGE:-}
-      DB_HOST: ${DB_HOST:-db}
-      DB_PORT: ${DB_PORT:-3306}
+      DB_HOST: ${DB_APP_HOST:-db}
+      DB_PORT: ${DB_APP_PORT:-3306}
       DB_NAME: ${DB_NAME:-kirpicore}
       DB_USER: ${DB_USER:-root}
       DB_PASS: ${DB_PASS:-root}
