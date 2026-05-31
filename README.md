@@ -49,7 +49,7 @@ Erişim:
 - Uygulama: `http://localhost:8080`
 - DB host (container içi): `db:3306`
 
-Host üzerinde `8080` doluysa `.env` içinde `APP_PORT_MAPPING=8081:80` gibi boş bir port verilebilir.
+Lokal geliştirmede host portuna bağlamak için ek bir compose override dosyasıyla `8080:80` port eşlemesi verilebilir.
 
 İlk kurulum:
 
@@ -65,8 +65,8 @@ Host üzerinde `8080` doluysa `.env` içinde `APP_PORT_MAPPING=8081:80` gibi bo�
 
 Not:
 
-- Dokploy domain/proxy kullanımında `APP_PORT_MAPPING` tanımlamayın. Compose varsayılanı servis iç portu `80` olarak bildirir.
-- Lokal geliştirmede host portuna bağlamak için `.env` içinde `APP_PORT_MAPPING=8080:80` kullanılabilir.
+- Dokploy domain/proxy kullanımında servis `app`, port `80` seçilmelidir.
+- `docker-compose.yml` host port publish etmez; sadece container iç portu `80` olarak bildirir.
 
 ### 4.2 Environment Settings
 

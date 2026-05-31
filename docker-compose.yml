@@ -34,8 +34,8 @@ services:
       AUTO_DB_INSTALL: ${AUTO_DB_INSTALL:-true}
       AUTO_WEB_SETUP: ${AUTO_WEB_SETUP:-true}
       SETUP_KEY: ${SETUP_KEY:-}
-    ports:
-      - "${APP_PORT_MAPPING:-80}"
+    expose:
+      - "80"
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost/healthz || exit 1"]
       interval: 10s
