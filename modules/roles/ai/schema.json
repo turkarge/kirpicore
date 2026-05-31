@@ -1,0 +1,38 @@
+{
+  "module": "roles",
+  "entities": [
+    {
+      "entity": "role",
+      "table": "roles",
+      "description": "Application roles used by RBAC",
+      "permission": "roles.view",
+      "fields": [
+        {
+          "name": "id",
+          "type": "int",
+          "description": "Role primary key"
+        },
+        {
+          "name": "name",
+          "type": "varchar",
+          "description": "Role name"
+        },
+        {
+          "name": "is_active",
+          "type": "tinyint",
+          "description": "Active role flag"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp",
+          "description": "Creation timestamp"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp",
+          "description": "Last update timestamp"
+        }
+      ]
+    }
+  ]
+}

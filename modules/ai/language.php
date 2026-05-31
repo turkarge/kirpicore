@@ -37,6 +37,12 @@ function ai_lang(string $key, ?string $default = null): string
                 'status_ready' => 'Hazir',
                 'status_missing' => 'Eksik',
                 'read_only_notice' => 'Ilk surum metadata-only ve read-only calisacak sekilde hazirlandi.',
+                'schema_manifests' => 'Schema Manifest',
+                'sync_schema' => 'Schema Sync',
+                'csrf_failed' => 'Oturum dogrulamasi basarisiz. Sayfayi yenileyip tekrar deneyin.',
+                'schema_sync_success' => 'Schema registry guncellendi: %d entity, %d field.',
+                'schema_sync_partial' => 'Schema registry kismen guncellendi. Loglari kontrol edin.',
+                'schema_sync_error' => 'Schema registry guncellenemedi.',
             ],
             'en' => [
                 'system_management' => 'System Management',
@@ -65,6 +71,12 @@ function ai_lang(string $key, ?string $default = null): string
                 'status_ready' => 'Ready',
                 'status_missing' => 'Missing',
                 'read_only_notice' => 'The first version is prepared as metadata-only and read-only.',
+                'schema_manifests' => 'Schema Manifests',
+                'sync_schema' => 'Sync Schema',
+                'csrf_failed' => 'Session validation failed. Refresh the page and try again.',
+                'schema_sync_success' => 'Schema registry updated: %d entities, %d fields.',
+                'schema_sync_partial' => 'Schema registry was partially updated. Check logs.',
+                'schema_sync_error' => 'Schema registry could not be updated.',
             ],
         ];
     }

@@ -46,6 +46,352 @@ function kirpi_ai_field_count(): int
     }
 }
 
+function kirpi_ai_schema_manifest_files(): array
+{
+    $files = [];
+    $moduleDirs = glob(BASE_PATH . '/modules/*', GLOB_ONLYDIR) ?: [];
+    sort($moduleDirs);
+
+    foreach ($moduleDirs as $moduleDir) {
+        $manifestPath = rtrim($moduleDir, '/\\') . '/ai/schema.json';
+        if (is_file($manifestPath)) {
+            $files[] = $manifestPath;
+        }
+    }
+
+    return $files;
+}
+
+function kirpi_ai_schema_manifest_count(): int
+{
+    return count(kirpi_ai_schema_manifest_files());
+}
+
+function kirpi_ai_normalize_schema_manifest(string $filePath): array
+{
+    $raw = (string) file_get_contents($filePath);
+    $decoded = json_decode($raw, true);
+    if (!is_array($decoded)) {
+        return [
+            'status' => 'error',
+            'message' => 'invalid_json',
+            'entities' => [],
+        ];
+    }
+
+    $moduleKey = trim((string) ($decoded['module'] ?? basename(dirname(dirname($filePath)))));
+    $entities = [];
+
+    foreach ((array) ($decoded['entities'] ?? []) as $entity) {
+        if (!is_array($entity)) {
+            continue;
+        }
+
+        $entityKey = trim((string) ($entity['entity'] ?? $entity['entity_key'] ?? ''));
+        $tableName = trim((string) ($entity['table'] ?? $entity['table_name'] ?? ''));
+        if ($moduleKey === '' || $entityKey === '' || $tableName === '') {
+            continue;
+        }
+
+        $fields = [];
+        foreach ((array) ($entity['fields'] ?? []) as $field) {
+            if (!is_array($field)) {
+                continue;
+            }
+
+            $fieldName = trim((string) ($field['name'] ?? $field['field_name'] ?? ''));
+            if ($fieldName === '') {
+                continue;
+            }
+
+            $fields[] = [
+                'name' => $fieldName,
+                'type' => trim((string) ($field['type'] ?? $field['field_type'] ?? '')),
+                'description' => trim((string) ($field['description'] ?? '')),
+                'is_sensitive' => !empty($field['is_sensitive']) ? 1 : 0,
+                'is_filterable' => array_key_exists('is_filterable', $field) ? (!empty($field['is_filterable']) ? 1 : 0) : 1,
+                'metadata' => is_array($field['metadata'] ?? null) ? (array) $field['metadata'] : [],
+            ];
+        }
+
+        $entities[] = [
+            'module' => $moduleKey,
+            'entity' => $entityKey,
+            'table' => $tableName,
+            'description' => trim((string) ($entity['description'] ?? '')),
+            'permission' => trim((string) ($entity['permission'] ?? $entity['permission_slug'] ?? '')),
+            'metadata' => is_array($entity['metadata'] ?? null) ? (array) $entity['metadata'] : [],
+            'fields' => $fields,
+        ];
+    }
+
+    return [
+        'status' => 'success',
+        'message' => null,
+        'entities' => $entities,
+    ];
+}
+
+function kirpi_ai_publish_schema_entity(array $entity): array
+{
+    if (!kirpi_ai_schema_registry_ready()) {
+        return [
+            'status' => 'error',
+            'message' => 'schema_registry_not_ready',
+        ];
+    }
+
+    $moduleKey = trim((string) ($entity['module'] ?? ''));
+    $entityKey = trim((string) ($entity['entity'] ?? ''));
+    $tableName = trim((string) ($entity['table'] ?? ''));
+
+    if ($moduleKey === '' || $entityKey === '' || $tableName === '') {
+        return [
+            'status' => 'error',
+            'message' => 'invalid_entity',
+        ];
+    }
+
+    $user = current_user();
+    $userId = (int) ($user['id'] ?? 0);
+    $metadataJson = null;
+    if (!empty($entity['metadata']) && is_array($entity['metadata'])) {
+        $encoded = json_encode($entity['metadata'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $metadataJson = $encoded === false ? null : $encoded;
+    }
+
+    db()->beginTransaction();
+
+    try {
+        $entityStmt = db()->prepare("
+            INSERT INTO ai_schema_entities (
+                module_key,
+                entity_key,
+                table_name,
+                description,
+                permission_slug,
+                metadata_json,
+                is_active,
+                created_by,
+                updated_by
+            ) VALUES (
+                :module_key,
+                :entity_key,
+                :table_name,
+                :description,
+                :permission_slug,
+                :metadata_json,
+                1,
+                :created_by,
+                :updated_by
+            )
+            ON DUPLICATE KEY UPDATE
+                table_name = VALUES(table_name),
+                description = VALUES(description),
+                permission_slug = VALUES(permission_slug),
+                metadata_json = VALUES(metadata_json),
+                is_active = 1,
+                updated_by = VALUES(updated_by),
+                updated_at = CURRENT_TIMESTAMP
+        ");
+
+        $permission = trim((string) ($entity['permission'] ?? ''));
+        $entityStmt->execute([
+            ':module_key' => mb_substr($moduleKey, 0, 80),
+            ':entity_key' => mb_substr($entityKey, 0, 120),
+            ':table_name' => mb_substr($tableName, 0, 120),
+            ':description' => mb_substr(trim((string) ($entity['description'] ?? '')), 0, 500) ?: null,
+            ':permission_slug' => $permission !== '' ? mb_substr($permission, 0, 150) : null,
+            ':metadata_json' => $metadataJson,
+            ':created_by' => $userId > 0 ? $userId : null,
+            ':updated_by' => $userId > 0 ? $userId : null,
+        ]);
+
+        $lookupStmt = db()->prepare("
+            SELECT id
+            FROM ai_schema_entities
+            WHERE module_key = :module_key
+              AND entity_key = :entity_key
+            LIMIT 1
+        ");
+        $lookupStmt->execute([
+            ':module_key' => $moduleKey,
+            ':entity_key' => $entityKey,
+        ]);
+        $entityId = (int) $lookupStmt->fetchColumn();
+
+        if ($entityId <= 0) {
+            throw new RuntimeException('schema entity lookup failed');
+        }
+
+        $publishedFields = [];
+        $fieldStmt = db()->prepare("
+            INSERT INTO ai_schema_fields (
+                entity_id,
+                field_name,
+                field_type,
+                description,
+                is_sensitive,
+                is_filterable,
+                is_active,
+                metadata_json
+            ) VALUES (
+                :entity_id,
+                :field_name,
+                :field_type,
+                :description,
+                :is_sensitive,
+                :is_filterable,
+                1,
+                :metadata_json
+            )
+            ON DUPLICATE KEY UPDATE
+                field_type = VALUES(field_type),
+                description = VALUES(description),
+                is_sensitive = VALUES(is_sensitive),
+                is_filterable = VALUES(is_filterable),
+                is_active = 1,
+                metadata_json = VALUES(metadata_json),
+                updated_at = CURRENT_TIMESTAMP
+        ");
+
+        foreach ((array) ($entity['fields'] ?? []) as $field) {
+            if (!is_array($field)) {
+                continue;
+            }
+
+            $fieldName = trim((string) ($field['name'] ?? ''));
+            if ($fieldName === '') {
+                continue;
+            }
+
+            $fieldMetadataJson = null;
+            if (!empty($field['metadata']) && is_array($field['metadata'])) {
+                $encoded = json_encode($field['metadata'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                $fieldMetadataJson = $encoded === false ? null : $encoded;
+            }
+
+            $fieldStmt->execute([
+                ':entity_id' => $entityId,
+                ':field_name' => mb_substr($fieldName, 0, 120),
+                ':field_type' => mb_substr(trim((string) ($field['type'] ?? '')), 0, 80) ?: null,
+                ':description' => mb_substr(trim((string) ($field['description'] ?? '')), 0, 500) ?: null,
+                ':is_sensitive' => !empty($field['is_sensitive']) ? 1 : 0,
+                ':is_filterable' => !empty($field['is_filterable']) ? 1 : 0,
+                ':metadata_json' => $fieldMetadataJson,
+            ]);
+
+            $publishedFields[] = $fieldName;
+        }
+
+        if (!empty($publishedFields)) {
+            $placeholders = implode(', ', array_fill(0, count($publishedFields), '?'));
+            $deactivateStmt = db()->prepare("
+                UPDATE ai_schema_fields
+                SET is_active = 0,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE entity_id = ?
+                  AND field_name NOT IN ({$placeholders})
+            ");
+            $deactivateStmt->execute(array_merge([$entityId], $publishedFields));
+        }
+
+        db()->commit();
+
+        return [
+            'status' => 'success',
+            'entity_id' => $entityId,
+            'field_count' => count($publishedFields),
+        ];
+    } catch (Throwable $e) {
+        if (db()->inTransaction()) {
+            db()->rollBack();
+        }
+
+        error_log('ai schema publish error: ' . $e->getMessage());
+
+        return [
+            'status' => 'error',
+            'message' => $e->getMessage(),
+        ];
+    }
+}
+
+function kirpi_ai_sync_schema_registry_from_manifests(): array
+{
+    if (!kirpi_ai_schema_registry_ready()) {
+        return [
+            'status' => 'error',
+            'message' => 'schema_registry_not_ready',
+            'files' => [],
+            'entity_count' => 0,
+            'field_count' => 0,
+            'errors' => [],
+        ];
+    }
+
+    $files = kirpi_ai_schema_manifest_files();
+    $entityCount = 0;
+    $fieldCount = 0;
+    $errors = [];
+    $installedFiles = [];
+
+    foreach ($files as $filePath) {
+        $relative = str_replace(BASE_PATH . '/', '', str_replace('\\', '/', $filePath));
+        $manifest = kirpi_ai_normalize_schema_manifest($filePath);
+        if (($manifest['status'] ?? '') !== 'success') {
+            $errors[] = [
+                'file' => $relative,
+                'message' => (string) ($manifest['message'] ?? 'manifest_error'),
+            ];
+            continue;
+        }
+
+        $fileEntities = 0;
+        $fileFields = 0;
+        foreach ((array) ($manifest['entities'] ?? []) as $entity) {
+            $result = kirpi_ai_publish_schema_entity((array) $entity);
+            if (($result['status'] ?? '') !== 'success') {
+                $errors[] = [
+                    'file' => $relative,
+                    'entity' => (string) ($entity['entity'] ?? ''),
+                    'message' => (string) ($result['message'] ?? 'publish_error'),
+                ];
+                continue;
+            }
+
+            $fileEntities++;
+            $fileFields += (int) ($result['field_count'] ?? 0);
+        }
+
+        $entityCount += $fileEntities;
+        $fieldCount += $fileFields;
+        $installedFiles[] = [
+            'file' => $relative,
+            'entities' => $fileEntities,
+            'fields' => $fileFields,
+        ];
+    }
+
+    $status = empty($errors) ? 'success' : 'partial';
+
+    kirpi_ai_log_operation('schema_sync', $status === 'success' ? 'success' : 'failed', [
+        'files' => $installedFiles,
+        'errors' => $errors,
+        'entity_count' => $entityCount,
+        'field_count' => $fieldCount,
+    ], null, 'schema_registry', null);
+
+    return [
+        'status' => $status,
+        'message' => null,
+        'files' => $installedFiles,
+        'entity_count' => $entityCount,
+        'field_count' => $fieldCount,
+        'errors' => $errors,
+    ];
+}
+
 function kirpi_ai_audit_count(): int
 {
     if (!kirpi_ai_audit_table_ready()) {

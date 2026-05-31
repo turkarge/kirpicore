@@ -8,6 +8,7 @@ require_once BASE_PATH . '/modules/ai/language.php';
 $schemaReady = kirpi_ai_schema_registry_ready();
 $auditReady = kirpi_ai_audit_table_ready();
 $modelsReady = kirpi_ai_models_table_ready();
+$manifestCount = kirpi_ai_schema_manifest_count();
 $entities = kirpi_ai_list_schema_entities(25);
 $adapters = kirpi_ai_model_adapters();
 
@@ -55,6 +56,16 @@ $statusBadge = static function (bool $ready): string {
                 <h2 class="page-title"><?php echo e(ai_lang('kirpi_intelligence')); ?></h2>
                 <div class="text-secondary mt-1"><?php echo e(ai_lang('subtitle')); ?></div>
             </div>
+            <?php if (check_permission('ai.schema.manage')): ?>
+                <div class="col-auto ms-auto d-print-none">
+                    <form action="<?php echo base_url('ai/actions/sync-schema'); ?>" method="post" data-ajax="true">
+                        <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+                        <button type="submit" class="btn btn-outline-primary">
+                            <?php echo e(ai_lang('sync_schema')); ?>
+                        </button>
+                    </form>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -74,6 +85,16 @@ $statusBadge = static function (bool $ready): string {
         <?php endif; ?>
 
         <div class="row row-cards">
+            <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="subheader"><?php echo e(ai_lang('schema_manifests')); ?></div>
+                        <div class="h1 mb-1 mt-3"><?php echo (int) $manifestCount; ?></div>
+                        <div class="text-secondary"><?php echo e(ai_lang('schema_manifests')); ?></div>
+                        <div class="text-secondary small mt-3"><?php echo e(ai_lang('schema_registry_detail')); ?></div>
+                    </div>
+                </div>
+            </div>
             <?php foreach ($cards as $card): ?>
                 <div class="col-sm-6 col-lg-3">
                     <div class="card">

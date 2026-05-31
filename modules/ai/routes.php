@@ -8,4 +8,11 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'ai/actions/sync-schema' => [
+        'file' => 'modules/ai/actions/sync_schema.php',
+        'layout' => false,
+        'permission' => 'ai.schema.manage',
+        'auth' => true,
+        'method' => 'POST',
+    ],
 ];
