@@ -3,7 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: kirpicore-app
     restart: unless-stopped
     depends_on:
       db:
@@ -53,7 +52,6 @@ services:
 
   db:
     image: mysql:8.4
-    container_name: kirpicore-db
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: ${DB_NAME:-kirpicore}
