@@ -2,8 +2,37 @@ html, body {
     min-height: 100%;
 }
 
+:root,
+:root[data-kirpi-theme="light"] {
+    --kirpi-shell-bg: #f3f6fb;
+    --kirpi-shell-accent: #2457f5;
+    --kirpi-shell-accent-soft: rgba(36, 87, 245, 0.12);
+    --kirpi-surface: rgba(255, 255, 255, 0.92);
+    --kirpi-surface-strong: #ffffff;
+    --kirpi-border: rgba(15, 23, 42, 0.08);
+    --kirpi-muted: #60708a;
+    --kirpi-text: #162033;
+    --kirpi-shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+:root[data-kirpi-theme="dark"] {
+    --kirpi-shell-bg: #0b1220;
+    --kirpi-shell-accent: #7aa2ff;
+    --kirpi-shell-accent-soft: rgba(122, 162, 255, 0.16);
+    --kirpi-surface: rgba(18, 27, 45, 0.92);
+    --kirpi-surface-strong: #121b2d;
+    --kirpi-border: rgba(148, 163, 184, 0.16);
+    --kirpi-muted: #98a8bf;
+    --kirpi-text: #eef4ff;
+    --kirpi-shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.24);
+}
+
 body {
-    background-color: var(--tblr-body-bg, #f6f8fb);
+    background:
+        radial-gradient(circle at top left, var(--kirpi-shell-accent-soft), transparent 28rem),
+        radial-gradient(circle at top right, rgba(20, 184, 166, 0.08), transparent 22rem),
+        var(--kirpi-shell-bg);
+    color: var(--kirpi-text);
 }
 
 .page {
@@ -19,10 +48,46 @@ body {
     font-weight: 700;
 }
 
+.kirpi-app-shell .navbar {
+    position: relative;
+    z-index: 1030;
+    background: color-mix(in srgb, var(--kirpi-surface-strong) 88%, transparent);
+    border-bottom: 1px solid var(--kirpi-border);
+    backdrop-filter: blur(16px);
+}
+
+.kirpi-app-shell .navbar .dropdown-menu {
+    z-index: 1050;
+}
+
+:root[data-kirpi-layout="fluid"] .container-xl {
+    max-width: none;
+}
+
+.kirpi-app-shell .card,
+.kirpi-app-shell .dropdown-menu,
+.kirpi-app-shell .modal-content {
+    border-color: var(--kirpi-border);
+    box-shadow: var(--kirpi-shadow-soft);
+}
+
+.kirpi-app-shell .card {
+    background: var(--kirpi-surface);
+}
+
+.kirpi-app-shell .page-header .page-pretitle,
+.kirpi-app-shell .text-secondary {
+    color: var(--kirpi-muted) !important;
+}
+
 .kirpi-brand-logo {
     height: 28px;
     width: auto;
     display: inline-block;
+}
+
+:root[data-kirpi-theme="dark"] .kirpi-brand-logo {
+    filter: invert(1);
 }
 
 .nav-link-icon {
@@ -105,7 +170,7 @@ body {
 .auth-cover-page {
     min-height: 100vh;
     margin: 0;
-    background: var(--tblr-body-bg, #f6f8fb);
+    background: var(--kirpi-shell-bg, var(--tblr-body-bg, #f6f8fb));
 }
 
 .auth-cover {
@@ -163,4 +228,9 @@ body {
         width: 100%;
         padding: 2rem 1.5rem;
     }
+}
+
+:root[data-kirpi-theme="dark"] .auth-cover__form-side {
+    background: var(--kirpi-shell-bg);
+    color: var(--kirpi-text);
 }

@@ -228,6 +228,22 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                             <a href="<?php echo base_url('profile/view'); ?>" class="dropdown-item"><?php echo e($navProfileLabel); ?></a>
                         <?php endif; ?>
 
+                        <div class="dropdown-divider"></div>
+                        <div class="px-3 py-2">
+                            <div class="text-secondary small mb-2">Tema</div>
+                            <div class="btn-group w-100" role="group" aria-label="Tema seçimi">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-theme-choice="light">Light</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-theme-choice="dark">Dark</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-theme-choice="system">Sistem</button>
+                            </div>
+                        </div>
+
+                        <div class="dropdown-divider"></div>
+                        <button type="button" class="dropdown-item d-flex align-items-center gap-2 js-layout-toggle">
+                            <i class="ti ti-arrows-maximize js-layout-toggle-icon"></i>
+                            <span>Geniş görünüm</span>
+                        </button>
+
                         <?php if ($canUseLockFeature && route_exists('auth/actions/lock')): ?>
                             <form action="<?php echo base_url('auth/actions/lock'); ?>" method="post" class="m-0" data-ajax="true">
                                 <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">

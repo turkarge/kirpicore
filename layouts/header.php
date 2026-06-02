@@ -16,14 +16,36 @@ $page_script = resolve_page_script($route_file);
     <meta charset="UTF-8">
     <title><?php echo e(app_name()); ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f172a">
 
     <link href="<?php echo asset_url('css/tabler.min.css'); ?>" rel="stylesheet"/>
     <link href="<?php echo asset_url('css/tabler-icons.min.css'); ?>" rel="stylesheet"/>
     <link href="<?php echo asset_url('css/app.css'); ?>" rel="stylesheet"/>
     <link href="<?php echo asset_url('css/toastr.min.css'); ?>" rel="stylesheet">
+    <script>
+    (function () {
+        try {
+            const storedThemePreference = localStorage.getItem('kirpi_theme_preference') || 'system';
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = storedThemePreference === 'system'
+                ? (prefersDark ? 'dark' : 'light')
+                : storedThemePreference;
+            const storedLayout = localStorage.getItem('kirpi_layout_width') || 'boxed';
+            document.documentElement.setAttribute('data-bs-theme', theme);
+            document.documentElement.setAttribute('data-kirpi-theme', theme);
+            document.documentElement.setAttribute('data-kirpi-theme-preference', storedThemePreference);
+            document.documentElement.setAttribute('data-kirpi-layout', storedLayout);
+        } catch (error) {
+            document.documentElement.setAttribute('data-bs-theme', 'light');
+            document.documentElement.setAttribute('data-kirpi-theme', 'light');
+            document.documentElement.setAttribute('data-kirpi-theme-preference', 'system');
+            document.documentElement.setAttribute('data-kirpi-layout', 'boxed');
+        }
+    })();
+    </script>
 </head>
 
-<body>
+<body class="kirpi-app-shell">
 <script>
 window.KIRPI_CONFIG = {
     baseUrl: "<?php echo e(BASE_URL); ?>",

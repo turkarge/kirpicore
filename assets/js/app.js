@@ -11,6 +11,8 @@
 
         init() {
             this.bootstrapGlobals();
+            this.initTheme();
+            this.initLayoutWidth();
             this.initToastr();
             this.showFlashMessage();
             this.showPendingToast();
@@ -29,6 +31,124 @@
                 this.csrfToken = window.KIRPI_CONFIG.csrfToken || null;
                 this.flashMessage = window.KIRPI_CONFIG.flashMessage || null;
             }
+        },
+
+        initTheme() {
+            const root = document.documentElement;
+            const iconMap = {
+                light: "ti ti-moon-stars fs-2 js-theme-toggle-icon",
+                dark: "ti ti-sun-high fs-2 js-theme-toggle-icon"
+            };
+            const getSystemTheme = () => window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+            const getPreference = () => root.getAttribute("data-kirpi-theme-preference") || "system";
+
+            const applyThemePreference = (preference) => {
+                const safePreference = ["light", "dark", "system"].includes(preference) ? preference : "system";
+                const safeTheme = safePreference === "system" ? getSystemTheme() : safePreference;
+                root.setAttribute("data-bs-theme", safeTheme);
+                root.setAttribute("data-kirpi-theme", safeTheme);
+                root.setAttribute("data-kirpi-theme-preference", safePreference);
+                if (document.body) {
+                    document.body.setAttribute("data-bs-theme", safeTheme);
+                    document.body.setAttribute("data-kirpi-theme", safeTheme);
+                    document.body.setAttribute("data-kirpi-theme-preference", safePreference);
+                }
+
+                document.querySelectorAll(".js-theme-toggle").forEach((button) => {
+                    const icon = button.querySelector(".js-theme-toggle-icon");
+                    if (icon) {
+                        icon.className = iconMap[safeTheme];
+                    }
+                    button.setAttribute("aria-label", safeTheme === "dark" ? "Açık temaya geç" : "Koyu temaya geç");
+                    button.setAttribute("title", safeTheme === "dark" ? "Açık temaya geç" : "Koyu temaya geç");
+                });
+
+                document.querySelectorAll("[data-theme-choice]").forEach((button) => {
+                    button.classList.toggle("active", button.dataset.themeChoice === safePreference);
+                });
+
+                try {
+                    window.localStorage.setItem("kirpi_theme_preference", safePreference);
+                } catch (error) {
+                    console.warn("Tema tercihi kaydedilemedi:", error);
+                }
+            };
+
+            applyThemePreference(getPreference());
+
+            document.addEventListener("click", (event) => {
+                const toggle = event.target.closest(".js-theme-toggle");
+                if (toggle) {
+                    event.preventDefault();
+                    const nextPreference = (root.getAttribute("data-kirpi-theme") || "light") === "dark" ? "light" : "dark";
+                    applyThemePreference(nextPreference);
+                }
+
+                const choice = event.target.closest("[data-theme-choice]");
+                if (choice) {
+                    event.preventDefault();
+                    applyThemePreference(choice.dataset.themeChoice || "system");
+                }
+            });
+
+            if (window.matchMedia) {
+                const media = window.matchMedia("(prefers-color-scheme: dark)");
+                const syncSystemTheme = () => {
+                    if (getPreference() === "system") {
+                        applyThemePreference("system");
+                    }
+                };
+                if (typeof media.addEventListener === "function") {
+                    media.addEventListener("change", syncSystemTheme);
+                } else if (typeof media.addListener === "function") {
+                    media.addListener(syncSystemTheme);
+                }
+            }
+        },
+
+        initLayoutWidth() {
+            const root = document.documentElement;
+            const iconMap = {
+                boxed: "ti ti-arrows-maximize fs-2 js-layout-toggle-icon",
+                fluid: "ti ti-arrows-minimize fs-2 js-layout-toggle-icon"
+            };
+
+            const applyLayout = (layout) => {
+                const safeLayout = layout === "fluid" ? "fluid" : "boxed";
+                root.setAttribute("data-kirpi-layout", safeLayout);
+                if (document.body) {
+                    document.body.setAttribute("data-kirpi-layout", safeLayout);
+                }
+
+                document.querySelectorAll(".js-layout-toggle").forEach((button) => {
+                    const icon = button.querySelector(".js-layout-toggle-icon");
+                    if (icon) {
+                        icon.className = iconMap[safeLayout];
+                    }
+                    const label = button.querySelector("span");
+                    if (label) {
+                        label.textContent = safeLayout === "fluid" ? "Dar görünüm" : "Geniş görünüm";
+                    }
+                    button.setAttribute("aria-label", safeLayout === "fluid" ? "Dar görünüm" : "Geniş görünüm");
+                    button.setAttribute("title", safeLayout === "fluid" ? "Dar görünüm" : "Geniş görünüm");
+                });
+
+                try {
+                    window.localStorage.setItem("kirpi_layout_width", safeLayout);
+                } catch (error) {
+                    console.warn("Görünüm tercihi kaydedilemedi:", error);
+                }
+            };
+
+            applyLayout(root.getAttribute("data-kirpi-layout") || "boxed");
+
+            document.addEventListener("click", (event) => {
+                const toggle = event.target.closest(".js-layout-toggle");
+                if (toggle) {
+                    event.preventDefault();
+                    applyLayout((root.getAttribute("data-kirpi-layout") || "boxed") === "fluid" ? "boxed" : "fluid");
+                }
+            });
         },
 
         initToastr() {
@@ -142,28 +262,56 @@
                 return;
             }
 
-            const dropdowns = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+            const dropdownToggles = Array.from(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
 
-            dropdowns.forEach((el) => {
-                const instance = bootstrap.Dropdown.getOrCreateInstance(el);
+            const hideOtherDropdowns = (currentToggle = null) => {
+                const currentContainer = currentToggle ? currentToggle.closest(".dropdown, .dropend") : null;
 
-                el.addEventListener("click", function (event) {
+                dropdownToggles.forEach((toggle) => {
+                    if (toggle === currentToggle) {
+                        return;
+                    }
+
+                    const otherContainer = toggle.closest(".dropdown, .dropend");
+                    const isSameBranch = currentContainer && otherContainer
+                        && (otherContainer.contains(currentContainer) || currentContainer.contains(otherContainer));
+
+                    if (isSameBranch) {
+                        return;
+                    }
+
+                    bootstrap.Dropdown.getOrCreateInstance(toggle).hide();
+                });
+            };
+
+            dropdownToggles.forEach((toggle) => {
+                const instance = bootstrap.Dropdown.getOrCreateInstance(toggle);
+
+                toggle.addEventListener("click", (event) => {
                     event.preventDefault();
                     event.stopPropagation();
+                    hideOtherDropdowns(toggle);
                     instance.toggle();
                 });
             });
 
-            document.addEventListener("click", function (event) {
-                dropdowns.forEach((el) => {
-                    const parent = el.closest(".dropdown");
-                    if (!parent) return;
+            document.addEventListener("click", (event) => {
+                const navLink = event.target.closest('#navbar-menu a[href]:not([href="#"])');
 
-                    if (!parent.contains(event.target)) {
-                        const instance = bootstrap.Dropdown.getOrCreateInstance(el);
-                        instance.hide();
-                    }
-                });
+                if (!event.target.closest(".dropdown-menu")) {
+                    hideOtherDropdowns(null);
+                }
+
+                if (!navLink) {
+                    return;
+                }
+
+                hideOtherDropdowns(null);
+
+                const collapseEl = document.getElementById("navbar-menu");
+                if (collapseEl && collapseEl.classList.contains("show") && window.bootstrap && bootstrap.Collapse) {
+                    bootstrap.Collapse.getOrCreateInstance(collapseEl, { toggle: false }).hide();
+                }
             });
         },
 
