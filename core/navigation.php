@@ -56,6 +56,12 @@ function kirpi_navigation_group_meta(string $groupKey): array
         $meta['weight'] = 900;
     }
 
+    if ($groupKey === 'content') {
+        $meta['title'] = kirpi_module_translate('settings', 'nav_content_management', 'İçerik Yönetimi');
+        $meta['icon'] = 'ti ti-layout-dashboard';
+        $meta['weight'] = 540;
+    }
+
     return $meta;
 }
 
