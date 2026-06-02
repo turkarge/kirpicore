@@ -8,6 +8,8 @@ require_once BASE_PATH . '/modules/mail/language.php';
 $configStatus = kirpi_mail_config_status();
 $currentUser = current_user();
 $defaultRecipient = (string) ($currentUser['email'] ?? '');
+$templateRoute = route_exists('template/email') && check_permission('template.view') ? 'template/email' : 'mail/templates';
+$canManageTemplates = route_exists($templateRoute) && (check_permission('template.view') || check_permission('mail.view'));
 
 $mailLogs = [];
 if (db_table_exists('mail_logs')) {
@@ -32,9 +34,9 @@ if (db_table_exists('mail_logs')) {
                 <div class="page-pretitle"><?php echo e(mail_lang('mail_center')); ?></div>
                 <h2 class="page-title"><?php echo e(mail_lang('mail_test_status')); ?></h2>
             </div>
-            <?php if (route_exists('mail/templates') && check_permission('mail.view')): ?>
+            <?php if ($canManageTemplates): ?>
                 <div class="col-auto ms-auto d-print-none">
-                    <a href="<?php echo base_url('mail/templates'); ?>" class="btn btn-outline-primary">
+                    <a href="<?php echo base_url($templateRoute); ?>" class="btn btn-outline-primary">
                         <?php echo e(mail_lang('manage_templates')); ?>
                     </a>
                 </div>

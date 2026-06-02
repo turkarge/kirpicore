@@ -451,6 +451,10 @@ function kirpi_mail_default_templates(): array
 
 function kirpi_mail_sync_system_templates(): void
 {
+    if (function_exists('kirpi_template_sync_mail_defaults')) {
+        kirpi_template_sync_mail_defaults(kirpi_mail_default_templates());
+    }
+
     if (!kirpi_mail_templates_table_ready()) {
         return;
     }
@@ -484,6 +488,13 @@ function kirpi_mail_get_template(string $templateKey, bool $mustBeActive = true)
     $templateKey = trim($templateKey);
     if ($templateKey === '') {
         return null;
+    }
+
+    if (function_exists('kirpi_template_find_mail_template')) {
+        $template = kirpi_template_find_mail_template($templateKey, $mustBeActive);
+        if ($template) {
+            return $template;
+        }
     }
 
     if (kirpi_mail_templates_table_ready()) {

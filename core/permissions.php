@@ -105,6 +105,19 @@ function kirpi_core_permission_catalog(): array
                 ],
             ],
         ],
+        'template' => [
+            'title' => 'Template Registry',
+            'permissions' => [
+                [
+                    'name' => 'Şablonları Görüntüleme',
+                    'slug' => 'template.view',
+                ],
+                [
+                    'name' => 'Şablon Yönetimi',
+                    'slug' => 'template.manage',
+                ],
+            ],
+        ],
         'audit' => [
             'title' => 'Audit',
             'permissions' => [
