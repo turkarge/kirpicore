@@ -17,6 +17,10 @@ $page_script = resolve_page_script($route_file);
     <title><?php echo e(app_name()); ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="<?php echo e(app_name()); ?>">
+    <link rel="manifest" href="<?php echo base_url('manifest.webmanifest'); ?>">
 
     <link href="<?php echo asset_url('css/tabler.min.css'); ?>" rel="stylesheet"/>
     <link href="<?php echo asset_url('css/tabler-icons.min.css'); ?>" rel="stylesheet"/>
