@@ -44,8 +44,8 @@ function dashboard_lang(string $key, ?string $default = null): string
                 'database_ok' => 'Temel tablolar ulaşılabilir.',
                 'database_missing' => 'Temel tablolar eksik görünüyor.',
                 'upload_folder' => 'Upload klasörü',
-                'upload_ok' => 'Avatar dizini yazılabilir.',
-                'upload_warn' => 'uploads/avatars yazma izni kontrol edilmeli.',
+                'upload_ok' => 'Upload dizini yazılabilir.',
+                'upload_warn' => 'uploads dizini yazma izni kontrol edilmeli.',
 
                 // API ve Throttle Durumu
                 'api_status' => 'API durumu',
@@ -91,8 +91,8 @@ function dashboard_lang(string $key, ?string $default = null): string
                 'database_ok' => 'Core tables are reachable.',
                 'database_missing' => 'Core tables appear to be missing.',
                 'upload_folder' => 'Upload folder',
-                'upload_ok' => 'Avatar directory is writable.',
-                'upload_warn' => 'Check write permission for uploads/avatars.',
+                'upload_ok' => 'Upload directory is writable.',
+                'upload_warn' => 'Check write permission for uploads.',
                 'api_status' => 'API status',
                 'api_on' => 'API is enabled.',
                 'api_off' => 'API is disabled.',

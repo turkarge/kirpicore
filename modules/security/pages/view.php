@@ -61,6 +61,7 @@ $dirChecks = [];
 $paths = [
     'uploads' => BASE_PATH . '/uploads',
     'uploads/avatars' => BASE_PATH . '/uploads/avatars',
+    'uploads/documents' => BASE_PATH . '/uploads/documents',
     'logs' => BASE_PATH . '/logs',
     'storage' => BASE_PATH . '/storage',
 ];

@@ -9,6 +9,7 @@ require_once BASE_PATH . '/core/permissions.php';
 require_once BASE_PATH . '/core/modules.php';
 require_once BASE_PATH . '/core/navigation.php';
 require_once BASE_PATH . '/modules/template/helpers.php';
+require_once BASE_PATH . '/modules/documents/helpers.php';
 require_once BASE_PATH . '/core/mail.php';
 require_once BASE_PATH . '/core/queue.php';
 require_once BASE_PATH . '/core/backup.php';

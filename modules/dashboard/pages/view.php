@@ -49,7 +49,7 @@ try {
 $modules = function_exists('kirpi_list_modules') ? kirpi_list_modules() : [];
 $metrics['enabled_modules'] = count(array_filter($modules, static fn(array $m): bool => !empty($m['enabled'])));
 
-$uploadPath = BASE_PATH . '/uploads/avatars';
+$uploadPath = BASE_PATH . '/uploads';
 $apiEnabled = env_bool('API_ENABLED', true);
 if (function_exists('kirpi_setting_bool')) {
     $apiEnabled = kirpi_setting_bool('api.enabled', $apiEnabled);

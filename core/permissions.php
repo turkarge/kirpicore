@@ -118,6 +118,23 @@ function kirpi_core_permission_catalog(): array
                 ],
             ],
         ],
+        'documents' => [
+            'title' => 'Documents',
+            'permissions' => [
+                [
+                    'name' => 'Belgeleri Görüntüleme',
+                    'slug' => 'documents.view',
+                ],
+                [
+                    'name' => 'Belge Yükleme',
+                    'slug' => 'documents.upload',
+                ],
+                [
+                    'name' => 'Belge Yönetimi',
+                    'slug' => 'documents.manage',
+                ],
+            ],
+        ],
         'audit' => [
             'title' => 'Audit',
             'permissions' => [
