@@ -12,6 +12,16 @@
     "author":  "Kirpi Core",
     "menu":  [
                  {
+                     "title":  "Audit Overview",
+                     "title_key":  "audit_overview",
+                     "icon":  "ti ti-chart-bar",
+                     "url":  "audit/overview",
+                     "permission":  "audit.view",
+                     "placement":  "management",
+                     "group":  "monitoring",
+                     "weight":  545
+                 },
+                 {
                      "title":  "Audit Log",
                      "title_key":  "audit_log",
                      "icon":  "ti ti-list-details",
