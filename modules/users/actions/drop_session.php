@@ -66,22 +66,15 @@ try {
         ]);
     }
 
-    kirpi_create_notification(
-        $targetUserId,
-        'Oturum sonlandirildi',
-        'Yetkili bir kullanici tum aktif oturumlarinizi sonlandirdi. Lutfen yeniden giris yapin.'
-    );
-
-    if (!empty($targetUser['email'])) {
-        kirpi_send_templated_mail(
-            (string) $targetUser['email'],
-            'users.session_dropped',
-            [
-                'user_name' => (string) ($targetUser['name'] ?? ''),
-            ],
-            $targetUserId > 0 ? $targetUserId : null
-        );
-    }
+    kirpi_notify_user($targetUserId, 'users.session_dropped', [
+        'user_name' => (string) ($targetUser['name'] ?? ''),
+    ], [
+        'title' => 'Oturum sonlandırıldı',
+        'message' => 'Yetkili bir kullanıcı tüm aktif oturumlarınızı sonlandırdı. Lütfen yeniden giriş yapın.',
+        'email' => !empty($targetUser['email']),
+        'recipient_email' => (string) ($targetUser['email'] ?? ''),
+        'email_template_key' => 'users.session_dropped',
+    ]);
 
     kirpi_audit_log('drop_session', 'users', [
         'target_user_id' => $targetUserId,

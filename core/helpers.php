@@ -267,6 +267,135 @@ function kirpi_create_notification(int $userId, string $title, string $message, 
     }
 }
 
+function kirpi_notification_settings(int $userId): array
+{
+    $settings = [
+        'in_app_enabled' => true,
+        'email_enabled' => true,
+    ];
+
+    if ($userId <= 0 || !db_table_exists('notification_settings')) {
+        return $settings;
+    }
+
+    try {
+        $stmt = db()->prepare("
+            SELECT in_app_enabled, email_enabled
+            FROM notification_settings
+            WHERE user_id = :user_id
+            LIMIT 1
+        ");
+        $stmt->execute([':user_id' => $userId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            return $settings;
+        }
+
+        return [
+            'in_app_enabled' => (int) ($row['in_app_enabled'] ?? 1) === 1,
+            'email_enabled' => (int) ($row['email_enabled'] ?? 1) === 1,
+        ];
+    } catch (Throwable $e) {
+        error_log('notification settings read error: ' . $e->getMessage());
+        return $settings;
+    }
+}
+
+function kirpi_notification_user_email(int $userId): ?string
+{
+    if ($userId <= 0 || !db_table_exists('users')) {
+        return null;
+    }
+
+    try {
+        $stmt = db()->prepare("SELECT email FROM users WHERE id = :id LIMIT 1");
+        $stmt->execute([':id' => $userId]);
+        $email = trim((string) $stmt->fetchColumn());
+
+        return filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : null;
+    } catch (Throwable $e) {
+        error_log('notification user email read error: ' . $e->getMessage());
+        return null;
+    }
+}
+
+function kirpi_render_notification_template(string $templateKey, array $variables, string $fallbackTitle, string $fallbackMessage): array
+{
+    if (function_exists('kirpi_template_sync_notification_defaults')) {
+        kirpi_template_sync_notification_defaults();
+    }
+
+    $title = trim($fallbackTitle);
+    $message = trim($fallbackMessage);
+
+    if (function_exists('kirpi_template_find_content_template')) {
+        $template = kirpi_template_find_content_template($templateKey, true);
+        if ($template) {
+            $subjectTemplate = trim((string) ($template['subject'] ?? ''));
+            $bodyTemplate = trim((string) ($template['body'] ?? ''));
+
+            if ($subjectTemplate !== '' && function_exists('kirpi_template_render_string')) {
+                $title = trim(kirpi_template_render_string($subjectTemplate, $variables));
+            }
+
+            if ($bodyTemplate !== '' && function_exists('kirpi_template_render_string')) {
+                $message = trim(kirpi_template_render_string($bodyTemplate, $variables));
+            }
+        }
+    }
+
+    return [
+        'title' => $title,
+        'message' => $message,
+    ];
+}
+
+function kirpi_notify_user(int $userId, string $templateKey, array $variables = [], array $options = []): array
+{
+    if ($userId <= 0) {
+        return [
+            'success' => false,
+            'in_app' => false,
+            'email' => false,
+            'message' => 'invalid_user',
+        ];
+    }
+
+    $templateKey = trim($templateKey);
+    $fallbackTitle = (string) ($options['title'] ?? ($variables['title'] ?? $templateKey));
+    $fallbackMessage = (string) ($options['message'] ?? ($variables['message'] ?? $fallbackTitle));
+    $settings = kirpi_notification_settings($userId);
+    $rendered = kirpi_render_notification_template($templateKey, $variables, $fallbackTitle, $fallbackMessage);
+    $channel = (string) ($options['channel'] ?? 'in_app');
+
+    $inAppCreated = false;
+    if (($options['in_app'] ?? true) && $settings['in_app_enabled']) {
+        $inAppCreated = kirpi_create_notification($userId, $rendered['title'], $rendered['message'], $channel);
+    }
+
+    $emailSent = false;
+    if (($options['email'] ?? false) && $settings['email_enabled'] && function_exists('kirpi_send_templated_mail')) {
+        $recipient = trim((string) ($options['recipient_email'] ?? ''));
+        if ($recipient === '') {
+            $recipient = (string) kirpi_notification_user_email($userId);
+        }
+
+        if ($recipient !== '' && filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
+            $mailTemplateKey = trim((string) ($options['email_template_key'] ?? $templateKey));
+            $mailResult = kirpi_send_templated_mail($recipient, $mailTemplateKey, $variables, $userId);
+            $emailSent = (bool) ($mailResult['success'] ?? false);
+        }
+    }
+
+    return [
+        'success' => $inAppCreated || $emailSent,
+        'in_app' => $inAppCreated,
+        'email' => $emailSent,
+        'title' => $rendered['title'],
+        'message' => $rendered['message'],
+    ];
+}
+
 function get_recent_notifications(?int $userId, int $limit = 5): array
 {
     if (!$userId || !db_table_exists('notifications')) {

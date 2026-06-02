@@ -27,6 +27,9 @@ if ($tableReady) {
     if ($kind === 'email' && function_exists('kirpi_mail_default_templates')) {
         kirpi_template_sync_mail_defaults(kirpi_mail_default_templates());
     }
+    if ($kind === 'content') {
+        kirpi_template_sync_notification_defaults();
+    }
 
     try {
         $stmt = db()->prepare("
@@ -126,7 +129,7 @@ $kindTabs = [
                                     <label class="form-label form-required"><?php echo e(template_lang('language')); ?></label>
                                     <input type="text" name="language" class="form-control" maxlength="10" required value="<?php echo e((string) env('APP_LOCALE', 'tr')); ?>">
                                 </div>
-                                <?php if ($kind === 'email'): ?>
+                                <?php if (in_array($kind, ['email', 'content'], true)): ?>
                                     <div class="col-12 col-lg-10">
                                         <label class="form-label form-required"><?php echo e(template_lang('subject')); ?></label>
                                         <input type="text" name="subject" class="form-control" required>
@@ -221,7 +224,7 @@ $kindTabs = [
                                                             <label class="form-label form-required"><?php echo e(template_lang('language')); ?></label>
                                                             <input type="text" name="language" class="form-control" maxlength="10" required value="<?php echo e((string) ($template['language'] ?? 'tr')); ?>">
                                                         </div>
-                                                        <?php if ($kind === 'email'): ?>
+                                                        <?php if (in_array($kind, ['email', 'content'], true)): ?>
                                                             <div class="col-12 col-lg-10">
                                                                 <label class="form-label form-required"><?php echo e(template_lang('subject')); ?></label>
                                                                 <input type="text" name="subject" class="form-control" required value="<?php echo e((string) ($template['subject'] ?? '')); ?>">

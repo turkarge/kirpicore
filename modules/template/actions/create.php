@@ -35,12 +35,12 @@ if (!in_array($kind, kirpi_template_kinds(), true)) {
     json_response(['status' => 'error', 'message' => template_lang('invalid_kind')], 422);
 }
 
-if ($kind === 'email') {
+if (in_array($kind, ['email', 'content'], true)) {
     $variables = array_values(array_unique(array_merge($variables, kirpi_template_variables_for_target($targetKey))));
     sort($variables);
 }
 
-if ($moduleKey === '' || $targetKey === '' || $code === '' || $name === '' || $language === '' || $body === '' || ($kind === 'email' && $subject === '')) {
+if ($moduleKey === '' || $targetKey === '' || $code === '' || $name === '' || $language === '' || $body === '' || (in_array($kind, ['email', 'content'], true) && $subject === '')) {
     json_response(['status' => 'error', 'message' => template_lang('required_fields')], 422);
 }
 
@@ -67,7 +67,7 @@ try {
         ':code' => $code,
         ':name' => $name,
         ':language' => $language,
-        ':subject' => $kind === 'email' ? $subject : null,
+        ':subject' => in_array($kind, ['email', 'content'], true) ? $subject : null,
         ':body' => $body,
         ':variables_json' => $variablesJson ?: null,
         ':created_by_user_id' => $createdBy > 0 ? $createdBy : null,

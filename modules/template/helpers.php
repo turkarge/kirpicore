@@ -21,6 +21,7 @@ function kirpi_template_supported_modules(): array
         'users' => 'Users',
         'notifications' => 'Notifications',
         'queue' => 'Queue',
+        'backup' => 'Backup',
         'audit' => 'Audit',
         'ai' => 'Kirpi Intelligence',
         'core' => 'Core',
@@ -47,6 +48,12 @@ function kirpi_template_supported_targets(string $kind): array
             'system.report' => 'Sistem raporu',
         ],
         'content' => [
+            'notifications.generic' => 'Genel bildirim',
+            'users.session_dropped' => 'Kullanıcı oturum düşürme bildirimi',
+            'users.lock_key_reset' => 'Kullanıcı lock key sıfırlama bildirimi',
+            'backup.completed' => 'Backup tamamlandı bildirimi',
+            'ai.schema_synced' => 'AI schema sync bildirimi',
+            'queue.job_failed' => 'Queue job hata bildirimi',
             'dashboard.notice' => 'Dashboard duyurusu',
             'system.footer' => 'Sistem footer içeriği',
             'terms.content' => 'Kullanım koşulları',
@@ -100,6 +107,9 @@ function kirpi_template_variables_for_target(string $targetKey): array
         'users.session_dropped' => ['user_name'],
         'users.lock_key_reset' => ['user_name'],
         'notifications.generic' => ['title', 'message', 'action_url'],
+        'backup.completed' => ['label', 'file_name', 'file_size'],
+        'ai.schema_synced' => ['entity_count', 'field_count'],
+        'queue.job_failed' => ['job_type', 'error_message'],
         'audit.summary' => ['period', 'total_events', 'failed_events'],
         'ai.summary' => ['entity_count', 'field_count', 'audit_count'],
         'audit.overview' => ['generated_at', 'total_events'],
@@ -151,6 +161,109 @@ function kirpi_template_kind_module_for_key(string $templateKey): string
     $moduleKey = trim((string) ($parts[0] ?? ''));
 
     return array_key_exists($moduleKey, kirpi_template_supported_modules()) ? $moduleKey : 'mail';
+}
+
+function kirpi_template_default_notification_templates(): array
+{
+    return [
+        'notifications.generic' => [
+            'name' => 'Notifications - Generic',
+            'subject' => '{{title}}',
+            'body' => '{{message}}',
+        ],
+        'users.session_dropped' => [
+            'name' => 'Users - Session Dropped Notification',
+            'subject' => 'Oturum sonlandırıldı',
+            'body' => 'Yetkili bir kullanıcı tüm aktif oturumlarınızı sonlandırdı. Lütfen yeniden giriş yapın.',
+        ],
+        'users.lock_key_reset' => [
+            'name' => 'Users - Lock Key Reset Notification',
+            'subject' => 'Lock key sıfırlandı',
+            'body' => 'Yetkili bir kullanıcı oturum kilitleme keyinizi sıfırladı ve özelliği pasif yaptı.',
+        ],
+        'backup.completed' => [
+            'name' => 'Backup - Completed Notification',
+            'subject' => 'Backup tamamlandı',
+            'body' => '{{label}} backup işlemi tamamlandı. Dosya: {{file_name}}',
+        ],
+        'ai.schema_synced' => [
+            'name' => 'AI - Schema Synced Notification',
+            'subject' => 'AI schema registry güncellendi',
+            'body' => '{{entity_count}} entity ve {{field_count}} field senkronize edildi.',
+        ],
+        'queue.job_failed' => [
+            'name' => 'Queue - Job Failed Notification',
+            'subject' => 'Queue job başarısız oldu',
+            'body' => '{{job_type}} job çalışırken hata oluştu: {{error_message}}',
+        ],
+    ];
+}
+
+function kirpi_template_sync_notification_defaults(): void
+{
+    $language = strtolower((string) env('APP_LOCALE', 'tr'));
+    $language = $language !== '' ? $language : 'tr';
+
+    foreach (kirpi_template_default_notification_templates() as $templateKey => $template) {
+        $key = kirpi_template_normalize_code((string) $templateKey);
+        if ($key === '') {
+            continue;
+        }
+
+        kirpi_template_upsert_system(
+            'content',
+            kirpi_template_kind_module_for_key($key),
+            $key,
+            $key,
+            (string) ($template['name'] ?? $key),
+            $language,
+            (string) ($template['subject'] ?? ''),
+            (string) ($template['body'] ?? ''),
+            kirpi_template_variables_for_target($key)
+        );
+    }
+}
+
+function kirpi_template_find_content_template(string $templateKey, bool $mustBeActive = true): ?array
+{
+    if (!kirpi_templates_table_ready()) {
+        return null;
+    }
+
+    $templateKey = kirpi_template_normalize_code($templateKey);
+    if ($templateKey === '') {
+        return null;
+    }
+
+    $language = strtolower((string) env('APP_LOCALE', 'tr'));
+    $language = $language !== '' ? $language : 'tr';
+
+    try {
+        $sql = "
+            SELECT id, code, name, subject, body, is_active, is_system, updated_at
+            FROM templates
+            WHERE kind = 'content'
+              AND language = :language
+              AND (code = :template_key OR target_key = :template_key)
+        ";
+        if ($mustBeActive) {
+            $sql .= " AND is_active = 1";
+        }
+        $sql .= " ORDER BY code = :template_key_sort DESC LIMIT 1";
+
+        $stmt = db()->prepare($sql);
+        $stmt->execute([
+            ':language' => $language,
+            ':template_key' => $templateKey,
+            ':template_key_sort' => $templateKey,
+        ]);
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    } catch (Throwable $e) {
+        error_log('template content lookup error: ' . $e->getMessage());
+        return null;
+    }
 }
 
 function kirpi_template_find_active(string $kind, string $moduleKey, string $targetKey, string $code, string $language = 'tr'): ?array

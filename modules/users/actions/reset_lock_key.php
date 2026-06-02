@@ -80,22 +80,15 @@ try {
         }
     }
 
-    kirpi_create_notification(
-        $targetUserId,
-        'Lock key sifirlandi',
-        'Yetkili bir kullanici oturum kilitleme keyinizi sifirladi ve ozelligi pasif yapti.'
-    );
-
-    if (!empty($targetUser['email'])) {
-        kirpi_send_templated_mail(
-            (string) $targetUser['email'],
-            'users.lock_key_reset',
-            [
-                'user_name' => (string) ($targetUser['name'] ?? ''),
-            ],
-            $targetUserId > 0 ? $targetUserId : null
-        );
-    }
+    kirpi_notify_user($targetUserId, 'users.lock_key_reset', [
+        'user_name' => (string) ($targetUser['name'] ?? ''),
+    ], [
+        'title' => 'Lock key sıfırlandı',
+        'message' => 'Yetkili bir kullanıcı oturum kilitleme keyinizi sıfırladı ve özelliği pasif yaptı.',
+        'email' => !empty($targetUser['email']),
+        'recipient_email' => (string) ($targetUser['email'] ?? ''),
+        'email_template_key' => 'users.lock_key_reset',
+    ]);
 
     kirpi_audit_log('reset_lock_key', 'users', [
         'target_user_id' => $targetUserId,

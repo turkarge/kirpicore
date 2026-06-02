@@ -41,7 +41,7 @@ try {
         json_response(['status' => 'error', 'message' => template_lang('not_found')], 404);
     }
 
-    if (($template['kind'] ?? '') === 'email') {
+    if (in_array((string) ($template['kind'] ?? ''), ['email', 'content'], true)) {
         if ($subject === '') {
             json_response(['status' => 'error', 'message' => template_lang('required_fields')], 422);
         }
@@ -66,7 +66,7 @@ try {
     $stmt->execute([
         ':name' => $name,
         ':language' => $language,
-        ':subject' => ($template['kind'] ?? '') === 'email' ? $subject : null,
+        ':subject' => in_array((string) ($template['kind'] ?? ''), ['email', 'content'], true) ? $subject : null,
         ':body' => $body,
         ':variables_json' => $variablesJson ?: null,
         ':is_active' => $isActive,
