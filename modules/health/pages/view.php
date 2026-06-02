@@ -6,7 +6,7 @@ if (!defined('KIRPI_CORE_ENTRY')) {
 require_once BASE_PATH . '/modules/health/language.php';
 
 $metrics = [];
-$now = date('Y-m-d H:i:s');
+$now = kirpi_format_datetime(new DateTimeImmutable('now'));
 
 $dbStatus = 'OK';
 $dbDetail = health_lang('db_connection_ok');

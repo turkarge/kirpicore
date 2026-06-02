@@ -270,9 +270,9 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
                                                             <tr>
                                                                 <td><?php echo $tokenId; ?></td>
                                                                 <td><?php echo e((string) ($tokenRow['token_name'] ?? 'default')); ?></td>
-                                                                <td><?php echo e((string) ($tokenRow['created_at'] ?? '-')); ?></td>
-                                                                <td><?php echo e((string) ($tokenRow['last_used_at'] ?? '-')); ?></td>
-                                                                <td><?php echo e($isUnlimitedToken ? profile_lang('unlimited') : ($expiresAtRaw !== '' ? $expiresAtRaw : '-')); ?></td>
+                                                                <td><?php echo e(kirpi_format_datetime((string) ($tokenRow['created_at'] ?? ''))); ?></td>
+                                                                <td><?php echo e(kirpi_format_datetime((string) ($tokenRow['last_used_at'] ?? ''))); ?></td>
+                                                                <td><?php echo e($isUnlimitedToken ? profile_lang('unlimited') : kirpi_format_datetime($expiresAtRaw)); ?></td>
                                                                 <td><code><?php echo e(implode(', ', $tokenScopes)); ?></code></td>
                                                                 <td><span class="badge <?php echo e($statusClass); ?>"><?php echo e($statusLabel); ?></span></td>
                                                                 <td>

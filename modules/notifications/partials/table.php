@@ -127,7 +127,7 @@ try {
                             <?php endif; ?>
                         </td>
                         <td>
-                            <?php echo e(date('d.m.Y H:i', strtotime($notification['created_at']))); ?>
+                            <?php echo e(kirpi_format_datetime((string) ($notification['created_at'] ?? ''))); ?>
                         </td>
                         <td>
                             <?php if (empty($notification['read_at'])): ?>

@@ -166,7 +166,7 @@ try {
                         </td>
 
                         <td>
-                            <?php echo e(date('d.m.Y H:i', strtotime($user['created_at']))); ?>
+                            <?php echo e(kirpi_format_datetime((string) ($user['created_at'] ?? ''))); ?>
                         </td>
 
                         <td>

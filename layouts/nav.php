@@ -130,10 +130,7 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                                             $dateLabel = '';
 
                                             if (!empty($notification['created_at'])) {
-                                                $timestamp = strtotime((string) $notification['created_at']);
-                                                if ($timestamp !== false) {
-                                                    $dateLabel = date('d.m.Y H:i', $timestamp);
-                                                }
+                                                $dateLabel = kirpi_format_datetime((string) $notification['created_at'], 'long', '');
                                             }
                                             ?>
                                             <a href="<?php echo base_url('notifications/list'); ?>"

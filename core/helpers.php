@@ -334,6 +334,40 @@ function asset_url(string $path): string
     return base_url('assets/' . $normalizedPath) . '?v=' . rawurlencode($version);
 }
 
+function kirpi_date_format(string $style = 'short'): string
+{
+    $style = strtolower(trim($style));
+    $locale = strtolower((string) env('APP_LOCALE', 'tr'));
+
+    $defaultShort = str_starts_with($locale, 'tr') ? 'd.m.Y' : 'Y-m-d';
+    $defaultLong = str_starts_with($locale, 'tr') ? 'd.m.Y H:i' : 'Y-m-d H:i';
+
+    if ($style === 'long' || $style === 'datetime') {
+        return (string) env('APP_DATE_FORMAT_LONG', $defaultLong);
+    }
+
+    return (string) env('APP_DATE_FORMAT_SHORT', $defaultShort);
+}
+
+function kirpi_format_date(null|string|DateTimeInterface $value, string $style = 'short', string $empty = '-'): string
+{
+    if ($value === null || $value === '') {
+        return $empty;
+    }
+
+    try {
+        $date = $value instanceof DateTimeInterface ? $value : new DateTimeImmutable((string) $value);
+        return $date->format(kirpi_date_format($style));
+    } catch (Throwable) {
+        return $empty;
+    }
+}
+
+function kirpi_format_datetime(null|string|DateTimeInterface $value, string $style = 'long', string $empty = '-'): string
+{
+    return kirpi_format_date($value, $style, $empty);
+}
+
 function set_flash_message(string $type, string $message): void
 {
     $_SESSION['flash_message'] = [
