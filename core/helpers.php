@@ -327,7 +327,11 @@ function base_url(string $path = ''): string
 
 function asset_url(string $path): string
 {
-    return base_url('assets/' . ltrim($path, '/'));
+    $normalizedPath = ltrim($path, '/');
+    $assetFile = BASE_PATH . '/assets/' . $normalizedPath;
+    $version = is_file($assetFile) ? (string) filemtime($assetFile) : APP_VER;
+
+    return base_url('assets/' . $normalizedPath) . '?v=' . rawurlencode($version);
 }
 
 function set_flash_message(string $type, string $message): void

@@ -32,6 +32,22 @@ $coverImage = AUTH_LOGIN_COVER_IMAGE !== ''
     <link href="<?php echo asset_url('css/tabler-icons.min.css'); ?>" rel="stylesheet">
     <link href="<?php echo asset_url('css/app.css'); ?>" rel="stylesheet">
     <link href="<?php echo asset_url('css/toastr.min.css'); ?>" rel="stylesheet">
+    <script>
+    (function () {
+        try {
+            const preference = localStorage.getItem('kirpi_theme_preference') || 'system';
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = preference === 'system' ? (prefersDark ? 'dark' : 'light') : preference;
+            document.documentElement.setAttribute('data-bs-theme', theme);
+            document.documentElement.setAttribute('data-kirpi-theme', theme);
+            document.documentElement.setAttribute('data-kirpi-theme-preference', preference);
+        } catch (error) {
+            document.documentElement.setAttribute('data-bs-theme', 'light');
+            document.documentElement.setAttribute('data-kirpi-theme', 'light');
+            document.documentElement.setAttribute('data-kirpi-theme-preference', 'system');
+        }
+    })();
+    </script>
 </head>
 <body class="auth-cover-page">
 <script>
@@ -120,6 +136,14 @@ window.KIRPI_CONFIG = {
                 <?php echo e(auth_lang('terms_accept_prefix')); ?>
                 <a href="<?php echo base_url('auth/terms'); ?>"><?php echo e(auth_lang('terms_accept_link')); ?></a>
                 <?php echo e(auth_lang('terms_accept_suffix')); ?>
+            </div>
+
+            <div class="auth-theme-switcher mt-4">
+                <div class="btn-group w-100" role="group" aria-label="Tema seçimi">
+                    <button type="button" class="btn btn-outline-secondary" data-theme-choice="light">Light</button>
+                    <button type="button" class="btn btn-outline-secondary" data-theme-choice="dark">Dark</button>
+                    <button type="button" class="btn btn-outline-secondary" data-theme-choice="system">Sistem</button>
+                </div>
             </div>
         </div>
     </div>

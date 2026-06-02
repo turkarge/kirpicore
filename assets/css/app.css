@@ -234,3 +234,9 @@ body {
     background: var(--kirpi-shell-bg);
     color: var(--kirpi-text);
 }
+
+.auth-theme-switcher .btn.active {
+    background: var(--kirpi-shell-accent);
+    border-color: var(--kirpi-shell-accent);
+    color: #fff;
+}
