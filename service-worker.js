@@ -10,6 +10,7 @@ const KIRPI_STATIC_ASSETS = [
   '/assets/js/tabler.min.js',
   '/assets/js/toastr.min.js',
   '/assets/js/app.js',
+  '/assets/js/report-table.js',
   '/assets/js/pwa.js',
   '/assets/img/logo.svg'
 ];

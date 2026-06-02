@@ -122,8 +122,46 @@ body {
     cursor: pointer;
 }
 
+.kirpi-sortable-th {
+    position: relative;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.kirpi-sortable-th::after {
+    content: "\2195";
+    margin-left: .4rem;
+    color: var(--kirpi-muted);
+    font-size: .75rem;
+}
+
+.kirpi-sortable-th[data-sort-dir="asc"]::after {
+    content: "\2191";
+    color: var(--kirpi-shell-accent);
+}
+
+.kirpi-sortable-th[data-sort-dir="desc"]::after {
+    content: "\2193";
+    color: var(--kirpi-shell-accent);
+}
+
 .table-actions {
     white-space: nowrap;
+}
+
+@media print {
+    .kirpi-report-card .card-header {
+        display: none !important;
+    }
+
+    .kirpi-sortable-report th {
+        color: #000 !important;
+    }
+
+    .kirpi-sortable-report a {
+        color: #000;
+        text-decoration: none;
+    }
 }
 
 .form-required::after {
