@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const moduleFilter = document.getElementById("audit-module-filter");
     const actionFilter = document.getElementById("audit-action-filter");
     const userFilter = document.getElementById("audit-user-filter");
+    const exportButtons = document.querySelectorAll(".js-audit-export");
 
     if (!tableContainer) {
         return;
@@ -15,7 +16,12 @@ document.addEventListener("DOMContentLoaded", function () {
     function buildUrl(page = 1) {
         const params = new URLSearchParams();
         params.set("page", page);
+        appendFilters(params);
 
+        return `${window.KIRPI_CONFIG.baseUrl}/ajax/audit/table?${params.toString()}`;
+    }
+
+    function appendFilters(params) {
         if (statusFilter && statusFilter.value !== "") {
             params.set("status", statusFilter.value);
         }
@@ -31,8 +37,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (userFilter && userFilter.value.trim() !== "") {
             params.set("user_id", userFilter.value.trim());
         }
-
-        return `${window.KIRPI_CONFIG.baseUrl}/ajax/audit/table?${params.toString()}`;
     }
 
     async function loadTable(page = 1) {
@@ -83,6 +87,15 @@ document.addEventListener("DOMContentLoaded", function () {
         input.addEventListener("input", function () {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(triggerReload, 300);
+        });
+    });
+
+    exportButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+            const params = new URLSearchParams();
+            params.set("format", button.dataset.format || "csv");
+            appendFilters(params);
+            window.location.href = `${window.KIRPI_CONFIG.baseUrl}/audit/actions/export?${params.toString()}`;
         });
     });
 

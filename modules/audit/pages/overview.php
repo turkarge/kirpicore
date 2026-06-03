@@ -105,10 +105,16 @@ $statusBadge = static function (string $status): string {
                         <i class="ti ti-mail"></i>
                         <?php echo e(audit_lang('email')); ?>
                     </button>
-                    <button type="button" class="btn btn-primary js-kirpi-report-excel" data-filename="audit-overview.xls">
-                        <i class="ti ti-file-spreadsheet"></i>
-                        <?php echo e(audit_lang('excel_export')); ?>
-                    </button>
+                    <?php if ($auditTableReady): ?>
+                        <a href="<?php echo base_url('audit/actions/export?format=csv'); ?>" class="btn btn-outline-secondary">
+                            <i class="ti ti-file-type-csv"></i>
+                            <?php echo e(audit_lang('csv_export')); ?>
+                        </a>
+                        <a href="<?php echo base_url('audit/actions/export?format=xls'); ?>" class="btn btn-primary">
+                            <i class="ti ti-file-spreadsheet"></i>
+                            <?php echo e(audit_lang('excel_export')); ?>
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

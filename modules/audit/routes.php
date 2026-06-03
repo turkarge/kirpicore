@@ -22,4 +22,11 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'audit/actions/export' => [
+        'file' => 'modules/audit/actions/export.php',
+        'layout' => false,
+        'permission' => 'audit.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
 ];
