@@ -16,9 +16,22 @@ if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
 
 $result = kirpi_queue_work_once('default');
 $status = (string) ($result['status'] ?? 'error');
+$currentUser = current_user();
+$userId = (int) ($currentUser['id'] ?? 0);
 
 if ($status === 'failed') {
     kirpi_audit_log('work_once', 'queue', $result, 'queue_job', isset($result['job_id']) ? (int) $result['job_id'] : null, 'failed');
+
+    if ($userId > 0) {
+        kirpi_notify_user($userId, 'queue.job_failed', [
+            'job_type' => (string) ($result['job_type'] ?? 'unknown'),
+            'error_message' => (string) ($result['message'] ?? queue_lang('work_failed_default')),
+        ], [
+            'title' => 'Queue job başarısız oldu',
+            'message' => (string) ($result['message'] ?? queue_lang('work_failed_default')),
+            'email' => false,
+        ]);
+    }
 
     json_response([
         'status' => 'error',

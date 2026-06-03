@@ -15,6 +15,8 @@ if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
 }
 
 $result = kirpi_ai_sync_schema_registry_from_manifests();
+$currentUser = current_user();
+$userId = (int) ($currentUser['id'] ?? 0);
 
 if (($result['status'] ?? '') === 'error') {
     json_response([
@@ -24,6 +26,17 @@ if (($result['status'] ?? '') === 'error') {
 }
 
 if (($result['status'] ?? '') === 'partial') {
+    if ($userId > 0) {
+        kirpi_notify_user($userId, 'ai.schema_synced', [
+            'entity_count' => (int) ($result['entity_count'] ?? 0),
+            'field_count' => (int) ($result['field_count'] ?? 0),
+        ], [
+            'title' => 'AI schema sync kısmi tamamlandı',
+            'message' => 'AI schema sync kısmi tamamlandı. Logları kontrol edin.',
+            'email' => false,
+        ]);
+    }
+
     json_response([
         'status' => 'warning',
         'message' => ai_lang('schema_sync_partial'),
@@ -31,12 +44,25 @@ if (($result['status'] ?? '') === 'partial') {
     ], 207);
 }
 
+$entityCount = (int) ($result['entity_count'] ?? 0);
+$fieldCount = (int) ($result['field_count'] ?? 0);
+if ($userId > 0) {
+    kirpi_notify_user($userId, 'ai.schema_synced', [
+        'entity_count' => $entityCount,
+        'field_count' => $fieldCount,
+    ], [
+        'title' => 'AI schema registry güncellendi',
+        'message' => $entityCount . ' entity ve ' . $fieldCount . ' field senkronize edildi.',
+        'email' => false,
+    ]);
+}
+
 json_response([
     'status' => 'success',
     'message' => sprintf(
         ai_lang('schema_sync_success'),
-        (int) ($result['entity_count'] ?? 0),
-        (int) ($result['field_count'] ?? 0)
+        $entityCount,
+        $fieldCount
     ),
     'reload_page' => true,
 ]);

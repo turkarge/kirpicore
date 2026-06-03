@@ -24,10 +24,22 @@ if (!kirpi_queue_table_ready()) {
 $stmt = db()->prepare("\n    UPDATE jobs_queue\n    SET status = 'queued',\n        last_error = NULL,\n        available_at = NOW(),\n        reserved_at = NULL,\n        finished_at = NULL,\n        updated_at = NOW()\n    WHERE status = 'failed'\n");
 $stmt->execute();
 $affected = (int) $stmt->rowCount();
+$currentUser = current_user();
+$userId = (int) ($currentUser['id'] ?? 0);
 
 kirpi_audit_log('retry_failed', 'queue', [
     'affected_rows' => $affected,
 ], 'queue_job', null, 'success');
+
+if ($userId > 0 && $affected > 0) {
+    kirpi_notify_user($userId, 'queue.retry_failed', [
+        'affected_count' => $affected,
+    ], [
+        'title' => 'Queue retry başlatıldı',
+        'message' => $affected . ' başarısız queue işi yeniden kuyruğa alındı.',
+        'email' => false,
+    ]);
+}
 
 json_response([
     'status' => 'success',

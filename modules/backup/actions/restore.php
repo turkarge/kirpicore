@@ -42,6 +42,16 @@ kirpi_audit_log('restore', 'backup', [
     'backup_id' => $backupId,
 ], 'backup', $backupId, 'success');
 
+if ($userId > 0) {
+    kirpi_notify_user($userId, 'backup.restored', [
+        'backup_id' => $backupId,
+    ], [
+        'title' => 'Backup restore tamamlandı',
+        'message' => 'Backup #' . $backupId . ' geri yükleme işlemi tamamlandı.',
+        'email' => false,
+    ]);
+}
+
 json_response([
     'status' => 'success',
     'message' => backup_lang('restore_success'),

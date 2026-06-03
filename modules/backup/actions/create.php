@@ -39,6 +39,19 @@ kirpi_audit_log('create', 'backup', [
     'retention_deleted_count' => $retentionDeletedCount,
 ], 'backup', $backupId, 'success');
 
+$fileSize = (int) ($result['file_size'] ?? 0);
+if ($userId > 0) {
+    kirpi_notify_user($userId, 'backup.completed', [
+        'label' => $label !== '' ? $label : ('Backup #' . $backupId),
+        'file_name' => (string) ($result['file_name'] ?? ''),
+        'file_size' => $fileSize > 0 ? number_format($fileSize / 1024 / 1024, 2) . ' MB' : '0 MB',
+    ], [
+        'title' => 'Backup tamamlandı',
+        'message' => 'Backup #' . $backupId . ' başarıyla oluşturuldu.',
+        'email' => false,
+    ]);
+}
+
 $message = backup_lang('create_success_prefix') . $backupId;
 if ($retentionDeletedCount > 0) {
     $message .= backup_lang('retention_deleted_prefix') . $retentionDeletedCount . backup_lang('retention_deleted_suffix');

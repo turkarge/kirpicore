@@ -52,8 +52,10 @@ function kirpi_template_supported_targets(string $kind): array
             'users.session_dropped' => 'Kullanıcı oturum düşürme bildirimi',
             'users.lock_key_reset' => 'Kullanıcı lock key sıfırlama bildirimi',
             'backup.completed' => 'Backup tamamlandı bildirimi',
+            'backup.restored' => 'Backup restore bildirimi',
             'ai.schema_synced' => 'AI schema sync bildirimi',
             'queue.job_failed' => 'Queue job hata bildirimi',
+            'queue.retry_failed' => 'Queue retry bildirimi',
             'dashboard.notice' => 'Dashboard duyurusu',
             'system.footer' => 'Sistem footer içeriği',
             'terms.content' => 'Kullanım koşulları',
@@ -108,8 +110,10 @@ function kirpi_template_variables_for_target(string $targetKey): array
         'users.lock_key_reset' => ['user_name'],
         'notifications.generic' => ['title', 'message', 'action_url'],
         'backup.completed' => ['label', 'file_name', 'file_size'],
+        'backup.restored' => ['backup_id'],
         'ai.schema_synced' => ['entity_count', 'field_count'],
         'queue.job_failed' => ['job_type', 'error_message'],
+        'queue.retry_failed' => ['affected_count'],
         'audit.summary' => ['period', 'total_events', 'failed_events'],
         'ai.summary' => ['entity_count', 'field_count', 'audit_count'],
         'audit.overview' => ['generated_at', 'total_events'],
@@ -186,6 +190,11 @@ function kirpi_template_default_notification_templates(): array
             'subject' => 'Backup tamamlandı',
             'body' => '{{label}} backup işlemi tamamlandı. Dosya: {{file_name}}',
         ],
+        'backup.restored' => [
+            'name' => 'Backup - Restored Notification',
+            'subject' => 'Backup restore tamamlandı',
+            'body' => 'Backup #{{backup_id}} geri yükleme işlemi tamamlandı.',
+        ],
         'ai.schema_synced' => [
             'name' => 'AI - Schema Synced Notification',
             'subject' => 'AI schema registry güncellendi',
@@ -195,6 +204,11 @@ function kirpi_template_default_notification_templates(): array
             'name' => 'Queue - Job Failed Notification',
             'subject' => 'Queue job başarısız oldu',
             'body' => '{{job_type}} job çalışırken hata oluştu: {{error_message}}',
+        ],
+        'queue.retry_failed' => [
+            'name' => 'Queue - Retry Failed Jobs Notification',
+            'subject' => 'Queue retry başlatıldı',
+            'body' => '{{affected_count}} başarısız queue işi yeniden kuyruğa alındı.',
         ],
     ];
 }
@@ -244,7 +258,7 @@ function kirpi_template_find_content_template(string $templateKey, bool $mustBeA
             FROM templates
             WHERE kind = 'content'
               AND language = :language
-              AND (code = :template_key OR target_key = :template_key)
+              AND (code = :template_key OR target_key = :target_key)
         ";
         if ($mustBeActive) {
             $sql .= " AND is_active = 1";
@@ -255,6 +269,7 @@ function kirpi_template_find_content_template(string $templateKey, bool $mustBeA
         $stmt->execute([
             ':language' => $language,
             ':template_key' => $templateKey,
+            ':target_key' => $templateKey,
             ':template_key_sort' => $templateKey,
         ]);
 
@@ -390,7 +405,7 @@ function kirpi_template_find_mail_template(string $templateKey, bool $mustBeActi
             FROM templates
             WHERE kind = 'email'
               AND language = :language
-              AND (code = :template_key OR target_key = :template_key)
+              AND (code = :template_key OR target_key = :target_key)
         ";
         if ($mustBeActive) {
             $sql .= " AND is_active = 1";
@@ -401,6 +416,7 @@ function kirpi_template_find_mail_template(string $templateKey, bool $mustBeActi
         $stmt->execute([
             ':language' => $language,
             ':template_key' => $templateKey,
+            ':target_key' => $templateKey,
             ':template_key_sort' => $templateKey,
         ]);
 
