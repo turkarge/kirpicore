@@ -11,12 +11,11 @@ function notifications_lang(string $key, ?string $default = null): string
     if ($dictionary === null) {
         $dictionary = [
             'tr' => [
-                // Genel Başlıklar
                 'communication_center' => 'İletişim Merkezi',
                 'notifications' => 'Bildirimler',
                 'settings' => 'Ayarlar',
-
-                // Bildirim Listesi
+                'export_csv' => 'CSV',
+                'export_excel' => 'Excel',
                 'search_placeholder' => 'Başlık veya mesaj ara...',
                 'all_statuses' => 'Tüm Durumlar',
                 'all_sources' => 'Tüm Kaynaklar',
@@ -31,8 +30,6 @@ function notifications_lang(string $key, ?string $default = null): string
                 'no_records' => 'Kayıt bulunamadı.',
                 'mark_read' => 'Okundu Yap',
                 'mark_all_read' => 'Tümünü Okundu Yap',
-
-                // Bildirim Ayarları
                 'settings_center' => 'Bildirim Merkezi',
                 'settings_title' => 'Bildirim Ayarları',
                 'back_to_list' => 'Listeye Dön',
@@ -40,16 +37,12 @@ function notifications_lang(string $key, ?string $default = null): string
                 'in_app_enabled' => 'Uygulama içi bildirimler açık olsun',
                 'save_settings' => 'Ayarları Kaydet',
                 'default_channel' => 'in_app',
-
-                // Hata ve Bilgilendirme Mesajları
                 'tables_missing' => 'Bildirim tabloları henüz kurulu değil. Önce modules/notifications/database/schema.sql dosyasını çalıştırın.',
                 'table_missing_short' => 'Bildirim tablosu henüz kurulu değil.',
                 'table_waiting' => 'Bildirim tablosu hazır olduğunda liste burada görünecek.',
                 'settings_table_missing' => 'Bildirim ayarları tablosu henüz kurulu değil. Önce database/notifications.sql dosyasını çalıştırın.',
                 'table_not_ready' => 'Bildirim tablosu henüz kurulu değil.',
                 'settings_table_not_ready' => 'Bildirim ayarları tablosu henüz kurulu değil.',
-
-                // Aksiyon ve Hata Bildirimleri
                 'csrf_failed' => 'Güvenlik doğrulaması başarısız oldu.',
                 'invalid_request' => 'Geçersiz istek.',
                 'invalid_session' => 'Geçersiz kullanıcı oturumu.',
@@ -60,15 +53,17 @@ function notifications_lang(string $key, ?string $default = null): string
                 'settings_update_success' => 'Bildirim ayarları başarıyla güncellendi.',
                 'settings_update_error' => 'Bildirim ayarları güncellenirken bir hata oluştu.',
                 'list_load_error' => 'Bildirim listesi yüklenirken bir hata oluştu.',
-                'nav_bell_aria' => 'Bildirimleri goster',
+                'nav_bell_aria' => 'Bildirimleri göster',
                 'nav_new_badge' => 'Yeni',
-                'nav_empty' => 'Henuz bildiriminiz bulunmuyor.',
-                'nav_view_all' => 'Tum bildirimleri gor',
+                'nav_empty' => 'Henüz bildiriminiz bulunmuyor.',
+                'nav_view_all' => 'Tüm bildirimleri gör',
             ],
             'en' => [
                 'communication_center' => 'Communication Center',
                 'notifications' => 'Notifications',
                 'settings' => 'Settings',
+                'export_csv' => 'CSV',
+                'export_excel' => 'Excel',
                 'mark_all_read' => 'Mark All as Read',
                 'tables_missing' => 'Notification tables are not installed yet. Run modules/notifications/database/schema.sql first.',
                 'search_placeholder' => 'Search title or message...',
@@ -129,4 +124,3 @@ function notifications_lang(string $key, ?string $default = null): string
 
     return $default ?? $key;
 }
-

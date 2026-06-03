@@ -7,7 +7,7 @@ function documents_lang(string $key, ?string $default = null): string
 {
     static $dictionary = [
         'tr' => [
-            'documents' => 'Documents',
+            'documents' => 'Belgeler',
             'page_title' => 'Belge Yönetimi',
             'page_hint' => 'Sistem genelindeki dosya ve ek kayıtları merkezi olarak yönetilir.',
             'upload_document' => 'Belge Yükle',
@@ -37,6 +37,8 @@ function documents_lang(string $key, ?string $default = null): string
             'file_not_found' => 'Belge dosyası bulunamadı.',
             'type_hint' => 'Örnek: attachment, report, user_document',
             'entity_hint' => 'Opsiyonel. Bir kayıtla ilişkilendirmek için doldurun.',
+            'export_csv' => 'CSV',
+            'export_excel' => 'Excel',
         ],
         'en' => [
             'documents' => 'Documents',
@@ -69,6 +71,8 @@ function documents_lang(string $key, ?string $default = null): string
             'file_not_found' => 'Document file not found.',
             'type_hint' => 'Example: attachment, report, user_document',
             'entity_hint' => 'Optional. Fill to link the file to an entity.',
+            'export_csv' => 'CSV',
+            'export_excel' => 'Excel',
         ],
     ];
 

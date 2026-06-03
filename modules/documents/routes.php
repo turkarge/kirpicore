@@ -15,6 +15,13 @@ return [
         'auth' => true,
         'method' => 'POST',
     ],
+    'documents/actions/export' => [
+        'file' => 'modules/documents/actions/export.php',
+        'layout' => false,
+        'permission' => 'documents.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
     'documents/actions/download/{id}' => [
         'file' => 'modules/documents/actions/download.php',
         'layout' => false,

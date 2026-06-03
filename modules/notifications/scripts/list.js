@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const statusFilter = document.getElementById("notifications-status-filter");
     const sourceFilter = document.getElementById("notifications-source-filter");
     const templateFilter = document.getElementById("notifications-template-filter");
+    const exportButtons = document.querySelectorAll(".js-notifications-export");
 
     if (!tableContainer) {
         return;
@@ -15,7 +16,12 @@ document.addEventListener("DOMContentLoaded", function () {
     function buildUrl(page = 1) {
         const params = new URLSearchParams();
         params.set("page", page);
+        appendFilters(params);
 
+        return `${window.KIRPI_CONFIG.baseUrl}/ajax/notifications/table?${params.toString()}`;
+    }
+
+    function appendFilters(params) {
         if (searchInput && searchInput.value.trim() !== "") {
             params.set("search", searchInput.value.trim());
         }
@@ -31,8 +37,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (templateFilter && templateFilter.value !== "") {
             params.set("template_key", templateFilter.value);
         }
-
-        return `${window.KIRPI_CONFIG.baseUrl}/ajax/notifications/table?${params.toString()}`;
     }
 
     async function loadTable(page = 1) {
@@ -89,6 +93,15 @@ document.addEventListener("DOMContentLoaded", function () {
     if (templateFilter) {
         templateFilter.addEventListener("change", triggerReload);
     }
+
+    exportButtons.forEach((button) => {
+        button.addEventListener("click", function () {
+            const params = new URLSearchParams();
+            params.set("format", button.dataset.format || "csv");
+            appendFilters(params);
+            window.location.href = `${window.KIRPI_CONFIG.baseUrl}/notifications/actions/export?${params.toString()}`;
+        });
+    });
 
     document.addEventListener("click", function (event) {
         const paginationLink = event.target.closest(".pagination .page-link");

@@ -22,6 +22,13 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'notifications/actions/export' => [
+        'file' => 'modules/notifications/actions/export.php',
+        'layout' => false,
+        'permission' => 'notifications.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
     'notifications/actions/mark-read' => [
         'file' => 'modules/notifications/actions/mark_read.php',
         'layout' => false,

@@ -84,6 +84,18 @@ if ($tableReady) {
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title"><?php echo e(documents_lang('document_list')); ?></h3>
+                    <div class="card-actions">
+                        <div class="btn-list">
+                            <a href="<?php echo base_url('documents/actions/export?format=csv'); ?>" class="btn btn-outline-secondary">
+                                <i class="ti ti-file-type-csv"></i>
+                                <?php echo e(documents_lang('export_csv')); ?>
+                            </a>
+                            <a href="<?php echo base_url('documents/actions/export?format=xls'); ?>" class="btn btn-outline-secondary">
+                                <i class="ti ti-file-spreadsheet"></i>
+                                <?php echo e(documents_lang('export_excel')); ?>
+                            </a>
+                        </div>
+                    </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-vcenter card-table table-striped">
