@@ -37,6 +37,8 @@ if ($userId > 0 && $affected > 0) {
     ], [
         'title' => 'Queue retry başlatıldı',
         'message' => $affected . ' başarısız queue işi yeniden kuyruğa alındı.',
+        'source_module' => 'queue',
+        'entity_type' => 'queue_job',
         'email' => false,
     ]);
 }

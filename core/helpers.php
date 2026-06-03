@@ -230,7 +230,7 @@ function get_unread_notifications_count(?int $userId): int
     }
 }
 
-function kirpi_create_notification(int $userId, string $title, string $message, string $channel = 'in_app'): bool
+function kirpi_create_notification(int $userId, string $title, string $message, string $channel = 'in_app', array $metadata = []): bool
 {
     if ($userId <= 0 || !db_table_exists('notifications')) {
         return false;
@@ -249,16 +249,50 @@ function kirpi_create_notification(int $userId, string $title, string $message, 
     }
 
     try {
-        $stmt = db()->prepare("
-            INSERT INTO notifications (user_id, title, message, channel)
-            VALUES (:user_id, :title, :message, :channel)
-        ");
-        $stmt->execute([
+        $columns = ['user_id', 'title', 'message', 'channel'];
+        $placeholders = [':user_id', ':title', ':message', ':channel'];
+        $params = [
             ':user_id' => $userId,
             ':title' => mb_substr($title, 0, 150),
             ':message' => $message,
             ':channel' => mb_substr($channel, 0, 50),
-        ]);
+        ];
+
+        $optionalColumns = [
+            'template_key' => isset($metadata['template_key']) ? mb_substr(trim((string) $metadata['template_key']), 0, 120) : null,
+            'source_module' => isset($metadata['source_module']) ? mb_substr(trim((string) $metadata['source_module']), 0, 80) : null,
+            'entity_type' => isset($metadata['entity_type']) ? mb_substr(trim((string) $metadata['entity_type']), 0, 80) : null,
+            'entity_id' => isset($metadata['entity_id']) && (int) $metadata['entity_id'] > 0 ? (int) $metadata['entity_id'] : null,
+        ];
+
+        foreach ($optionalColumns as $column => $value) {
+            if (db_column_exists('notifications', $column) && $value !== null && $value !== '') {
+                $columns[] = $column;
+                $placeholders[] = ':' . $column;
+                $params[':' . $column] = $value;
+            }
+        }
+
+        if (db_column_exists('notifications', 'data_json')) {
+            $data = $metadata['data'] ?? null;
+            if (is_array($data) && !empty($data)) {
+                $encodedData = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                if ($encodedData !== false) {
+                    $columns[] = 'data_json';
+                    $placeholders[] = ':data_json';
+                    $params[':data_json'] = $encodedData;
+                }
+            }
+        }
+
+        $sql = sprintf(
+            'INSERT INTO notifications (%s) VALUES (%s)',
+            implode(', ', $columns),
+            implode(', ', $placeholders)
+        );
+
+        $stmt = db()->prepare($sql);
+        $stmt->execute($params);
 
         return true;
     } catch (Throwable $e) {
@@ -367,10 +401,20 @@ function kirpi_notify_user(int $userId, string $templateKey, array $variables = 
     $settings = kirpi_notification_settings($userId);
     $rendered = kirpi_render_notification_template($templateKey, $variables, $fallbackTitle, $fallbackMessage);
     $channel = (string) ($options['channel'] ?? 'in_app');
+    $sourceModule = (string) ($options['source_module'] ?? (explode('.', $templateKey, 2)[0] ?? ''));
+    $entityType = (string) ($options['entity_type'] ?? '');
+    $entityId = isset($options['entity_id']) ? (int) $options['entity_id'] : null;
+    $metadata = [
+        'template_key' => $templateKey,
+        'source_module' => $sourceModule,
+        'entity_type' => $entityType,
+        'entity_id' => $entityId,
+        'data' => $options['data'] ?? $variables,
+    ];
 
     $inAppCreated = false;
     if (($options['in_app'] ?? true) && $settings['in_app_enabled']) {
-        $inAppCreated = kirpi_create_notification($userId, $rendered['title'], $rendered['message'], $channel);
+        $inAppCreated = kirpi_create_notification($userId, $rendered['title'], $rendered['message'], $channel, $metadata);
     }
 
     $emailSent = false;
@@ -405,12 +449,20 @@ function get_recent_notifications(?int $userId, int $limit = 5): array
     $limit = max(1, min(20, $limit));
 
     try {
+        $metaSelect = db_column_exists('notifications', 'template_key')
+            && db_column_exists('notifications', 'source_module')
+            && db_column_exists('notifications', 'entity_type')
+            && db_column_exists('notifications', 'entity_id')
+            ? 'template_key, source_module, entity_type, entity_id,'
+            : 'NULL AS template_key, NULL AS source_module, NULL AS entity_type, NULL AS entity_id,';
+
         $stmt = db()->prepare("
             SELECT
                 id,
                 title,
                 message,
                 channel,
+                {$metaSelect}
                 created_at,
                 read_at
             FROM notifications

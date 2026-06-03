@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const tableContainer = document.getElementById("notifications-table-container");
     const searchInput = document.getElementById("notifications-search");
     const statusFilter = document.getElementById("notifications-status-filter");
+    const sourceFilter = document.getElementById("notifications-source-filter");
+    const templateFilter = document.getElementById("notifications-template-filter");
 
     if (!tableContainer) {
         return;
@@ -20,6 +22,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (statusFilter && statusFilter.value !== "") {
             params.set("status", statusFilter.value);
+        }
+
+        if (sourceFilter && sourceFilter.value !== "") {
+            params.set("source_module", sourceFilter.value);
+        }
+
+        if (templateFilter && templateFilter.value !== "") {
+            params.set("template_key", templateFilter.value);
         }
 
         return `${window.KIRPI_CONFIG.baseUrl}/ajax/notifications/table?${params.toString()}`;
@@ -70,6 +80,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (statusFilter) {
         statusFilter.addEventListener("change", triggerReload);
+    }
+
+    if (sourceFilter) {
+        sourceFilter.addEventListener("change", triggerReload);
+    }
+
+    if (templateFilter) {
+        templateFilter.addEventListener("change", triggerReload);
     }
 
     document.addEventListener("click", function (event) {

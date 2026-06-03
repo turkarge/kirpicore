@@ -29,6 +29,9 @@ if ($status === 'failed') {
         ], [
             'title' => 'Queue job başarısız oldu',
             'message' => (string) ($result['message'] ?? queue_lang('work_failed_default')),
+            'source_module' => 'queue',
+            'entity_type' => 'queue_job',
+            'entity_id' => isset($result['job_id']) ? (int) $result['job_id'] : null,
             'email' => false,
         ]);
     }

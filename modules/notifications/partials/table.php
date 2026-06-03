@@ -21,6 +21,12 @@ $userId = (int) ($currentUser['id'] ?? 0);
 $page = max(1, (int) ($_GET['page'] ?? 1));
 $search = trim((string) ($_GET['search'] ?? ''));
 $status = trim((string) ($_GET['status'] ?? ''));
+$sourceModule = trim((string) ($_GET['source_module'] ?? ''));
+$templateKey = trim((string) ($_GET['template_key'] ?? ''));
+$hasMetadataColumns = db_column_exists('notifications', 'source_module')
+    && db_column_exists('notifications', 'template_key')
+    && db_column_exists('notifications', 'entity_type')
+    && db_column_exists('notifications', 'entity_id');
 
 $limit = 10;
 $offset = ($page - 1) * $limit;
@@ -43,6 +49,16 @@ if ($status === 'read') {
     $where[] = 'n.read_at IS NOT NULL';
 }
 
+if ($hasMetadataColumns && $sourceModule !== '') {
+    $where[] = 'n.source_module = :source_module';
+    $params[':source_module'] = $sourceModule;
+}
+
+if ($hasMetadataColumns && $templateKey !== '') {
+    $where[] = 'n.template_key = :template_key';
+    $params[':template_key'] = $templateKey;
+}
+
 $whereSql = 'WHERE ' . implode(' AND ', $where);
 
 try {
@@ -61,12 +77,17 @@ try {
     $totalRecords = (int) $countStmt->fetchColumn();
     $totalPages = (int) ceil($totalRecords / $limit);
 
+    $metaSelect = $hasMetadataColumns
+        ? 'n.template_key, n.source_module, n.entity_type, n.entity_id,'
+        : 'NULL AS template_key, NULL AS source_module, NULL AS entity_type, NULL AS entity_id,';
+
     $sql = "
         SELECT
             n.id,
             n.title,
             n.message,
             n.channel,
+            {$metaSelect}
             n.created_at,
             n.read_at
         FROM notifications n
@@ -96,6 +117,7 @@ try {
         <thead>
             <tr>
                 <th><?php echo e(notifications_lang('table_notification')); ?></th>
+                <th><?php echo e(notifications_lang('table_source')); ?></th>
                 <th><?php echo e(notifications_lang('table_channel')); ?></th>
                 <th><?php echo e(notifications_lang('table_status')); ?></th>
                 <th><?php echo e(notifications_lang('table_date')); ?></th>
@@ -105,7 +127,7 @@ try {
         <tbody>
             <?php if (empty($notifications)): ?>
                 <tr>
-                    <td colspan="5" class="text-center text-secondary py-4">
+                    <td colspan="6" class="text-center text-secondary py-4">
                         <?php echo e(notifications_lang('no_records')); ?>
                     </td>
                 </tr>
@@ -115,6 +137,24 @@ try {
                         <td>
                             <div class="fw-bold"><?php echo e($notification['title']); ?></div>
                             <div class="text-secondary"><?php echo e($notification['message']); ?></div>
+                            <?php if (!empty($notification['template_key'])): ?>
+                                <div class="mt-1"><code><?php echo e((string) $notification['template_key']); ?></code></div>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <?php if (!empty($notification['source_module'])): ?>
+                                <div><span class="badge bg-blue-lt"><?php echo e((string) $notification['source_module']); ?></span></div>
+                            <?php else: ?>
+                                <span class="text-secondary">-</span>
+                            <?php endif; ?>
+                            <?php if (!empty($notification['entity_type'])): ?>
+                                <div class="text-secondary small mt-1">
+                                    <?php echo e((string) $notification['entity_type']); ?>
+                                    <?php if (!empty($notification['entity_id'])): ?>
+                                        #<?php echo (int) $notification['entity_id']; ?>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
                         </td>
                         <td>
                             <?php echo e($notification['channel'] ?: notifications_lang('default_channel')); ?>

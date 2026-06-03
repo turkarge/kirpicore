@@ -48,6 +48,9 @@ if ($userId > 0) {
     ], [
         'title' => 'Backup restore tamamlandı',
         'message' => 'Backup #' . $backupId . ' geri yükleme işlemi tamamlandı.',
+        'source_module' => 'backup',
+        'entity_type' => 'backup',
+        'entity_id' => $backupId,
         'email' => false,
     ]);
 }

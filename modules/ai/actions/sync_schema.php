@@ -33,6 +33,8 @@ if (($result['status'] ?? '') === 'partial') {
         ], [
             'title' => 'AI schema sync kısmi tamamlandı',
             'message' => 'AI schema sync kısmi tamamlandı. Logları kontrol edin.',
+            'source_module' => 'ai',
+            'entity_type' => 'schema_registry',
             'email' => false,
         ]);
     }
@@ -53,6 +55,8 @@ if ($userId > 0) {
     ], [
         'title' => 'AI schema registry güncellendi',
         'message' => $entityCount . ' entity ve ' . $fieldCount . ' field senkronize edildi.',
+        'source_module' => 'ai',
+        'entity_type' => 'schema_registry',
         'email' => false,
     ]);
 }

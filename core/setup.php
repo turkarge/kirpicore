@@ -129,6 +129,10 @@ function kirpi_expected_indexes_map(): array
         'db_backups' => [
             'idx_db_backups_created_at_id' => ['created_at', 'id'],
         ],
+        'notifications' => [
+            'idx_notifications_source' => ['source_module', 'entity_type', 'entity_id'],
+            'idx_notifications_template' => ['template_key'],
+        ],
     ];
 }
 
@@ -198,6 +202,13 @@ function kirpi_expected_columns_map(): array
             'lock_enabled' => 'TINYINT(1) NOT NULL DEFAULT 0',
             'lock_pin_hash' => 'VARCHAR(255) NULL',
             'session_version' => 'INT NOT NULL DEFAULT 0',
+        ],
+        'notifications' => [
+            'template_key' => 'VARCHAR(120) NULL',
+            'source_module' => 'VARCHAR(80) NULL',
+            'entity_type' => 'VARCHAR(80) NULL',
+            'entity_id' => 'BIGINT UNSIGNED NULL',
+            'data_json' => 'LONGTEXT NULL',
         ],
     ];
 }

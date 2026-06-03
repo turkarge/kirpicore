@@ -48,6 +48,9 @@ if ($userId > 0) {
     ], [
         'title' => 'Backup tamamlandı',
         'message' => 'Backup #' . $backupId . ' başarıyla oluşturuldu.',
+        'source_module' => 'backup',
+        'entity_type' => 'backup',
+        'entity_id' => $backupId,
         'email' => false,
     ]);
 }

@@ -6,6 +6,33 @@ if (!defined('KIRPI_CORE_ENTRY')) {
 require_once BASE_PATH . '/modules/notifications/language.php';
 
 $notificationsTableReady = db_table_exists('notifications');
+$hasMetadataColumns = $notificationsTableReady
+    && db_column_exists('notifications', 'source_module')
+    && db_column_exists('notifications', 'template_key');
+$sourceModules = [];
+$templateKeys = [];
+
+if ($hasMetadataColumns) {
+    try {
+        $sourceModules = db()->query("
+            SELECT DISTINCT source_module
+            FROM notifications
+            WHERE source_module IS NOT NULL AND source_module <> ''
+            ORDER BY source_module ASC
+        ")->fetchAll(PDO::FETCH_COLUMN) ?: [];
+
+        $templateKeys = db()->query("
+            SELECT DISTINCT template_key
+            FROM notifications
+            WHERE template_key IS NOT NULL AND template_key <> ''
+            ORDER BY template_key ASC
+        ")->fetchAll(PDO::FETCH_COLUMN) ?: [];
+    } catch (Throwable $e) {
+        error_log('notifications metadata filters error: ' . $e->getMessage());
+        $sourceModules = [];
+        $templateKeys = [];
+    }
+}
 ?>
 
 <script>
@@ -61,7 +88,7 @@ window.KIRPI_NOTIFICATIONS_I18N = {
         <div class="card">
             <div class="card-body border-bottom py-3">
                 <div class="row g-2 align-items-center">
-                    <div class="col-12 col-md-8">
+                    <div class="col-12 col-lg-5">
                         <input
                             type="text"
                             id="notifications-search"
@@ -71,11 +98,29 @@ window.KIRPI_NOTIFICATIONS_I18N = {
                         >
                     </div>
 
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-sm-4 col-lg-2">
                         <select id="notifications-status-filter" class="form-select" <?php echo !$notificationsTableReady ? 'disabled' : ''; ?>>
                             <option value=""><?php echo e(notifications_lang('all_statuses')); ?></option>
                             <option value="unread"><?php echo e(notifications_lang('status_unread')); ?></option>
                             <option value="read"><?php echo e(notifications_lang('status_read')); ?></option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-sm-4 col-lg-2">
+                        <select id="notifications-source-filter" class="form-select" <?php echo !$hasMetadataColumns ? 'disabled' : ''; ?>>
+                            <option value=""><?php echo e(notifications_lang('all_sources')); ?></option>
+                            <?php foreach ($sourceModules as $sourceModule): ?>
+                                <option value="<?php echo e((string) $sourceModule); ?>"><?php echo e((string) $sourceModule); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-sm-4 col-lg-3">
+                        <select id="notifications-template-filter" class="form-select" <?php echo !$hasMetadataColumns ? 'disabled' : ''; ?>>
+                            <option value=""><?php echo e(notifications_lang('all_templates')); ?></option>
+                            <?php foreach ($templateKeys as $key): ?>
+                                <option value="<?php echo e((string) $key); ?>"><?php echo e((string) $key); ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                 </div>
