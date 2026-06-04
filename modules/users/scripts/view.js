@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const searchInput = document.getElementById("users-search");
     const roleFilter = document.getElementById("users-role-filter");
     const statusFilter = document.getElementById("users-status-filter");
+    const exportButtons = document.querySelectorAll(".js-users-export");
 
     if (!tableContainer) {
         return;
@@ -11,10 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentPage = 1;
     let debounceTimer = null;
 
-    function buildUrl(page = 1) {
-        const params = new URLSearchParams();
-        params.set("page", page);
-
+    function appendFilters(params) {
         if (searchInput && searchInput.value.trim() !== "") {
             params.set("search", searchInput.value.trim());
         }
@@ -26,6 +24,12 @@ document.addEventListener("DOMContentLoaded", function () {
         if (statusFilter && statusFilter.value !== "") {
             params.set("status", statusFilter.value);
         }
+    }
+
+    function buildUrl(page = 1) {
+        const params = new URLSearchParams();
+        params.set("page", page);
+        appendFilters(params);
 
         return `${window.KIRPI_CONFIG.baseUrl}/ajax/users/table?${params.toString()}`;
     }
@@ -77,6 +81,15 @@ document.addEventListener("DOMContentLoaded", function () {
     if (statusFilter) {
         statusFilter.addEventListener("change", triggerReload);
     }
+
+    exportButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+            const params = new URLSearchParams();
+            params.set("format", button.dataset.format || "csv");
+            appendFilters(params);
+            window.location.href = `${window.KIRPI_CONFIG.baseUrl}/users/actions/export?${params.toString()}`;
+        });
+    });
 
     document.addEventListener("click", function (event) {
         const paginationLink = event.target.closest(".pagination .page-link");
@@ -136,7 +149,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            // modal kapanırken küçük gecikmeyle tabloyu yenile
+            // Modal kapanırken küçük gecikmeyle tabloyu yenile.
             setTimeout(() => {
                 loadTable(currentPage);
             }, 150);

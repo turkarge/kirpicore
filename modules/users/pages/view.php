@@ -16,6 +16,14 @@ require_once BASE_PATH . '/modules/users/language.php';
 
             <div class="col-auto ms-auto d-print-none">
                 <div class="btn-list">
+                    <button type="button" class="btn btn-outline-secondary js-users-export" data-format="csv">
+                        <i class="ti ti-file-type-csv"></i>
+                        <?php echo e(users_lang('csv_export')); ?>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary js-users-export" data-format="xls">
+                        <i class="ti ti-file-spreadsheet"></i>
+                        <?php echo e(users_lang('excel_export')); ?>
+                    </button>
                     <a
                         href="#"
                         class="btn btn-primary btn-modal-trigger"

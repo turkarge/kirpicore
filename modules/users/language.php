@@ -11,28 +11,24 @@ function users_lang(string $key, ?string $default = null): string
     if ($dictionary === null) {
         $dictionary = [
             'tr' => [
-                // Genel Başlıklar ve Yönetim
                 'system_management' => 'Sistem Yönetimi',
                 'users' => 'Kullanıcılar',
                 'new_user' => 'Yeni Kullanıcı',
                 'edit_user' => 'Kullanıcı Düzenle',
-
-                // Arama ve Filtreleme
                 'search_placeholder' => 'Ad, e-posta veya rol ara...',
                 'all_roles' => 'Tüm Roller',
                 'all_statuses' => 'Tüm Durumlar',
                 'active' => 'Aktif',
                 'inactive' => 'Pasif',
                 'status_inactive_suffix' => ' (Pasif)',
-
-                // Tablo Başlıkları
+                'csv_export' => 'CSV',
+                'excel_export' => 'Excel',
                 'table_user' => 'Kullanıcı',
                 'table_role' => 'Rol',
                 'table_status' => 'Durum',
                 'table_created_at' => 'Oluşturulma',
+                'updated_at' => 'Güncelleme',
                 'no_records' => 'Kayıt bulunamadı.',
-
-                // Form Alanları ve İpuçları
                 'name_surname' => 'Ad Soyad',
                 'email' => 'E-posta',
                 'password' => 'Şifre',
@@ -49,29 +45,24 @@ function users_lang(string $key, ?string $default = null): string
                 'select_role' => 'Rol Seçin',
                 'only_active_roles_hint' => 'Yalnızca aktif roller listelenir.',
                 'passive_role_info_hint' => 'Pasif roller yeni atama için listelenmez. Mevcut pasif rol yalnızca bilgilendirme için gösterilir.',
-
-                // Oturum ve Güvenlik Ayarları
                 'session' => 'Oturum',
                 'key' => 'Key',
+                'lock_status' => 'Kilit Durumu',
                 'lock_enabled' => 'Lock Aktif',
                 'lock_disabled' => 'Lock Pasif',
+                'session_version' => 'Oturum Versiyonu',
                 'drop_session' => 'Oturumu Sonlandır',
                 'reset_key' => 'Key Sıfırlama',
-
-                // Onay Mesajları
                 'drop_session_confirm' => 'Bu kullanıcının aktif oturumları sonlandırılacak. Emin misiniz?',
                 'reset_key_confirm' => 'Bu kullanıcının lock key ayarı sıfırlanacak ve oturum kilitleme pasif olacak. Emin misiniz?',
                 'reset_key_list_confirm' => 'Bu kullanıcının lock key ayarı sıfırlanacak. Emin misiniz?',
-
-                // Aksiyonlar
                 'edit' => 'Düzenle',
                 'cancel' => 'İptal',
                 'save' => 'Kaydet',
                 'update' => 'Güncelle',
-
-                // Hata Mesajları
                 'invalid_user_id' => 'Geçersiz kullanıcı ID.',
                 'user_data_load_error' => 'Kullanıcı verileri yüklenemedi.',
+                'table_not_ready' => 'Kullanıcı tablosu henüz kurulu değil.',
             ],
             'en' => [
                 'system_management' => 'System Management',
@@ -83,10 +74,13 @@ function users_lang(string $key, ?string $default = null): string
                 'active' => 'Active',
                 'inactive' => 'Inactive',
                 'status_inactive_suffix' => ' (Inactive)',
+                'csv_export' => 'CSV',
+                'excel_export' => 'Excel',
                 'table_user' => 'User',
                 'table_role' => 'Role',
                 'table_status' => 'Status',
                 'table_created_at' => 'Created At',
+                'updated_at' => 'Updated At',
                 'no_records' => 'No records found.',
                 'edit' => 'Edit',
                 'session' => 'Session',
@@ -113,13 +107,16 @@ function users_lang(string $key, ?string $default = null): string
                 'select_role' => 'Select Role',
                 'only_active_roles_hint' => 'Only active roles are listed.',
                 'passive_role_info_hint' => 'Inactive roles are not listed for new assignments. Current inactive role is shown for information only.',
+                'lock_status' => 'Lock Status',
                 'lock_enabled' => 'Lock Enabled',
                 'lock_disabled' => 'Lock Disabled',
+                'session_version' => 'Session Version',
                 'drop_session' => 'Drop Session',
                 'reset_key' => 'Reset Key',
                 'drop_session_confirm' => 'Active sessions for this user will be terminated. Continue?',
                 'reset_key_confirm' => 'User lock key will be reset and session lock will be disabled. Continue?',
                 'reset_key_list_confirm' => 'User lock key will be reset. Continue?',
+                'table_not_ready' => 'User table is not installed yet.',
             ],
         ];
     }
