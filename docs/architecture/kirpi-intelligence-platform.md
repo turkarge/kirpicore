@@ -1,5 +1,23 @@
 # Kirpi Intelligence Platform (KIP)
 
+## Core Hazırlık Notu
+
+KIP geliştirmesine geçmeden önce Kirpi Core tarafında aşağıdaki yapısal standartlar tamamlandı:
+
+- AI schema registry temeli ve standart modüllerde `ai/schema.json` yayınlama modeli.
+- Yetki kontrollü schema discovery.
+- Ortak notification metadata modeli.
+- Template Registry ve Documents Registry.
+- Server-side CSV/XLS export standardı.
+- Notifications, Documents, Audit, Users ve Roles modüllerinde export entegrasyonu.
+- Roles için Permission Catalog ve Role-Permission Matrix export.
+- UTF-8 çeviri standardı.
+- Tema, layout ve PWA temeli.
+
+Bu hazırlıklar KIP Faz 2 ve sonrası için veri keşfi, yetki sınırları, event analizi ve rapor üretimi altyapısını standart hale getirir.
+
+---
+
 ## Amaç
 
 Kirpi Core içerisine entegre edilecek ortak bir yapay zeka ve bilgi erişim platformu geliştirmek.

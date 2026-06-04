@@ -6,7 +6,7 @@ Bu doküman, Kirpi Core sistemini yerel ortamda ve Dokploy üzerinden üretim or
 
 ## 1. Genel Bakış
 
-Kirpi Core modulleri:
+Kirpi Core modülleri:
 
 - `auth`
 - `dashboard`
@@ -22,14 +22,20 @@ Kirpi Core modulleri:
 - `health`
 - `throttle`
 - `api`
+- `ai`
+- `template`
+- `documents`
 
 Yapı özellikleri:
 
-- Modul manifest desteği (`modules/<module>/module.json`)
-- Dinamik modul etkinleştirme/devre dışı bırakma
+- Modül manifest desteği (`modules/<module>/module.json`)
+- Dinamik modül etkinleştirme/devre dışı bırakma
 - Web tabanlı setup + shell tabanlı setup
 - API token ve scope yönetimi
 - Backup/restore, health metrics, throttle ve audit log
+- Server-side CSV/XLS export standardı
+- Template, Documents ve Notifications registry altyapısı
+- PWA temeli
 
 ## 2. Ön Koşullar
 
@@ -216,8 +222,16 @@ Menü davranış standardı:
 - `Dashboard` her zaman ilk sıradadır (sabit).
 - `Yönetim` her zaman son sıradadır (sabit).
 - Diğer menüler `modules/<module>/module.json` içindeki `menu` alanından üretilir.
-- `placement=management` ve `group=monitoring` olan öğeler Yönetim altında `Monitoring / Izleme` grubuna alınır.
+- `placement=management` ve `group=monitoring` olan öğeler Yönetim altında `Monitoring / İzleme` grubuna alınır.
 - Menü etiketleri için `title_key` + `<module>_lang()` kullanımı önerilen standarttır.
+
+Core liste/export standardı:
+
+- Liste export endpointleri `<module>/actions/export` formatındadır.
+- CSV/XLS çıktıları `core/export.php` helper'ları ile üretilir.
+- Export butonları gerçek link olarak çalışır; JavaScript varsa mevcut filtreleri linke ekler.
+- Notifications, Documents, Audit, Users ve Roles export standardına geçirilmiştir.
+- Roles modülünde Permission Catalog ve Role-Permission Matrix export bulunur.
 
 ## 7. REST API (v1)
 
@@ -319,6 +333,7 @@ Kapsayıcı kullanıcısının (`www-data`) yazma izni olmalı.
 
 - [SETUP.md](SETUP.md)
 - [docs/MODULE_MANIFEST.md](docs/MODULE_MANIFEST.md)
+- [docs/ROADMAP.md](docs/ROADMAP.md)
 - [docs/API_USERS.md](docs/API_USERS.md)
 - [docs/MAIL_TEMPLATES.md](docs/MAIL_TEMPLATES.md)
 

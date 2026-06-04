@@ -126,6 +126,73 @@ Kullanım:
 - Sayfa/action başında: `require_once BASE_PATH . '/modules/<module_key>/language.php';`
 - Sabit metinler doğrudan yazılmak yerine `*_lang('key')` ile okunur.
 
+## Liste, Rapor ve Export Standardı
+
+Liste ekranı olan core modüllerde aşağıdaki standart uygulanır:
+
+- Liste filtreleri HTML form elemanlarıyla görünür olmalıdır.
+- AJAX tablo varsa filtre parametreleri hem tablo endpoint'ine hem export endpoint'ine aynı isimlerle taşınmalıdır.
+- Export endpoint standardı: `modules/<module_key>/actions/export.php`
+- Route standardı: `<module_key>/actions/export`
+- Yetki standardı:
+  - Liste export için `<module_key>.view`
+  - Hassas matris/katalog export için ilgili özel yetki (`roles.permissions` gibi)
+- CSV ve XLS çıktıları `core/export.php` içindeki helper'lar ile üretilir.
+- Export butonları gerçek `<a href="...">` link olmalıdır.
+- JavaScript yalnızca mevcut filtreleri export linkine eklemek için kullanılmalıdır; JS çalışmasa bile filtresiz export başlamalıdır.
+- Export dosyaları en fazla makul bir sınırla üretilmelidir. Mevcut standart limit `5000` kayıttır.
+
+Tamamlanan server-side export modülleri:
+
+- `notifications`
+- `documents`
+- `audit`
+- `users`
+- `roles`
+
+`roles` modülünde ek olarak Permission Catalog ve Role-Permission Matrix export standarttır.
+
+## Notification Event Standardı
+
+Modüller kullanıcıya veya sisteme dönük önemli olaylarda `kirpi_notify_user()` kullanmalıdır.
+
+Metadata alanları:
+
+- `template_key`
+- `source_module`
+- `entity_type`
+- `entity_id`
+- `data`
+
+Bu metadata notification listesinde filtreleme ve daha sonra AI/KIP tarafında olay analizi için kullanılır.
+
+## Template ve Document Standardı
+
+Yeni modüller, içerik üretimi veya kullanıcıya gönderilecek metinlerde Template Registry kullanmalıdır.
+
+Dosya/ek yönetimi gereken modüller Documents Registry ile çalışmalıdır:
+
+- Dosya saklama modül içinde dağınık yapılmamalıdır.
+- Entity bağlantıları `document_links` üzerinden kurulmalıdır.
+- Belge tipi teknik anahtarı kısa ve stabil olmalıdır (`attachment`, `report`, `user_document` gibi).
+
+## AI Schema Standardı
+
+AI/KIP için veri yayınlayacak modüller aşağıdaki dosyayı sağlamalıdır:
+
+- `modules/<module_key>/ai/schema.json`
+
+Schema tanımı en az şu bilgileri içermelidir:
+
+- `module`
+- `entity`
+- `table`
+- `permission`
+- `fields`
+- hassas alan işaretleri
+
+AI discovery, kullanıcının mevcut RBAC yetkilerini aşamaz.
+
 ## Geriye Uyumluluk
 
 - `module.json` yoksa default değerler kullanılır.
@@ -162,5 +229,5 @@ Kullanım:
 - Action cevapları tutarlı JSON formatında olur (`status`, `message`, opsiyonel `data`).
 - UI metinleri ve tablo başlıkları dil dosyasından gelir.
 - Yeni modül eklerken önce `module.json` + `language.php` oluşturulur, sonra route/page/action yazılır.
-- Tüm PHP dosyalari `UTF-8 (BOM'suz)` formatta kaydedilmelidir.
-- `language.php` dosyalarinda da ayni kodlama standardi zorunludur; BOM karakteri header/layout cikisinda bosluk sorununa neden olabilir.
+- Tüm PHP dosyaları `UTF-8 (BOM'suz)` formatta kaydedilmelidir.
+- `language.php` dosyalarında da aynı kodlama standardı zorunludur; BOM karakteri header/layout çıkışında boşluk sorununa neden olabilir.
