@@ -92,9 +92,9 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - JS'in yalnızca filtre ekleme sorumluluğu taşıdığı doğrulandı.
    - Audit ve Notifications JS fallback hata metinleri UTF-8 Türkçe standardına çekildi.
 
-5. **KIP hazırlığı**
-   - AI schema manifestlerini kalan standart modüllerde tamamla.
-   - Schema discovery ekranında export/metadata kullanımı için gereksinimleri çıkar.
+5. **KIP hazırlığı** - Tamamlandı
+   - AI schema manifestleri kalan standart modüllerde tamamlandı.
+   - Schema discovery ekranında export/metadata kullanımı için manifest kapsamı genişletildi.
 
 ## Kısa Vadeli Sonraki Sıra
 
