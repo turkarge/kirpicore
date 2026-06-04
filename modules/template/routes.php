@@ -29,6 +29,13 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'template/actions/export' => [
+        'file' => 'modules/template/actions/export.php',
+        'layout' => false,
+        'permission' => 'template.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
     'template/actions/create' => [
         'file' => 'modules/template/actions/create.php',
         'layout' => false,

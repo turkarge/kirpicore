@@ -22,6 +22,10 @@ $templates = [];
 $tableReady = kirpi_templates_table_ready();
 $modules = kirpi_template_supported_modules();
 $targets = kirpi_template_supported_targets($kind);
+$search = trim((string) ($_GET['search'] ?? ''));
+$moduleFilter = trim((string) ($_GET['module_key'] ?? ''));
+$codeFilter = trim((string) ($_GET['code'] ?? ''));
+$statusFilter = trim((string) ($_GET['status'] ?? ''));
 
 if ($tableReady) {
     if ($kind === 'email' && function_exists('kirpi_mail_default_templates')) {
@@ -32,13 +36,38 @@ if ($tableReady) {
     }
 
     try {
+        $where = ['kind = :kind'];
+        $params = [
+            ':kind' => $kind,
+        ];
+
+        if ($search !== '') {
+            $where[] = '(name LIKE :search OR subject LIKE :search OR body LIKE :search OR target_key LIKE :search)';
+            $params[':search'] = '%' . $search . '%';
+        }
+
+        if ($moduleFilter !== '') {
+            $where[] = 'module_key = :module_key';
+            $params[':module_key'] = $moduleFilter;
+        }
+
+        if ($codeFilter !== '') {
+            $where[] = 'code LIKE :code';
+            $params[':code'] = '%' . $codeFilter . '%';
+        }
+
+        if ($statusFilter !== '' && in_array($statusFilter, ['0', '1'], true)) {
+            $where[] = 'is_active = :is_active';
+            $params[':is_active'] = (int) $statusFilter;
+        }
+
         $stmt = db()->prepare("
             SELECT id, kind, module_key, target_key, code, name, language, subject, body, variables_json, is_system, is_active, updated_at
             FROM templates
-            WHERE kind = :kind
+            WHERE " . implode(' AND ', $where) . "
             ORDER BY is_system DESC, module_key ASC, target_key ASC, code ASC
         ");
-        $stmt->execute([':kind' => $kind]);
+        $stmt->execute($params);
         $templates = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     } catch (Throwable $e) {
         error_log('template page list error: ' . $e->getMessage());
@@ -51,6 +80,23 @@ $kindTabs = [
     'print' => 'template/print',
     'content' => 'template/content',
 ];
+$filterParams = [
+    'kind' => $kind,
+];
+if ($search !== '') {
+    $filterParams['search'] = $search;
+}
+if ($moduleFilter !== '') {
+    $filterParams['module_key'] = $moduleFilter;
+}
+if ($codeFilter !== '') {
+    $filterParams['code'] = $codeFilter;
+}
+if ($statusFilter !== '' && in_array($statusFilter, ['0', '1'], true)) {
+    $filterParams['status'] = $statusFilter;
+}
+$csvExportUrl = base_url('template/actions/export?' . http_build_query($filterParams + ['format' => 'csv']));
+$xlsExportUrl = base_url('template/actions/export?' . http_build_query($filterParams + ['format' => 'xls']));
 ?>
 
 <div class="page-header d-print-none">
@@ -89,6 +135,63 @@ $kindTabs = [
         <?php if (!$tableReady): ?>
             <div class="alert alert-warning"><?php echo e(template_lang('table_missing')); ?></div>
         <?php else: ?>
+            <div class="card mb-4">
+                <form method="get" action="">
+                    <div class="card-header">
+                        <h3 class="card-title"><?php echo e(template_lang('filters')); ?></h3>
+                        <div class="card-actions">
+                            <div class="btn-list">
+                                <a href="<?php echo e($csvExportUrl); ?>" class="btn btn-outline-secondary">
+                                    <i class="ti ti-file-type-csv"></i>
+                                    <?php echo e(template_lang('export_csv')); ?>
+                                </a>
+                                <a href="<?php echo e($xlsExportUrl); ?>" class="btn btn-outline-secondary">
+                                    <i class="ti ti-file-spreadsheet"></i>
+                                    <?php echo e(template_lang('export_excel')); ?>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-12 col-lg-4">
+                                <label class="form-label"><?php echo e(template_lang('search')); ?></label>
+                                <input type="search" name="search" class="form-control" value="<?php echo e($search); ?>" placeholder="<?php echo e(template_lang('search_placeholder')); ?>">
+                            </div>
+                            <div class="col-12 col-lg-2">
+                                <label class="form-label"><?php echo e(template_lang('module')); ?></label>
+                                <select name="module_key" class="form-select">
+                                    <option value=""><?php echo e(template_lang('all_modules')); ?></option>
+                                    <?php foreach ($modules as $moduleKey => $moduleLabel): ?>
+                                        <option value="<?php echo e($moduleKey); ?>" <?php echo $moduleFilter === $moduleKey ? 'selected' : ''; ?>>
+                                            <?php echo e($moduleLabel); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-12 col-lg-2">
+                                <label class="form-label"><?php echo e(template_lang('code')); ?></label>
+                                <input type="text" name="code" class="form-control" value="<?php echo e($codeFilter); ?>">
+                            </div>
+                            <div class="col-12 col-lg-2">
+                                <label class="form-label"><?php echo e(template_lang('status')); ?></label>
+                                <select name="status" class="form-select">
+                                    <option value=""><?php echo e(template_lang('all_statuses')); ?></option>
+                                    <option value="1" <?php echo $statusFilter === '1' ? 'selected' : ''; ?>><?php echo e(template_lang('active')); ?></option>
+                                    <option value="0" <?php echo $statusFilter === '0' ? 'selected' : ''; ?>><?php echo e(template_lang('inactive')); ?></option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-lg-2">
+                                <div class="btn-list">
+                                    <button type="submit" class="btn btn-primary"><?php echo e(template_lang('filter')); ?></button>
+                                    <a href="<?php echo base_url($kindTabs[$kind] ?? 'template/templates'); ?>" class="btn btn-outline-secondary"><?php echo e(template_lang('clear')); ?></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
             <?php if (check_permission('template.manage')): ?>
                 <div class="card mb-4">
                     <form action="<?php echo base_url('template/actions/create'); ?>" method="post" data-ajax="true">

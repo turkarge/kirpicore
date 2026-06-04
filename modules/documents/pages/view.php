@@ -7,25 +7,88 @@ require_once BASE_PATH . '/modules/documents/language.php';
 
 $tableReady = documents_tables_ready();
 $documents = [];
+$search = trim((string) ($_GET['search'] ?? ''));
+$documentType = trim((string) ($_GET['document_type'] ?? ''));
+$entityType = trim((string) ($_GET['entity_type'] ?? ''));
+$entityId = (int) ($_GET['entity_id'] ?? 0);
+$documentTypes = [];
+$entityTypes = [];
 
 if ($tableReady) {
     try {
-        $stmt = db()->query("
+        $documentTypes = db()->query("
+            SELECT DISTINCT document_type
+            FROM documents
+            WHERE document_type IS NOT NULL AND document_type <> ''
+            ORDER BY document_type ASC
+        ")->fetchAll(PDO::FETCH_COLUMN) ?: [];
+
+        $entityTypes = db()->query("
+            SELECT DISTINCT entity_type
+            FROM document_links
+            WHERE entity_type IS NOT NULL AND entity_type <> ''
+            ORDER BY entity_type ASC
+        ")->fetchAll(PDO::FETCH_COLUMN) ?: [];
+
+        $where = [];
+        $params = [];
+
+        if ($search !== '') {
+            $where[] = '(d.original_name LIKE :search OR d.mime_type LIKE :search OR d.storage_path LIKE :search)';
+            $params[':search'] = '%' . $search . '%';
+        }
+
+        if ($documentType !== '') {
+            $where[] = 'd.document_type = :document_type';
+            $params[':document_type'] = $documentType;
+        }
+
+        if ($entityType !== '') {
+            $where[] = 'dl.entity_type = :entity_type';
+            $params[':entity_type'] = $entityType;
+        }
+
+        if ($entityId > 0) {
+            $where[] = 'dl.entity_id = :entity_id';
+            $params[':entity_id'] = $entityId;
+        }
+
+        $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+
+        $stmt = db()->prepare("
             SELECT d.id, d.document_type, d.original_name, d.mime_type, d.file_size, d.created_at, u.name AS uploaded_by_name,
                    COUNT(dl.id) AS link_count
             FROM documents d
             LEFT JOIN users u ON u.id = d.uploaded_by_user_id
             LEFT JOIN document_links dl ON dl.document_id = d.id
+            {$whereSql}
             GROUP BY d.id, d.document_type, d.original_name, d.mime_type, d.file_size, d.created_at, u.name
             ORDER BY d.id DESC
             LIMIT 100
         ");
+        $stmt->execute($params);
         $documents = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     } catch (Throwable $e) {
         error_log('documents view list error: ' . $e->getMessage());
         $documents = [];
     }
 }
+
+$filterParams = [];
+if ($search !== '') {
+    $filterParams['search'] = $search;
+}
+if ($documentType !== '') {
+    $filterParams['document_type'] = $documentType;
+}
+if ($entityType !== '') {
+    $filterParams['entity_type'] = $entityType;
+}
+if ($entityId > 0) {
+    $filterParams['entity_id'] = $entityId;
+}
+$csvExportUrl = base_url('documents/actions/export?' . http_build_query($filterParams + ['format' => 'csv']));
+$xlsExportUrl = base_url('documents/actions/export?' . http_build_query($filterParams + ['format' => 'xls']));
 ?>
 
 <div class="page-header d-print-none">
@@ -45,6 +108,66 @@ if ($tableReady) {
         <?php if (!$tableReady): ?>
             <div class="alert alert-warning"><?php echo e(documents_lang('tables_missing')); ?></div>
         <?php else: ?>
+            <div class="card mb-4">
+                <form method="get" action="">
+                    <div class="card-header">
+                        <h3 class="card-title"><?php echo e(documents_lang('filters')); ?></h3>
+                        <div class="card-actions">
+                            <div class="btn-list">
+                                <a href="<?php echo e($csvExportUrl); ?>" class="btn btn-outline-secondary">
+                                    <i class="ti ti-file-type-csv"></i>
+                                    <?php echo e(documents_lang('export_csv')); ?>
+                                </a>
+                                <a href="<?php echo e($xlsExportUrl); ?>" class="btn btn-outline-secondary">
+                                    <i class="ti ti-file-spreadsheet"></i>
+                                    <?php echo e(documents_lang('export_excel')); ?>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-12 col-lg-4">
+                                <label class="form-label"><?php echo e(documents_lang('search')); ?></label>
+                                <input type="search" name="search" class="form-control" value="<?php echo e($search); ?>" placeholder="<?php echo e(documents_lang('search_placeholder')); ?>">
+                            </div>
+                            <div class="col-12 col-lg-2">
+                                <label class="form-label"><?php echo e(documents_lang('document_type')); ?></label>
+                                <select name="document_type" class="form-select">
+                                    <option value=""><?php echo e(documents_lang('all_document_types')); ?></option>
+                                    <?php foreach ($documentTypes as $type): ?>
+                                        <option value="<?php echo e((string) $type); ?>" <?php echo $documentType === (string) $type ? 'selected' : ''; ?>>
+                                            <?php echo e((string) $type); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-12 col-lg-2">
+                                <label class="form-label"><?php echo e(documents_lang('entity_type')); ?></label>
+                                <select name="entity_type" class="form-select">
+                                    <option value=""><?php echo e(documents_lang('all_entity_types')); ?></option>
+                                    <?php foreach ($entityTypes as $type): ?>
+                                        <option value="<?php echo e((string) $type); ?>" <?php echo $entityType === (string) $type ? 'selected' : ''; ?>>
+                                            <?php echo e((string) $type); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-12 col-lg-2">
+                                <label class="form-label"><?php echo e(documents_lang('entity_id')); ?></label>
+                                <input type="number" name="entity_id" class="form-control" min="1" value="<?php echo $entityId > 0 ? $entityId : ''; ?>">
+                            </div>
+                            <div class="col-12 col-lg-2">
+                                <div class="btn-list">
+                                    <button type="submit" class="btn btn-primary"><?php echo e(documents_lang('filter')); ?></button>
+                                    <a href="<?php echo base_url('documents/view'); ?>" class="btn btn-outline-secondary"><?php echo e(documents_lang('clear')); ?></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
             <?php if (check_permission('documents.upload')): ?>
                 <div class="card mb-4">
                     <form action="<?php echo base_url('documents/actions/upload'); ?>" method="post" enctype="multipart/form-data" data-ajax="true">
@@ -86,11 +209,11 @@ if ($tableReady) {
                     <h3 class="card-title"><?php echo e(documents_lang('document_list')); ?></h3>
                     <div class="card-actions">
                         <div class="btn-list">
-                            <a href="<?php echo base_url('documents/actions/export?format=csv'); ?>" class="btn btn-outline-secondary">
+                            <a href="<?php echo e($csvExportUrl); ?>" class="btn btn-outline-secondary">
                                 <i class="ti ti-file-type-csv"></i>
                                 <?php echo e(documents_lang('export_csv')); ?>
                             </a>
-                            <a href="<?php echo base_url('documents/actions/export?format=xls'); ?>" class="btn btn-outline-secondary">
+                            <a href="<?php echo e($xlsExportUrl); ?>" class="btn btn-outline-secondary">
                                 <i class="ti ti-file-spreadsheet"></i>
                                 <?php echo e(documents_lang('export_excel')); ?>
                             </a>

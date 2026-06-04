@@ -75,13 +75,13 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
 
 ## Yarın Planı
 
-1. **Template export ve filtre standardı**
-   - Template listesine CSV/XLS export ekle.
-   - Template tipi, anahtar ve aktiflik filtrelerini standardize et.
+1. **Template export ve filtre standardı** - Tamamlandı
+   - Template listesine CSV/XLS export eklendi.
+   - Template türü, modül, kod, aktiflik ve metin arama filtreleri standardize edildi.
 
-2. **Documents filtre standardı**
-   - Documents ekranına arama, belge türü ve entity filtreleri ekle.
-   - Mevcut export endpoint'ini bu filtreleri okuyacak şekilde genişlet.
+2. **Documents filtre standardı** - Tamamlandı
+   - Documents ekranına arama, belge türü, entity türü ve entity ID filtreleri eklendi.
+   - Mevcut export endpoint'i bu filtreleri okuyacak şekilde genişletildi.
 
 3. **Settings/Modules export**
    - Modül registry listesini CSV/XLS export et.
