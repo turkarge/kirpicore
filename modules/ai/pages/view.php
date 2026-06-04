@@ -11,9 +11,28 @@ $modelsReady = kirpi_ai_models_table_ready();
 $manifestCount = kirpi_ai_schema_manifest_count();
 $entities = kirpi_ai_list_schema_entities(25);
 $adapters = kirpi_ai_model_adapters();
+$filterOptions = kirpi_ai_schema_filter_options();
+$latestSync = kirpi_ai_latest_schema_sync();
+$canManageSchema = check_permission('ai.schema.manage');
+$discoveryFilters = [
+    'module' => trim((string) ($_GET['module'] ?? '')),
+    'entity' => trim((string) ($_GET['entity'] ?? '')),
+    'table' => trim((string) ($_GET['table'] ?? '')),
+    'permission' => trim((string) ($_GET['permission'] ?? '')),
+    'search' => trim((string) ($_GET['discovery_q'] ?? '')),
+    'filterable_only' => (string) ($_GET['filterable_only'] ?? '') === '1',
+    'include_sensitive' => $canManageSchema && (string) ($_GET['include_sensitive'] ?? '') === '1',
+    'limit' => (int) ($_GET['limit'] ?? 25),
+];
 $discovery = kirpi_ai_discover_schema([
-    'include_sensitive' => false,
-    'limit' => 10,
+    'include_sensitive' => $discoveryFilters['include_sensitive'],
+    'filterable_only' => $discoveryFilters['filterable_only'],
+    'search' => $discoveryFilters['search'],
+    'module' => $discoveryFilters['module'],
+    'entity' => $discoveryFilters['entity'],
+    'table' => $discoveryFilters['table'],
+    'permission' => $discoveryFilters['permission'],
+    'limit' => $discoveryFilters['limit'] > 0 ? $discoveryFilters['limit'] : 25,
 ]);
 $discoveryEntities = (array) ($discovery['entities'] ?? []);
 $discoveryMeta = (array) ($discovery['meta'] ?? []);
@@ -57,6 +76,22 @@ $cards = [
 $statusBadge = static function (bool $ready): string {
     return $ready ? 'bg-green-lt' : 'bg-red-lt';
 };
+
+$renderSelect = static function (string $name, string $label, array $options, string $selected): void {
+    ?>
+    <div class="col-12 col-md-6 col-lg-3">
+        <label class="form-label"><?php echo e($label); ?></label>
+        <select name="<?php echo e($name); ?>" class="form-select">
+            <option value=""><?php echo e(ai_lang('all')); ?></option>
+            <?php foreach ($options as $option): ?>
+                <option value="<?php echo e((string) $option); ?>" <?php echo (string) $option === $selected ? 'selected' : ''; ?>>
+                    <?php echo e((string) $option); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+    <?php
+};
 ?>
 
 <div class="page-header d-print-none">
@@ -67,14 +102,14 @@ $statusBadge = static function (bool $ready): string {
                 <h2 class="page-title"><?php echo e(ai_lang('kirpi_intelligence')); ?></h2>
                 <div class="text-secondary mt-1"><?php echo e(ai_lang('subtitle')); ?></div>
             </div>
-            <?php if (check_permission('ai.schema.manage') || check_permission('ai.audit.view')): ?>
+            <?php if ($canManageSchema || check_permission('ai.audit.view')): ?>
                 <div class="col-auto ms-auto d-print-none d-flex gap-2">
                     <?php if (check_permission('ai.audit.view')): ?>
                         <a href="<?php echo base_url('ai/audit'); ?>" class="btn btn-outline-secondary">
                             <?php echo e(ai_lang('view_audit')); ?>
                         </a>
                     <?php endif; ?>
-                    <?php if (check_permission('ai.schema.manage')): ?>
+                    <?php if ($canManageSchema): ?>
                         <form action="<?php echo base_url('ai/actions/sync-schema'); ?>" method="post" data-ajax="true">
                             <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                             <button type="submit" class="btn btn-outline-primary">
@@ -131,6 +166,64 @@ $statusBadge = static function (bool $ready): string {
                 </div>
             <?php endforeach; ?>
         </div>
+
+        <?php if ($latestSync !== null): ?>
+            <?php
+            $syncDetails = (array) ($latestSync['details'] ?? []);
+            $syncFiles = array_slice((array) ($syncDetails['files'] ?? []), 0, 8);
+            $syncErrors = (array) ($syncDetails['errors'] ?? []);
+            ?>
+            <div class="card mt-3">
+                <div class="card-header">
+                    <div>
+                        <h3 class="card-title"><?php echo e(ai_lang('latest_schema_sync')); ?></h3>
+                        <div class="text-secondary small mt-1">
+                            <?php echo e((string) ($latestSync['created_at'] ?? '-')); ?>
+                            &middot;
+                            <?php echo e(ai_lang('status')); ?>:
+                            <strong><?php echo e((string) ($latestSync['status'] ?? '-')); ?></strong>
+                            &middot;
+                            <?php echo e(ai_lang('entities')); ?>:
+                            <strong><?php echo (int) ($syncDetails['entity_count'] ?? 0); ?></strong>
+                            &middot;
+                            <?php echo e(ai_lang('fields')); ?>:
+                            <strong><?php echo (int) ($syncDetails['field_count'] ?? 0); ?></strong>
+                        </div>
+                    </div>
+                </div>
+                <?php if (!empty($syncFiles) || !empty($syncErrors)): ?>
+                    <div class="table-responsive">
+                        <table class="table table-vcenter card-table table-striped mb-0">
+                            <thead>
+                            <tr>
+                                <th><?php echo e(ai_lang('manifest_file')); ?></th>
+                                <th><?php echo e(ai_lang('entities')); ?></th>
+                                <th><?php echo e(ai_lang('fields')); ?></th>
+                                <th><?php echo e(ai_lang('status')); ?></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <?php foreach ($syncFiles as $file): ?>
+                                <tr>
+                                    <td><code><?php echo e((string) ($file['file'] ?? '')); ?></code></td>
+                                    <td><?php echo (int) ($file['entities'] ?? 0); ?></td>
+                                    <td><?php echo (int) ($file['fields'] ?? 0); ?></td>
+                                    <td><span class="badge bg-green-lt"><?php echo e(ai_lang('status_ready')); ?></span></td>
+                                </tr>
+                            <?php endforeach; ?>
+                            <?php foreach ($syncErrors as $error): ?>
+                                <tr>
+                                    <td><code><?php echo e((string) ($error['file'] ?? '')); ?></code></td>
+                                    <td colspan="2"><?php echo e((string) ($error['entity'] ?? '-')); ?></td>
+                                    <td><span class="badge bg-red-lt"><?php echo e((string) ($error['message'] ?? 'error')); ?></span></td>
+                                </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
 
         <div class="card mt-3">
             <div class="card-header">
@@ -191,8 +284,60 @@ $statusBadge = static function (bool $ready): string {
                     <?php echo e(ai_lang('visible_fields')); ?>:
                     <strong><?php echo (int) ($discoveryMeta['field_count'] ?? 0); ?></strong>
                     &middot;
-                    <?php echo e(ai_lang('sensitive_hidden')); ?>
+                    <?php echo e(!empty($discoveryMeta['include_sensitive']) ? ai_lang('sensitive_visible') : ai_lang('sensitive_hidden')); ?>
                 </div>
+            </div>
+            <div class="card-body border-bottom">
+                <form method="get" action="<?php echo base_url('ai/view'); ?>">
+                    <input type="hidden" name="q" value="<?php echo e($searchQuery); ?>">
+                    <div class="row g-2">
+                        <?php $renderSelect('module', ai_lang('module'), (array) ($filterOptions['modules'] ?? []), $discoveryFilters['module']); ?>
+                        <?php $renderSelect('entity', ai_lang('entity'), (array) ($filterOptions['entities'] ?? []), $discoveryFilters['entity']); ?>
+                        <?php $renderSelect('table', ai_lang('table'), (array) ($filterOptions['tables'] ?? []), $discoveryFilters['table']); ?>
+                        <?php $renderSelect('permission', ai_lang('permission'), (array) ($filterOptions['permissions'] ?? []), $discoveryFilters['permission']); ?>
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <label class="form-label"><?php echo e(ai_lang('search_query')); ?></label>
+                            <input
+                                type="search"
+                                name="discovery_q"
+                                class="form-control"
+                                value="<?php echo e((string) $discoveryFilters['search']); ?>"
+                                placeholder="<?php echo e(ai_lang('search_placeholder')); ?>"
+                            >
+                        </div>
+                        <div class="col-12 col-md-6 col-lg-2">
+                            <label class="form-label"><?php echo e(ai_lang('limit')); ?></label>
+                            <input
+                                type="number"
+                                min="1"
+                                max="200"
+                                name="limit"
+                                class="form-control"
+                                value="<?php echo e((string) max(1, min(200, (int) $discoveryFilters['limit']))); ?>"
+                            >
+                        </div>
+                        <div class="col-12 col-lg-3 d-flex align-items-end gap-3">
+                            <label class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="filterable_only" value="1" <?php echo $discoveryFilters['filterable_only'] ? 'checked' : ''; ?>>
+                                <span class="form-check-label"><?php echo e(ai_lang('filterable_only')); ?></span>
+                            </label>
+                            <?php if ($canManageSchema): ?>
+                                <label class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="include_sensitive" value="1" <?php echo $discoveryFilters['include_sensitive'] ? 'checked' : ''; ?>>
+                                    <span class="form-check-label"><?php echo e(ai_lang('include_sensitive')); ?></span>
+                                </label>
+                            <?php endif; ?>
+                        </div>
+                        <div class="col-12 col-lg-auto d-flex align-items-end gap-2 ms-lg-auto">
+                            <a href="<?php echo base_url('ai/view'); ?>" class="btn btn-outline-secondary">
+                                <?php echo e(ai_lang('clear_filters')); ?>
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <?php echo e(ai_lang('filter')); ?>
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
             <div class="table-responsive">
                 <table class="table table-vcenter card-table table-striped mb-0">

@@ -572,6 +572,84 @@ function kirpi_ai_list_schema_entities(int $limit = 50): array
     }
 }
 
+function kirpi_ai_schema_filter_options(): array
+{
+    if (!kirpi_ai_schema_registry_ready()) {
+        return [
+            'modules' => [],
+            'entities' => [],
+            'tables' => [],
+            'permissions' => [],
+        ];
+    }
+
+    try {
+        $readDistinct = static function (string $column): array {
+            $allowed = ['module_key', 'entity_key', 'table_name', 'permission_slug'];
+            if (!in_array($column, $allowed, true)) {
+                return [];
+            }
+
+            $stmt = db()->query("
+                SELECT DISTINCT {$column} AS value
+                FROM ai_schema_entities
+                WHERE is_active = 1
+                  AND {$column} IS NOT NULL
+                  AND {$column} <> ''
+                ORDER BY {$column} ASC
+            ");
+
+            return array_values(array_map('strval', $stmt->fetchAll(PDO::FETCH_COLUMN) ?: []));
+        };
+
+        return [
+            'modules' => $readDistinct('module_key'),
+            'entities' => $readDistinct('entity_key'),
+            'tables' => $readDistinct('table_name'),
+            'permissions' => $readDistinct('permission_slug'),
+        ];
+    } catch (Throwable $e) {
+        error_log('ai schema filter options error: ' . $e->getMessage());
+
+        return [
+            'modules' => [],
+            'entities' => [],
+            'tables' => [],
+            'permissions' => [],
+        ];
+    }
+}
+
+function kirpi_ai_latest_schema_sync(): ?array
+{
+    if (!kirpi_ai_audit_table_ready()) {
+        return null;
+    }
+
+    try {
+        $stmt = db()->prepare("
+            SELECT action_key, status, details_json, created_at
+            FROM ai_audit_logs
+            WHERE action_key = :action_key
+            ORDER BY id DESC
+            LIMIT 1
+        ");
+        $stmt->execute([':action_key' => 'schema_sync']);
+        $record = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$record) {
+            return null;
+        }
+
+        $details = json_decode((string) ($record['details_json'] ?? ''), true);
+        $record['details'] = is_array($details) ? $details : [];
+
+        return $record;
+    } catch (Throwable $e) {
+        error_log('ai latest schema sync error: ' . $e->getMessage());
+        return null;
+    }
+}
+
 function kirpi_ai_user_has_permission(?array $user, ?string $permissionSlug): bool
 {
     $permissionSlug = trim((string) $permissionSlug);
@@ -609,6 +687,10 @@ function kirpi_ai_discover_schema(array $options = [], ?array $user = null): arr
     $includeSensitive = !empty($options['include_sensitive']) && kirpi_ai_user_has_permission($user, 'ai.schema.manage');
     $filterableOnly = !empty($options['filterable_only']);
     $search = mb_strtolower(trim((string) ($options['search'] ?? '')));
+    $moduleFilter = trim((string) ($options['module'] ?? ''));
+    $entityFilter = trim((string) ($options['entity'] ?? ''));
+    $tableFilter = trim((string) ($options['table'] ?? ''));
+    $permissionFilter = trim((string) ($options['permission'] ?? ''));
     $limit = max(1, min(200, (int) ($options['limit'] ?? 50)));
 
     try {
@@ -655,6 +737,22 @@ function kirpi_ai_discover_schema(array $options = [], ?array $user = null): arr
     foreach ($rows as $row) {
         $permissionSlug = trim((string) ($row['permission_slug'] ?? ''));
         if (!kirpi_ai_user_has_permission($user, $permissionSlug)) {
+            continue;
+        }
+
+        if ($moduleFilter !== '' && (string) ($row['module_key'] ?? '') !== $moduleFilter) {
+            continue;
+        }
+
+        if ($entityFilter !== '' && (string) ($row['entity_key'] ?? '') !== $entityFilter) {
+            continue;
+        }
+
+        if ($tableFilter !== '' && (string) ($row['table_name'] ?? '') !== $tableFilter) {
+            continue;
+        }
+
+        if ($permissionFilter !== '' && $permissionSlug !== $permissionFilter) {
             continue;
         }
 
@@ -750,6 +848,10 @@ function kirpi_ai_discover_schema(array $options = [], ?array $user = null): arr
             'include_sensitive' => $includeSensitive,
             'filterable_only' => $filterableOnly,
             'search' => $search,
+            'module' => $moduleFilter,
+            'entity' => $entityFilter,
+            'table' => $tableFilter,
+            'permission' => $permissionFilter,
         ],
     ];
 }
