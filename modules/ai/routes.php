@@ -29,4 +29,11 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'ai/actions/export-quality' => [
+        'file' => 'modules/ai/actions/export_quality.php',
+        'layout' => false,
+        'permission' => 'ai.schema.manage',
+        'auth' => true,
+        'method' => 'GET',
+    ],
 ];

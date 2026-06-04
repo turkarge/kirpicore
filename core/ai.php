@@ -650,6 +650,191 @@ function kirpi_ai_latest_schema_sync(): ?array
     }
 }
 
+function kirpi_ai_schema_quality_report(int $limit = 100): array
+{
+    $limit = max(1, min(500, $limit));
+
+    if (!kirpi_ai_schema_registry_ready()) {
+        return [
+            'status' => 'error',
+            'message' => 'schema_registry_not_ready',
+            'warnings' => [],
+            'meta' => [
+                'warning_count' => 0,
+                'error_count' => 0,
+                'by_module' => [],
+            ],
+        ];
+    }
+
+    try {
+        $stmt = db()->query("
+            SELECT
+                e.id AS entity_id,
+                e.module_key,
+                e.entity_key,
+                e.table_name,
+                e.description AS entity_description,
+                e.permission_slug,
+                f.field_name,
+                f.field_type,
+                f.description AS field_description,
+                f.is_sensitive,
+                f.is_filterable
+            FROM ai_schema_entities e
+            LEFT JOIN ai_schema_fields f ON f.entity_id = e.id AND f.is_active = 1
+            WHERE e.is_active = 1
+            ORDER BY e.module_key ASC, e.entity_key ASC, f.field_name ASC
+        ");
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    } catch (Throwable $e) {
+        error_log('ai schema quality error: ' . $e->getMessage());
+
+        return [
+            'status' => 'error',
+            'message' => 'schema_quality_failed',
+            'warnings' => [],
+            'meta' => [
+                'warning_count' => 0,
+                'error_count' => 0,
+                'by_module' => [],
+            ],
+        ];
+    }
+
+    $entities = [];
+    foreach ($rows as $row) {
+        $entityId = (int) ($row['entity_id'] ?? 0);
+        if ($entityId <= 0) {
+            continue;
+        }
+
+        if (!isset($entities[$entityId])) {
+            $entities[$entityId] = [
+                'module' => (string) ($row['module_key'] ?? ''),
+                'entity' => (string) ($row['entity_key'] ?? ''),
+                'table' => (string) ($row['table_name'] ?? ''),
+                'description' => trim((string) ($row['entity_description'] ?? '')),
+                'permission' => trim((string) ($row['permission_slug'] ?? '')),
+                'fields' => [],
+            ];
+        }
+
+        $fieldName = trim((string) ($row['field_name'] ?? ''));
+        if ($fieldName === '') {
+            continue;
+        }
+
+        $entities[$entityId]['fields'][] = [
+            'name' => $fieldName,
+            'type' => trim((string) ($row['field_type'] ?? '')),
+            'description' => trim((string) ($row['field_description'] ?? '')),
+            'is_sensitive' => (int) ($row['is_sensitive'] ?? 0) === 1,
+            'is_filterable' => (int) ($row['is_filterable'] ?? 0) === 1,
+        ];
+    }
+
+    $warnings = [];
+    $byModule = [];
+    $errorCount = 0;
+    $sensitivePatterns = [
+        'password',
+        'token',
+        'secret',
+        'email',
+        'ip',
+        'path',
+        'payload',
+        'json',
+        'body',
+        'agent',
+        'hash',
+        'key',
+    ];
+
+    $addWarning = static function (
+        string $severity,
+        string $code,
+        array $entity,
+        ?array $field,
+        string $message
+    ) use (&$warnings, &$byModule, &$errorCount): void {
+        $module = (string) ($entity['module'] ?? '');
+        $warnings[] = [
+            'severity' => $severity,
+            'code' => $code,
+            'module' => $module,
+            'entity' => (string) ($entity['entity'] ?? ''),
+            'table' => (string) ($entity['table'] ?? ''),
+            'field' => $field !== null ? (string) ($field['name'] ?? '') : null,
+            'message' => $message,
+        ];
+
+        if (!isset($byModule[$module])) {
+            $byModule[$module] = [
+                'warning_count' => 0,
+                'error_count' => 0,
+            ];
+        }
+
+        $byModule[$module]['warning_count']++;
+        if ($severity === 'error') {
+            $byModule[$module]['error_count']++;
+            $errorCount++;
+        }
+    };
+
+    foreach ($entities as $entity) {
+        if ((string) ($entity['description'] ?? '') === '') {
+            $addWarning('warning', 'missing_entity_description', $entity, null, 'Entity description is missing.');
+        }
+
+        if ((string) ($entity['permission'] ?? '') === '') {
+            $addWarning('error', 'missing_permission', $entity, null, 'Permission slug is missing.');
+        }
+
+        $fields = (array) ($entity['fields'] ?? []);
+        if (empty($fields)) {
+            $addWarning('error', 'missing_fields', $entity, null, 'Entity has no active fields.');
+            continue;
+        }
+
+        foreach ($fields as $field) {
+            if ((string) ($field['description'] ?? '') === '') {
+                $addWarning('warning', 'missing_field_description', $entity, $field, 'Field description is missing.');
+            }
+
+            if ((string) ($field['type'] ?? '') === '') {
+                $addWarning('warning', 'missing_field_type', $entity, $field, 'Field type is missing.');
+            }
+
+            $fieldName = mb_strtolower((string) ($field['name'] ?? ''));
+            if (empty($field['is_sensitive'])) {
+                foreach ($sensitivePatterns as $pattern) {
+                    if (str_contains($fieldName, $pattern)) {
+                        $addWarning('warning', 'possible_sensitive_field', $entity, $field, 'Field name suggests sensitive data but is_sensitive is not set.');
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    ksort($byModule);
+
+    return [
+        'status' => 'success',
+        'message' => null,
+        'warnings' => array_slice($warnings, 0, $limit),
+        'meta' => [
+            'warning_count' => count($warnings),
+            'error_count' => $errorCount,
+            'by_module' => $byModule,
+            'limit' => $limit,
+        ],
+    ];
+}
+
 function kirpi_ai_user_has_permission(?array $user, ?string $permissionSlug): bool
 {
     $permissionSlug = trim((string) $permissionSlug);

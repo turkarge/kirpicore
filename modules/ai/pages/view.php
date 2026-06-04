@@ -14,6 +14,9 @@ $adapters = kirpi_ai_model_adapters();
 $filterOptions = kirpi_ai_schema_filter_options();
 $latestSync = kirpi_ai_latest_schema_sync();
 $canManageSchema = check_permission('ai.schema.manage');
+$qualityReport = $canManageSchema ? kirpi_ai_schema_quality_report(20) : null;
+$qualityMeta = is_array($qualityReport) ? (array) ($qualityReport['meta'] ?? []) : [];
+$qualityWarnings = is_array($qualityReport) ? (array) ($qualityReport['warnings'] ?? []) : [];
 $discoveryFilters = [
     'module' => trim((string) ($_GET['module'] ?? '')),
     'entity' => trim((string) ($_GET['entity'] ?? '')),
@@ -56,6 +59,12 @@ $schemaExportUrl = static function (string $format) use ($schemaExportParams): s
     return base_url('ai/actions/export-schema?' . http_build_query(array_merge($schemaExportParams, [
         'format' => $format,
     ])));
+};
+$qualityExportUrl = static function (string $format): string {
+    return base_url('ai/actions/export-quality?' . http_build_query([
+        'format' => $format,
+        'limit' => 500,
+    ]));
 };
 
 $cards = [
@@ -238,6 +247,86 @@ $renderSelect = static function (string $name, string $label, array $options, st
                         </table>
                     </div>
                 <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($canManageSchema && is_array($qualityReport)): ?>
+            <?php $qualityByModule = array_slice((array) ($qualityMeta['by_module'] ?? []), 0, 8, true); ?>
+            <div class="card mt-3">
+                <div class="card-header">
+                    <div>
+                        <h3 class="card-title"><?php echo e(ai_lang('schema_quality')); ?></h3>
+                        <div class="text-secondary small mt-1">
+                            <?php echo e(ai_lang('quality_warnings')); ?>:
+                            <strong><?php echo (int) ($qualityMeta['warning_count'] ?? 0); ?></strong>
+                            &middot;
+                            <?php echo e(ai_lang('quality_errors')); ?>:
+                            <strong><?php echo (int) ($qualityMeta['error_count'] ?? 0); ?></strong>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <div class="btn-list">
+                            <a href="<?php echo e($qualityExportUrl('json')); ?>" class="btn btn-sm btn-outline-secondary">JSON</a>
+                            <a href="<?php echo e($qualityExportUrl('csv')); ?>" class="btn btn-sm btn-outline-secondary">CSV</a>
+                            <a href="<?php echo e($qualityExportUrl('xls')); ?>" class="btn btn-sm btn-outline-secondary">XLS</a>
+                        </div>
+                    </div>
+                </div>
+                <?php if (!empty($qualityByModule)): ?>
+                    <div class="card-body border-bottom">
+                        <div class="row g-2">
+                            <?php foreach ($qualityByModule as $moduleKey => $moduleQuality): ?>
+                                <div class="col-6 col-md-3 col-xl-2">
+                                    <div class="border rounded-2 p-2">
+                                        <div><code><?php echo e((string) $moduleKey); ?></code></div>
+                                        <div class="text-secondary small">
+                                            <?php echo (int) ($moduleQuality['warning_count'] ?? 0); ?>
+                                            <?php echo e(ai_lang('quality_warnings')); ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+                <div class="table-responsive">
+                    <table class="table table-vcenter card-table table-striped mb-0">
+                        <thead>
+                        <tr>
+                            <th><?php echo e(ai_lang('severity')); ?></th>
+                            <th><?php echo e(ai_lang('quality_code')); ?></th>
+                            <th><?php echo e(ai_lang('module')); ?></th>
+                            <th><?php echo e(ai_lang('entity')); ?></th>
+                            <th><?php echo e(ai_lang('field_name')); ?></th>
+                            <th><?php echo e(ai_lang('quality_message')); ?></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php if (empty($qualityWarnings)): ?>
+                            <tr>
+                                <td colspan="6" class="text-center text-secondary py-4">
+                                    <?php echo e(ai_lang('no_quality_warnings')); ?>
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($qualityWarnings as $warning): ?>
+                                <tr>
+                                    <td>
+                                        <span class="badge <?php echo (string) ($warning['severity'] ?? '') === 'error' ? 'bg-red-lt' : 'bg-yellow-lt'; ?>">
+                                            <?php echo e((string) ($warning['severity'] ?? 'warning')); ?>
+                                        </span>
+                                    </td>
+                                    <td><code><?php echo e((string) ($warning['code'] ?? '')); ?></code></td>
+                                    <td><code><?php echo e((string) ($warning['module'] ?? '')); ?></code></td>
+                                    <td><?php echo e((string) ($warning['entity'] ?? '')); ?></td>
+                                    <td><?php echo e((string) ($warning['field'] ?? '-')); ?></td>
+                                    <td><?php echo e((string) ($warning['message'] ?? '')); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         <?php endif; ?>
 

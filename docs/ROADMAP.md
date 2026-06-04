@@ -57,6 +57,7 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
 - CSV ve XLS çıktıları sunucu tarafında üretilecek standart endpoint yapısına bağlandı.
 - Export butonları gerçek link olarak çalışır; JS varsa mevcut filtreler URL'e eklenir.
 - AI schema discovery çıktısı JSON/CSV/XLS formatlarında export edilebilir hale getirildi.
+- AI schema kalite kontrol çıktısı JSON/CSV/XLS formatlarında export edilebilir hale getirildi.
 - Aşağıdaki modüllerde server-side export tamamlandı:
   - `notifications`
   - `documents`
@@ -97,6 +98,7 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - AI schema manifestleri kalan standart modüllerde tamamlandı.
    - Schema discovery ekranında export/metadata kullanımı için manifest kapsamı genişletildi.
    - Discovery filtreleri ve JSON/CSV/XLS schema export endpoint'i eklendi.
+   - Schema quality check ve kalite raporu export endpoint'i eklendi.
 
 ## Kısa Vadeli Sonraki Sıra
 

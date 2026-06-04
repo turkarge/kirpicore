@@ -209,6 +209,33 @@ Export mevcut discovery filtrelerini kullanır:
 
 Hassas alanlar varsayılan olarak dışarı verilmez. `include_sensitive=1` yalnızca `ai.schema.manage` yetkisi olan kullanıcılar için çalışır.
 
+## Schema Quality Gate
+
+KIP Faz 2 metadata indeksleme öncesinde schema kayıtları kalite kontrolünden geçmelidir.
+
+Kontrol edilen başlıklar:
+
+* Eksik entity açıklaması
+* Eksik permission slug
+* Aktif field içermeyen entity
+* Eksik field açıklaması
+* Eksik field tipi
+* Hassas olabilecek ama `is_sensitive` işaretlenmemiş alanlar
+
+Hassas alan adayları aşağıdaki kelimelerle taranır:
+
+```text
+password, token, secret, email, ip, path, payload, json, body, agent, hash, key
+```
+
+Kalite raporu endpoint'i:
+
+```text
+ai/actions/export-quality?format=json
+```
+
+Bu endpoint yalnızca `ai.schema.manage` yetkisi olan kullanıcılar tarafından kullanılmalıdır.
+
 ---
 
 # Faz 2 — Vector Search
