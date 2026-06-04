@@ -17,6 +17,37 @@ KIP geliştirmesine geçmeden önce Kirpi Core tarafında aşağıdaki yapısal 
 
 Bu hazırlıklar KIP Faz 2 ve sonrası için veri keşfi, yetki sınırları, event analizi ve rapor üretimi altyapısını standart hale getirir.
 
+## Uygulanan Core Durumu - 2026-06-04
+
+KIP geliştirmesi öncesindeki Core hazırlık zinciri tamamlandı:
+
+```text
+Manifest
+  -> Sync
+  -> Discovery
+  -> Export
+  -> Quality Gate
+```
+
+Tamamlanan uygulama başlıkları:
+
+* Standart modüller `modules/{module}/ai/schema.json` manifestleriyle schema yayınlar.
+* `ai/actions/sync-schema` manifestleri `ai_schema_entities` ve `ai_schema_fields` tablolarına senkronize eder.
+* Discovery ekranı modül, entity, tablo, yetki, arama, limit, filterable-only ve sensitive filtrelerini destekler.
+* `ai/actions/export-schema` schema bilgisini JSON/CSV/XLS formatlarında dışarı verir.
+* `ai/actions/export-quality` schema kalite raporunu JSON/CSV/XLS formatlarında dışarı verir.
+* Schema Quality Gate eksik açıklama, eksik yetki, fieldsız entity ve olası hassas alan uyarılarını üretir.
+
+Son doğrulama sonucu:
+
+```text
+Schema sync: 23 entity, 207 field, 0 hata
+Schema quality: 24 uyarı, 0 hata
+Health check: app/db ok
+```
+
+Sonraki çalışma, kalite uyarılarındaki gürültüyü azaltmak ve gerçek hassas alan işaretlerini netleştirmektir.
+
 ---
 
 ## Amaç
