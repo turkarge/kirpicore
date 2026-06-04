@@ -58,14 +58,14 @@ window.KIRPI_NOTIFICATIONS_I18N = {
                     <?php endif; ?>
 
                     <?php if ($notificationsTableReady): ?>
-                        <button type="button" class="btn btn-outline-secondary js-notifications-export" data-format="csv">
+                        <a href="<?php echo base_url('notifications/actions/export?format=csv'); ?>" class="btn btn-outline-secondary js-notifications-export" data-format="csv">
                             <i class="ti ti-file-type-csv"></i>
                             <?php echo e(notifications_lang('export_csv')); ?>
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary js-notifications-export" data-format="xls">
+                        </a>
+                        <a href="<?php echo base_url('notifications/actions/export?format=xls'); ?>" class="btn btn-outline-secondary js-notifications-export" data-format="xls">
                             <i class="ti ti-file-spreadsheet"></i>
                             <?php echo e(notifications_lang('export_excel')); ?>
-                        </button>
+                        </a>
                         <form
                             id="notifications-mark-all-read-form"
                             action="<?php echo base_url('notifications/actions/mark-all-read'); ?>"

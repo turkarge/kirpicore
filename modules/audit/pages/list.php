@@ -69,14 +69,14 @@ window.KIRPI_AUDIT_I18N = {
                 <?php if ($auditTableReady): ?>
                     <div class="card-actions">
                         <div class="btn-list">
-                            <button type="button" class="btn btn-outline-secondary js-audit-export" data-format="csv">
+                            <a href="<?php echo base_url('audit/actions/export?format=csv'); ?>" class="btn btn-outline-secondary js-audit-export" data-format="csv">
                                 <i class="ti ti-file-type-csv"></i>
                                 <?php echo e(audit_lang('csv_export')); ?>
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary js-audit-export" data-format="xls">
+                            </a>
+                            <a href="<?php echo base_url('audit/actions/export?format=xls'); ?>" class="btn btn-outline-secondary js-audit-export" data-format="xls">
                                 <i class="ti ti-file-spreadsheet"></i>
                                 <?php echo e(audit_lang('excel_export')); ?>
-                            </button>
+                            </a>
                         </div>
                     </div>
                 <?php endif; ?>

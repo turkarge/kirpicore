@@ -95,7 +95,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     exportButtons.forEach((button) => {
-        button.addEventListener("click", function () {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
             const params = new URLSearchParams();
             params.set("format", button.dataset.format || "csv");
             appendFilters(params);
