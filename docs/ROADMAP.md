@@ -83,9 +83,9 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Documents ekranına arama, belge türü, entity türü ve entity ID filtreleri eklendi.
    - Mevcut export endpoint'i bu filtreleri okuyacak şekilde genişletildi.
 
-3. **Settings/Modules export**
-   - Modül registry listesini CSV/XLS export et.
-   - Menü registry görünümü için export gereksinimini değerlendir.
+3. **Settings/Modules export** - Tamamlandı
+   - Modül registry listesine CSV/XLS export eklendi.
+   - Menü registry görünümüne CSV/XLS export eklendi.
 
 4. **Standard UI kontrolü**
    - Export butonları tüm ilgili ekranlarda gerçek `<a>` link olarak kalsın.

@@ -11,18 +11,15 @@ function settings_lang(string $key, ?string $default = null): string
     if ($dictionary === null) {
         $dictionary = [
             'tr' => [
-                // Sistem ve Ayarlar
                 'system_management' => 'Sistem Yönetimi',
                 'settings' => 'Ayarlar',
-                'nav_toggle' => 'Menuyu Ac/Kapat',
-                'nav_management' => 'Yonetim',
-                'nav_monitoring' => 'Monitoring / Izleme',
+                'nav_toggle' => 'Menüyü Aç/Kapat',
+                'nav_management' => 'Yönetim',
+                'nav_monitoring' => 'Monitoring / İzleme',
                 'nav_content_management' => 'İçerik Yönetimi',
                 'session_data' => 'Session Verileri',
                 'settings_table_missing' => 'Ayarlar tablosu kurulu değil. Kurulum için setup veya db:install çalıştırın.',
                 'system_check' => 'Sistem Kontrol ve Eksik Kurulum',
-
-                // Kurulum ve Schema
                 'required_total_tables' => 'Beklenen Toplam Tablo',
                 'missing_table' => 'Eksik Tablo',
                 'missing_index_expected' => 'Eksik İndeks / Beklenen',
@@ -35,8 +32,6 @@ function settings_lang(string $key, ?string $default = null): string
                 'missing_installed' => 'Eksik tablo, kolon ve indeksler başarıyla kuruldu.',
                 'still_missing' => 'Kurulum denendi ancak halen eksikler var. Logları kontrol edin.',
                 'install_missing_error' => 'Eksik tablolar kurulurken bir hata oluştu.',
-
-                // Uygulama Ayarları
                 'application' => 'Uygulama',
                 'application_name' => 'Uygulama Adı',
                 'api_status' => 'API Durumu',
@@ -47,8 +42,6 @@ function settings_lang(string $key, ?string $default = null): string
                 'password_defined' => 'Parola tanımlı (güvenlik için gösterilmiyor).',
                 'password_missing' => 'Parola tanımlı değil.',
                 'save_settings' => 'Ayarları Kaydet',
-
-                // Modül Yönetimi
                 'module_management' => 'Modül Yönetimi',
                 'app_modules_missing' => 'app_modules tablosu hazır değil. Ayarlar ekranından Eksikleri Kur çalıştırın.',
                 'modules' => 'Modüller',
@@ -57,6 +50,8 @@ function settings_lang(string $key, ?string $default = null): string
                 'order' => 'Sıra',
                 'dependency' => 'Bağımlılık',
                 'dependent_modules' => 'Kullanan Modüller',
+                'menu_count' => 'Menü Sayısı',
+                'permission' => 'Yetki',
                 'type' => 'Tip',
                 'status' => 'Durum',
                 'operation' => 'İşlem',
@@ -65,15 +60,15 @@ function settings_lang(string $key, ?string $default = null): string
                 'plugin' => 'Plugin',
                 'active' => 'Aktif',
                 'passive' => 'Pasif',
-                'locked' => 'Kilitle',
+                'locked' => 'Kilitli',
                 'disable_confirm' => 'Bu modül devre dışı bırakılacak. Emin misiniz?',
                 'enable_confirm' => 'Bu modül aktif edilecek. Emin misiniz?',
                 'disable_blocked_title_prefix' => 'Disable engelli. Aktif bağımlı modüller: ',
                 'dependent_module_exists' => 'Bağımlı Modül Var',
                 'disable' => 'Disable',
                 'enable' => 'Enable',
-
-                // API Test
+                'export_csv' => 'CSV',
+                'export_excel' => 'Excel',
                 'api_test_center' => 'API Test Merkezi',
                 'method' => 'Method',
                 'endpoint' => 'Endpoint',
@@ -88,15 +83,11 @@ function settings_lang(string $key, ?string $default = null): string
                 'pending' => 'Bekleniyor',
                 'error' => 'Hata',
                 'invalid_json_prefix' => 'JSON Body geçersiz: ',
-
-                // Modallar ve Genel Mesajlar
                 'session_modal_title' => 'Session Verileri',
                 'session_mask_info' => 'Hassas alanlar otomatik olarak maskelenir.',
                 'close' => 'Kapat',
                 'csrf_failed' => 'Güvenlik doğrulaması başarısız oldu.',
                 'settings_table_not_ready' => 'Ayarlar tablosu henüz kurulu değil.',
-
-                // Hata Mesajları
                 'app_name_required' => 'Uygulama adı boş olamaz.',
                 'mail_port_invalid' => 'MAIL_PORT sayısal ve pozitif olmalıdır.',
                 'mail_encryption_invalid' => 'MAIL_ENCRYPTION geçersiz.',
@@ -106,20 +97,20 @@ function settings_lang(string $key, ?string $default = null): string
                 'module_key_required' => 'Modül anahtarı zorunludur.',
                 'module_update_failed' => 'Modül durumu güncellenemedi.',
                 'module_updated' => 'Modül durumu güncellendi.',
-                'menu_management' => 'Menu Yonetimi',
-                'menu_management_note' => 'Menu yapisi module.json icindeki menu tanimlarindan otomatik uretilir.',
-                'fixed_menu_items' => 'Sabit Menu Ogeleri',
-                'top_menu_items' => 'Ust Menu Ogeleri',
-                'management_menu_items' => 'Yonetim Menu Ogeleri',
-                'module' => 'Modul',
-                'placement' => 'Yerlesim',
+                'menu_management' => 'Menü Yönetimi',
+                'menu_management_note' => 'Menü yapısı module.json içindeki menu tanımlarından otomatik üretilir.',
+                'fixed_menu_items' => 'Sabit Menü Öğeleri',
+                'top_menu_items' => 'Üst Menü Öğeleri',
+                'management_menu_items' => 'Yönetim Menü Öğeleri',
+                'module' => 'Modül',
+                'placement' => 'Yerleşim',
                 'group' => 'Grup',
                 'route' => 'Route',
                 'title_key' => 'Title Key',
-                'description' => 'Aciklama',
-                'no_menu_item' => 'Menu ogesi bulunamadi.',
-                'menu_fixed_dashboard' => 'Her zaman ilk sirada yer alir.',
-                'menu_fixed_management' => 'Her zaman son sirada yer alir.',
+                'description' => 'Açıklama',
+                'no_menu_item' => 'Menü öğesi bulunamadı.',
+                'menu_fixed_dashboard' => 'Her zaman ilk sırada yer alır.',
+                'menu_fixed_management' => 'Her zaman son sırada yer alır.',
             ],
             'en' => [
                 'system_management' => 'System Management',
@@ -139,6 +130,10 @@ function settings_lang(string $key, ?string $default = null): string
                 'missing_schema_files' => 'Schema files with missing tables:',
                 'missing_indexes' => 'Missing indexes:',
                 'missing_columns' => 'Missing columns:',
+                'no_missing_schema' => 'No missing tables, columns, or indexes. System is complete.',
+                'missing_installed' => 'Missing tables, columns, and indexes installed successfully.',
+                'still_missing' => 'Installation attempted but some items are still missing. Check logs.',
+                'install_missing_error' => 'An error occurred while installing missing schema.',
                 'application' => 'Application',
                 'application_name' => 'Application Name',
                 'api_status' => 'API Status',
@@ -157,6 +152,8 @@ function settings_lang(string $key, ?string $default = null): string
                 'order' => 'Order',
                 'dependency' => 'Dependency',
                 'dependent_modules' => 'Dependent Modules',
+                'menu_count' => 'Menu Count',
+                'permission' => 'Permission',
                 'type' => 'Type',
                 'status' => 'Status',
                 'operation' => 'Operation',
@@ -172,6 +169,8 @@ function settings_lang(string $key, ?string $default = null): string
                 'dependent_module_exists' => 'Has Dependents',
                 'disable' => 'Disable',
                 'enable' => 'Enable',
+                'export_csv' => 'CSV',
+                'export_excel' => 'Excel',
                 'api_test_center' => 'API Test Center',
                 'method' => 'Method',
                 'endpoint' => 'Endpoint',
@@ -214,10 +213,6 @@ function settings_lang(string $key, ?string $default = null): string
                 'no_menu_item' => 'No menu item found.',
                 'menu_fixed_dashboard' => 'Always appears first.',
                 'menu_fixed_management' => 'Always appears last.',
-                'no_missing_schema' => 'No missing tables, columns, or indexes. System is complete.',
-                'missing_installed' => 'Missing tables, columns, and indexes installed successfully.',
-                'still_missing' => 'Installation attempted but some items are still missing. Check logs.',
-                'install_missing_error' => 'An error occurred while installing missing schema.',
             ],
         ];
     }
@@ -237,4 +232,3 @@ function settings_lang(string $key, ?string $default = null): string
 
     return $default ?? $key;
 }
-
