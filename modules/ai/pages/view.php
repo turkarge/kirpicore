@@ -41,6 +41,22 @@ $searchResult = $searchQuery !== ''
     ? kirpi_ai_search_schema($searchQuery, ['limit' => 10])
     : ['status' => 'success', 'results' => [], 'meta' => ['result_count' => 0]];
 $searchResults = (array) ($searchResult['results'] ?? []);
+$schemaExportParams = [
+    'module' => $discoveryFilters['module'],
+    'entity' => $discoveryFilters['entity'],
+    'table' => $discoveryFilters['table'],
+    'permission' => $discoveryFilters['permission'],
+    'discovery_q' => $discoveryFilters['search'],
+    'filterable_only' => $discoveryFilters['filterable_only'] ? '1' : '',
+    'include_sensitive' => $discoveryFilters['include_sensitive'] ? '1' : '',
+    'limit' => max(1, min(200, (int) $discoveryFilters['limit'])),
+];
+$schemaExportParams = array_filter($schemaExportParams, static fn ($value): bool => (string) $value !== '');
+$schemaExportUrl = static function (string $format) use ($schemaExportParams): string {
+    return base_url('ai/actions/export-schema?' . http_build_query(array_merge($schemaExportParams, [
+        'format' => $format,
+    ])));
+};
 
 $cards = [
     [
@@ -285,6 +301,17 @@ $renderSelect = static function (string $name, string $label, array $options, st
                     <strong><?php echo (int) ($discoveryMeta['field_count'] ?? 0); ?></strong>
                     &middot;
                     <?php echo e(!empty($discoveryMeta['include_sensitive']) ? ai_lang('sensitive_visible') : ai_lang('sensitive_hidden')); ?>
+                    <div class="btn-list justify-content-end mt-2">
+                        <a href="<?php echo e($schemaExportUrl('json')); ?>" class="btn btn-sm btn-outline-secondary">
+                            JSON
+                        </a>
+                        <a href="<?php echo e($schemaExportUrl('csv')); ?>" class="btn btn-sm btn-outline-secondary">
+                            CSV
+                        </a>
+                        <a href="<?php echo e($schemaExportUrl('xls')); ?>" class="btn btn-sm btn-outline-secondary">
+                            XLS
+                        </a>
+                    </div>
                 </div>
             </div>
             <div class="card-body border-bottom">

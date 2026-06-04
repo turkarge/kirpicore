@@ -22,4 +22,11 @@ return [
         'auth' => true,
         'method' => 'POST',
     ],
+    'ai/actions/export-schema' => [
+        'file' => 'modules/ai/actions/export_schema.php',
+        'layout' => false,
+        'permission' => 'ai.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
 ];

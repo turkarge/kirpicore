@@ -6,6 +6,7 @@ KIP geliştirmesine geçmeden önce Kirpi Core tarafında aşağıdaki yapısal 
 
 - AI schema registry temeli ve standart modüllerde `ai/schema.json` yayınlama modeli.
 - Yetki kontrollü schema discovery.
+- Schema discovery için JSON/CSV/XLS export standardı.
 - Ortak notification metadata modeli.
 - Template Registry ve Documents Registry.
 - Server-side CSV/XLS export standardı.
@@ -178,6 +179,35 @@ Her modül kendi şemasını yayınlayacaktır.
 * CMS+
 * QDMS
 * Teklifbaz
+
+## Discovery Export Standardı
+
+KIP servisleri schema bilgisini Core üzerinden dışarı almalıdır.
+
+Standart endpoint:
+
+```text
+ai/actions/export-schema?format=json
+```
+
+Desteklenen formatlar:
+
+* JSON
+* CSV
+* XLS
+
+Export mevcut discovery filtrelerini kullanır:
+
+* `module`
+* `entity`
+* `table`
+* `permission`
+* `discovery_q`
+* `filterable_only`
+* `include_sensitive`
+* `limit`
+
+Hassas alanlar varsayılan olarak dışarı verilmez. `include_sensitive=1` yalnızca `ai.schema.manage` yetkisi olan kullanıcılar için çalışır.
 
 ---
 

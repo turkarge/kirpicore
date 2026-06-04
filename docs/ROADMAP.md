@@ -56,6 +56,7 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
 - Ortak export helper eklendi: `core/export.php`.
 - CSV ve XLS çıktıları sunucu tarafında üretilecek standart endpoint yapısına bağlandı.
 - Export butonları gerçek link olarak çalışır; JS varsa mevcut filtreler URL'e eklenir.
+- AI schema discovery çıktısı JSON/CSV/XLS formatlarında export edilebilir hale getirildi.
 - Aşağıdaki modüllerde server-side export tamamlandı:
   - `notifications`
   - `documents`
@@ -95,6 +96,7 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
 5. **KIP hazırlığı** - Tamamlandı
    - AI schema manifestleri kalan standart modüllerde tamamlandı.
    - Schema discovery ekranında export/metadata kullanımı için manifest kapsamı genişletildi.
+   - Discovery filtreleri ve JSON/CSV/XLS schema export endpoint'i eklendi.
 
 ## Kısa Vadeli Sonraki Sıra
 
@@ -104,3 +106,4 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
 - Mail templates export
 - Backup/audit operasyon raporları
 - KIP Faz 2 için metadata indeksleme hazırlığı
+- KIP schema kalite kontrolü ve metadata indeksleme
