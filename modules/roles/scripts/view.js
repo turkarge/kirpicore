@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const tableContainer = document.getElementById("roles-table-container");
     const searchInput = document.getElementById("roles-search");
     const statusFilter = document.getElementById("roles-status-filter");
+    const exportButtons = document.querySelectorAll(".js-roles-export");
 
     if (!tableContainer) {
         return;
@@ -10,10 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentPage = 1;
     let debounceTimer = null;
 
-    function buildUrl(page = 1) {
-        const params = new URLSearchParams();
-        params.set("page", page);
-
+    function appendFilters(params) {
         if (searchInput && searchInput.value.trim() !== "") {
             params.set("search", searchInput.value.trim());
         }
@@ -21,6 +19,12 @@ document.addEventListener("DOMContentLoaded", function () {
         if (statusFilter && statusFilter.value !== "") {
             params.set("status", statusFilter.value);
         }
+    }
+
+    function buildUrl(page = 1) {
+        const params = new URLSearchParams();
+        params.set("page", page);
+        appendFilters(params);
 
         return `${window.KIRPI_CONFIG.baseUrl}/ajax/roles/table?${params.toString()}`;
     }
@@ -68,6 +72,17 @@ document.addEventListener("DOMContentLoaded", function () {
             loadTable(1);
         });
     }
+
+    exportButtons.forEach(function (button) {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+            const params = new URLSearchParams();
+            params.set("type", button.dataset.type || "roles");
+            params.set("format", button.dataset.format || "csv");
+            appendFilters(params);
+            window.location.href = `${window.KIRPI_CONFIG.baseUrl}/roles/actions/export?${params.toString()}`;
+        });
+    });
 
     document.addEventListener("click", function (event) {
         const paginationLink = event.target.closest(".pagination .page-link");

@@ -36,6 +36,13 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'roles/actions/export' => [
+        'file' => 'modules/roles/actions/export.php',
+        'layout' => false,
+        'permission' => 'roles.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
     'roles/actions/create' => [
         'file' => 'modules/roles/actions/create.php',
         'layout' => false,

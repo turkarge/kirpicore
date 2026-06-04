@@ -16,6 +16,24 @@ require_once BASE_PATH . '/modules/roles/language.php';
 
             <div class="col-auto ms-auto d-print-none">
                 <div class="btn-list">
+                    <a href="<?php echo base_url('roles/actions/export?type=roles&format=csv'); ?>" class="btn btn-outline-secondary js-roles-export" data-type="roles" data-format="csv">
+                        <i class="ti ti-file-type-csv"></i>
+                        <?php echo e(roles_lang('csv_export')); ?>
+                    </a>
+                    <a href="<?php echo base_url('roles/actions/export?type=roles&format=xls'); ?>" class="btn btn-outline-secondary js-roles-export" data-type="roles" data-format="xls">
+                        <i class="ti ti-file-spreadsheet"></i>
+                        <?php echo e(roles_lang('excel_export')); ?>
+                    </a>
+                    <?php if (check_permission('roles.permissions')): ?>
+                        <a href="<?php echo base_url('roles/actions/export?type=permissions&format=xls'); ?>" class="btn btn-outline-secondary">
+                            <i class="ti ti-list-check"></i>
+                            <?php echo e(roles_lang('permission_catalog_export')); ?>
+                        </a>
+                        <a href="<?php echo base_url('roles/actions/export?type=matrix&format=xls'); ?>" class="btn btn-outline-secondary">
+                            <i class="ti ti-table-export"></i>
+                            <?php echo e(roles_lang('permission_matrix_export')); ?>
+                        </a>
+                    <?php endif; ?>
                     <a
                         href="#"
                         class="btn btn-primary btn-modal-trigger"
