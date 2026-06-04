@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
             tableContainer.innerHTML = html;
         } catch (error) {
             const i18n = window.KIRPI_NOTIFICATIONS_I18N || {};
-            const loadErrorText = i18n.listLoadError || "Bildirim listesi yuklenirken bir hata olustu.";
+            const loadErrorText = i18n.listLoadError || "Bildirim listesi yüklenirken bir hata oluştu.";
 
             tableContainer.innerHTML = `
                 <div class="p-4">

@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
             tableContainer.innerHTML = html;
         } catch (error) {
             const i18n = window.KIRPI_AUDIT_I18N || {};
-            const loadErrorText = i18n.loadError || "Audit kayitlari yuklenirken bir hata olustu.";
+            const loadErrorText = i18n.loadError || "Audit kayıtları yüklenirken bir hata oluştu.";
 
             tableContainer.innerHTML = `
                 <div class="p-4">

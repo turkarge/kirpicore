@@ -87,10 +87,10 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Modül registry listesine CSV/XLS export eklendi.
    - Menü registry görünümüne CSV/XLS export eklendi.
 
-4. **Standard UI kontrolü**
-   - Export butonları tüm ilgili ekranlarda gerçek `<a>` link olarak kalsın.
-   - JS yalnızca filtre ekleme sorumluluğunu taşısın.
-   - Butonlar, ikonlar ve metinler dil dosyasından gelsin.
+4. **Standard UI kontrolü** - Tamamlandı
+   - Export butonlarının ilgili ekranlarda gerçek `<a>` link olarak kaldığı doğrulandı.
+   - JS'in yalnızca filtre ekleme sorumluluğu taşıdığı doğrulandı.
+   - Audit ve Notifications JS fallback hata metinleri UTF-8 Türkçe standardına çekildi.
 
 5. **KIP hazırlığı**
    - AI schema manifestlerini kalan standart modüllerde tamamla.
