@@ -13,14 +13,44 @@
     "author": "Kirpi Core",
     "menu": [
         {
-            "title": "Kirpi Intelligence",
-            "title_key": "kirpi_intelligence",
-            "icon": "ti ti-brain",
+            "title": "Dashboard",
+            "title_key": "dashboard",
+            "icon": "ti ti-dashboard",
             "url": "ai/view",
             "permission": "ai.view",
             "placement": "management",
-            "group": "monitoring",
-            "weight": 540
+            "group": "intelligence",
+            "weight": 10
+        },
+        {
+            "title": "Schema Discovery",
+            "title_key": "schema_discovery",
+            "icon": "ti ti-database-search",
+            "url": "ai/schema",
+            "permission": "ai.view",
+            "placement": "management",
+            "group": "intelligence",
+            "weight": 20
+        },
+        {
+            "title": "Schema Quality",
+            "title_key": "schema_quality",
+            "icon": "ti ti-shield-check",
+            "url": "ai/quality",
+            "permission": "ai.schema.manage",
+            "placement": "management",
+            "group": "intelligence",
+            "weight": 30
+        },
+        {
+            "title": "Audit Log",
+            "title_key": "view_audit",
+            "icon": "ti ti-history",
+            "url": "ai/audit",
+            "permission": "ai.audit.view",
+            "placement": "management",
+            "group": "intelligence",
+            "weight": 40
         }
     ]
 }

@@ -62,6 +62,12 @@ function kirpi_navigation_group_meta(string $groupKey): array
         $meta['weight'] = 540;
     }
 
+    if ($groupKey === 'intelligence') {
+        $meta['title'] = kirpi_module_translate('ai', 'kirpi_intelligence', 'Kirpi Intelligence');
+        $meta['icon'] = 'ti ti-brain';
+        $meta['weight'] = 890;
+    }
+
     return $meta;
 }
 

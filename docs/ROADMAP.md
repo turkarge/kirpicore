@@ -106,6 +106,11 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Schema search indeks tabanlı skorlamaya geçirildi.
    - Search sonuçlarına eşleşen terim ve kaynak bilgisi eklendi.
 
+7. **Kirpi Intelligence modül ayrımı** - Tamamlandı
+   - Yönetim menüsü altında Kirpi Intelligence kendi alt menü grubuna taşındı.
+   - Dashboard, Schema Discovery, Schema Quality ve Audit Log ayrı sayfalara bölündü.
+   - Ana dashboard yalnızca özet kartlar, hızlı işlemler ve son sync bilgisini gösterir hale getirildi.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:
