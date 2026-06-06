@@ -111,6 +111,12 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Dashboard, Schema Discovery, Schema Quality ve Audit Log ayrı sayfalara bölündü.
    - Ana dashboard yalnızca özet kartlar, hızlı işlemler ve son sync bilgisini gösterir hale getirildi.
 
+8. **KIP Query Planner taslağı** - Tamamlandı
+   - Doğal dil soruları SQL üretmeden metadata tabanlı aday plana dönüştürülür.
+   - Plan çıktısı aday entity, tablo, yetki, önerilen alanlar ve eşleşen terimleri gösterir.
+   - Query Planner ayrı Kirpi Intelligence alt menüsü ve sayfası olarak eklendi.
+   - Her plan önizleme denemesi AI audit zincirine yazılır.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:
@@ -139,5 +145,5 @@ Doğrulanan son durum:
 - Settings/Modules export
 - Mail templates export
 - Backup/audit operasyon raporları
-- KIP query plan taslağı
+- Query Planner sonuçlarından güvenli SQL Guard akışına geçiş tasarımı
 - Read-only SQL Guard genişletme

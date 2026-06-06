@@ -344,6 +344,37 @@ Search sonucu aşağıdaki ek bilgileri döndürür:
 
 ---
 
+## Uygulanan Query Plan Preview Standardı
+
+Faz 3'e geçmeden önce güvenli ara katman olarak `Query Planner` uygulanır.
+
+Bu katman doğal dil sorusunu SQL üretmeden metadata tabanlı bir plana dönüştürür:
+
+```text
+Soru
+ ↓
+Schema Search
+ ↓
+Query Plan Preview
+ ↓
+Aday Entity / Field / Yetki Listesi
+```
+
+Plan çıktısı:
+
+* Birincil aday entity
+* Aday tablolar
+* Önerilen field listesi
+* Yetki slug'ı
+* Eşleşen terimler ve kaynaklar
+* Güvenlik notları
+
+Query Planner gerçek veri okumaz ve SQL üretmez. Üretilen plan sadece kullanıcı onayı ve sonraki SQL Guard aşaması için ön hazırlıktır.
+
+Her plan önizleme denemesi `query_plan_preview` aksiyonu ile AI audit zincirine yazılır.
+
+---
+
 # Faz 3 — Query Engine
 
 ## Amaç

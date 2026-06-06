@@ -22,6 +22,13 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'ai/planner' => [
+        'file' => 'modules/ai/pages/planner.php',
+        'layout' => true,
+        'permission' => 'ai.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
     'ai/quality' => [
         'file' => 'modules/ai/pages/quality.php',
         'layout' => true,

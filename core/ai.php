@@ -1609,6 +1609,134 @@ function kirpi_ai_search_schema(string $query, array $options = [], ?array $user
     ];
 }
 
+function kirpi_ai_build_query_plan(string $question, array $options = [], ?array $user = null): array
+{
+    $question = trim($question);
+    $limit = max(1, min(20, (int) ($options['limit'] ?? 5)));
+    $tokens = kirpi_ai_tokenize_search($question);
+    $safetyNotes = [
+        'Bu aşama SQL üretmez ve veri okumaz.',
+        'Adaylar RBAC ve hassas alan kurallarıyla sınırlıdır.',
+        'SQL aşamasına geçmeden önce Read-only SQL Guard zorunludur.',
+    ];
+
+    if ($question === '' || empty($tokens)) {
+        return [
+            'status' => 'success',
+            'question' => $question,
+            'tokens' => [],
+            'search_mode' => null,
+            'index_count' => kirpi_ai_schema_index_count(),
+            'candidate_count' => 0,
+            'primary_candidate' => null,
+            'candidates' => [],
+            'safety_notes' => $safetyNotes,
+            'meta' => [
+                'message' => 'empty_question',
+            ],
+        ];
+    }
+
+    $search = kirpi_ai_search_schema($question, ['limit' => $limit], $user);
+    if (($search['status'] ?? '') !== 'success') {
+        kirpi_ai_log_operation('query_plan_preview', 'failed', [
+            'question' => $question,
+            'tokens' => $tokens,
+            'reason' => 'schema_search_failed',
+        ], null, 'query_plan', null);
+
+        return [
+            'status' => 'error',
+            'question' => $question,
+            'tokens' => $tokens,
+            'search_mode' => null,
+            'index_count' => kirpi_ai_schema_index_count(),
+            'candidate_count' => 0,
+            'primary_candidate' => null,
+            'candidates' => [],
+            'safety_notes' => $safetyNotes,
+            'meta' => [
+                'message' => 'schema_search_failed',
+            ],
+        ];
+    }
+
+    $candidates = [];
+    foreach ((array) ($search['results'] ?? []) as $index => $result) {
+        $matchedFields = array_values((array) ($result['matched_fields'] ?? []));
+        $fieldDetails = [];
+        $recommendedFields = [];
+
+        foreach ($matchedFields as $field) {
+            $name = trim((string) ($field['name'] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+
+            $recommendedFields[] = $name;
+            $fieldDetails[] = [
+                'name' => $name,
+                'type' => (string) ($field['type'] ?? ''),
+                'description' => (string) ($field['description'] ?? ''),
+                'score' => (int) ($field['score'] ?? 0),
+                'matched_terms' => array_values((array) ($field['matched_terms'] ?? [])),
+            ];
+
+            if (count($recommendedFields) >= 8) {
+                break;
+            }
+        }
+
+        $notes = [];
+        if (empty($recommendedFields)) {
+            $notes[] = 'Entity metadata ile eşleşti; field seçimi için kullanıcı onayı gerekir.';
+        }
+
+        $candidates[] = [
+            'rank' => $index + 1,
+            'score' => (int) ($result['score'] ?? 0),
+            'module' => (string) ($result['module'] ?? ''),
+            'entity' => (string) ($result['entity'] ?? ''),
+            'table' => (string) ($result['table'] ?? ''),
+            'description' => (string) ($result['description'] ?? ''),
+            'permission' => $result['permission'] ?? null,
+            'matched_terms' => array_values((array) ($result['matched_terms'] ?? [])),
+            'matched_sources' => array_values((array) ($result['matched_sources'] ?? [])),
+            'recommended_fields' => array_values(array_unique($recommendedFields)),
+            'field_details' => $fieldDetails,
+            'notes' => $notes,
+        ];
+    }
+
+    $plan = [
+        'status' => 'success',
+        'question' => $question,
+        'tokens' => $tokens,
+        'search_mode' => $search['meta']['mode'] ?? null,
+        'index_count' => (int) ($search['meta']['index_count'] ?? kirpi_ai_schema_index_count()),
+        'candidate_count' => count($candidates),
+        'primary_candidate' => $candidates[0] ?? null,
+        'candidates' => $candidates,
+        'safety_notes' => $safetyNotes,
+        'meta' => [
+            'result_count' => (int) ($search['meta']['result_count'] ?? count($candidates)),
+            'sql_generated' => false,
+            'data_read' => false,
+        ],
+    ];
+
+    kirpi_ai_log_operation('query_plan_preview', 'success', [
+        'question' => $question,
+        'tokens' => $tokens,
+        'candidate_count' => count($candidates),
+        'primary_entity' => $candidates[0]['entity'] ?? null,
+        'search_mode' => $plan['search_mode'],
+        'sql_generated' => false,
+    ], null, 'query_plan', null);
+
+    return $plan;
+}
+
 function kirpi_ai_log_operation(
     string $action,
     string $status,

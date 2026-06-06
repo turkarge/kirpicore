@@ -33,6 +33,16 @@
             "weight": 20
         },
         {
+            "title": "Query Planner",
+            "title_key": "query_planner",
+            "icon": "ti ti-route-square",
+            "url": "ai/planner",
+            "permission": "ai.view",
+            "placement": "management",
+            "group": "intelligence",
+            "weight": 25
+        },
+        {
             "title": "Schema Quality",
             "title_key": "schema_quality",
             "icon": "ti ti-shield-check",

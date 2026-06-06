@@ -77,6 +77,9 @@ $statusBadge = static fn (bool $ready): string => $ready ? 'bg-green-lt' : 'bg-r
                     <a href="<?php echo base_url('ai/schema'); ?>" class="btn btn-outline-primary">
                         <?php echo e(ai_lang('schema_discovery')); ?>
                     </a>
+                    <a href="<?php echo base_url('ai/planner'); ?>" class="btn btn-outline-secondary">
+                        <?php echo e(ai_lang('query_planner')); ?>
+                    </a>
                     <?php if ($canManageSchema): ?>
                         <a href="<?php echo base_url('ai/quality'); ?>" class="btn btn-outline-secondary">
                             <?php echo e(ai_lang('schema_quality')); ?>
@@ -132,6 +135,15 @@ $statusBadge = static fn (bool $ready): string => $ready ? 'bg-green-lt' : 'bg-r
                                 <div class="col">
                                     <div><?php echo e(ai_lang('schema_discovery')); ?></div>
                                     <div class="text-secondary small"><?php echo e(ai_lang('schema_discovery_detail')); ?></div>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="<?php echo base_url('ai/planner'); ?>" class="list-group-item list-group-item-action">
+                            <div class="row align-items-center">
+                                <div class="col-auto"><i class="ti ti-route-square"></i></div>
+                                <div class="col">
+                                    <div><?php echo e(ai_lang('query_planner')); ?></div>
+                                    <div class="text-secondary small"><?php echo e(ai_lang('query_planner_detail')); ?></div>
                                 </div>
                             </div>
                         </a>
