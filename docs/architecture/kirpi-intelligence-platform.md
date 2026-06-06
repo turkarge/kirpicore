@@ -425,6 +425,38 @@ TRUNCATE
 
 İlk sürüm yalnızca READ ONLY çalışmalıdır.
 
+## Uygulanan Read-only SQL Guard Standardı
+
+Core tarafında ilk SQL Guard katmanı sıkı read-only modda uygulanır.
+
+Guard sadece sorguyu denetler; SQL çalıştırmaz.
+
+Bloklanan durumlar:
+
+* Boş SQL
+* `SELECT` dışında başlayan sorgular
+* Noktalı virgül ve çoklu statement riski
+* SQL yorumları
+* `DELETE`, `UPDATE`, `INSERT`, `DROP`, `ALTER`, `TRUNCATE`, `CREATE`, `GRANT`, `REVOKE` ve benzeri DDL/DML komutları
+* `UNION`
+* `FROM (...)` veya `JOIN (...)` subquery kullanımı
+* `information_schema`, `mysql`, `performance_schema`, `sys` gibi sistem şemaları
+* `INTO OUTFILE`, `INTO DUMPFILE`, `LOAD_FILE`, `SLEEP`, `BENCHMARK` gibi riskli ifadeler
+* İzinli tablo listesi verildiğinde liste dışı tablo kullanımı
+
+Guard çıktısı:
+
+* `allowed`
+* `status`
+* `reason`
+* `reasons`
+* `tables`
+* `allowed_tables`
+
+Her guard kontrolü `sql_guard_check` aksiyonu ile AI audit zincirine yazılır.
+
+Query Planner çıktısındaki `allowed_tables` ve `allowed_fields` alanları sonraki aşamada model tarafından üretilecek SQL'in guard tarafından plana göre doğrulanmasını sağlar.
+
 ---
 
 # Faz 4 — AI Gateway

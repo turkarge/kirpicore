@@ -53,6 +53,16 @@
             "weight": 30
         },
         {
+            "title": "SQL Guard",
+            "title_key": "sql_guard",
+            "icon": "ti ti-shield-lock",
+            "url": "ai/sql-guard",
+            "permission": "ai.schema.manage",
+            "placement": "management",
+            "group": "intelligence",
+            "weight": 35
+        },
+        {
             "title": "Audit Log",
             "title_key": "view_audit",
             "icon": "ti ti-history",

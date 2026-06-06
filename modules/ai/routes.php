@@ -29,6 +29,13 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'ai/sql-guard' => [
+        'file' => 'modules/ai/pages/sql_guard.php',
+        'layout' => true,
+        'permission' => 'ai.schema.manage',
+        'auth' => true,
+        'method' => 'GET',
+    ],
     'ai/quality' => [
         'file' => 'modules/ai/pages/quality.php',
         'layout' => true,

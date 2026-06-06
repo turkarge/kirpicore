@@ -1717,6 +1717,18 @@ function kirpi_ai_build_query_plan(string $question, array $options = [], ?array
         'candidate_count' => count($candidates),
         'primary_candidate' => $candidates[0] ?? null,
         'candidates' => $candidates,
+        'allowed_tables' => array_values(array_unique(array_filter(array_map(
+            static fn (array $candidate): string => (string) ($candidate['table'] ?? ''),
+            $candidates
+        )))),
+        'allowed_fields' => array_reduce($candidates, static function (array $carry, array $candidate): array {
+            $table = (string) ($candidate['table'] ?? '');
+            if ($table !== '') {
+                $carry[$table] = (array) ($candidate['recommended_fields'] ?? []);
+            }
+
+            return $carry;
+        }, []),
         'safety_notes' => $safetyNotes,
         'meta' => [
             'result_count' => (int) ($search['meta']['result_count'] ?? count($candidates)),
@@ -1802,35 +1814,95 @@ function kirpi_ai_log_operation(
     }
 }
 
-function kirpi_ai_sql_guard_readonly(string $sql): array
+function kirpi_ai_sql_guard_readonly(string $sql, array $options = []): array
 {
     $normalized = trim($sql);
-    $withoutComments = preg_replace('/(--[^\r\n]*|\/\*.*?\*\/)/s', ' ', $normalized);
-    $canonical = strtolower(trim((string) $withoutComments));
+    $canonical = strtolower(trim(preg_replace('/\s+/', ' ', $normalized) ?? ''));
+    $reasons = [];
+    $tables = [];
+    $allowedTables = array_values(array_filter(array_map(
+        static fn ($table): string => strtolower(trim((string) $table, " \t\n\r\0\x0B`")),
+        (array) ($options['allowed_tables'] ?? [])
+    )));
 
     if ($canonical === '') {
-        return [
-            'allowed' => false,
-            'reason' => 'empty_sql',
-        ];
+        $reasons[] = 'empty_sql';
     }
 
-    if (!str_starts_with($canonical, 'select')) {
-        return [
-            'allowed' => false,
-            'reason' => 'only_select_allowed',
-        ];
+    if ($canonical !== '' && !str_starts_with($canonical, 'select')) {
+        $reasons[] = 'only_select_allowed';
     }
 
-    if (preg_match('/\b(delete|update|insert|drop|alter|truncate|create|replace|grant|revoke)\b/i', $canonical) === 1) {
-        return [
-            'allowed' => false,
-            'reason' => 'dangerous_keyword',
-        ];
+    if (preg_match('/(--|#|\/\*|\*\/)/', $normalized) === 1) {
+        $reasons[] = 'comments_not_allowed';
     }
 
-    return [
-        'allowed' => true,
-        'reason' => null,
+    if (preg_match('/;/', $normalized) === 1) {
+        $reasons[] = 'semicolon_not_allowed';
+    }
+
+    if (preg_match('/\b(delete|update|insert|drop|alter|truncate|create|replace|grant|revoke|merge|call|execute|prepare|deallocate|set|use|lock|unlock|handler)\b/i', $canonical) === 1) {
+        $reasons[] = 'dangerous_keyword';
+    }
+
+    if (preg_match('/\b(into\s+outfile|into\s+dumpfile|load_file\s*\(|sleep\s*\(|benchmark\s*\(|information_schema|mysql\.|performance_schema|sys\.)/i', $canonical) === 1) {
+        $reasons[] = 'unsafe_expression';
+    }
+
+    if (preg_match('/\bunion\b/i', $canonical) === 1) {
+        $reasons[] = 'union_not_allowed';
+    }
+
+    if (preg_match('/\b(from|join)\s*\(/i', $canonical) === 1) {
+        $reasons[] = 'subquery_not_allowed';
+    }
+
+    if (preg_match_all('/\b(from|join)\s+(`?[a-zA-Z_][a-zA-Z0-9_]*`?(?:\.`?[a-zA-Z_][a-zA-Z0-9_]*`?)?)/', $canonical, $matches, PREG_SET_ORDER) > 0) {
+        foreach ($matches as $match) {
+            $table = strtolower(str_replace('`', '', (string) ($match[2] ?? '')));
+            if (str_contains($table, '.')) {
+                $parts = explode('.', $table);
+                $table = (string) end($parts);
+            }
+
+            if ($table !== '') {
+                $tables[] = $table;
+            }
+        }
+    }
+
+    $tables = array_values(array_unique($tables));
+    if ($canonical !== '' && empty($tables)) {
+        $reasons[] = 'table_required';
+    }
+
+    if (!empty($allowedTables)) {
+        $blockedTables = array_values(array_diff($tables, $allowedTables));
+        if (!empty($blockedTables)) {
+            $reasons[] = 'table_not_allowed';
+        }
+    }
+
+    $reasons = array_values(array_unique($reasons));
+    $allowed = empty($reasons);
+    $result = [
+        'allowed' => $allowed,
+        'status' => $allowed ? 'allowed' : 'blocked',
+        'reason' => $reasons[0] ?? null,
+        'reasons' => $reasons,
+        'tables' => $tables,
+        'allowed_tables' => $allowedTables,
     ];
+
+    if (!empty($options['audit']) && $normalized !== '') {
+        kirpi_ai_log_operation('sql_guard_check', $allowed ? 'success' : 'blocked', [
+            'allowed' => $allowed,
+            'reasons' => $reasons,
+            'tables' => $tables,
+            'allowed_tables' => $allowedTables,
+            'sql_length' => strlen($normalized),
+        ], null, 'sql_guard', null);
+    }
+
+    return $result;
 }

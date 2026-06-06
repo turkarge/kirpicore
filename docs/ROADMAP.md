@@ -117,6 +117,13 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Query Planner ayrı Kirpi Intelligence alt menüsü ve sayfası olarak eklendi.
    - Her plan önizleme denemesi AI audit zincirine yazılır.
 
+9. **KIP Read-only SQL Guard** - Tamamlandı
+   - SQL Guard yalnızca tekil `SELECT` sorgularına izin verecek şekilde sıkılaştırıldı.
+   - Yorumlar, noktalı virgül, DDL/DML komutları, `UNION`, subquery, sistem şemaları ve riskli fonksiyonlar bloklanır.
+   - Plan veya kullanıcı tarafından verilen izinli tablo listesine göre tablo kontrolü yapılır.
+   - SQL Guard test ekranı Kirpi Intelligence alt menüsüne eklendi.
+   - Her guard kontrolü AI audit zincirine `sql_guard_check` olarak yazılır.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:
@@ -146,4 +153,4 @@ Doğrulanan son durum:
 - Mail templates export
 - Backup/audit operasyon raporları
 - Query Planner sonuçlarından güvenli SQL Guard akışına geçiş tasarımı
-- Read-only SQL Guard genişletme
+- Guard sonrası model SQL üretim standardı ve dry-run akışı
