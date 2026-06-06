@@ -253,10 +253,18 @@ Kontrol edilen başlıklar:
 * Eksik field tipi
 * Hassas olabilecek ama `is_sensitive` işaretlenmemiş alanlar
 
-Hassas alan adayları aşağıdaki kelimelerle taranır:
+Hassas alan adayları substring ile değil, alan adı desenleriyle taranır. Amaç `action_key`, `module_key`, `metadata_json`, `route_path` gibi teknik metadata alanlarında gürültü üretmemektir.
 
 ```text
-password, token, secret, email, ip, path, payload, json, body, agent, hash, key
+password, passwd,
+token_hash, access_token, refresh_token, secret_token, private_token, api_token,
+secret_key, private_key, api_key, access_key, secret_value,
+email, *_email, email_address, ip_address,
+file_path, storage_path, absolute_path,
+payload_json, details_json, data_json,
+body, request_body, response_body, html_body,
+user_agent,
+password_hash, token_hash, secret_hash
 ```
 
 Kalite raporu endpoint'i:

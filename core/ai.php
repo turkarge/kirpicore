@@ -737,19 +737,22 @@ function kirpi_ai_schema_quality_report(int $limit = 100): array
     $warnings = [];
     $byModule = [];
     $errorCount = 0;
-    $sensitivePatterns = [
-        'password',
-        'token',
-        'secret',
-        'email',
-        'ip',
-        'path',
-        'payload',
-        'json',
-        'body',
-        'agent',
-        'hash',
-        'key',
+    $sensitiveFieldPatterns = [
+        '/(^|_)password($|_)/',
+        '/(^|_)passwd($|_)/',
+        '/(^|_)token_hash($|_)/',
+        '/(^|_)(access|refresh|secret|private|api)_token($|_)/',
+        '/(^|_)(secret|private|api|access)_key($|_)/',
+        '/(^|_)secret_value($|_)/',
+        '/(^|_)email$/',
+        '/_email$/',
+        '/(^|_)email_address$/',
+        '/(^|_)ip_address($|_)/',
+        '/(^|_)(file|storage|absolute)_path($|_)/',
+        '/(^|_)(payload|details|data)_json($|_)/',
+        '/(^|_)(request|response|html)?_?body($|_)/',
+        '/(^|_)user_agent($|_)/',
+        '/(^|_)(password|token|secret)_hash($|_)/',
     ];
 
     $addWarning = static function (
@@ -810,8 +813,8 @@ function kirpi_ai_schema_quality_report(int $limit = 100): array
 
             $fieldName = mb_strtolower((string) ($field['name'] ?? ''));
             if (empty($field['is_sensitive'])) {
-                foreach ($sensitivePatterns as $pattern) {
-                    if (str_contains($fieldName, $pattern)) {
+                foreach ($sensitiveFieldPatterns as $pattern) {
+                    if (preg_match($pattern, $fieldName) === 1) {
                         $addWarning('warning', 'possible_sensitive_field', $entity, $field, 'Field name suggests sensitive data but is_sensitive is not set.');
                         break;
                     }
