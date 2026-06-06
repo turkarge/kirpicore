@@ -142,6 +142,13 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Candidate çıktısı Preview zincirine aktarılır ve SQL yine çalıştırılmaz.
    - Candidate review denemeleri AI audit zincirine `sql_candidate_review` olarak yazılır.
 
+13. **Mock SQL Generation Adapter + Prompt Builder** - Tamamlandı
+   - SQL üretimi için güvenli prompt builder standardı eklendi.
+   - `mock-sql-generator` adapter seed olarak eklendi.
+   - Mock generator yalnızca Planner context içindeki izinli tablo ve field listesinden aday üretir.
+   - Mock üretim çıktısı Candidate Review ve SQL Preview zincirine bağlıdır; SQL çalıştırılmaz.
+   - Mock üretim denemeleri AI audit zincirine `sql_candidate_generate` olarak yazılır.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:

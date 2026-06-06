@@ -547,6 +547,45 @@ Candidate Review SQL çalıştırmaz. Üretilen aday yalnızca Preview ekranına
 
 Her candidate inceleme denemesi `sql_candidate_review` aksiyonu ile AI audit zincirine yazılır.
 
+## Mock SQL Generation Adapter ve Prompt Builder
+
+Gerçek model adapter bağlanmadan önce SQL üretim sözleşmesi mock adapter ile doğrulanır.
+
+Prompt Builder yalnızca aşağıdaki bilgileri kullanır:
+
+* Kullanıcı sorusu
+* İzinli tablo listesi
+* Tablo bazlı izinli field listesi
+* Güvenlik kuralları
+
+Prompt'a gerçek veri, hassas field, kullanıcı credential bilgisi veya tablo dışı schema bilgisi eklenmez.
+
+Prompt Builder çıktısı:
+
+* `prompt`
+* `prompt_hash`
+* `allowed_tables`
+* `allowed_fields`
+* `safety_rules`
+
+Mock adapter:
+
+* Adapter key: `mock-sql-generator`
+* Provider: `mock`
+* Type: `sql_generation`
+* External: `false`
+* Enabled: `true`
+
+Mock adapter gerçek model çağrısı yapmaz. İlk izinli tabloyu ve o tabloya ait izinli field listesini kullanarak basit bir `SELECT` adayı üretir. Üretilen SQL yine doğrudan çalıştırılmaz; Candidate Review ve SQL Preview zincirine aktarılır.
+
+Mock generation audit aksiyonu:
+
+```text
+sql_candidate_generate
+```
+
+Bu aşama gerçek model entegrasyonuna geçmeden önce adapter sözleşmesini, prompt sınırlarını ve güvenlik zincirini test etmek için kullanılır.
+
 ---
 
 # Faz 4 — AI Gateway

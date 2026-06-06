@@ -115,7 +115,8 @@ INSERT INTO ai_model_adapters (
     is_external
 ) VALUES
     ('local-qwen-placeholder', 'qwen', 'qwen-local', 'chat', 0, 0),
-    ('openai-placeholder', 'openai', 'external-model', 'chat', 0, 1)
+    ('openai-placeholder', 'openai', 'external-model', 'chat', 0, 1),
+    ('mock-sql-generator', 'mock', 'mock-sql-generator', 'sql_generation', 1, 0)
 ON DUPLICATE KEY UPDATE
     provider = VALUES(provider),
     model_name = VALUES(model_name),

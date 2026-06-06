@@ -9,6 +9,7 @@ $question = trim((string) ($_GET['question'] ?? ($_GET['planner_question'] ?? ''
 $candidateSql = trim((string) ($_GET['candidate_sql'] ?? ($_GET['sql'] ?? '')));
 $modelAdapter = trim((string) ($_GET['model_adapter'] ?? 'manual'));
 $confidence = max(0, min(100, (int) ($_GET['confidence'] ?? 0)));
+$mockGenerate = (string) ($_GET['mock_generate'] ?? '') === '1';
 $allowedTablesInput = trim((string) ($_GET['allowed_tables'] ?? ''));
 $allowedFieldsInput = trim((string) ($_GET['allowed_fields'] ?? ''));
 $allowedFields = [];
@@ -22,8 +23,18 @@ $allowedTables = array_values(array_filter(array_map(
     static fn (string $table): string => trim($table),
     preg_split('/[\s,]+/', $allowedTablesInput) ?: []
 )));
-$candidate = $candidateSql !== ''
-    ? kirpi_ai_build_sql_candidate([
+$candidate = null;
+if ($mockGenerate) {
+    $candidate = kirpi_ai_mock_generate_sql_candidate($question, [
+        'allowed_tables' => $allowedTables,
+        'allowed_fields' => $allowedFields,
+        'audit' => true,
+    ]);
+    $candidateSql = (string) ($candidate['candidate_sql'] ?? '');
+    $modelAdapter = (string) ($candidate['model_adapter'] ?? 'mock-sql-generator');
+    $confidence = (int) round(((float) ($candidate['confidence'] ?? 0)) * 100);
+} elseif ($candidateSql !== '') {
+    $candidate = kirpi_ai_build_sql_candidate([
         'question' => $question,
         'candidate_sql' => $candidateSql,
         'model_adapter' => $modelAdapter,
@@ -31,10 +42,13 @@ $candidate = $candidateSql !== ''
         'allowed_tables' => $allowedTables,
         'allowed_fields' => $allowedFields,
         'audit' => true,
-    ])
-    : null;
+    ]);
+}
 $adapters = kirpi_ai_model_adapters();
-$adapterOptions = ['manual' => ai_lang('manual_candidate')];
+$adapterOptions = [
+    'manual' => ai_lang('manual_candidate'),
+    'mock-sql-generator' => ai_lang('mock_sql_generator'),
+];
 foreach ($adapters as $adapter) {
     $key = trim((string) ($adapter['adapter_key'] ?? ''));
     if ($key !== '') {
@@ -117,9 +131,14 @@ $renderBadges = static function (array $items, string $class = 'bg-secondary-lt'
                             <input type="text" name="allowed_tables" class="form-control" value="<?php echo e($allowedTablesInput); ?>" placeholder="<?php echo e(ai_lang('allowed_tables_placeholder')); ?>">
                         </div>
                         <div class="col-12 col-lg-auto d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary w-100">
-                                <?php echo e(ai_lang('review_candidate')); ?>
-                            </button>
+                            <div class="btn-list w-100">
+                                <button type="submit" class="btn btn-primary">
+                                    <?php echo e(ai_lang('review_candidate')); ?>
+                                </button>
+                                <button type="submit" name="mock_generate" value="1" class="btn btn-outline-secondary">
+                                    <?php echo e(ai_lang('mock_generate')); ?>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -157,8 +176,8 @@ $renderBadges = static function (array $items, string $class = 'bg-secondary-lt'
                 <div class="col-md-3">
                     <div class="card">
                         <div class="card-body">
-                            <div class="subheader"><?php echo e(ai_lang('execution')); ?></div>
-                            <span class="badge bg-red-lt"><?php echo e(ai_lang('disabled')); ?></span>
+                            <div class="subheader"><?php echo e(ai_lang('generation_mode')); ?></div>
+                            <code><?php echo e((string) ($candidate['generation_mode'] ?? 'manual')); ?></code>
                         </div>
                     </div>
                 </div>
@@ -181,6 +200,33 @@ $renderBadges = static function (array $items, string $class = 'bg-secondary-lt'
                     <?php else: ?>
                         <?php $renderBadges((array) ($candidate['warnings'] ?? []), 'bg-yellow-lt'); ?>
                     <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="row row-cards mt-1">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="subheader"><?php echo e(ai_lang('prompt_hash')); ?></div>
+                            <code><?php echo e((string) ($candidate['prompt_hash'] ?? '-')); ?></code>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="subheader"><?php echo e(ai_lang('execution')); ?></div>
+                            <span class="badge bg-red-lt"><?php echo e(ai_lang('disabled')); ?></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="subheader"><?php echo e(ai_lang('preview_required')); ?></div>
+                            <span class="badge bg-green-lt"><?php echo e(ai_lang('yes')); ?></span>
+                        </div>
+                    </div>
                 </div>
             </div>
 

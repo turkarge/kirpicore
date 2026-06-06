@@ -1993,6 +1993,8 @@ function kirpi_ai_build_sql_candidate(array $input): array
     $question = trim((string) ($input['question'] ?? ''));
     $candidateSql = trim((string) ($input['candidate_sql'] ?? ''));
     $modelAdapter = trim((string) ($input['model_adapter'] ?? 'manual'));
+    $promptHash = trim((string) ($input['prompt_hash'] ?? ''));
+    $generationMode = trim((string) ($input['generation_mode'] ?? 'manual'));
     $confidence = (float) ($input['confidence'] ?? 0);
     $confidence = max(0, min(1, $confidence));
     $allowedTables = array_values(array_filter(array_map(
@@ -2004,6 +2006,10 @@ function kirpi_ai_build_sql_candidate(array $input): array
 
     if ($modelAdapter === '') {
         $modelAdapter = 'manual';
+    }
+
+    if ($generationMode === '') {
+        $generationMode = $modelAdapter === 'manual' ? 'manual' : 'adapter';
     }
 
     if ($candidateSql === '') {
@@ -2028,6 +2034,8 @@ function kirpi_ai_build_sql_candidate(array $input): array
         'candidate_sql' => $candidateSql,
         'model_adapter' => $modelAdapter,
         'confidence' => $confidence,
+        'prompt_hash' => $promptHash !== '' ? $promptHash : null,
+        'generation_mode' => $generationMode,
         'warnings' => array_values(array_unique($warnings)),
         'generated_at' => date('c'),
         'execution_enabled' => false,
@@ -2039,12 +2047,138 @@ function kirpi_ai_build_sql_candidate(array $input): array
             'question' => $question !== '' ? $question : null,
             'model_adapter' => $modelAdapter,
             'confidence' => $confidence,
+            'prompt_hash' => $promptHash !== '' ? $promptHash : null,
+            'generation_mode' => $generationMode,
             'warnings' => $candidate['warnings'],
             'allowed_tables' => $allowedTables,
             'sql_length' => strlen($candidateSql),
             'execution_enabled' => false,
             'preview_required' => true,
         ], $modelAdapter, 'sql_candidate', null);
+    }
+
+    return $candidate;
+}
+
+function kirpi_ai_build_sql_generation_prompt(string $question, array $context = []): array
+{
+    $question = trim($question);
+    $allowedTables = array_values(array_filter(array_map(
+        static fn ($table): string => trim((string) $table),
+        (array) ($context['allowed_tables'] ?? [])
+    )));
+    $allowedFields = (array) ($context['allowed_fields'] ?? []);
+
+    $lines = [
+        'Task: Produce one read-only SQL candidate for the given user question.',
+        'Hard rules:',
+        '- Return a single SELECT statement only.',
+        '- Do not use semicolons, comments, UNION, subqueries, DDL, DML, system schemas, or unsafe functions.',
+        '- Use only the allowed tables and fields below.',
+        '- Do not invent tables or fields.',
+        '- Do not execute SQL.',
+        '- The candidate must still pass SQL Preview and SQL Guard.',
+        '',
+        'User question:',
+        $question !== '' ? $question : '-',
+        '',
+        'Allowed tables:',
+        empty($allowedTables) ? '-' : implode(', ', $allowedTables),
+        '',
+        'Allowed fields by table:',
+    ];
+
+    if (empty($allowedFields)) {
+        $lines[] = '-';
+    } else {
+        foreach ($allowedFields as $table => $fields) {
+            $fieldList = array_values(array_filter(array_map('strval', (array) $fields)));
+            $lines[] = (string) $table . ': ' . (empty($fieldList) ? '-' : implode(', ', $fieldList));
+        }
+    }
+
+    $prompt = implode("\n", $lines);
+
+    return [
+        'status' => 'success',
+        'prompt' => $prompt,
+        'prompt_hash' => hash('sha256', $prompt),
+        'allowed_tables' => $allowedTables,
+        'allowed_fields' => $allowedFields,
+        'safety_rules' => [
+            'single_select_only',
+            'no_execution',
+            'preview_required',
+            'guard_required',
+            'allowed_schema_only',
+        ],
+    ];
+}
+
+function kirpi_ai_mock_generate_sql_candidate(string $question, array $context = []): array
+{
+    $prompt = kirpi_ai_build_sql_generation_prompt($question, $context);
+    $allowedTables = (array) ($prompt['allowed_tables'] ?? []);
+    $allowedFields = (array) ($prompt['allowed_fields'] ?? []);
+    $table = (string) ($allowedTables[0] ?? '');
+    $warnings = ['mock_generation'];
+    $candidateSql = '';
+    $fields = [];
+
+    if ($table === '') {
+        $warnings[] = 'allowed_tables_missing';
+    } else {
+        $rawFields = (array) ($allowedFields[$table] ?? []);
+        foreach ($rawFields as $field) {
+            $field = trim((string) $field);
+            if ($field !== '' && preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $field) === 1) {
+                $fields[] = $field;
+            }
+
+            if (count($fields) >= 5) {
+                break;
+            }
+        }
+
+        if (empty($fields)) {
+            $fields[] = 'id';
+            $warnings[] = 'field_fallback';
+        }
+
+        if (preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $table) === 1) {
+            $candidateSql = 'SELECT ' . implode(', ', array_unique($fields)) . ' FROM ' . $table . ' LIMIT 50';
+        } else {
+            $warnings[] = 'invalid_table_name';
+        }
+    }
+
+    $candidate = kirpi_ai_build_sql_candidate([
+        'question' => $question,
+        'candidate_sql' => $candidateSql,
+        'model_adapter' => 'mock-sql-generator',
+        'confidence' => $candidateSql !== '' ? 0.35 : 0,
+        'prompt_hash' => (string) ($prompt['prompt_hash'] ?? ''),
+        'generation_mode' => 'mock',
+        'allowed_tables' => $allowedTables,
+        'allowed_fields' => $allowedFields,
+    ]);
+    $candidate['warnings'] = array_values(array_unique(array_merge((array) ($candidate['warnings'] ?? []), $warnings)));
+    $candidate['prompt_hash'] = (string) ($prompt['prompt_hash'] ?? '');
+    $candidate['generation_mode'] = 'mock';
+    $candidate['prompt'] = (string) ($prompt['prompt'] ?? '');
+
+    if (!empty($context['audit']) && $candidateSql !== '') {
+        kirpi_ai_log_operation('sql_candidate_generate', 'success', [
+            'question' => $question !== '' ? $question : null,
+            'model_adapter' => 'mock-sql-generator',
+            'generation_mode' => 'mock',
+            'prompt_hash' => $candidate['prompt_hash'],
+            'warnings' => $candidate['warnings'],
+            'allowed_tables' => $allowedTables,
+            'sql_length' => strlen($candidateSql),
+            'execution_enabled' => false,
+            'preview_required' => true,
+        ], 'mock-sql-generator', 'sql_candidate', null);
     }
 
     return $candidate;
