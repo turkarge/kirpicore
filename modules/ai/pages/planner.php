@@ -12,6 +12,13 @@ $plan = $question !== ''
     : null;
 $primary = is_array($plan) ? ($plan['primary_candidate'] ?? null) : null;
 $candidates = is_array($plan) ? (array) ($plan['candidates'] ?? []) : [];
+$allowedTables = is_array($plan) ? (array) ($plan['allowed_tables'] ?? []) : [];
+$allowedFields = is_array($plan) ? (array) ($plan['allowed_fields'] ?? []) : [];
+$guardUrl = base_url('ai/sql-guard?' . http_build_query([
+    'planner_question' => $question,
+    'allowed_tables' => implode(', ', $allowedTables),
+    'allowed_fields' => json_encode($allowedFields, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '',
+]));
 
 $renderBadges = static function (array $items): void {
     foreach ($items as $item) {
@@ -149,6 +156,45 @@ $renderBadges = static function (array $items): void {
                         </div>
                     </div>
                 <?php endif; ?>
+
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title"><?php echo e(ai_lang('guard_context')); ?></h3>
+                            <div class="text-secondary small mt-1"><?php echo e(ai_lang('guard_context_detail')); ?></div>
+                        </div>
+                        <div class="card-actions">
+                            <a href="<?php echo e($guardUrl); ?>" class="btn btn-outline-primary">
+                                <?php echo e(ai_lang('open_sql_guard')); ?>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-lg-4">
+                                <div class="text-secondary small mb-1"><?php echo e(ai_lang('allowed_tables')); ?></div>
+                                <?php $renderBadges($allowedTables); ?>
+                                <?php if (empty($allowedTables)): ?>
+                                    <span class="text-secondary">-</span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="col-lg-8">
+                                <div class="text-secondary small mb-1"><?php echo e(ai_lang('allowed_fields')); ?></div>
+                                <?php if (empty($allowedFields)): ?>
+                                    <span class="text-secondary">-</span>
+                                <?php else: ?>
+                                    <?php foreach ($allowedFields as $table => $fields): ?>
+                                        <div class="mb-2">
+                                            <code><?php echo e((string) $table); ?></code>
+                                            <span class="text-secondary">:</span>
+                                            <?php $renderBadges((array) $fields); ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="card mt-3">
                     <div class="card-header">

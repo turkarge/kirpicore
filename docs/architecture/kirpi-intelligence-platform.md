@@ -457,6 +457,32 @@ Her guard kontrolü `sql_guard_check` aksiyonu ile AI audit zincirine yazılır.
 
 Query Planner çıktısındaki `allowed_tables` ve `allowed_fields` alanları sonraki aşamada model tarafından üretilecek SQL'in guard tarafından plana göre doğrulanmasını sağlar.
 
+## Planner → Guard Bağlantısı
+
+Query Planner ve SQL Guard birlikte güvenli üretim öncesi kontrol zinciri olarak çalışır.
+
+```text
+Doğal Dil Sorusu
+ ↓
+Query Planner
+ ↓
+Guard Context
+ ↓
+SQL Guard
+ ↓
+Allowed / Blocked
+```
+
+Guard Context:
+
+* Kullanıcı sorusu
+* İzinli tablo listesi
+* Tablo bazlı izinli field listesi
+
+Planner ekranı bu context'i görünür şekilde gösterir ve SQL Guard ekranına aktarır. SQL Guard ekranı context'i form gönderimleri boyunca korur.
+
+Bu birleşik akış hâlâ SQL üretmez ve SQL çalıştırmaz. Ama sonraki Text-to-SQL aşamasında üretilecek SQL için net doğrulama sınırını hazırlar.
+
 ---
 
 # Faz 4 — AI Gateway

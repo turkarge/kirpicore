@@ -124,6 +124,12 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - SQL Guard test ekranı Kirpi Intelligence alt menüsüne eklendi.
    - Her guard kontrolü AI audit zincirine `sql_guard_check` olarak yazılır.
 
+10. **Planner → Guard birleşik akışı** - Tamamlandı
+   - Query Planner ekranında Guard Context bölümü eklendi.
+   - Planner çıktısındaki `allowed_tables` ve `allowed_fields` kullanıcıya açık gösterilir hale getirildi.
+   - SQL Guard ekranı Planner context bilgisini URL üzerinden alıp korur.
+   - Bu akış SQL üretmez ve SQL çalıştırmaz; yalnızca güvenli üretim öncesi sınırları netleştirir.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:

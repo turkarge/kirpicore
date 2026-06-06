@@ -6,7 +6,16 @@ if (!defined('KIRPI_CORE_ENTRY')) {
 require_once BASE_PATH . '/modules/ai/language.php';
 
 $sql = trim((string) ($_GET['sql'] ?? ''));
+$plannerQuestion = trim((string) ($_GET['planner_question'] ?? ''));
 $allowedTablesInput = trim((string) ($_GET['allowed_tables'] ?? ''));
+$allowedFieldsInput = trim((string) ($_GET['allowed_fields'] ?? ''));
+$allowedFields = [];
+if ($allowedFieldsInput !== '') {
+    $decodedFields = json_decode($allowedFieldsInput, true);
+    if (is_array($decodedFields)) {
+        $allowedFields = $decodedFields;
+    }
+}
 $allowedTables = array_values(array_filter(array_map(
     static fn (string $table): string => trim($table),
     preg_split('/[\s,]+/', $allowedTablesInput) ?: []
@@ -56,6 +65,8 @@ $renderBadges = static function (array $items, string $class = 'bg-secondary-lt'
             </div>
             <div class="card-body">
                 <form method="get" action="<?php echo base_url('ai/sql-guard'); ?>">
+                    <input type="hidden" name="planner_question" value="<?php echo e($plannerQuestion); ?>">
+                    <input type="hidden" name="allowed_fields" value="<?php echo e($allowedFieldsInput); ?>">
                     <div class="row g-3">
                         <div class="col-12">
                             <label class="form-label"><?php echo e(ai_lang('sql_input')); ?></label>
@@ -129,6 +140,45 @@ $renderBadges = static function (array $items, string $class = 'bg-secondary-lt'
 
             <div class="alert alert-warning mt-3">
                 <?php echo e(ai_lang('sql_guard_no_execute')); ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($plannerQuestion !== '' || !empty($allowedTables) || !empty($allowedFields)): ?>
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h3 class="card-title"><?php echo e(ai_lang('planner_context')); ?></h3>
+                </div>
+                <div class="card-body">
+                    <?php if ($plannerQuestion !== ''): ?>
+                        <div class="mb-3">
+                            <div class="text-secondary small"><?php echo e(ai_lang('question')); ?></div>
+                            <?php echo e($plannerQuestion); ?>
+                        </div>
+                    <?php endif; ?>
+                    <div class="row g-3">
+                        <div class="col-lg-4">
+                            <div class="text-secondary small mb-1"><?php echo e(ai_lang('allowed_tables')); ?></div>
+                            <?php $renderBadges($allowedTables); ?>
+                            <?php if (empty($allowedTables)): ?>
+                                <span class="text-secondary">-</span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="text-secondary small mb-1"><?php echo e(ai_lang('allowed_fields')); ?></div>
+                            <?php if (empty($allowedFields)): ?>
+                                <span class="text-secondary">-</span>
+                            <?php else: ?>
+                                <?php foreach ($allowedFields as $table => $fields): ?>
+                                    <div class="mb-2">
+                                        <code><?php echo e((string) $table); ?></code>
+                                        <span class="text-secondary">:</span>
+                                        <?php $renderBadges((array) $fields); ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
             </div>
         <?php endif; ?>
     </div>
