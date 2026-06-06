@@ -130,6 +130,12 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - SQL Guard ekranı Planner context bilgisini URL üzerinden alıp korur.
    - Bu akış SQL üretmez ve SQL çalıştırmaz; yalnızca güvenli üretim öncesi sınırları netleştirir.
 
+11. **SQL Preview / Dry Run katmanı** - Tamamlandı
+   - SQL Preview ekranı Planner context ve SQL Guard sonucunu tek yerde değerlendirir.
+   - Preview akışı SQL çalıştırmaz, `EXPLAIN` çalıştırmaz ve gerçek veri okumaz.
+   - Guard sonucu, yakalanan tablolar, blok nedenleri ve yürütme kararları görünür hale getirildi.
+   - Preview denemeleri AI audit zincirine `sql_preview_check` olarak yazılır.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:
@@ -158,5 +164,5 @@ Doğrulanan son durum:
 - Settings/Modules export
 - Mail templates export
 - Backup/audit operasyon raporları
-- Query Planner sonuçlarından güvenli SQL Guard akışına geçiş tasarımı
-- Guard sonrası model SQL üretim standardı ve dry-run akışı
+- Model SQL üretim standardı
+- SQL Preview sonrası kontrollü `EXPLAIN` tasarımı

@@ -63,6 +63,16 @@
             "weight": 35
         },
         {
+            "title": "SQL Preview",
+            "title_key": "sql_preview",
+            "icon": "ti ti-file-search",
+            "url": "ai/sql-preview",
+            "permission": "ai.schema.manage",
+            "placement": "management",
+            "group": "intelligence",
+            "weight": 36
+        },
+        {
             "title": "Audit Log",
             "title_key": "view_audit",
             "icon": "ti ti-history",

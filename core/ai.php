@@ -1906,3 +1906,84 @@ function kirpi_ai_sql_guard_readonly(string $sql, array $options = []): array
 
     return $result;
 }
+
+function kirpi_ai_preview_sql(string $sql, array $context = []): array
+{
+    $sql = trim($sql);
+    $allowedTables = array_values(array_filter(array_map(
+        static fn ($table): string => trim((string) $table),
+        (array) ($context['allowed_tables'] ?? [])
+    )));
+    $allowedFields = (array) ($context['allowed_fields'] ?? []);
+    $plannerQuestion = trim((string) ($context['planner_question'] ?? ''));
+
+    if ($sql === '') {
+        return [
+            'status' => 'empty',
+            'decision' => 'blocked',
+            'executable' => false,
+            'execution_enabled' => false,
+            'explain_enabled' => false,
+            'planner_question' => $plannerQuestion,
+            'allowed_tables' => $allowedTables,
+            'allowed_fields' => $allowedFields,
+            'guard' => null,
+            'notes' => [
+                'SQL girilmedi.',
+                'Bu aşama SQL çalıştırmaz.',
+            ],
+        ];
+    }
+
+    $guard = kirpi_ai_sql_guard_readonly($sql, [
+        'allowed_tables' => $allowedTables,
+        'audit' => false,
+    ]);
+    $guardAllowed = !empty($guard['allowed']);
+    $decision = $guardAllowed ? 'preview_allowed' : 'blocked';
+    $notes = [
+        'SQL çalıştırılmadı.',
+        'EXPLAIN çalıştırılmadı.',
+        'Gerçek veri okunmadı.',
+    ];
+
+    if ($guardAllowed) {
+        $notes[] = 'Guard kontrolü geçti; yürütme yine de kapalıdır.';
+    } else {
+        $notes[] = 'Guard kontrolü blokladı; SQL üretim akışına geri dönülmelidir.';
+    }
+
+    $preview = [
+        'status' => 'success',
+        'decision' => $decision,
+        'executable' => false,
+        'execution_enabled' => false,
+        'explain_enabled' => false,
+        'planner_question' => $plannerQuestion,
+        'allowed_tables' => $allowedTables,
+        'allowed_fields' => $allowedFields,
+        'guard' => $guard,
+        'detected_tables' => (array) ($guard['tables'] ?? []),
+        'notes' => $notes,
+        'meta' => [
+            'sql_length' => strlen($sql),
+            'guard_allowed' => $guardAllowed,
+        ],
+    ];
+
+    if (!empty($context['audit'])) {
+        kirpi_ai_log_operation('sql_preview_check', $guardAllowed ? 'success' : 'blocked', [
+            'decision' => $decision,
+            'guard_allowed' => $guardAllowed,
+            'guard_reasons' => (array) ($guard['reasons'] ?? []),
+            'detected_tables' => (array) ($guard['tables'] ?? []),
+            'allowed_tables' => $allowedTables,
+            'planner_question' => $plannerQuestion !== '' ? $plannerQuestion : null,
+            'sql_length' => strlen($sql),
+            'execution_enabled' => false,
+            'explain_enabled' => false,
+        ], null, 'sql_preview', null);
+    }
+
+    return $preview;
+}

@@ -87,6 +87,9 @@ $statusBadge = static fn (bool $ready): string => $ready ? 'bg-green-lt' : 'bg-r
                         <a href="<?php echo base_url('ai/sql-guard'); ?>" class="btn btn-outline-secondary">
                             <?php echo e(ai_lang('sql_guard')); ?>
                         </a>
+                        <a href="<?php echo base_url('ai/sql-preview'); ?>" class="btn btn-outline-secondary">
+                            <?php echo e(ai_lang('sql_preview')); ?>
+                        </a>
                     <?php endif; ?>
                     <?php if ($canViewAudit): ?>
                         <a href="<?php echo base_url('ai/audit'); ?>" class="btn btn-outline-secondary">
@@ -166,6 +169,15 @@ $statusBadge = static fn (bool $ready): string => $ready ? 'bg-green-lt' : 'bg-r
                                     <div class="col">
                                         <div><?php echo e(ai_lang('sql_guard')); ?></div>
                                         <div class="text-secondary small"><?php echo e(ai_lang('sql_guard_detail')); ?></div>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="<?php echo base_url('ai/sql-preview'); ?>" class="list-group-item list-group-item-action">
+                                <div class="row align-items-center">
+                                    <div class="col-auto"><i class="ti ti-file-search"></i></div>
+                                    <div class="col">
+                                        <div><?php echo e(ai_lang('sql_preview')); ?></div>
+                                        <div class="text-secondary small"><?php echo e(ai_lang('sql_preview_detail')); ?></div>
                                     </div>
                                 </div>
                             </a>

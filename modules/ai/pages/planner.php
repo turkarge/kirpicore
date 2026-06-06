@@ -19,6 +19,11 @@ $guardUrl = base_url('ai/sql-guard?' . http_build_query([
     'allowed_tables' => implode(', ', $allowedTables),
     'allowed_fields' => json_encode($allowedFields, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '',
 ]));
+$previewUrl = base_url('ai/sql-preview?' . http_build_query([
+    'planner_question' => $question,
+    'allowed_tables' => implode(', ', $allowedTables),
+    'allowed_fields' => json_encode($allowedFields, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '',
+]));
 
 $renderBadges = static function (array $items): void {
     foreach ($items as $item) {
@@ -164,7 +169,10 @@ $renderBadges = static function (array $items): void {
                             <div class="text-secondary small mt-1"><?php echo e(ai_lang('guard_context_detail')); ?></div>
                         </div>
                         <div class="card-actions">
-                            <a href="<?php echo e($guardUrl); ?>" class="btn btn-outline-primary">
+                            <a href="<?php echo e($previewUrl); ?>" class="btn btn-outline-primary">
+                                <?php echo e(ai_lang('open_sql_preview')); ?>
+                            </a>
+                            <a href="<?php echo e($guardUrl); ?>" class="btn btn-outline-secondary">
                                 <?php echo e(ai_lang('open_sql_guard')); ?>
                             </a>
                         </div>

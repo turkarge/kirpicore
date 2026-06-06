@@ -36,6 +36,13 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'ai/sql-preview' => [
+        'file' => 'modules/ai/pages/sql_preview.php',
+        'layout' => true,
+        'permission' => 'ai.schema.manage',
+        'auth' => true,
+        'method' => 'GET',
+    ],
     'ai/quality' => [
         'file' => 'modules/ai/pages/quality.php',
         'layout' => true,

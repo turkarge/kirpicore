@@ -483,6 +483,36 @@ Planner ekranı bu context'i görünür şekilde gösterir ve SQL Guard ekranın
 
 Bu birleşik akış hâlâ SQL üretmez ve SQL çalıştırmaz. Ama sonraki Text-to-SQL aşamasında üretilecek SQL için net doğrulama sınırını hazırlar.
 
+## SQL Preview / Dry Run Standardı
+
+SQL Preview katmanı model SQL üretimine geçmeden önceki son güvenli tampon olarak uygulanır.
+
+```text
+Planner Context
+ ↓
+Manuel veya model kaynaklı SQL adayı
+ ↓
+SQL Guard
+ ↓
+SQL Preview
+ ↓
+Preview Allowed / Blocked
+```
+
+SQL Preview:
+
+* SQL çalıştırmaz.
+* `EXPLAIN` çalıştırmaz.
+* Gerçek veri okumaz.
+* Guard sonucunu gösterir.
+* Yakalanan tabloları gösterir.
+* İzinli tablo ve field sınırlarını gösterir.
+* Bloklama nedenlerini gösterir.
+
+Preview akışı `sql_preview_check` aksiyonu ile AI audit zincirine yazılır. Guard seviyesi `sql_guard_check`, Preview seviyesi ise üst akış olarak ayrı izlenir.
+
+Bu standarttan sonra model SQL üretimi devreye alınsa bile çıktı doğrudan çalıştırılmaz; önce SQL Preview üzerinden Guard kararına bağlanır.
+
 ---
 
 # Faz 4 — AI Gateway
