@@ -48,13 +48,15 @@ if (($result['status'] ?? '') === 'partial') {
 
 $entityCount = (int) ($result['entity_count'] ?? 0);
 $fieldCount = (int) ($result['field_count'] ?? 0);
+$indexCount = (int) ($result['index_count'] ?? 0);
 if ($userId > 0) {
     kirpi_notify_user($userId, 'ai.schema_synced', [
         'entity_count' => $entityCount,
         'field_count' => $fieldCount,
+        'index_count' => $indexCount,
     ], [
         'title' => 'AI schema registry güncellendi',
-        'message' => $entityCount . ' entity ve ' . $fieldCount . ' field senkronize edildi.',
+        'message' => $entityCount . ' entity, ' . $fieldCount . ' field ve ' . $indexCount . ' index kaydı senkronize edildi.',
         'source_module' => 'ai',
         'entity_type' => 'schema_registry',
         'email' => false,
@@ -66,7 +68,8 @@ json_response([
     'message' => sprintf(
         ai_lang('schema_sync_success'),
         $entityCount,
-        $fieldCount
+        $fieldCount,
+        $indexCount
     ),
     'reload_page' => true,
 ]);

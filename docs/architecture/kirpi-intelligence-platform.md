@@ -307,6 +307,41 @@ Bu aşamada sadece metadata indekslenir.
 
 Gerçek veriler indekslenmez.
 
+## Uygulanan Metadata Index Standardı
+
+Core tarafında ilk metadata index katmanı `ai_schema_index` tablosu ile uygulanır.
+
+İndeks kaynakları:
+
+* Modül anahtarı
+* Entity anahtarı
+* Tablo adı
+* Entity açıklaması
+* Entity alias ve keyword metadata alanları
+* Hassas olmayan field adı
+* Hassas olmayan field tipi
+* Hassas olmayan field açıklaması
+* Hassas olmayan field alias ve keyword metadata alanları
+
+Hassas field metadata'sı index'e yazılmaz.
+
+Schema sync sonrası index otomatik yeniden üretilir:
+
+```text
+ai/schema.json
+  -> ai_schema_entities / ai_schema_fields
+  -> ai_schema_index
+```
+
+Schema search öncelikle `ai_schema_index` üzerinden çalışır. Index hazır değilse sistem discovery fallback moduna döner.
+
+Search sonucu aşağıdaki ek bilgileri döndürür:
+
+* `mode`: `metadata_index` veya `discovery_fallback`
+* `matched_terms`
+* `matched_sources`
+* field bazında `matched_terms`
+
 ---
 
 # Faz 3 — Query Engine

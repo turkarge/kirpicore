@@ -100,6 +100,12 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Discovery filtreleri ve JSON/CSV/XLS schema export endpoint'i eklendi.
    - Schema quality check ve kalite raporu export endpoint'i eklendi.
 
+6. **KIP Faz 2 metadata indexing** - Tamamlandı
+   - `ai_schema_index` tablosu eklendi.
+   - Schema sync sonrası metadata index otomatik yeniden üretilir hale getirildi.
+   - Schema search indeks tabanlı skorlamaya geçirildi.
+   - Search sonuçlarına eşleşen terim ve kaynak bilgisi eklendi.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:
@@ -128,5 +134,5 @@ Doğrulanan son durum:
 - Settings/Modules export
 - Mail templates export
 - Backup/audit operasyon raporları
-- KIP schema kalite uyarılarını azaltma
-- KIP Faz 2 için metadata indeksleme hazırlığı
+- KIP query plan taslağı
+- Read-only SQL Guard genişletme

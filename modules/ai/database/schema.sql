@@ -43,6 +43,30 @@ CREATE TABLE IF NOT EXISTS ai_schema_fields (
         FOREIGN KEY (entity_id) REFERENCES ai_schema_entities(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS ai_schema_index (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    entity_id BIGINT UNSIGNED NOT NULL,
+    field_id BIGINT UNSIGNED NULL,
+    module_key VARCHAR(80) NOT NULL,
+    entity_key VARCHAR(120) NOT NULL,
+    table_name VARCHAR(120) NOT NULL,
+    field_name VARCHAR(120) NULL,
+    token VARCHAR(120) NOT NULL,
+    source_type VARCHAR(40) NOT NULL,
+    source_text VARCHAR(500) NULL,
+    weight SMALLINT UNSIGNED NOT NULL DEFAULT 1,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_ai_schema_index_token (token),
+    INDEX idx_ai_schema_index_entity (entity_id),
+    INDEX idx_ai_schema_index_field (field_id),
+    INDEX idx_ai_schema_index_module_entity (module_key, entity_key),
+    INDEX idx_ai_schema_index_source (source_type),
+    CONSTRAINT fk_ai_schema_index_entity_id
+        FOREIGN KEY (entity_id) REFERENCES ai_schema_entities(id) ON DELETE CASCADE,
+    CONSTRAINT fk_ai_schema_index_field_id
+        FOREIGN KEY (field_id) REFERENCES ai_schema_fields(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS ai_model_adapters (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     adapter_key VARCHAR(120) NOT NULL,

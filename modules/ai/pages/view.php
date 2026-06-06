@@ -83,6 +83,13 @@ $cards = [
         'ready' => $schemaReady,
     ],
     [
+        'title' => ai_lang('metadata_index'),
+        'detail' => ai_lang('metadata_index_detail'),
+        'value' => kirpi_ai_schema_index_count(),
+        'label' => ai_lang('index_records'),
+        'ready' => kirpi_ai_schema_index_ready(),
+    ],
+    [
         'title' => ai_lang('ai_audit_log'),
         'detail' => ai_lang('ai_audit_log_detail'),
         'value' => kirpi_ai_audit_count(),
@@ -503,7 +510,14 @@ $renderSelect = static function (string $name, string $label, array $options, st
             <div class="card-header">
                 <div>
                     <h3 class="card-title"><?php echo e(ai_lang('metadata_search')); ?></h3>
-                    <div class="text-secondary small mt-1"><?php echo e(ai_lang('metadata_search_detail')); ?></div>
+                    <div class="text-secondary small mt-1">
+                        <?php echo e(ai_lang('metadata_search_detail')); ?>
+                        <?php if ($searchQuery !== ''): ?>
+                            &middot;
+                            <?php echo e(ai_lang('search_mode')); ?>:
+                            <strong><?php echo e((string) ($searchResult['meta']['mode'] ?? '')); ?></strong>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
             <div class="card-body">
@@ -538,12 +552,13 @@ $renderSelect = static function (string $name, string $label, array $options, st
                             <th><?php echo e(ai_lang('entity')); ?></th>
                             <th><?php echo e(ai_lang('table')); ?></th>
                             <th><?php echo e(ai_lang('matched_fields')); ?></th>
+                            <th><?php echo e(ai_lang('match_reason')); ?></th>
                         </tr>
                         </thead>
                         <tbody>
                         <?php if (empty($searchResults)): ?>
                             <tr>
-                                <td colspan="5" class="text-center text-secondary py-4">
+                                <td colspan="6" class="text-center text-secondary py-4">
                                     <?php echo e(ai_lang('no_search_results')); ?>
                                 </td>
                             </tr>
@@ -555,6 +570,16 @@ $renderSelect = static function (string $name, string $label, array $options, st
                                     (array) ($result['matched_fields'] ?? [])
                                 );
                                 $matchedFields = array_values(array_filter($matchedFields, static fn (string $field): bool => $field !== ''));
+                                $matchedTerms = array_map('strval', (array) ($result['matched_terms'] ?? []));
+                                $matchedSources = array_map(
+                                    static function (array $source): string {
+                                        $type = (string) ($source['type'] ?? '');
+                                        $token = (string) ($source['token'] ?? '');
+                                        return trim($type . ':' . $token, ':');
+                                    },
+                                    array_slice((array) ($result['matched_sources'] ?? []), 0, 3)
+                                );
+                                $matchedSources = array_values(array_filter($matchedSources, static fn (string $source): bool => $source !== ''));
                                 ?>
                                 <tr>
                                     <td><?php echo (int) ($result['score'] ?? 0); ?></td>
@@ -562,6 +587,14 @@ $renderSelect = static function (string $name, string $label, array $options, st
                                     <td><?php echo e((string) ($result['entity'] ?? '')); ?></td>
                                     <td><code><?php echo e((string) ($result['table'] ?? '')); ?></code></td>
                                     <td><?php echo e(implode(', ', $matchedFields)); ?></td>
+                                    <td>
+                                        <?php if (!empty($matchedTerms)): ?>
+                                            <div><?php echo e(ai_lang('matched_terms')); ?>: <code><?php echo e(implode(', ', $matchedTerms)); ?></code></div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($matchedSources)): ?>
+                                            <div class="text-secondary small"><?php echo e(implode(' | ', $matchedSources)); ?></div>
+                                        <?php endif; ?>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>

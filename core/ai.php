@@ -16,6 +16,11 @@ function kirpi_ai_models_table_ready(): bool
     return db_table_exists('ai_model_adapters');
 }
 
+function kirpi_ai_schema_index_ready(): bool
+{
+    return db_table_exists('ai_schema_index');
+}
+
 function kirpi_ai_schema_count(): int
 {
     if (!kirpi_ai_schema_registry_ready()) {
@@ -42,6 +47,21 @@ function kirpi_ai_field_count(): int
         return (int) $stmt->fetchColumn();
     } catch (Throwable $e) {
         error_log('ai field count error: ' . $e->getMessage());
+        return 0;
+    }
+}
+
+function kirpi_ai_schema_index_count(): int
+{
+    if (!kirpi_ai_schema_index_ready()) {
+        return 0;
+    }
+
+    try {
+        $stmt = db()->query('SELECT COUNT(*) FROM ai_schema_index');
+        return (int) $stmt->fetchColumn();
+    } catch (Throwable $e) {
+        error_log('ai schema index count error: ' . $e->getMessage());
         return 0;
     }
 }
@@ -374,12 +394,15 @@ function kirpi_ai_sync_schema_registry_from_manifests(): array
     }
 
     $status = empty($errors) ? 'success' : 'partial';
+    $indexResult = kirpi_ai_rebuild_schema_index();
 
     kirpi_ai_log_operation('schema_sync', $status === 'success' ? 'success' : 'failed', [
         'files' => $installedFiles,
         'errors' => $errors,
         'entity_count' => $entityCount,
         'field_count' => $fieldCount,
+        'index_status' => (string) ($indexResult['status'] ?? 'skipped'),
+        'index_count' => (int) ($indexResult['index_count'] ?? 0),
     ], null, 'schema_registry', null);
 
     return [
@@ -388,8 +411,205 @@ function kirpi_ai_sync_schema_registry_from_manifests(): array
         'files' => $installedFiles,
         'entity_count' => $entityCount,
         'field_count' => $fieldCount,
+        'index_status' => (string) ($indexResult['status'] ?? 'skipped'),
+        'index_count' => (int) ($indexResult['index_count'] ?? 0),
         'errors' => $errors,
     ];
+}
+
+function kirpi_ai_index_text_entries(string $text, string $sourceType, int $weight): array
+{
+    $tokens = kirpi_ai_tokenize_search($text);
+    $entries = [];
+
+    foreach ($tokens as $token) {
+        $entries[] = [
+            'token' => $token,
+            'source_type' => $sourceType,
+            'source_text' => mb_substr(trim($text), 0, 500),
+            'weight' => $weight,
+        ];
+    }
+
+    return $entries;
+}
+
+function kirpi_ai_index_metadata_entries(array $metadata, string $sourceType, int $weight): array
+{
+    $entries = [];
+
+    foreach ((array) ($metadata['aliases'] ?? []) as $alias) {
+        $entries = array_merge($entries, kirpi_ai_index_text_entries((string) $alias, $sourceType, $weight));
+    }
+
+    foreach ((array) ($metadata['keywords'] ?? []) as $keyword) {
+        $entries = array_merge($entries, kirpi_ai_index_text_entries((string) $keyword, $sourceType, $weight));
+    }
+
+    return $entries;
+}
+
+function kirpi_ai_rebuild_schema_index(): array
+{
+    if (!kirpi_ai_schema_registry_ready()) {
+        return [
+            'status' => 'error',
+            'message' => 'schema_registry_not_ready',
+            'index_count' => 0,
+        ];
+    }
+
+    if (!kirpi_ai_schema_index_ready()) {
+        return [
+            'status' => 'skipped',
+            'message' => 'schema_index_not_ready',
+            'index_count' => 0,
+        ];
+    }
+
+    try {
+        $stmt = db()->query("
+            SELECT
+                e.id AS entity_id,
+                e.module_key,
+                e.entity_key,
+                e.table_name,
+                e.description AS entity_description,
+                e.permission_slug,
+                e.metadata_json AS entity_metadata_json,
+                f.id AS field_id,
+                f.field_name,
+                f.field_type,
+                f.description AS field_description,
+                f.is_sensitive,
+                f.is_filterable,
+                f.metadata_json AS field_metadata_json
+            FROM ai_schema_entities e
+            LEFT JOIN ai_schema_fields f ON f.entity_id = e.id AND f.is_active = 1
+            WHERE e.is_active = 1
+            ORDER BY e.module_key ASC, e.entity_key ASC, f.field_name ASC
+        ");
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        db()->beginTransaction();
+        db()->exec('DELETE FROM ai_schema_index');
+
+        $insert = db()->prepare("
+            INSERT INTO ai_schema_index (
+                entity_id,
+                field_id,
+                module_key,
+                entity_key,
+                table_name,
+                field_name,
+                token,
+                source_type,
+                source_text,
+                weight
+            ) VALUES (
+                :entity_id,
+                :field_id,
+                :module_key,
+                :entity_key,
+                :table_name,
+                :field_name,
+                :token,
+                :source_type,
+                :source_text,
+                :weight
+            )
+        ");
+
+        $seen = [];
+        $indexCount = 0;
+        foreach ($rows as $row) {
+            $entityId = (int) ($row['entity_id'] ?? 0);
+            if ($entityId <= 0) {
+                continue;
+            }
+
+            $fieldId = (int) ($row['field_id'] ?? 0);
+            $fieldName = trim((string) ($row['field_name'] ?? ''));
+            $isSensitive = (int) ($row['is_sensitive'] ?? 0) === 1;
+            $entityMetadata = json_decode((string) ($row['entity_metadata_json'] ?? ''), true) ?: [];
+            $fieldMetadata = json_decode((string) ($row['field_metadata_json'] ?? ''), true) ?: [];
+
+            $entries = [];
+            $entityKey = (string) ($row['entity_key'] ?? '');
+            $moduleKey = (string) ($row['module_key'] ?? '');
+            $tableName = (string) ($row['table_name'] ?? '');
+
+            $entries = array_merge($entries, kirpi_ai_index_text_entries($moduleKey, 'module', 8));
+            $entries = array_merge($entries, kirpi_ai_index_text_entries($entityKey, 'entity', 14));
+            $entries = array_merge($entries, kirpi_ai_index_text_entries($tableName, 'table', 10));
+            $entries = array_merge($entries, kirpi_ai_index_text_entries((string) ($row['entity_description'] ?? ''), 'entity_description', 6));
+            $entries = array_merge($entries, kirpi_ai_index_metadata_entries($entityMetadata, 'entity_alias', 16));
+
+            if ($fieldId > 0 && $fieldName !== '' && !$isSensitive) {
+                $entries = array_merge($entries, kirpi_ai_index_text_entries($fieldName, 'field', 12));
+                $entries = array_merge($entries, kirpi_ai_index_text_entries((string) ($row['field_type'] ?? ''), 'field_type', 3));
+                $entries = array_merge($entries, kirpi_ai_index_text_entries((string) ($row['field_description'] ?? ''), 'field_description', 5));
+                $entries = array_merge($entries, kirpi_ai_index_metadata_entries($fieldMetadata, 'field_alias', 14));
+            }
+
+            foreach ($entries as $entry) {
+                $token = trim((string) ($entry['token'] ?? ''));
+                $sourceType = trim((string) ($entry['source_type'] ?? ''));
+                if ($token === '' || $sourceType === '') {
+                    continue;
+                }
+
+                $dedupeKey = implode('|', [
+                    $entityId,
+                    $fieldId > 0 && !$isSensitive ? $fieldId : 0,
+                    $token,
+                    $sourceType,
+                ]);
+                if (isset($seen[$dedupeKey])) {
+                    continue;
+                }
+                $seen[$dedupeKey] = true;
+
+                $insert->execute([
+                    ':entity_id' => $entityId,
+                    ':field_id' => $fieldId > 0 && !$isSensitive ? $fieldId : null,
+                    ':module_key' => mb_substr($moduleKey, 0, 80),
+                    ':entity_key' => mb_substr($entityKey, 0, 120),
+                    ':table_name' => mb_substr($tableName, 0, 120),
+                    ':field_name' => $fieldId > 0 && !$isSensitive ? mb_substr($fieldName, 0, 120) : null,
+                    ':token' => mb_substr($token, 0, 120),
+                    ':source_type' => mb_substr($sourceType, 0, 40),
+                    ':source_text' => mb_substr((string) ($entry['source_text'] ?? ''), 0, 500) ?: null,
+                    ':weight' => max(1, min(65535, (int) ($entry['weight'] ?? 1))),
+                ]);
+                $indexCount++;
+            }
+        }
+
+        db()->commit();
+
+        kirpi_ai_log_operation('schema_index_rebuild', 'success', [
+            'index_count' => $indexCount,
+        ], null, 'schema_registry', null);
+
+        return [
+            'status' => 'success',
+            'message' => null,
+            'index_count' => $indexCount,
+        ];
+    } catch (Throwable $e) {
+        if (db()->inTransaction()) {
+            db()->rollBack();
+        }
+
+        error_log('ai schema index rebuild error: ' . $e->getMessage());
+
+        return [
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'index_count' => 0,
+        ];
+    }
 }
 
 function kirpi_ai_audit_count(): int
@@ -1088,6 +1308,167 @@ function kirpi_ai_text_score(string $text, array $tokens, int $exactWeight = 6, 
     return $score;
 }
 
+function kirpi_ai_search_schema_index(array $tokens, int $limit, ?array $user = null): ?array
+{
+    if (!kirpi_ai_schema_index_ready() || kirpi_ai_schema_index_count() <= 0) {
+        return null;
+    }
+
+    $user = $user ?? current_user();
+
+    try {
+        $stmt = db()->query("
+            SELECT
+                i.entity_id,
+                i.field_id,
+                i.module_key,
+                i.entity_key,
+                i.table_name,
+                i.field_name,
+                i.token,
+                i.source_type,
+                i.source_text,
+                i.weight,
+                e.description AS entity_description,
+                e.permission_slug,
+                f.field_type,
+                f.description AS field_description
+            FROM ai_schema_index i
+            INNER JOIN ai_schema_entities e ON e.id = i.entity_id AND e.is_active = 1
+            LEFT JOIN ai_schema_fields f ON f.id = i.field_id AND f.is_active = 1
+            ORDER BY i.module_key ASC, i.entity_key ASC, i.field_name ASC, i.weight DESC
+        ");
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    } catch (Throwable $e) {
+        error_log('ai schema index search error: ' . $e->getMessage());
+        return null;
+    }
+
+    $results = [];
+    foreach ($rows as $row) {
+        $permissionSlug = trim((string) ($row['permission_slug'] ?? ''));
+        if (!kirpi_ai_user_has_permission($user, $permissionSlug)) {
+            continue;
+        }
+
+        $indexToken = mb_strtolower(trim((string) ($row['token'] ?? '')));
+        if ($indexToken === '') {
+            continue;
+        }
+
+        $matchedTokens = [];
+        $score = 0;
+        foreach ($tokens as $queryToken) {
+            $queryToken = mb_strtolower((string) $queryToken);
+            if ($queryToken === '') {
+                continue;
+            }
+
+            if ($indexToken === $queryToken) {
+                $score += (int) ($row['weight'] ?? 1) * 3;
+                $matchedTokens[] = $queryToken;
+                continue;
+            }
+
+            if (str_contains($indexToken, $queryToken) || str_contains($queryToken, $indexToken)) {
+                $score += (int) ($row['weight'] ?? 1);
+                $matchedTokens[] = $queryToken;
+            }
+        }
+
+        if ($score <= 0) {
+            continue;
+        }
+
+        $entityId = (int) ($row['entity_id'] ?? 0);
+        if ($entityId <= 0) {
+            continue;
+        }
+
+        if (!isset($results[$entityId])) {
+            $results[$entityId] = [
+                'score' => 0,
+                'module' => (string) ($row['module_key'] ?? ''),
+                'entity' => (string) ($row['entity_key'] ?? ''),
+                'table' => (string) ($row['table_name'] ?? ''),
+                'description' => (string) ($row['entity_description'] ?? ''),
+                'permission' => $permissionSlug !== '' ? $permissionSlug : null,
+                'matched_fields' => [],
+                'matched_terms' => [],
+                'matched_sources' => [],
+            ];
+        }
+
+        $results[$entityId]['score'] += $score;
+        foreach ($matchedTokens as $matchedToken) {
+            $results[$entityId]['matched_terms'][$matchedToken] = true;
+        }
+
+        $sourceType = (string) ($row['source_type'] ?? '');
+        $sourceText = (string) ($row['source_text'] ?? '');
+        if ($sourceType !== '') {
+            $results[$entityId]['matched_sources'][] = [
+                'type' => $sourceType,
+                'text' => $sourceText,
+                'token' => $indexToken,
+                'score' => $score,
+            ];
+        }
+
+        $fieldName = trim((string) ($row['field_name'] ?? ''));
+        if ($fieldName !== '') {
+            if (!isset($results[$entityId]['matched_fields'][$fieldName])) {
+                $results[$entityId]['matched_fields'][$fieldName] = [
+                    'name' => $fieldName,
+                    'type' => (string) ($row['field_type'] ?? ''),
+                    'description' => (string) ($row['field_description'] ?? ''),
+                    'score' => 0,
+                    'matched_terms' => [],
+                ];
+            }
+
+            $results[$entityId]['matched_fields'][$fieldName]['score'] += $score;
+            foreach ($matchedTokens as $matchedToken) {
+                $results[$entityId]['matched_fields'][$fieldName]['matched_terms'][$matchedToken] = true;
+            }
+        }
+    }
+
+    $resultList = array_values($results);
+    foreach ($resultList as &$result) {
+        $fields = array_values((array) ($result['matched_fields'] ?? []));
+        foreach ($fields as &$field) {
+            $field['matched_terms'] = array_keys((array) ($field['matched_terms'] ?? []));
+        }
+        unset($field);
+
+        usort($fields, static function (array $a, array $b): int {
+            return ((int) ($b['score'] ?? 0)) <=> ((int) ($a['score'] ?? 0));
+        });
+
+        $sources = (array) ($result['matched_sources'] ?? []);
+        usort($sources, static function (array $a, array $b): int {
+            return ((int) ($b['score'] ?? 0)) <=> ((int) ($a['score'] ?? 0));
+        });
+
+        $result['matched_fields'] = $fields;
+        $result['matched_terms'] = array_keys((array) ($result['matched_terms'] ?? []));
+        $result['matched_sources'] = array_slice($sources, 0, 5);
+    }
+    unset($result);
+
+    usort($resultList, static function (array $a, array $b): int {
+        $scoreCompare = ((int) ($b['score'] ?? 0)) <=> ((int) ($a['score'] ?? 0));
+        if ($scoreCompare !== 0) {
+            return $scoreCompare;
+        }
+
+        return strcmp((string) ($a['entity'] ?? ''), (string) ($b['entity'] ?? ''));
+    });
+
+    return array_slice($resultList, 0, $limit);
+}
+
 function kirpi_ai_search_schema(string $query, array $options = [], ?array $user = null): array
 {
     $tokens = kirpi_ai_tokenize_search($query);
@@ -1101,6 +1482,28 @@ function kirpi_ai_search_schema(string $query, array $options = [], ?array $user
             'results' => [],
             'meta' => [
                 'result_count' => 0,
+            ],
+        ];
+    }
+
+    $indexedResults = kirpi_ai_search_schema_index($tokens, $limit, $user);
+    if (is_array($indexedResults)) {
+        kirpi_ai_log_operation('schema_search', 'success', [
+            'query' => trim($query),
+            'tokens' => $tokens,
+            'result_count' => count($indexedResults),
+            'mode' => 'metadata_index',
+        ], null, 'schema_registry', null);
+
+        return [
+            'status' => 'success',
+            'query' => trim($query),
+            'tokens' => $tokens,
+            'results' => $indexedResults,
+            'meta' => [
+                'result_count' => count($indexedResults),
+                'mode' => 'metadata_index',
+                'index_count' => kirpi_ai_schema_index_count(),
             ],
         ];
     }
@@ -1191,6 +1594,7 @@ function kirpi_ai_search_schema(string $query, array $options = [], ?array $user
         'query' => trim($query),
         'tokens' => $tokens,
         'result_count' => count($results),
+        'mode' => 'discovery_fallback',
     ], null, 'schema_registry', null);
 
     return [
@@ -1200,6 +1604,7 @@ function kirpi_ai_search_schema(string $query, array $options = [], ?array $user
         'results' => $results,
         'meta' => [
             'result_count' => count($results),
+            'mode' => 'discovery_fallback',
         ],
     ];
 }
