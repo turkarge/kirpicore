@@ -136,6 +136,12 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Guard sonucu, yakalanan tablolar, blok nedenleri ve yürütme kararları görünür hale getirildi.
    - Preview denemeleri AI audit zincirine `sql_preview_check` olarak yazılır.
 
+12. **SQL Candidate Review katmanı** - Tamamlandı
+   - Model SQL çıktısı için standart candidate yapısı eklendi.
+   - İlk sürüm model çağırmaz; manuel SQL adayı model çıktısı gibi değerlendirilir.
+   - Candidate çıktısı Preview zincirine aktarılır ve SQL yine çalıştırılmaz.
+   - Candidate review denemeleri AI audit zincirine `sql_candidate_review` olarak yazılır.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:
@@ -164,5 +170,5 @@ Doğrulanan son durum:
 - Settings/Modules export
 - Mail templates export
 - Backup/audit operasyon raporları
-- Model SQL üretim standardı
+- Gerçek model adapter ile SQL candidate üretimi
 - SQL Preview sonrası kontrollü `EXPLAIN` tasarımı

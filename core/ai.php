@@ -1987,3 +1987,65 @@ function kirpi_ai_preview_sql(string $sql, array $context = []): array
 
     return $preview;
 }
+
+function kirpi_ai_build_sql_candidate(array $input): array
+{
+    $question = trim((string) ($input['question'] ?? ''));
+    $candidateSql = trim((string) ($input['candidate_sql'] ?? ''));
+    $modelAdapter = trim((string) ($input['model_adapter'] ?? 'manual'));
+    $confidence = (float) ($input['confidence'] ?? 0);
+    $confidence = max(0, min(1, $confidence));
+    $allowedTables = array_values(array_filter(array_map(
+        static fn ($table): string => trim((string) $table),
+        (array) ($input['allowed_tables'] ?? [])
+    )));
+    $allowedFields = (array) ($input['allowed_fields'] ?? []);
+    $warnings = [];
+
+    if ($modelAdapter === '') {
+        $modelAdapter = 'manual';
+    }
+
+    if ($candidateSql === '') {
+        $warnings[] = 'candidate_sql_empty';
+    }
+
+    if (empty($allowedTables)) {
+        $warnings[] = 'allowed_tables_missing';
+    }
+
+    if ($modelAdapter === 'manual') {
+        $warnings[] = 'manual_candidate';
+    }
+
+    $candidate = [
+        'status' => $candidateSql === '' ? 'empty' : 'ready',
+        'question' => $question,
+        'planner_context' => [
+            'allowed_tables' => $allowedTables,
+            'allowed_fields' => $allowedFields,
+        ],
+        'candidate_sql' => $candidateSql,
+        'model_adapter' => $modelAdapter,
+        'confidence' => $confidence,
+        'warnings' => array_values(array_unique($warnings)),
+        'generated_at' => date('c'),
+        'execution_enabled' => false,
+        'preview_required' => true,
+    ];
+
+    if (!empty($input['audit']) && $candidateSql !== '') {
+        kirpi_ai_log_operation('sql_candidate_review', 'success', [
+            'question' => $question !== '' ? $question : null,
+            'model_adapter' => $modelAdapter,
+            'confidence' => $confidence,
+            'warnings' => $candidate['warnings'],
+            'allowed_tables' => $allowedTables,
+            'sql_length' => strlen($candidateSql),
+            'execution_enabled' => false,
+            'preview_required' => true,
+        ], $modelAdapter, 'sql_candidate', null);
+    }
+
+    return $candidate;
+}

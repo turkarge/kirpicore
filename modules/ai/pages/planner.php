@@ -24,6 +24,11 @@ $previewUrl = base_url('ai/sql-preview?' . http_build_query([
     'allowed_tables' => implode(', ', $allowedTables),
     'allowed_fields' => json_encode($allowedFields, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '',
 ]));
+$candidateUrl = base_url('ai/sql-candidate?' . http_build_query([
+    'question' => $question,
+    'allowed_tables' => implode(', ', $allowedTables),
+    'allowed_fields' => json_encode($allowedFields, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '',
+]));
 
 $renderBadges = static function (array $items): void {
     foreach ($items as $item) {
@@ -171,6 +176,9 @@ $renderBadges = static function (array $items): void {
                         <div class="card-actions">
                             <a href="<?php echo e($previewUrl); ?>" class="btn btn-outline-primary">
                                 <?php echo e(ai_lang('open_sql_preview')); ?>
+                            </a>
+                            <a href="<?php echo e($candidateUrl); ?>" class="btn btn-outline-secondary">
+                                <?php echo e(ai_lang('open_sql_candidate')); ?>
                             </a>
                             <a href="<?php echo e($guardUrl); ?>" class="btn btn-outline-secondary">
                                 <?php echo e(ai_lang('open_sql_guard')); ?>

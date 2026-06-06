@@ -43,6 +43,13 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'ai/sql-candidate' => [
+        'file' => 'modules/ai/pages/sql_candidate.php',
+        'layout' => true,
+        'permission' => 'ai.schema.manage',
+        'auth' => true,
+        'method' => 'GET',
+    ],
     'ai/quality' => [
         'file' => 'modules/ai/pages/quality.php',
         'layout' => true,

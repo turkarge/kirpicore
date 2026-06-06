@@ -73,6 +73,16 @@
             "weight": 36
         },
         {
+            "title": "SQL Candidate",
+            "title_key": "sql_candidate",
+            "icon": "ti ti-file-pencil",
+            "url": "ai/sql-candidate",
+            "permission": "ai.schema.manage",
+            "placement": "management",
+            "group": "intelligence",
+            "weight": 37
+        },
+        {
             "title": "Audit Log",
             "title_key": "view_audit",
             "icon": "ti ti-history",

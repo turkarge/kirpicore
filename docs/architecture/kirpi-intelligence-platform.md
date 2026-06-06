@@ -513,6 +513,40 @@ Preview akışı `sql_preview_check` aksiyonu ile AI audit zincirine yazılır. 
 
 Bu standarttan sonra model SQL üretimi devreye alınsa bile çıktı doğrudan çalıştırılmaz; önce SQL Preview üzerinden Guard kararına bağlanır.
 
+## SQL Candidate Review Standardı
+
+Model SQL üretimine geçmeden önce candidate formatı standart hale getirilir.
+
+Candidate yapısı:
+
+* `question`
+* `planner_context`
+* `candidate_sql`
+* `model_adapter`
+* `confidence`
+* `warnings`
+* `generated_at`
+* `execution_enabled`
+* `preview_required`
+
+İlk uygulama model çağırmaz. Kullanıcı manuel SQL adayını girer; sistem bu girdiyi model çıktısı ile aynı yapıya dönüştürür.
+
+```text
+Planner Context
+ ↓
+SQL Candidate
+ ↓
+SQL Preview
+ ↓
+SQL Guard
+ ↓
+Preview Allowed / Blocked
+```
+
+Candidate Review SQL çalıştırmaz. Üretilen aday yalnızca Preview ekranına aktarılır.
+
+Her candidate inceleme denemesi `sql_candidate_review` aksiyonu ile AI audit zincirine yazılır.
+
 ---
 
 # Faz 4 — AI Gateway
