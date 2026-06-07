@@ -61,6 +61,19 @@ try {
         'is_active' => $isActive === 1,
     ], 'mail_template', $id, 'success');
 
+    kirpi_notify_current_user('mail.template_updated', [
+        'template_id' => $id,
+        'template_key' => (string) ($template['template_key'] ?? ''),
+        'name' => $name,
+        'is_active' => $isActive === 1,
+    ], [
+        'title' => 'Mail şablonu güncellendi',
+        'message' => '"' . $name . '" mail şablonu güncellendi.',
+        'source_module' => 'mail',
+        'entity_type' => 'mail_template',
+        'entity_id' => $id,
+    ]);
+
     json_response([
         'status' => 'success',
         'message' => mail_lang('template_updated'),

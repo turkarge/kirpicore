@@ -26,6 +26,17 @@ try {
         'original_name' => (string) ($document['original_name'] ?? ''),
     ], 'document', $documentId, 'success');
 
+    kirpi_notify_current_user('documents.deleted', [
+        'document_id' => $documentId,
+        'original_name' => (string) ($document['original_name'] ?? ''),
+    ], [
+        'title' => 'Doküman silindi',
+        'message' => '"' . (string) ($document['original_name'] ?? 'Doküman') . '" dokümanı silindi.',
+        'source_module' => 'documents',
+        'entity_type' => 'document',
+        'entity_id' => $documentId,
+    ]);
+
     json_response([
         'status' => 'success',
         'message' => documents_lang('delete_success'),

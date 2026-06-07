@@ -62,6 +62,17 @@ try {
         'is_active' => $isActive,
     ], 'role', $createdRoleId, 'success');
 
+    kirpi_notify_current_user('roles.created', [
+        'name' => $name,
+        'is_active' => $isActive === 1,
+    ], [
+        'title' => 'Rol oluşturuldu',
+        'message' => '"' . $name . '" rolü başarıyla oluşturuldu.',
+        'source_module' => 'roles',
+        'entity_type' => 'role',
+        'entity_id' => $createdRoleId,
+    ]);
+
     json_response([
         'status' => 'success',
         'message' => '"' . $name . '" rolü başarıyla oluşturuldu.',

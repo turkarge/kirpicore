@@ -65,6 +65,18 @@ try {
         'permission_slugs' => array_values($permissionSlugs),
     ], 'role', $id, 'success');
 
+    kirpi_notify_current_user('roles.permissions_updated', [
+        'name' => (string) ($role['name'] ?? ''),
+        'permission_count' => count($permissionSlugs),
+        'permission_slugs' => array_values($permissionSlugs),
+    ], [
+        'title' => 'Rol izinleri güncellendi',
+        'message' => '"' . ($role['name'] ?? 'Rol') . '" rolünün izinleri güncellendi.',
+        'source_module' => 'roles',
+        'entity_type' => 'role',
+        'entity_id' => $id,
+    ]);
+
     set_flash_message('success', '"' . ($role['name'] ?? 'Rol') . '" rolünün izinleri başarıyla güncellendi.');
 
     json_response([

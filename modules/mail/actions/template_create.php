@@ -51,10 +51,23 @@ try {
         ':is_active' => $isActive,
     ]);
 
+    $createdTemplateId = (int) db()->lastInsertId();
     kirpi_audit_log('mail_template_create', 'mail', [
         'template_key' => $templateKey,
         'is_active' => $isActive === 1,
-    ], 'mail_template', (int) db()->lastInsertId(), 'success');
+    ], 'mail_template', $createdTemplateId, 'success');
+
+    kirpi_notify_current_user('mail.template_created', [
+        'template_key' => $templateKey,
+        'name' => $name,
+        'is_active' => $isActive === 1,
+    ], [
+        'title' => 'Mail şablonu oluşturuldu',
+        'message' => '"' . $name . '" mail şablonu oluşturuldu.',
+        'source_module' => 'mail',
+        'entity_type' => 'mail_template',
+        'entity_id' => $createdTemplateId,
+    ]);
 
     json_response([
         'status' => 'success',

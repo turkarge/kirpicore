@@ -57,6 +57,19 @@ kirpi_audit_log('verify', 'backup', [
     'dry_run_table_count' => $tableCount,
 ], 'backup', $backupId, 'success');
 
+kirpi_notify_current_user('backup.verified', [
+    'backup_id' => $backupId,
+    'checksum' => $checksum,
+    'dry_run' => $dryRun,
+    'dry_run_table_count' => $tableCount,
+], [
+    'title' => 'Yedek doğrulandı',
+    'message' => 'Yedek #' . $backupId . ' başarıyla doğrulandı.',
+    'source_module' => 'backup',
+    'entity_type' => 'backup',
+    'entity_id' => $backupId,
+]);
+
 json_response([
     'status' => 'success',
     'message' => $message,

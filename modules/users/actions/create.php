@@ -134,6 +134,19 @@ try {
         'is_active' => $isActive,
     ], 'user', $createdUserId, 'success');
 
+    kirpi_notify_current_user('users.created', [
+        'name' => $name,
+        'email' => $email,
+        'role_id' => $roleId !== '' ? (int) $roleId : null,
+        'is_active' => $isActive === 1,
+    ], [
+        'title' => 'Kullanıcı oluşturuldu',
+        'message' => $name . ' kullanıcısı başarıyla oluşturuldu.',
+        'source_module' => 'users',
+        'entity_type' => 'user',
+        'entity_id' => $createdUserId,
+    ]);
+
     json_response([
         'status' => 'success',
         'message' => 'Kullanıcı başarıyla oluşturuldu.',

@@ -69,6 +69,17 @@ try {
         'file_name' => $fileName,
     ], 'backup', $backupId, 'success');
 
+    kirpi_notify_current_user('backup.deleted', [
+        'backup_id' => $backupId,
+        'file_name' => $fileName,
+    ], [
+        'title' => 'Yedek silindi',
+        'message' => ($fileName !== '' ? $fileName : 'Yedek #' . $backupId) . ' silindi.',
+        'source_module' => 'backup',
+        'entity_type' => 'backup',
+        'entity_id' => $backupId,
+    ]);
+
     json_response([
         'status' => 'success',
         'message' => backup_lang('delete_success'),

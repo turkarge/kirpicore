@@ -74,6 +74,18 @@ try {
         'is_active' => $status,
     ], 'role', $id, 'success');
 
+    kirpi_notify_current_user('roles.status_changed', [
+        'name' => (string) ($role['name'] ?? ''),
+        'is_active' => $status === 1,
+        'status_label' => $status === 1 ? 'aktif' : 'pasif',
+    ], [
+        'title' => 'Rol durumu güncellendi',
+        'message' => '"' . ($role['name'] ?? 'Rol') . '" rolü ' . ($status === 1 ? 'aktif' : 'pasif') . ' yapıldı.',
+        'source_module' => 'roles',
+        'entity_type' => 'role',
+        'entity_id' => $id,
+    ]);
+
     json_response([
         'status' => 'success',
         'message' => '"' . ($role['name'] ?? 'Rol') . '" rolü ' . ($status === 1 ? 'aktif yapıldı.' : 'pasif yapıldı.'),

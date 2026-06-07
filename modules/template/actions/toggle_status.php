@@ -48,6 +48,19 @@ try {
         'is_active' => $newStatus === 1,
     ], 'template', $id, 'success');
 
+    kirpi_notify_current_user('template.status_changed', [
+        'id' => $id,
+        'code' => (string) ($template['code'] ?? ''),
+        'is_active' => $newStatus === 1,
+        'status_label' => $newStatus === 1 ? 'aktif' : 'pasif',
+    ], [
+        'title' => 'Şablon durumu güncellendi',
+        'message' => (string) ($template['code'] ?? 'Şablon') . ' ' . ($newStatus === 1 ? 'aktif' : 'pasif') . ' yapıldı.',
+        'source_module' => 'template',
+        'entity_type' => 'template',
+        'entity_id' => $id,
+    ]);
+
     json_response([
         'status' => 'success',
         'message' => template_lang('status_updated'),

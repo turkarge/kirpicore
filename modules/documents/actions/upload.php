@@ -36,6 +36,19 @@ kirpi_audit_log('document_upload', 'documents', [
     'entity_id' => $entityId > 0 ? $entityId : null,
 ], 'document', $documentId, 'success');
 
+kirpi_notify_current_user('documents.uploaded', [
+    'document_id' => $documentId,
+    'document_type' => $documentType,
+    'entity_type' => $entityType !== '' ? $entityType : null,
+    'entity_id' => $entityId > 0 ? $entityId : null,
+], [
+    'title' => 'Doküman yüklendi',
+    'message' => 'Doküman #' . $documentId . ' başarıyla yüklendi.',
+    'source_module' => 'documents',
+    'entity_type' => 'document',
+    'entity_id' => $documentId,
+]);
+
 json_response([
     'status' => 'success',
     'message' => documents_lang('upload_success'),

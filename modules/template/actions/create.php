@@ -73,12 +73,27 @@ try {
         ':created_by_user_id' => $createdBy > 0 ? $createdBy : null,
     ]);
 
+    $createdTemplateId = (int) db()->lastInsertId();
     kirpi_audit_log('template_create', 'template', [
         'kind' => $kind,
         'module_key' => $moduleKey,
         'target_key' => $targetKey,
         'code' => $code,
-    ], 'template', (int) db()->lastInsertId(), 'success');
+    ], 'template', $createdTemplateId, 'success');
+
+    kirpi_notify_current_user('template.created', [
+        'kind' => $kind,
+        'module_key' => $moduleKey,
+        'target_key' => $targetKey,
+        'code' => $code,
+        'name' => $name,
+    ], [
+        'title' => 'Şablon oluşturuldu',
+        'message' => '"' . $name . '" şablonu oluşturuldu.',
+        'source_module' => 'template',
+        'entity_type' => 'template',
+        'entity_id' => $createdTemplateId,
+    ]);
 
     json_response([
         'status' => 'success',

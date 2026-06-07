@@ -73,6 +73,18 @@ try {
         'is_active' => $status,
     ], 'user', $id, 'success');
 
+    kirpi_notify_current_user('users.status_changed', [
+        'target_user_id' => $id,
+        'is_active' => $status === 1,
+        'status_label' => $status === 1 ? 'aktif' : 'pasif',
+    ], [
+        'title' => 'Kullanıcı durumu güncellendi',
+        'message' => 'Kullanıcı #' . $id . ' ' . ($status === 1 ? 'aktif' : 'pasif') . ' yapıldı.',
+        'source_module' => 'users',
+        'entity_type' => 'user',
+        'entity_id' => $id,
+    ]);
+
     json_response([
         'status' => 'success',
         'message' => $status === 1 ? 'Kullanıcı aktif yapıldı.' : 'Kullanıcı pasif yapıldı.',

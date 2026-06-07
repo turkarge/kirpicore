@@ -440,6 +440,23 @@ function kirpi_notify_user(int $userId, string $templateKey, array $variables = 
     ];
 }
 
+function kirpi_notify_current_user(string $templateKey, array $variables = [], array $options = []): array
+{
+    $currentUser = current_user();
+    $userId = (int) ($currentUser['id'] ?? 0);
+
+    if ($userId <= 0) {
+        return [
+            'success' => false,
+            'in_app' => false,
+            'email' => false,
+            'message' => 'invalid_user',
+        ];
+    }
+
+    return kirpi_notify_user($userId, $templateKey, $variables, $options);
+}
+
 function get_recent_notifications(?int $userId, int $limit = 5): array
 {
     if (!$userId || !db_table_exists('notifications')) {

@@ -80,6 +80,20 @@ try {
         'is_active' => $isActive === 1,
     ], 'template', $id, 'success');
 
+    kirpi_notify_current_user('template.updated', [
+        'id' => $id,
+        'kind' => (string) ($template['kind'] ?? ''),
+        'code' => (string) ($template['code'] ?? ''),
+        'name' => $name,
+        'is_active' => $isActive === 1,
+    ], [
+        'title' => 'Şablon güncellendi',
+        'message' => '"' . $name . '" şablonu güncellendi.',
+        'source_module' => 'template',
+        'entity_type' => 'template',
+        'entity_id' => $id,
+    ]);
+
     json_response([
         'status' => 'success',
         'message' => template_lang('updated_success'),

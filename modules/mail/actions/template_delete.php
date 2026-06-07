@@ -56,6 +56,17 @@ try {
         'template_key' => (string) ($template['template_key'] ?? ''),
     ], 'mail_template', $id, 'success');
 
+    kirpi_notify_current_user('mail.template_deleted', [
+        'template_id' => $id,
+        'template_key' => (string) ($template['template_key'] ?? ''),
+    ], [
+        'title' => 'Mail şablonu silindi',
+        'message' => (string) ($template['template_key'] ?? 'Mail şablonu') . ' silindi.',
+        'source_module' => 'mail',
+        'entity_type' => 'mail_template',
+        'entity_id' => $id,
+    ]);
+
     json_response([
         'status' => 'success',
         'message' => mail_lang('template_deleted'),

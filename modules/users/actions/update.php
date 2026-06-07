@@ -265,6 +265,21 @@ try {
         'avatar_changed' => $newAvatarFileName !== null,
     ], 'user', $id, 'success');
 
+    kirpi_notify_current_user('users.updated', [
+        'name' => $name,
+        'email' => $email,
+        'role_id' => $roleId !== '' ? (int) $roleId : null,
+        'is_active' => $isActive === 1,
+        'password_changed' => $passwordWillChange,
+        'avatar_changed' => $newAvatarFileName !== null,
+    ], [
+        'title' => 'Kullanıcı güncellendi',
+        'message' => $name . ' kullanıcısı başarıyla güncellendi.',
+        'source_module' => 'users',
+        'entity_type' => 'user',
+        'entity_id' => $id,
+    ]);
+
     json_response([
         'status' => 'success',
         'message' => 'Kullanıcı başarıyla güncellendi.',

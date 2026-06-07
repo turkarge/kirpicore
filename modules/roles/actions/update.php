@@ -121,6 +121,17 @@ try {
         'is_active' => $isActive,
     ], 'role', $id, 'success');
 
+    kirpi_notify_current_user('roles.updated', [
+        'name' => $name,
+        'is_active' => $isActive === 1,
+    ], [
+        'title' => 'Rol güncellendi',
+        'message' => '"' . $name . '" rolü başarıyla güncellendi.',
+        'source_module' => 'roles',
+        'entity_type' => 'role',
+        'entity_id' => $id,
+    ]);
+
     json_response([
         'status' => 'success',
         'message' => '"' . $name . '" rolü başarıyla güncellendi.',
