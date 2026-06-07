@@ -756,6 +756,50 @@ function kirpi_ai_model_adapters(): array
     }
 }
 
+function kirpi_ai_model_adapter(string $adapterKey): ?array
+{
+    if (!kirpi_ai_models_table_ready()) {
+        return null;
+    }
+
+    $adapterKey = trim($adapterKey);
+    if ($adapterKey === '') {
+        return null;
+    }
+
+    try {
+        $stmt = db()->prepare("
+            SELECT adapter_key, provider, model_name, adapter_type, is_enabled, is_external, config_json
+            FROM ai_model_adapters
+            WHERE adapter_key = :adapter_key
+            LIMIT 1
+        ");
+        $stmt->execute([
+            ':adapter_key' => $adapterKey,
+        ]);
+
+        $adapter = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$adapter) {
+            return null;
+        }
+
+        $config = [];
+        if (!empty($adapter['config_json'])) {
+            $decoded = json_decode((string) $adapter['config_json'], true);
+            if (is_array($decoded)) {
+                $config = $decoded;
+            }
+        }
+
+        $adapter['config'] = $config;
+
+        return $adapter;
+    } catch (Throwable $e) {
+        error_log('ai model adapter read error: ' . $e->getMessage());
+        return null;
+    }
+}
+
 function kirpi_ai_list_schema_entities(int $limit = 50): array
 {
     if (!kirpi_ai_schema_registry_ready()) {
@@ -2182,4 +2226,91 @@ function kirpi_ai_mock_generate_sql_candidate(string $question, array $context =
     }
 
     return $candidate;
+}
+
+function kirpi_ai_generate_sql_candidate(string $question, array $context = [], string $adapterKey = 'mock-sql-generator'): array
+{
+    $adapterKey = trim($adapterKey) !== '' ? trim($adapterKey) : 'mock-sql-generator';
+    $adapter = kirpi_ai_model_adapter($adapterKey);
+
+    if ($adapter === null && $adapterKey !== 'mock-sql-generator') {
+        kirpi_ai_log_operation('sql_candidate_generate', 'blocked', [
+            'model_adapter' => $adapterKey,
+            'reason' => 'adapter_not_found',
+            'execution_enabled' => false,
+            'preview_required' => true,
+        ], $adapterKey, 'sql_candidate', null);
+
+        return [
+            'status' => 'blocked',
+            'reason' => 'adapter_not_found',
+            'model_adapter' => $adapterKey,
+            'candidate_sql' => '',
+            'warnings' => ['adapter_not_found'],
+            'execution_enabled' => false,
+            'preview_required' => true,
+        ];
+    }
+
+    if ($adapterKey === 'mock-sql-generator' || (string) ($adapter['provider'] ?? '') === 'mock') {
+        return kirpi_ai_mock_generate_sql_candidate($question, array_merge($context, [
+            'audit' => true,
+        ]));
+    }
+
+    if ((int) ($adapter['is_enabled'] ?? 0) !== 1) {
+        kirpi_ai_log_operation('sql_candidate_generate', 'blocked', [
+            'model_adapter' => $adapterKey,
+            'reason' => 'adapter_disabled',
+            'execution_enabled' => false,
+            'preview_required' => true,
+        ], $adapterKey, 'sql_candidate', null);
+
+        return [
+            'status' => 'blocked',
+            'reason' => 'adapter_disabled',
+            'model_adapter' => $adapterKey,
+            'candidate_sql' => '',
+            'warnings' => ['adapter_disabled'],
+            'execution_enabled' => false,
+            'preview_required' => true,
+        ];
+    }
+
+    $config = (array) ($adapter['config'] ?? []);
+    if ((int) ($adapter['is_external'] ?? 0) === 1 && empty($config['api_key_ref']) && empty($config['api_key_env'])) {
+        kirpi_ai_log_operation('sql_candidate_generate', 'blocked', [
+            'model_adapter' => $adapterKey,
+            'reason' => 'external_adapter_not_configured',
+            'execution_enabled' => false,
+            'preview_required' => true,
+        ], $adapterKey, 'sql_candidate', null);
+
+        return [
+            'status' => 'blocked',
+            'reason' => 'external_adapter_not_configured',
+            'model_adapter' => $adapterKey,
+            'candidate_sql' => '',
+            'warnings' => ['external_adapter_not_configured'],
+            'execution_enabled' => false,
+            'preview_required' => true,
+        ];
+    }
+
+    kirpi_ai_log_operation('sql_candidate_generate', 'blocked', [
+        'model_adapter' => $adapterKey,
+        'reason' => 'adapter_runtime_not_implemented',
+        'execution_enabled' => false,
+        'preview_required' => true,
+    ], $adapterKey, 'sql_candidate', null);
+
+    return [
+        'status' => 'blocked',
+        'reason' => 'adapter_runtime_not_implemented',
+        'model_adapter' => $adapterKey,
+        'candidate_sql' => '',
+        'warnings' => ['adapter_runtime_not_implemented'],
+        'execution_enabled' => false,
+        'preview_required' => true,
+    ];
 }

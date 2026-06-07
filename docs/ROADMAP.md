@@ -149,6 +149,13 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Mock üretim çıktısı Candidate Review ve SQL Preview zincirine bağlıdır; SQL çalıştırılmaz.
    - Mock üretim denemeleri AI audit zincirine `sql_candidate_generate` olarak yazılır.
 
+14. **SQL Generation Gateway** - Tamamlandı
+   - SQL candidate üretimi tek gateway fonksiyonuna bağlandı.
+   - Mock adapter mevcut güvenli üretim akışını kullanır.
+   - External veya disabled adapter durumları güvenli şekilde bloklanır.
+   - Config olmayan external adapter `external_adapter_not_configured` sonucu verir.
+   - Runtime bağlanmamış adapter `adapter_runtime_not_implemented` sonucu verir.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:

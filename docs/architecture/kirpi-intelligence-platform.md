@@ -586,6 +586,34 @@ sql_candidate_generate
 
 Bu aşama gerçek model entegrasyonuna geçmeden önce adapter sözleşmesini, prompt sınırlarını ve güvenlik zincirini test etmek için kullanılır.
 
+## SQL Generation Gateway Standardı
+
+SQL candidate üretimi tek gateway fonksiyonu üzerinden yönetilir:
+
+```php
+kirpi_ai_generate_sql_candidate($question, $context, $adapterKey)
+```
+
+Gateway sorumlulukları:
+
+* Adapter kaydını bulmak
+* Adapter aktif mi kontrol etmek
+* External adapter config kontrolü yapmak
+* Mock adapter için güvenli mock üretimi çalıştırmak
+* Runtime bağlanmamış adapter'ları bloklamak
+* Üretim çıktısını Candidate Review standardında döndürmek
+
+Güvenli blok durumları:
+
+* `adapter_not_found`
+* `adapter_disabled`
+* `external_adapter_not_configured`
+* `adapter_runtime_not_implemented`
+
+Gateway hiçbir durumda SQL çalıştırmaz. Üretilen veya bloklanan her sonuç Preview/Guard zincirine bağlı kalır.
+
+External adapter gerçek modele bağlanmadan önce `config_json` içinde güvenli key referansı tanımlanmalıdır. Secret değerleri doğrudan audit veya prompt içine yazılmaz.
+
 ---
 
 # Faz 4 — AI Gateway

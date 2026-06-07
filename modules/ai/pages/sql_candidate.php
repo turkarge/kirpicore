@@ -9,7 +9,7 @@ $question = trim((string) ($_GET['question'] ?? ($_GET['planner_question'] ?? ''
 $candidateSql = trim((string) ($_GET['candidate_sql'] ?? ($_GET['sql'] ?? '')));
 $modelAdapter = trim((string) ($_GET['model_adapter'] ?? 'manual'));
 $confidence = max(0, min(100, (int) ($_GET['confidence'] ?? 0)));
-$mockGenerate = (string) ($_GET['mock_generate'] ?? '') === '1';
+$generateCandidate = (string) ($_GET['generate_candidate'] ?? '') === '1';
 $allowedTablesInput = trim((string) ($_GET['allowed_tables'] ?? ''));
 $allowedFieldsInput = trim((string) ($_GET['allowed_fields'] ?? ''));
 $allowedFields = [];
@@ -24,14 +24,13 @@ $allowedTables = array_values(array_filter(array_map(
     preg_split('/[\s,]+/', $allowedTablesInput) ?: []
 )));
 $candidate = null;
-if ($mockGenerate) {
-    $candidate = kirpi_ai_mock_generate_sql_candidate($question, [
+if ($generateCandidate) {
+    $candidate = kirpi_ai_generate_sql_candidate($question, [
         'allowed_tables' => $allowedTables,
         'allowed_fields' => $allowedFields,
-        'audit' => true,
-    ]);
+    ], $modelAdapter !== 'manual' ? $modelAdapter : 'mock-sql-generator');
     $candidateSql = (string) ($candidate['candidate_sql'] ?? '');
-    $modelAdapter = (string) ($candidate['model_adapter'] ?? 'mock-sql-generator');
+    $modelAdapter = (string) ($candidate['model_adapter'] ?? $modelAdapter);
     $confidence = (int) round(((float) ($candidate['confidence'] ?? 0)) * 100);
 } elseif ($candidateSql !== '') {
     $candidate = kirpi_ai_build_sql_candidate([
@@ -135,8 +134,8 @@ $renderBadges = static function (array $items, string $class = 'bg-secondary-lt'
                                 <button type="submit" class="btn btn-primary">
                                     <?php echo e(ai_lang('review_candidate')); ?>
                                 </button>
-                                <button type="submit" name="mock_generate" value="1" class="btn btn-outline-secondary">
-                                    <?php echo e(ai_lang('mock_generate')); ?>
+                                <button type="submit" name="generate_candidate" value="1" class="btn btn-outline-secondary">
+                                    <?php echo e(ai_lang('generate_candidate')); ?>
                                 </button>
                             </div>
                         </div>
@@ -153,7 +152,10 @@ $renderBadges = static function (array $items, string $class = 'bg-secondary-lt'
                     <div class="card">
                         <div class="card-body">
                             <div class="subheader"><?php echo e(ai_lang('status')); ?></div>
-                            <span class="badge bg-green-lt"><?php echo e((string) ($candidate['status'] ?? 'ready')); ?></span>
+                            <?php $candidateStatus = (string) ($candidate['status'] ?? 'ready'); ?>
+                            <span class="badge <?php echo $candidateStatus === 'blocked' ? 'bg-red-lt' : 'bg-green-lt'; ?>">
+                                <?php echo e($candidateStatus); ?>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -187,7 +189,7 @@ $renderBadges = static function (array $items, string $class = 'bg-secondary-lt'
                 <div class="card-header">
                     <h3 class="card-title"><?php echo e(ai_lang('candidate_warnings')); ?></h3>
                     <div class="card-actions">
-                        <?php if ($previewUrl !== null): ?>
+                        <?php if ($previewUrl !== null && $candidateSql !== ''): ?>
                             <a href="<?php echo e($previewUrl); ?>" class="btn btn-outline-primary">
                                 <?php echo e(ai_lang('open_sql_preview')); ?>
                             </a>
