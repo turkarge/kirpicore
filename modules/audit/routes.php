@@ -29,4 +29,11 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'audit/actions/overview-export' => [
+        'file' => 'modules/audit/actions/overview_export.php',
+        'layout' => false,
+        'permission' => 'audit.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
 ];

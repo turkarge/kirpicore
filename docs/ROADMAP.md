@@ -61,6 +61,8 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
 - AI schema discovery çıktısı JSON/CSV/XLS formatlarında export edilebilir hale getirildi.
 - AI schema kalite kontrol çıktısı JSON/CSV/XLS formatlarında export edilebilir hale getirildi.
 - Mail şablonları listesi CSV/XLS export standardına bağlandı.
+- Backup kayıtları ve restore logları CSV/XLS export standardına bağlandı.
+- Audit Overview için modül bazlı operasyon özeti XLS/CSV export standardına bağlandı.
 - Aşağıdaki modüllerde server-side export tamamlandı:
   - `notifications`
   - `documents`
@@ -204,6 +206,6 @@ Doğrulanan son durum:
 - Documents filtre/export iyileştirmesi
 - Settings/Modules export
 - Mail templates export - Tamamlandı
-- Backup/audit operasyon raporları
+- Backup/audit operasyon raporları - Tamamlandı
 - Gerçek model adapter ile SQL candidate üretimi
 - Gerçek model adapter runtime bağlama tasarımı

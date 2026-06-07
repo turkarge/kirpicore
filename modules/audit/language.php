@@ -49,6 +49,9 @@ function audit_lang(string $key, ?string $default = null): string
                 'success_count' => 'Başarılı',
                 'failed_count' => 'Hatalı',
                 'last_event' => 'Son Olay',
+                'first_event' => 'İlk Olay',
+                'user_count' => 'Kullanıcı Sayısı',
+                'overview_export' => 'Özet Excel',
                 'audit_search_placeholder' => 'Audit kayıtlarında ara',
             ],
             'en' => [
@@ -90,6 +93,9 @@ function audit_lang(string $key, ?string $default = null): string
                 'success_count' => 'Success',
                 'failed_count' => 'Failed',
                 'last_event' => 'Last Event',
+                'first_event' => 'First Event',
+                'user_count' => 'User Count',
+                'overview_export' => 'Summary Excel',
                 'audit_search_placeholder' => 'Search audit records',
             ],
         ];

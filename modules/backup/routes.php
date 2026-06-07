@@ -43,4 +43,11 @@ return [
         'auth' => true,
         'method' => 'POST',
     ],
+    'backup/actions/export' => [
+        'file' => 'modules/backup/actions/export.php',
+        'layout' => false,
+        'permission' => 'backup.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
 ];

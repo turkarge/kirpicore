@@ -43,6 +43,24 @@ if ($backupReady) {
                 <div class="page-pretitle"><?php echo e(backup_lang('system_management')); ?></div>
                 <h2 class="page-title"><?php echo e(backup_lang('backup_restore')); ?></h2>
             </div>
+            <?php if ($backupReady): ?>
+                <div class="col-auto ms-auto d-print-none">
+                    <div class="btn-list">
+                        <a href="<?php echo base_url('backup/actions/export?type=backups&format=csv'); ?>" class="btn btn-outline-secondary">
+                            <i class="ti ti-file-type-csv"></i>
+                            <?php echo e(backup_lang('export_backups_csv')); ?>
+                        </a>
+                        <a href="<?php echo base_url('backup/actions/export?type=backups&format=xls'); ?>" class="btn btn-outline-secondary">
+                            <i class="ti ti-file-spreadsheet"></i>
+                            <?php echo e(backup_lang('export_backups_excel')); ?>
+                        </a>
+                        <a href="<?php echo base_url('backup/actions/export?type=restores&format=xls'); ?>" class="btn btn-outline-secondary">
+                            <i class="ti ti-history"></i>
+                            <?php echo e(backup_lang('export_restores_excel')); ?>
+                        </a>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
