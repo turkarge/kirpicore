@@ -43,6 +43,16 @@
             "weight": 25
         },
         {
+            "title": "Query Flow",
+            "title_key": "query_flow",
+            "icon": "ti ti-git-branch",
+            "url": "ai/query-flow",
+            "permission": "ai.schema.manage",
+            "placement": "management",
+            "group": "intelligence",
+            "weight": 26
+        },
+        {
             "title": "Schema Quality",
             "title_key": "schema_quality",
             "icon": "ti ti-shield-check",

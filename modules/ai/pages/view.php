@@ -81,6 +81,9 @@ $statusBadge = static fn (bool $ready): string => $ready ? 'bg-green-lt' : 'bg-r
                         <?php echo e(ai_lang('query_planner')); ?>
                     </a>
                     <?php if ($canManageSchema): ?>
+                        <a href="<?php echo base_url('ai/query-flow'); ?>" class="btn btn-outline-primary">
+                            <?php echo e(ai_lang('query_flow')); ?>
+                        </a>
                         <a href="<?php echo base_url('ai/quality'); ?>" class="btn btn-outline-secondary">
                             <?php echo e(ai_lang('schema_quality')); ?>
                         </a>
@@ -157,6 +160,15 @@ $statusBadge = static fn (bool $ready): string => $ready ? 'bg-green-lt' : 'bg-r
                             </div>
                         </a>
                         <?php if ($canManageSchema): ?>
+                            <a href="<?php echo base_url('ai/query-flow'); ?>" class="list-group-item list-group-item-action">
+                                <div class="row align-items-center">
+                                    <div class="col-auto"><i class="ti ti-git-branch"></i></div>
+                                    <div class="col">
+                                        <div><?php echo e(ai_lang('query_flow')); ?></div>
+                                        <div class="text-secondary small"><?php echo e(ai_lang('query_flow_detail')); ?></div>
+                                    </div>
+                                </div>
+                            </a>
                             <a href="<?php echo base_url('ai/quality'); ?>" class="list-group-item list-group-item-action">
                                 <div class="row align-items-center">
                                     <div class="col-auto"><i class="ti ti-shield-check"></i></div>

@@ -162,6 +162,12 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Guard bloklarsa EXPLAIN de `guard_blocked` nedeni ile bloklanır.
    - EXPLAIN açılsa bile normal SQL execution kapalı kalır ve gerçek veri okunmaz.
 
+16. **KIP Query Flow birleşik ekranı** - Tamamlandı
+   - Planner, Guard Context, SQL Candidate, SQL Preview, SQL Guard ve Explain Gate tek ekranda birleştirildi.
+   - Query Flow ekranı SQL execution yetkisi eklemez; tüm zincir read-only ve preview modunda kalır.
+   - Mock/gateway üzerinden candidate üretimi ve preview sonucu aynı akışta görünür hale getirildi.
+   - Audit zinciri görünürlüğü eklendi.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:

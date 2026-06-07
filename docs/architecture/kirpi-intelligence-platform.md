@@ -654,6 +654,41 @@ Kurallar:
 AI_SQL_EXPLAIN_ENABLED=true
 ```
 
+## KIP Query Flow Ekranı
+
+KIP Query Flow ekranı güvenlik zincirinin tek kullanıcı arayüzüdür.
+
+```text
+Question
+ ↓
+Query Planner
+ ↓
+Guard Context
+ ↓
+SQL Generation Gateway
+ ↓
+SQL Candidate
+ ↓
+SQL Preview
+ ↓
+SQL Guard
+ ↓
+Explain Gate
+```
+
+Bu ekran:
+
+* Planner sonucunu gösterir.
+* Guard Context sınırlarını gösterir.
+* Gateway üzerinden candidate üretir.
+* Candidate SQL'i gösterir.
+* Preview, Guard ve Explain Gate kararlarını gösterir.
+* SQL execution yetkisi eklemez.
+* Gerçek veri okumaz.
+* Audit zincirini görünür hale getirir.
+
+Query Flow, ayrı teknik ekranları kaldırmaz. Teknik ekranlar hata ayıklama ve parça parça doğrulama için korunur; Query Flow ise ana güvenli kullanım yüzüdür.
+
 ---
 
 # Faz 4 — AI Gateway
