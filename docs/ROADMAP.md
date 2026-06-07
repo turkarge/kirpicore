@@ -12,6 +12,7 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
 - Tema varlıkları ve kullanıcı tercihleri kalıcı hale getirildi.
 - Menü üretimi `module.json > menu` standardına bağlandı.
 - Content menü grubu Türkçeleştirildi.
+- Yönetim menüsü Core alanlarına ayrıldı: Erişim Yönetimi, İletişim, İçerik Yönetimi, Kirpi Intelligence, Sistem, Operasyon ve Monitoring / İzleme.
 
 ### Kurulum ve Docker
 

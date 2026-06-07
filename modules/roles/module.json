@@ -18,7 +18,7 @@
                      "url":  "roles/view",
                      "permission":  "roles.view",
                      "placement":  "management",
-                     "group":  "default",
+                     "group":  "access",
                      "weight":  110
                  }
              ]

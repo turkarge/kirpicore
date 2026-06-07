@@ -18,7 +18,7 @@
                      "url":  "mail/test",
                      "permission":  "mail.view",
                      "placement":  "management",
-                     "group":  "default",
+                     "group":  "communication",
                      "weight":  130
                  },
                  {
@@ -28,7 +28,7 @@
                      "url":  "mail/templates",
                      "permission":  "mail.view",
                      "placement":  "management",
-                     "group":  "default",
+                     "group":  "communication",
                      "weight":  131
                  }
              ]

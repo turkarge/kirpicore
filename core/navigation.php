@@ -56,16 +56,40 @@ function kirpi_navigation_group_meta(string $groupKey): array
         $meta['weight'] = 900;
     }
 
+    if ($groupKey === 'access') {
+        $meta['title'] = kirpi_module_translate('settings', 'nav_access_management', 'Erisim Yonetimi');
+        $meta['icon'] = 'ti ti-users-group';
+        $meta['weight'] = 100;
+    }
+
+    if ($groupKey === 'communication') {
+        $meta['title'] = kirpi_module_translate('settings', 'nav_communication', 'Iletisim');
+        $meta['icon'] = 'ti ti-message-circle';
+        $meta['weight'] = 300;
+    }
+
     if ($groupKey === 'content') {
         $meta['title'] = kirpi_module_translate('settings', 'nav_content_management', 'İçerik Yönetimi');
         $meta['icon'] = 'ti ti-layout-dashboard';
-        $meta['weight'] = 540;
+        $meta['weight'] = 400;
+    }
+
+    if ($groupKey === 'system') {
+        $meta['title'] = kirpi_module_translate('settings', 'nav_system', 'Sistem');
+        $meta['icon'] = 'ti ti-adjustments';
+        $meta['weight'] = 700;
+    }
+
+    if ($groupKey === 'operations') {
+        $meta['title'] = kirpi_module_translate('settings', 'nav_operations', 'Operasyon');
+        $meta['icon'] = 'ti ti-tool';
+        $meta['weight'] = 800;
     }
 
     if ($groupKey === 'intelligence') {
         $meta['title'] = kirpi_module_translate('ai', 'kirpi_intelligence', 'Kirpi Intelligence');
         $meta['icon'] = 'ti ti-brain';
-        $meta['weight'] = 890;
+        $meta['weight'] = 600;
     }
 
     return $meta;

@@ -18,7 +18,7 @@
                      "url":  "settings/view",
                      "permission":  "settings.view",
                      "placement":  "management",
-                     "group":  "default",
+                     "group":  "system",
                      "weight":  200
                  },
                  {
@@ -28,7 +28,7 @@
                      "url":  "settings/api-test",
                      "permission":  "settings.view",
                      "placement":  "management",
-                     "group":  "default",
+                     "group":  "system",
                      "weight":  210
                  },
                  {
@@ -38,7 +38,7 @@
                      "url":  "settings/modules",
                      "permission":  "settings.view",
                      "placement":  "management",
-                     "group":  "default",
+                     "group":  "system",
                      "weight":  220
                  },
                  {
@@ -48,7 +48,7 @@
                      "url":  "settings/menu-management",
                      "permission":  "settings.view",
                      "placement":  "management",
-                     "group":  "default",
+                     "group":  "system",
                      "weight":  230
                  }
              ]
