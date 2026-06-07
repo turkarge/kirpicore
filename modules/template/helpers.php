@@ -22,6 +22,13 @@ function kirpi_template_supported_modules(): array
         'notifications' => 'Notifications',
         'queue' => 'Queue',
         'backup' => 'Backup',
+        'documents' => 'Documents',
+        'settings' => 'Settings',
+        'template' => 'Template',
+        'api' => 'API',
+        'profile' => 'Profile',
+        'security' => 'Security',
+        'health' => 'Health',
         'audit' => 'Audit',
         'ai' => 'Kirpi Intelligence',
         'core' => 'Core',
@@ -62,7 +69,41 @@ function kirpi_template_supported_targets(string $kind): array
         ],
     ];
 
+    if ($kind === 'content') {
+        $targets['content'] = ($targets['content'] ?? []) + kirpi_template_notification_target_catalog();
+    }
+
     return $targets[$kind] ?? [];
+}
+
+function kirpi_template_notification_target_catalog(): array
+{
+    return [
+        'users.created' => 'Kullanıcı oluşturma bildirimi',
+        'users.updated' => 'Kullanıcı güncelleme bildirimi',
+        'users.status_changed' => 'Kullanıcı durum bildirimi',
+        'roles.created' => 'Rol oluşturma bildirimi',
+        'roles.updated' => 'Rol güncelleme bildirimi',
+        'roles.status_changed' => 'Rol durum bildirimi',
+        'roles.permissions_updated' => 'Rol izin bildirimi',
+        'documents.uploaded' => 'Doküman yükleme bildirimi',
+        'documents.deleted' => 'Doküman silme bildirimi',
+        'mail.test_sent' => 'Test mail bildirimi',
+        'mail.template_created' => 'Mail şablonu oluşturma bildirimi',
+        'mail.template_updated' => 'Mail şablonu güncelleme bildirimi',
+        'mail.template_deleted' => 'Mail şablonu silme bildirimi',
+        'backup.verified' => 'Backup doğrulama bildirimi',
+        'backup.deleted' => 'Backup silme bildirimi',
+        'api.token_created' => 'API token oluşturma bildirimi',
+        'api.token_revoked' => 'API token iptal bildirimi',
+        'queue.mail_enqueued' => 'Queue mail işi bildirimi',
+        'settings.updated' => 'Ayar güncelleme bildirimi',
+        'settings.module_toggled' => 'Modül durum bildirimi',
+        'settings.schema_installed' => 'Eksik kurulum bildirimi',
+        'template.created' => 'Şablon oluşturma bildirimi',
+        'template.updated' => 'Şablon güncelleme bildirimi',
+        'template.status_changed' => 'Şablon durum bildirimi',
+    ];
 }
 
 function kirpi_template_normalize_code(string $value): string
@@ -121,8 +162,39 @@ function kirpi_template_variables_for_target(string $targetKey): array
         'roles.list' => ['generated_at', 'role_count'],
         'system.report' => ['generated_at', 'app_version'],
     ];
+    $targetVariables += kirpi_template_notification_variable_catalog();
 
     return kirpi_template_normalize_variables(array_merge($variables, $targetVariables[$targetKey] ?? []));
+}
+
+function kirpi_template_notification_variable_catalog(): array
+{
+    return [
+        'users.created' => ['name', 'email', 'role_id', 'is_active'],
+        'users.updated' => ['name', 'email', 'role_id', 'is_active', 'password_changed', 'avatar_changed'],
+        'users.status_changed' => ['target_user_id', 'is_active', 'status_label'],
+        'roles.created' => ['name', 'is_active'],
+        'roles.updated' => ['name', 'is_active'],
+        'roles.status_changed' => ['name', 'is_active', 'status_label'],
+        'roles.permissions_updated' => ['name', 'permission_count', 'permission_slugs'],
+        'documents.uploaded' => ['document_id', 'document_type', 'entity_type', 'entity_id'],
+        'documents.deleted' => ['document_id', 'original_name'],
+        'mail.test_sent' => ['recipient_email', 'subject', 'transport'],
+        'mail.template_created' => ['template_key', 'name', 'is_active'],
+        'mail.template_updated' => ['template_id', 'template_key', 'name', 'is_active'],
+        'mail.template_deleted' => ['template_id', 'template_key'],
+        'backup.verified' => ['backup_id', 'checksum', 'dry_run', 'dry_run_table_count'],
+        'backup.deleted' => ['backup_id', 'file_name'],
+        'api.token_created' => ['token_id', 'token_name', 'expires_at', 'ttl_option', 'scope_option'],
+        'api.token_revoked' => ['token_id'],
+        'queue.mail_enqueued' => ['job_id', 'recipient_email'],
+        'settings.updated' => ['changed_keys', 'changed_count'],
+        'settings.module_toggled' => ['module_key', 'is_enabled', 'status_label'],
+        'settings.schema_installed' => ['before_missing_table_count', 'after_missing_table_count', 'before_missing_column_count', 'after_missing_column_count', 'before_missing_index_count', 'after_missing_index_count'],
+        'template.created' => ['kind', 'module_key', 'target_key', 'code', 'name'],
+        'template.updated' => ['id', 'kind', 'code', 'name', 'is_active'],
+        'template.status_changed' => ['id', 'code', 'is_active', 'status_label'],
+    ];
 }
 
 function kirpi_template_render_string(string $body, array $context, bool $escape = true): string
@@ -213,12 +285,44 @@ function kirpi_template_default_notification_templates(): array
     ];
 }
 
+function kirpi_template_extra_notification_templates(): array
+{
+    return [
+        'users.created' => ['name' => 'Users - Created Notification', 'subject' => 'Kullanıcı oluşturuldu', 'body' => '{{name}} kullanıcısı oluşturuldu.'],
+        'users.updated' => ['name' => 'Users - Updated Notification', 'subject' => 'Kullanıcı güncellendi', 'body' => '{{name}} kullanıcısı güncellendi.'],
+        'users.status_changed' => ['name' => 'Users - Status Notification', 'subject' => 'Kullanıcı durumu güncellendi', 'body' => 'Kullanıcı #{{target_user_id}} {{status_label}} yapıldı.'],
+        'roles.created' => ['name' => 'Roles - Created Notification', 'subject' => 'Rol oluşturuldu', 'body' => '{{name}} rolü oluşturuldu.'],
+        'roles.updated' => ['name' => 'Roles - Updated Notification', 'subject' => 'Rol güncellendi', 'body' => '{{name}} rolü güncellendi.'],
+        'roles.status_changed' => ['name' => 'Roles - Status Notification', 'subject' => 'Rol durumu güncellendi', 'body' => '{{name}} rolü {{status_label}} yapıldı.'],
+        'roles.permissions_updated' => ['name' => 'Roles - Permissions Notification', 'subject' => 'Rol izinleri güncellendi', 'body' => '{{name}} rolünün {{permission_count}} izni güncellendi.'],
+        'documents.uploaded' => ['name' => 'Documents - Uploaded Notification', 'subject' => 'Doküman yüklendi', 'body' => 'Doküman #{{document_id}} yüklendi.'],
+        'documents.deleted' => ['name' => 'Documents - Deleted Notification', 'subject' => 'Doküman silindi', 'body' => '{{original_name}} dokümanı silindi.'],
+        'mail.test_sent' => ['name' => 'Mail - Test Sent Notification', 'subject' => 'Test mail gönderildi', 'body' => '{{recipient_email}} adresine test maili gönderildi.'],
+        'mail.template_created' => ['name' => 'Mail - Template Created Notification', 'subject' => 'Mail şablonu oluşturuldu', 'body' => '{{name}} mail şablonu oluşturuldu.'],
+        'mail.template_updated' => ['name' => 'Mail - Template Updated Notification', 'subject' => 'Mail şablonu güncellendi', 'body' => '{{name}} mail şablonu güncellendi.'],
+        'mail.template_deleted' => ['name' => 'Mail - Template Deleted Notification', 'subject' => 'Mail şablonu silindi', 'body' => '{{template_key}} mail şablonu silindi.'],
+        'backup.verified' => ['name' => 'Backup - Verified Notification', 'subject' => 'Yedek doğrulandı', 'body' => 'Yedek #{{backup_id}} doğrulandı.'],
+        'backup.deleted' => ['name' => 'Backup - Deleted Notification', 'subject' => 'Yedek silindi', 'body' => '{{file_name}} yedeği silindi.'],
+        'api.token_created' => ['name' => 'API - Token Created Notification', 'subject' => 'API token oluşturuldu', 'body' => '{{token_name}} API token kaydı oluşturuldu.'],
+        'api.token_revoked' => ['name' => 'API - Token Revoked Notification', 'subject' => 'API token iptal edildi', 'body' => 'API token #{{token_id}} iptal edildi.'],
+        'queue.mail_enqueued' => ['name' => 'Queue - Mail Enqueued Notification', 'subject' => 'Mail işi kuyruğa alındı', 'body' => 'Mail işi #{{job_id}} kuyruğa alındı.'],
+        'settings.updated' => ['name' => 'Settings - Updated Notification', 'subject' => 'Ayarlar güncellendi', 'body' => '{{changed_count}} ayar güncellendi.'],
+        'settings.module_toggled' => ['name' => 'Settings - Module Toggled Notification', 'subject' => 'Modül durumu güncellendi', 'body' => '{{module_key}} modülü {{status_label}} yapıldı.'],
+        'settings.schema_installed' => ['name' => 'Settings - Schema Installed Notification', 'subject' => 'Eksik kurulum kontrolü tamamlandı', 'body' => 'Eksik kurulum kontrolü tamamlandı.'],
+        'template.created' => ['name' => 'Template - Created Notification', 'subject' => 'Şablon oluşturuldu', 'body' => '{{name}} şablonu oluşturuldu.'],
+        'template.updated' => ['name' => 'Template - Updated Notification', 'subject' => 'Şablon güncellendi', 'body' => '{{name}} şablonu güncellendi.'],
+        'template.status_changed' => ['name' => 'Template - Status Notification', 'subject' => 'Şablon durumu güncellendi', 'body' => '{{code}} şablonu {{status_label}} yapıldı.'],
+    ];
+}
+
 function kirpi_template_sync_notification_defaults(): void
 {
     $language = strtolower((string) env('APP_LOCALE', 'tr'));
     $language = $language !== '' ? $language : 'tr';
 
-    foreach (kirpi_template_default_notification_templates() as $templateKey => $template) {
+    $templates = kirpi_template_default_notification_templates() + kirpi_template_extra_notification_templates();
+
+    foreach ($templates as $templateKey => $template) {
         $key = kirpi_template_normalize_code((string) $templateKey);
         if ($key === '') {
             continue;

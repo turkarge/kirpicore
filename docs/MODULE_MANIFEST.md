@@ -149,12 +149,22 @@ Tamamlanan server-side export modülleri:
 - `audit`
 - `users`
 - `roles`
+- `mail`
+- `backup`
+- `settings`
+- `template`
+- `queue`
+- `api`
+- `health`
+- `security`
 
 `roles` modülünde ek olarak Permission Catalog ve Role-Permission Matrix export standarttır.
 
 ## Notification Event Standardı
 
 Modüller kullanıcıya veya sisteme dönük önemli olaylarda `kirpi_notify_user()` kullanmalıdır.
+
+Oturumdaki kullanıcıya dönük yönetim aksiyonlarında `kirpi_notify_current_user()` tercih edilmelidir.
 
 Metadata alanları:
 

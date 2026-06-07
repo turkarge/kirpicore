@@ -110,6 +110,10 @@ try {
         <div class="card mb-4">
             <div class="card-header">
                 <h3 class="card-title"><?php echo e(security_lang('security_checks_title')); ?></h3>
+                <div class="card-actions">
+                    <a href="<?php echo base_url('security/actions/export?format=csv'); ?>" class="btn btn-outline-secondary"><?php echo e(security_lang('export_csv')); ?></a>
+                    <a href="<?php echo base_url('security/actions/export?format=xls'); ?>" class="btn btn-outline-secondary"><?php echo e(security_lang('export_excel')); ?></a>
+                </div>
             </div>
             <div class="table-responsive">
                 <table class="table table-vcenter card-table table-striped">

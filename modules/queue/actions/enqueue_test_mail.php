@@ -47,6 +47,17 @@ kirpi_audit_log('enqueue_test_mail', 'queue', [
     'recipient_email' => $recipientEmail,
 ], 'queue_job', $jobId, 'success');
 
+kirpi_notify_current_user('queue.mail_enqueued', [
+    'job_id' => $jobId,
+    'recipient_email' => $recipientEmail,
+], [
+    'title' => 'Mail işi kuyruğa alındı',
+    'message' => 'Mail işi #' . $jobId . ' kuyruğa alındı.',
+    'source_module' => 'queue',
+    'entity_type' => 'queue_job',
+    'entity_id' => $jobId,
+]);
+
 json_response([
     'status' => 'success',
     'message' => queue_lang('enqueue_success_prefix') . $jobId,

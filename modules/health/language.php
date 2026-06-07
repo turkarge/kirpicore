@@ -22,6 +22,8 @@ function health_lang(string $key, ?string $default = null): string
                 'status' => 'Status',
                 'latency' => 'Latency',
                 'detail' => 'Detay',
+                'export_csv' => 'CSV',
+                'export_excel' => 'Excel',
 
                 // Durum ve Hata Mesajları
                 'db_connection_ok' => 'Bağlantı başarılı',
@@ -45,6 +47,8 @@ function health_lang(string $key, ?string $default = null): string
                 'status' => 'Status',
                 'latency' => 'Latency',
                 'detail' => 'Detail',
+                'export_csv' => 'CSV',
+                'export_excel' => 'Excel',
                 'db_connection_ok' => 'Connection successful',
                 'db_query_failed' => 'Database query failed',
                 'queue_table_missing' => 'Queue table is missing',

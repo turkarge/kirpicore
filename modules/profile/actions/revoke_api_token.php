@@ -47,6 +47,16 @@ try {
         'token_id' => $tokenId,
     ], 'api_token', $tokenId, 'success');
 
+    kirpi_notify_current_user('api.token_revoked', [
+        'token_id' => $tokenId,
+    ], [
+        'title' => 'API token iptal edildi',
+        'message' => 'API token #' . $tokenId . ' iptal edildi.',
+        'source_module' => 'api',
+        'entity_type' => 'api_token',
+        'entity_id' => $tokenId,
+    ]);
+
     set_flash_message('success', profile_lang('token_revoked'));
     redirect(base_url('profile/view'));
 } catch (Throwable $e) {

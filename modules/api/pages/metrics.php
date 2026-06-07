@@ -98,10 +98,14 @@ if ($tableReady) {
                 <h2 class="page-title"><?php echo e(api_lang('metrics_title')); ?> (<?php echo e($windowLabel); ?>)</h2>
             </div>
             <div class="col-auto ms-auto d-print-none">
-                <div class="btn-group" role="group" aria-label="Window Filter">
-                    <a href="<?php echo base_url('api/metrics?window=1h'); ?>" class="btn <?php echo $window === '1h' ? 'btn-primary' : 'btn-outline-primary'; ?>"><?php echo e(api_lang('window_1h')); ?></a>
-                    <a href="<?php echo base_url('api/metrics?window=24h'); ?>" class="btn <?php echo $window === '24h' ? 'btn-primary' : 'btn-outline-primary'; ?>"><?php echo e(api_lang('window_24h')); ?></a>
-                    <a href="<?php echo base_url('api/metrics?window=7d'); ?>" class="btn <?php echo $window === '7d' ? 'btn-primary' : 'btn-outline-primary'; ?>"><?php echo e(api_lang('window_7d')); ?></a>
+                <div class="btn-list">
+                    <div class="btn-group" role="group" aria-label="Window Filter">
+                        <a href="<?php echo base_url('api/metrics?window=1h'); ?>" class="btn <?php echo $window === '1h' ? 'btn-primary' : 'btn-outline-primary'; ?>"><?php echo e(api_lang('window_1h')); ?></a>
+                        <a href="<?php echo base_url('api/metrics?window=24h'); ?>" class="btn <?php echo $window === '24h' ? 'btn-primary' : 'btn-outline-primary'; ?>"><?php echo e(api_lang('window_24h')); ?></a>
+                        <a href="<?php echo base_url('api/metrics?window=7d'); ?>" class="btn <?php echo $window === '7d' ? 'btn-primary' : 'btn-outline-primary'; ?>"><?php echo e(api_lang('window_7d')); ?></a>
+                    </div>
+                    <a href="<?php echo base_url('api/actions/metrics-export?' . http_build_query(['window' => $window, 'format' => 'csv'])); ?>" class="btn btn-outline-secondary"><?php echo e(api_lang('export_csv')); ?></a>
+                    <a href="<?php echo base_url('api/actions/metrics-export?' . http_build_query(['window' => $window, 'format' => 'xls'])); ?>" class="btn btn-outline-secondary"><?php echo e(api_lang('export_excel')); ?></a>
                 </div>
             </div>
         </div>

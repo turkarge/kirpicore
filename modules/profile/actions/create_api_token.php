@@ -90,6 +90,20 @@ try {
         'scopes' => (array) ($issued['scopes'] ?? $scopes),
     ], 'api_token', null, 'success');
 
+    kirpi_notify_current_user('api.token_created', [
+        'token_id' => (int) ($issued['token_id'] ?? 0),
+        'token_name' => $tokenName,
+        'expires_at' => (string) ($issued['expires_at'] ?? ''),
+        'ttl_option' => $ttlOption,
+        'scope_option' => $scopeOption,
+    ], [
+        'title' => 'API token oluşturuldu',
+        'message' => '"' . $tokenName . '" API token kaydı oluşturuldu.',
+        'source_module' => 'api',
+        'entity_type' => 'api_token',
+        'entity_id' => (int) ($issued['token_id'] ?? 0),
+    ]);
+
     set_flash_message('success', profile_lang('token_created_once'));
     redirect(base_url('profile/view'));
 } catch (Throwable $e) {

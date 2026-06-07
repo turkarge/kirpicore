@@ -99,6 +99,16 @@ try {
         'changed_keys' => $changes,
     ], 'settings', null, 'success');
 
+    kirpi_notify_current_user('settings.updated', [
+        'changed_keys' => $changes,
+        'changed_count' => count($changes),
+    ], [
+        'title' => 'Ayarlar güncellendi',
+        'message' => count($changes) . ' ayar başarıyla güncellendi.',
+        'source_module' => 'settings',
+        'entity_type' => 'settings',
+    ]);
+
     json_response([
         'status' => 'success',
         'message' => settings_lang('settings_updated'),

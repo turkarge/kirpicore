@@ -77,9 +77,7 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
 
 ## Devam Eden Standartlaştırma
 
-- Report/export davranışının kalan standart modüllere yayılması.
-- Template ve Documents entegrasyonlarının modül bazında derinleştirilmesi.
-- Notification event üretiminin tüm CRUD akışlarında tutarlı hale getirilmesi.
+- Gerçek provider runtime implementasyonu.
 - AI öncesi schema/metadata kapsamının genişletilmesi.
 
 ## Yarın Planı
@@ -187,6 +185,12 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Runtime kapalıyken sonuç `external_runtime_disabled` olarak audit zincirine yazılır.
    - `openai-sql-placeholder` seed adapter kaydı eklendi; varsayılan olarak pasif kalır.
 
+19. **Core standart kapanış turu** - Tamamlandı
+   - Queue, API Metrics, Health ve Security ekranları server-side CSV/XLS export standardına bağlandı.
+   - Settings, Profile API token, Mail test ve Queue enqueue aksiyonları metadata'lı notification event üretir hale getirildi.
+   - Template Registry notification target/variable/default katalogları yeni standart event key'lerini kapsayacak şekilde genişletildi.
+   - Module manifest standardı tamamlanan export ve notification davranışını yansıtacak şekilde güncellendi.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:
@@ -215,6 +219,9 @@ Doğrulanan son durum:
 - Settings/Modules export
 - Mail templates export - Tamamlandı
 - Backup/audit operasyon raporları - Tamamlandı
+- Queue/API/Health/Security export - Tamamlandı
+- Notification event yayılımı - Tamamlandı
+- Template notification katalog entegrasyonu - Tamamlandı
 - Gerçek model adapter ile SQL candidate üretimi
 - Gerçek model adapter runtime bağlama tasarımı - Tamamlandı
 - Gerçek provider runtime implementasyonu

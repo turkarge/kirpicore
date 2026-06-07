@@ -58,6 +58,8 @@ function security_lang(string $key, ?string $default = null): string
                 // Veritabanı
                 'db_tables_title' => 'Veritabanı Tabloları',
                 'db_empty' => 'Tablo bulunamadı veya veritabanı okunamadı.',
+                'export_csv' => 'CSV',
+                'export_excel' => 'Excel',
             ],
             'en' => [
                 'check_app_env_name' => 'Application environment',
@@ -96,6 +98,8 @@ function security_lang(string $key, ?string $default = null): string
                 'no' => 'No',
                 'db_tables_title' => 'Database Tables',
                 'db_empty' => 'No table found or database could not be read.',
+                'export_csv' => 'CSV',
+                'export_excel' => 'Excel',
             ],
         ];
     }

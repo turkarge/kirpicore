@@ -35,6 +35,20 @@ try {
         'installed_indexes' => $result['indexes']['installed_indexes'] ?? [],
     ], 'schema', null, 'success');
 
+    kirpi_notify_current_user('settings.schema_installed', [
+        'before_missing_table_count' => $beforeMissing,
+        'after_missing_table_count' => $afterMissing,
+        'before_missing_column_count' => $beforeMissingColumns,
+        'after_missing_column_count' => $afterMissingColumns,
+        'before_missing_index_count' => $beforeMissingIndexes,
+        'after_missing_index_count' => $afterMissingIndexes,
+    ], [
+        'title' => 'Eksik kurulum kontrolü tamamlandı',
+        'message' => 'Eksik tablo, kolon ve indeks kurulumu kontrol edildi.',
+        'source_module' => 'settings',
+        'entity_type' => 'schema',
+    ]);
+
     if ($beforeMissing <= 0 && $beforeMissingColumns <= 0 && $beforeMissingIndexes <= 0) {
         json_response([
             'status' => 'success',

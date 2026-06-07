@@ -59,6 +59,17 @@ kirpi_audit_log('send_test', 'mail', [
     'transport' => (string) ($sendResult['transport'] ?? ''),
 ], 'mail', null, 'success');
 
+kirpi_notify_current_user('mail.test_sent', [
+    'recipient_email' => $recipientEmail,
+    'subject' => $subject,
+    'transport' => (string) ($sendResult['transport'] ?? ''),
+], [
+    'title' => 'Test mail gönderildi',
+    'message' => $recipientEmail . ' adresine test maili gönderildi.',
+    'source_module' => 'mail',
+    'entity_type' => 'mail',
+]);
+
 json_response([
     'status' => 'success',
     'message' => (string) ($sendResult['message'] ?? mail_lang('send_success_default')),

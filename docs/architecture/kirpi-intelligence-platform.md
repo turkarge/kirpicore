@@ -10,8 +10,10 @@ KIP geliştirmesine geçmeden önce Kirpi Core tarafında aşağıdaki yapısal 
 - Ortak notification metadata modeli.
 - Template Registry ve Documents Registry.
 - Server-side CSV/XLS export standardı.
-- Notifications, Documents, Audit, Users ve Roles modüllerinde export entegrasyonu.
+- Notifications, Documents, Audit, Users, Roles, Mail, Backup, Settings, Template, Queue, API Metrics, Health ve Security modüllerinde export entegrasyonu.
 - Roles için Permission Catalog ve Role-Permission Matrix export.
+- Standart yönetim aksiyonlarında metadata'lı notification event üretimi.
+- Template Registry üzerinde notification target, variable ve default content katalogları.
 - UTF-8 çeviri standardı.
 - Tema, layout ve PWA temeli.
 

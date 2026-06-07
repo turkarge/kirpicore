@@ -29,4 +29,11 @@ return [
         'auth' => true,
         'method' => 'POST',
     ],
+    'queue/actions/export' => [
+        'file' => 'modules/queue/actions/export.php',
+        'layout' => false,
+        'permission' => 'queue.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
 ];

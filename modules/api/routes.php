@@ -8,6 +8,13 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'api/actions/metrics-export' => [
+        'file' => 'modules/api/actions/metrics_export.php',
+        'layout' => false,
+        'permission' => 'health.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
     'api/v1' => [
         'file' => 'modules/api/v1/index.php',
         'layout' => false,

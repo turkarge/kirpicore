@@ -44,6 +44,17 @@ try {
         'is_enabled' => $isEnabled,
     ], 'module', null, 'success');
 
+    kirpi_notify_current_user('settings.module_toggled', [
+        'module_key' => $moduleKey,
+        'is_enabled' => $isEnabled,
+        'status_label' => $isEnabled ? 'aktif' : 'pasif',
+    ], [
+        'title' => 'Modül durumu güncellendi',
+        'message' => $moduleKey . ' modülü ' . ($isEnabled ? 'aktif' : 'pasif') . ' yapıldı.',
+        'source_module' => 'settings',
+        'entity_type' => 'module',
+    ]);
+
     json_response([
         'status' => 'success',
         'message' => (string) ($result['message'] ?? settings_lang('module_updated')),

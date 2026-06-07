@@ -43,6 +43,8 @@ function api_lang(string $key, ?string $default = null): string
                 'error_code' => 'Error Code',
                 'no_data' => 'Veri yok',
                 'no_error_log' => 'Hata kaydı yok',
+                'export_csv' => 'CSV',
+                'export_excel' => 'Excel',
 
                 // API Hata ve İşlem Mesajları
                 'table_missing' => 'api_request_logs tablosu kurulu değil. Ayarlar ekranından Eksikleri Kur çalıştırın.',
@@ -119,6 +121,8 @@ function api_lang(string $key, ?string $default = null): string
                 'error_code' => 'Error Code',
                 'ip' => 'IP',
                 'no_error_log' => 'No error log',
+                'export_csv' => 'CSV',
+                'export_excel' => 'Excel',
                 'token_table_missing' => 'API token table is not ready. Complete setup first.',
                 'missing_credentials' => 'email and password are required.',
                 'invalid_email' => 'Enter a valid email address.',
