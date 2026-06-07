@@ -290,7 +290,7 @@ function kirpi_backup_verify(int $backupId, ?int $userId = null): array
     if (!kirpi_shell_exec_available()) {
         return [
             'success' => false,
-            'message' => 'shell_exec kullanilamiyor. Dogrulama calistirilamadi.',
+            'message' => 'shell_exec kullanılamıyor. Doğrulama çalıştırılamadı.',
         ];
     }
 
@@ -303,7 +303,7 @@ function kirpi_backup_verify(int $backupId, ?int $userId = null): array
     if (!$backup) {
         return [
             'success' => false,
-            'message' => 'Backup kaydi bulunamadi.',
+            'message' => 'Backup kaydı bulunamadı.',
         ];
     }
 
@@ -311,7 +311,7 @@ function kirpi_backup_verify(int $backupId, ?int $userId = null): array
     if ($filePath === '' || !is_file($filePath) || !is_readable($filePath)) {
         return [
             'success' => false,
-            'message' => 'Backup dosyasi bulunamadi veya okunamiyor.',
+            'message' => 'Backup dosyası bulunamadı veya okunamıyor.',
         ];
     }
 
@@ -319,7 +319,7 @@ function kirpi_backup_verify(int $backupId, ?int $userId = null): array
     if ($checksum === '') {
         return [
             'success' => false,
-            'message' => 'Backup SHA-256 hesabi olusturulamadi.',
+            'message' => 'Backup SHA-256 hesabı oluşturulamadı.',
         ];
     }
 
@@ -344,7 +344,7 @@ function kirpi_backup_verify(int $backupId, ?int $userId = null): array
     if (!($createResult['success'] ?? false)) {
         return [
             'success' => false,
-            'message' => 'Dry-run DB olusturulamadi. ' . (string) ($createResult['output'] ?? ''),
+            'message' => 'Dry-run DB oluşturulamadı. ' . (string) ($createResult['output'] ?? ''),
         ];
     }
 
@@ -356,7 +356,7 @@ function kirpi_backup_verify(int $backupId, ?int $userId = null): array
         if (!($restoreResult['success'] ?? false)) {
             return [
                 'success' => false,
-                'message' => 'Dry-run restore basarisiz. ' . ($restoreOutput !== '' ? $restoreOutput : ('exit code: ' . (string) ($restoreResult['exit_code'] ?? '1'))),
+                'message' => 'Dry-run restore başarısız. ' . ($restoreOutput !== '' ? $restoreOutput : ('exit code: ' . (string) ($restoreResult['exit_code'] ?? '1'))),
             ];
         }
 
@@ -403,7 +403,7 @@ function kirpi_backup_create(?string $label = null, ?int $userId = null): array
     if (!kirpi_shell_exec_available()) {
         return [
             'success' => false,
-            'message' => 'shell_exec kullanilamiyor. Backup olusturulamadi.',
+            'message' => 'shell_exec kullanılamıyor. Backup oluşturulamadı.',
         ];
     }
 
@@ -463,7 +463,7 @@ function kirpi_backup_create(?string $label = null, ?int $userId = null): array
 
         return [
             'success' => false,
-            'message' => 'mysqldump basarisiz. ' . implode(' | ', array_slice($attemptErrors, -2)),
+            'message' => 'mysqldump başarısız. ' . implode(' | ', array_slice($attemptErrors, -2)),
         ];
     }
 
@@ -502,7 +502,7 @@ function kirpi_backup_restore(int $backupId, ?int $userId = null): array
     if (!kirpi_shell_exec_available()) {
         return [
             'success' => false,
-            'message' => 'shell_exec kullanilamiyor. Restore calistirilamadi.',
+            'message' => 'shell_exec kullanılamıyor. Restore çalıştırılamadı.',
         ];
     }
 
@@ -515,7 +515,7 @@ function kirpi_backup_restore(int $backupId, ?int $userId = null): array
     if (!$backup) {
         return [
             'success' => false,
-            'message' => 'Backup kaydi bulunamadi.',
+            'message' => 'Backup kaydı bulunamadı.',
         ];
     }
 
@@ -523,7 +523,7 @@ function kirpi_backup_restore(int $backupId, ?int $userId = null): array
     if ($filePath === '' || !is_file($filePath)) {
         return [
             'success' => false,
-            'message' => 'Backup dosyasi bulunamadi.',
+            'message' => 'Backup dosyası bulunamadı.',
         ];
     }
 
@@ -554,11 +554,11 @@ function kirpi_backup_restore(int $backupId, ?int $userId = null): array
     if ($exitCode !== 0) {
         return [
             'success' => false,
-            'message' => 'Restore komutu basarisiz. ' . ($output !== '' ? $output : ('exit code: ' . $exitCode)),
+            'message' => 'Restore komutu başarısız. ' . ($output !== '' ? $output : ('exit code: ' . $exitCode)),
         ];
     }
 
-    // Restore dump eskiyse backup kayitlarini geri alabilir/silebilir.
+    // Restore dump eskiyse backup kayıtlarını geri alabilir/silebilir.
     // Dosya kaydini geri ekleyip restore logunu "best effort" olarak yazariz.
     try {
         if (db_table_exists('db_backups')) {
@@ -595,6 +595,6 @@ function kirpi_backup_restore(int $backupId, ?int $userId = null): array
 
     return [
         'success' => true,
-        'message' => 'Backup geri yukleme komutu calistirildi.',
+        'message' => 'Backup geri yükleme komutu çalıştırıldı.',
     ];
 }

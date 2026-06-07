@@ -282,7 +282,7 @@ function kirpi_set_module_enabled(string $moduleKey, bool $enabled, ?int $update
     if (!kirpi_modules_registry_ready()) {
         return [
             'success' => false,
-            'message' => 'Modul registry tablosu hazir degil.',
+            'message' => 'Modül registry tablosu hazır değil.',
         ];
     }
 
@@ -290,14 +290,14 @@ function kirpi_set_module_enabled(string $moduleKey, bool $enabled, ?int $update
     if (!$module) {
         return [
             'success' => false,
-            'message' => 'Modul bulunamadi.',
+            'message' => 'Modül bulunamadı.',
         ];
     }
 
     if (!empty($module['core'])) {
         return [
             'success' => false,
-            'message' => 'Core modul devre disi birakilamaz.',
+            'message' => 'Core modül devre dışı bırakılamaz.',
         ];
     }
 
@@ -329,19 +329,19 @@ function kirpi_set_module_enabled(string $moduleKey, bool $enabled, ?int $update
         if ($stmt->rowCount() <= 0) {
             return [
                 'success' => false,
-                'message' => 'Modul durumu guncellenemedi.',
+                'message' => 'Modül durumu güncellenemedi.',
             ];
         }
 
         return [
             'success' => true,
-            'message' => $enabled ? 'Modul aktif edildi.' : 'Modul devre disi birakildi.',
+            'message' => $enabled ? 'Modül aktif edildi.' : 'Modül devre dışı bırakıldı.',
         ];
     } catch (Throwable $e) {
         error_log('module enable toggle error: ' . $e->getMessage());
         return [
             'success' => false,
-            'message' => 'Modul durumu guncellenirken hata olustu.',
+            'message' => 'Modül durumu güncellenirken hata oluştu.',
         ];
     }
 }

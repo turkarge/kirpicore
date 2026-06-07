@@ -503,7 +503,7 @@ function api_require_token(?string $requiredPermission = null, ?string $required
 
     $auth = api_authenticate_by_token($token);
     if (!$auth) {
-        api_error(401, 'Gecersiz veya suresi dolmus token.', 'invalid_or_expired_token');
+        api_error(401, 'Geçersiz veya süresi dolmuş token.', 'invalid_or_expired_token');
     }
 
     $user = (array) ($auth['user'] ?? []);

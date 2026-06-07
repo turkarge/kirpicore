@@ -1,7 +1,7 @@
 {
     "key":  "settings",
     "name":  "Settings",
-    "description":  "Uygulama ve sistem ayarlari",
+    "description":  "Uygulama ve sistem ayarları",
     "version":  "1.0.0",
     "enabled":  true,
     "core":  true,
@@ -32,7 +32,7 @@
                      "weight":  210
                  },
                  {
-                     "title":  "Moduller",
+                     "title":  "Modüller",
                      "title_key":  "modules",
                      "icon":  "ti ti-packages",
                      "url":  "settings/modules",
@@ -42,7 +42,7 @@
                      "weight":  220
                  },
                  {
-                     "title":  "Menu Yonetimi",
+                     "title":  "Menü Yönetimi",
                      "title_key":  "menu_management",
                      "icon":  "ti ti-layout-navbar",
                      "url":  "settings/menu-management",

@@ -8,7 +8,7 @@ require_action('POST', true);
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Guvenlik dogrulamasi basarisiz oldu.',
+        'message' => 'Güvenlik doğrulaması başarısız oldu.',
     ], 419);
 }
 
@@ -19,14 +19,14 @@ $actorUserId = (int) ($currentUser['id'] ?? 0);
 if ($targetUserId <= 0) {
     json_response([
         'status' => 'error',
-        'message' => 'Gecersiz kullanici.',
+        'message' => 'Geçersiz kullanıcı.',
     ], 422);
 }
 
 if (!kirpi_auth_lock_schema_ready()) {
     json_response([
         'status' => 'error',
-        'message' => 'Lock key altyapisi hazir degil. Ayarlar > Eksikleri Kur calistirin.',
+        'message' => 'Lock key altyapısı hazır değil. Ayarlar > Eksikleri Kur çalıştırın.',
     ], 422);
 }
 
@@ -45,7 +45,7 @@ try {
     if (!$targetUser) {
         json_response([
             'status' => 'error',
-            'message' => 'Kullanici bulunamadi.',
+            'message' => 'Kullanıcı bulunamadı.',
         ], 404);
     }
 
@@ -97,7 +97,7 @@ try {
 
     json_response([
         'status' => 'success',
-        'message' => 'Lock key sifirlandi ve oturum kilitleme pasif yapildi.',
+        'message' => 'Lock key sıfırlandı ve oturum kilitleme pasif yapıldı.',
         'reload_page' => true,
     ]);
 } catch (Throwable $e) {
@@ -105,6 +105,6 @@ try {
 
     json_response([
         'status' => 'error',
-        'message' => 'Lock key sifirlanirken bir hata olustu.',
+        'message' => 'Lock key sıfırlanırken bir hata oluştu.',
     ], 500);
 }

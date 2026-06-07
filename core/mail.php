@@ -137,7 +137,7 @@ function kirpi_smtp_send_mail(string $to, string $subject, string $htmlBody): ar
         return [
             'success' => false,
             'transport' => 'smtp',
-            'error' => 'SMTP ayarlari eksik: MAIL_HOST veya MAIL_PORT.',
+            'error' => 'SMTP ayarları eksik: MAIL_HOST veya MAIL_PORT.',
         ];
     }
 
@@ -180,7 +180,7 @@ function kirpi_smtp_send_mail(string $to, string $subject, string $htmlBody): ar
         return [
             'success' => false,
             'transport' => 'smtp',
-            'error' => 'EHLO basarisiz: ' . $ehlo['response'],
+            'error' => 'EHLO başarısız: ' . $ehlo['response'],
         ];
     }
 
@@ -191,7 +191,7 @@ function kirpi_smtp_send_mail(string $to, string $subject, string $htmlBody): ar
             return [
                 'success' => false,
                 'transport' => 'smtp',
-                'error' => 'STARTTLS basarisiz: ' . $startTls['response'],
+                'error' => 'STARTTLS başarısız: ' . $startTls['response'],
             ];
         }
 
@@ -211,7 +211,7 @@ function kirpi_smtp_send_mail(string $to, string $subject, string $htmlBody): ar
             return [
                 'success' => false,
                 'transport' => 'smtp',
-                'error' => 'TLS sonrasi EHLO basarisiz: ' . $ehloAfterTls['response'],
+                'error' => 'TLS sonrası EHLO başarısız: ' . $ehloAfterTls['response'],
             ];
         }
     }
@@ -223,7 +223,7 @@ function kirpi_smtp_send_mail(string $to, string $subject, string $htmlBody): ar
             return [
                 'success' => false,
                 'transport' => 'smtp',
-                'error' => 'SMTP AUTH LOGIN basarisiz: ' . $auth['response'],
+                'error' => 'SMTP AUTH LOGIN başarısız: ' . $auth['response'],
             ];
         }
 
@@ -233,7 +233,7 @@ function kirpi_smtp_send_mail(string $to, string $subject, string $htmlBody): ar
             return [
                 'success' => false,
                 'transport' => 'smtp',
-                'error' => 'SMTP kullanici dogrulamasi basarisiz: ' . $userResp['response'],
+                'error' => 'SMTP kullanıcı doğrulaması başarısız: ' . $userResp['response'],
             ];
         }
 
@@ -243,7 +243,7 @@ function kirpi_smtp_send_mail(string $to, string $subject, string $htmlBody): ar
             return [
                 'success' => false,
                 'transport' => 'smtp',
-                'error' => 'SMTP parola dogrulamasi basarisiz: ' . $passResp['response'],
+                'error' => 'SMTP parola doğrulaması başarısız: ' . $passResp['response'],
             ];
         }
     }
@@ -254,7 +254,7 @@ function kirpi_smtp_send_mail(string $to, string $subject, string $htmlBody): ar
         return [
             'success' => false,
             'transport' => 'smtp',
-            'error' => 'MAIL FROM basarisiz: ' . $mailFrom['response'],
+            'error' => 'MAIL FROM başarısız: ' . $mailFrom['response'],
         ];
     }
 
@@ -264,7 +264,7 @@ function kirpi_smtp_send_mail(string $to, string $subject, string $htmlBody): ar
         return [
             'success' => false,
             'transport' => 'smtp',
-            'error' => 'RCPT TO basarisiz: ' . $rcptTo['response'],
+            'error' => 'RCPT TO başarısız: ' . $rcptTo['response'],
         ];
     }
 
@@ -274,7 +274,7 @@ function kirpi_smtp_send_mail(string $to, string $subject, string $htmlBody): ar
         return [
             'success' => false,
             'transport' => 'smtp',
-            'error' => 'DATA komutu basarisiz: ' . $dataCommand['response'],
+            'error' => 'DATA komutu başarısız: ' . $dataCommand['response'],
         ];
     }
 
@@ -300,7 +300,7 @@ function kirpi_smtp_send_mail(string $to, string $subject, string $htmlBody): ar
         return [
             'success' => false,
             'transport' => 'smtp',
-            'error' => 'Mesaj teslimi basarisiz: ' . trim($dataResponse),
+            'error' => 'Mesaj teslimi başarısız: ' . trim($dataResponse),
         ];
     }
 
@@ -343,7 +343,7 @@ function kirpi_php_mail_send(string $to, string $subject, string $htmlBody): arr
         return [
             'success' => false,
             'transport' => 'php_mail',
-            'error' => 'PHP mail() gonderimi basarisiz oldu.',
+            'error' => 'PHP mail() gönderimi başarısız oldu.',
         ];
     }
 
@@ -398,7 +398,7 @@ function kirpi_send_mail(string $to, string $subject, string $htmlBody, ?int $us
 
     return [
         'success' => true,
-        'message' => 'Test e-postasi basariyla gonderildi.',
+        'message' => 'Test e-postası başarıyla gönderildi.',
         'transport' => (string) ($result['transport'] ?? 'unknown'),
     ];
 }
@@ -414,7 +414,7 @@ function kirpi_mail_default_templates(): array
         'auth.password_reset' => [
             'name' => 'Auth - Password Reset',
             'subject' => '{{app_name}} - Sifre Sifirlama',
-            'html_body' => '<p>Merhaba {{user_name}},</p><p>Sifrenizi sifirlamak icin asagidaki baglantiyi kullanin:</p><p><a href="{{reset_link}}">{{reset_link}}</a></p><p>Bu baglanti {{expires_minutes}} dakika gecerlidir.</p>',
+            'html_body' => '<p>Merhaba {{user_name}},</p><p>Şifrenizi sıfırlamak için aşağıdaki bağlantıyı kullanın:</p><p><a href="{{reset_link}}">{{reset_link}}</a></p><p>Bu bağlantı {{expires_minutes}} dakika geçerlidir.</p>',
             'is_active' => 1,
             'is_system' => 1,
         ],
@@ -442,7 +442,7 @@ function kirpi_mail_default_templates(): array
         'users.lock_key_reset' => [
             'name' => 'Users - Lock Key Reset',
             'subject' => '{{app_name}} - Kilit Key Sifirlandi',
-            'html_body' => '<p>Merhaba {{user_name}},</p><p>Oturum kilitleme key bilginiz yonetici tarafindan sifirlandi.</p><p>Profil ekranindan yeni key olusturabilirsiniz.</p>',
+            'html_body' => '<p>Merhaba {{user_name}},</p><p>Oturum kilitleme key bilginiz yönetici tarafından sıfırlandı.</p><p>Profil ekranından yeni key oluşturabilirsiniz.</p>',
             'is_active' => 1,
             'is_system' => 1,
         ],
@@ -602,7 +602,7 @@ function kirpi_send_templated_mail(
     if (!$template) {
         return [
             'success' => false,
-            'message' => 'Mail sablonu bulunamadi veya pasif.',
+            'message' => 'Mail şablonu bulunamadı veya pasif.',
             'transport' => 'none',
         ];
     }

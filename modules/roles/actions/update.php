@@ -8,7 +8,7 @@ require_action('POST', true);
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Guvenlik dogrulamasi basarisiz oldu.',
+        'message' => 'Güvenlik doğrulaması başarısız oldu.',
     ], 419);
 }
 
@@ -21,28 +21,28 @@ $currentRoleId = (int) ($currentUser['role_id'] ?? 0);
 if ($id <= 0) {
     json_response([
         'status' => 'error',
-        'message' => 'Gecersiz rol.',
+        'message' => 'Geçersiz rol.',
     ], 422);
 }
 
 if ($id === $currentRoleId && $isActive !== 1) {
     json_response([
         'status' => 'error',
-        'message' => 'Oturumdaki kullanicinin rolu pasif yapilamaz.',
+        'message' => 'Oturumdaki kullanıcının rolü pasif yapılamaz.',
     ], 422);
 }
 
 if ($name === '') {
     json_response([
         'status' => 'error',
-        'message' => 'Rol adi zorunludur.',
+        'message' => 'Rol adı zorunludur.',
     ], 422);
 }
 
 if (mb_strlen($name) < 2) {
     json_response([
         'status' => 'error',
-        'message' => 'Rol adi en az 2 karakter olmalidir.',
+        'message' => 'Rol adı en az 2 karakter olmalıdır.',
     ], 422);
 }
 
@@ -62,21 +62,21 @@ try {
     if (!$existingRole) {
         json_response([
             'status' => 'error',
-            'message' => 'Rol bulunamadi.',
+            'message' => 'Rol bulunamadı.',
         ], 404);
     }
 
     if (($existingRole['name'] ?? '') === 'Super Admin' && $name !== 'Super Admin') {
         json_response([
             'status' => 'error',
-            'message' => 'Super Admin rol adi degistirilemez.',
+            'message' => 'Super Admin rol adı değiştirilemez.',
         ], 422);
     }
 
     if (($existingRole['name'] ?? '') === 'Super Admin' && $isActive !== 1) {
         json_response([
             'status' => 'error',
-            'message' => 'Super Admin rolu pasif yapilamaz.',
+            'message' => 'Super Admin rolü pasif yapılamaz.',
         ], 422);
     }
 
@@ -94,7 +94,7 @@ try {
     if ((int) $checkStmt->fetchColumn() > 0) {
         json_response([
             'status' => 'error',
-            'message' => 'Bu rol adi baska bir kayit tarafindan kullaniliyor.',
+            'message' => 'Bu rol adı başka bir kayıt tarafından kullanılıyor.',
         ], 422);
     }
 
@@ -123,13 +123,13 @@ try {
 
     json_response([
         'status' => 'success',
-        'message' => '"' . $name . '" rolu basariyla guncellendi.',
+        'message' => '"' . $name . '" rolü başarıyla güncellendi.',
     ]);
 } catch (Throwable $e) {
     error_log('roles update error: ' . $e->getMessage());
 
     json_response([
         'status' => 'error',
-        'message' => 'Rol guncellenirken bir hata olustu.',
+        'message' => 'Rol güncellenirken bir hata oluştu.',
     ], 500);
 }

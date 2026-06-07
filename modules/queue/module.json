@@ -1,7 +1,7 @@
 {
     "key":  "queue",
     "name":  "Queue",
-    "description":  "Arka plan is kuyrugu",
+    "description":  "Arka plan iş kuyruğu",
     "version":  "1.0.0",
     "enabled":  true,
     "core":  false,

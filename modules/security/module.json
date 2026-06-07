@@ -1,7 +1,7 @@
 {
     "key":  "security",
     "name":  "Security",
-    "description":  "Guvenlik izleme ekrani",
+    "description":  "Güvenlik izleme ekranı",
     "version":  "1.0.0",
     "enabled":  true,
     "core":  false,
@@ -12,7 +12,7 @@
     "author":  "Kirpi Core",
     "menu":  [
                  {
-                     "title":  "Guvenlik Izleme",
+                     "title":  "Güvenlik İzleme",
                      "title_key":  "page_title",
                      "icon":  "ti ti-shield-check",
                      "url":  "security/view",

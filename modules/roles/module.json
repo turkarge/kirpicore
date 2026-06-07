@@ -1,7 +1,7 @@
 {
     "key":  "roles",
     "name":  "Roles",
-    "description":  "Rol ve yetki yonetimi",
+    "description":  "Rol ve yetki yönetimi",
     "version":  "1.0.0",
     "enabled":  true,
     "core":  true,

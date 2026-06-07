@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const url = toAbsoluteUrl(endpoint);
         urlLabelEl.textContent = url;
-        responseEl.textContent = i18n.sending || "Istek gonderiliyor...";
+        responseEl.textContent = i18n.sending || "İstek gönderiliyor...";
         setStatus(i18n.pending || "Bekleniyor", "bg-yellow-lt");
         sendBtn.disabled = true;
 
@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         options.body = JSON.stringify(parsed);
                         headers["Content-Type"] = "application/json";
                     } catch (error) {
-                        throw new Error((i18n.invalidJsonPrefix || "JSON Body gecersiz: ") + error.message);
+                        throw new Error((i18n.invalidJsonPrefix || "JSON Body geçersiz: ") + error.message);
                     }
                 }
             }

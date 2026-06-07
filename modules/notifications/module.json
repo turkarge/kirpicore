@@ -1,7 +1,7 @@
 {
     "key":  "notifications",
     "name":  "Notifications",
-    "description":  "Bildirim listesi ve ayarlari",
+    "description":  "Bildirim listesi ve ayarları",
     "version":  "1.0.0",
     "enabled":  true,
     "core":  false,

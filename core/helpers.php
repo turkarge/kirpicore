@@ -611,28 +611,28 @@ function kirpi_upload_avatar(array $file): array
     if (!is_dir($uploadsRoot) && !mkdir($uploadsRoot, 0775, true) && !is_dir($uploadsRoot)) {
         return [
             'success' => false,
-            'message' => 'Yukleme kok dizini olusturulamadi.',
+            'message' => 'Yükleme kök dizini oluşturulamadı.',
         ];
     }
 
     if (!is_writable($uploadsRoot)) {
         return [
             'success' => false,
-            'message' => 'Yukleme kok dizini yazilabilir degil.',
+            'message' => 'Yükleme kök dizini yazılabilir değil.',
         ];
     }
 
     if (!is_dir($uploadDir) && !mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
         return [
             'success' => false,
-            'message' => 'Yukleme dizini olusturulamadi.',
+            'message' => 'Yükleme dizini oluşturulamadı.',
         ];
     }
 
     if (!is_writable($uploadDir)) {
         return [
             'success' => false,
-            'message' => 'Yukleme dizini yazilabilir degil.',
+            'message' => 'Yükleme dizini yazılabilir değil.',
         ];
     }
 

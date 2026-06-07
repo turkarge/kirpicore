@@ -1,7 +1,7 @@
 {
     "key":  "mail",
     "name":  "Mail",
-    "description":  "Mail test ve gonderim kayitlari",
+    "description":  "Mail test ve gönderim kayıtları",
     "version":  "1.0.0",
     "enabled":  true,
     "core":  false,
@@ -22,7 +22,7 @@
                      "weight":  130
                  },
                  {
-                     "title":  "Mail Sablonlari",
+                     "title":  "Mail Şablonları",
                      "title_key":  "mail_templates",
                      "icon":  "ti ti-mail-cog",
                      "url":  "mail/templates",

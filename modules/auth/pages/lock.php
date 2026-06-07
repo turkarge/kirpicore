@@ -14,7 +14,7 @@ if (!kirpi_session_lock_state()) {
 }
 
 $user = current_user();
-$userName = (string) ($user['name'] ?? 'Kullanici');
+$userName = (string) ($user['name'] ?? 'Kullanıcı');
 $userRole = (string) ($user['role_name'] ?? '');
 $initial = mb_strtoupper(mb_substr($userName, 0, 1));
 $avatarUrl = !empty($user['avatar'])

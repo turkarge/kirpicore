@@ -1,7 +1,7 @@
 {
     "key":  "health",
     "name":  "Health",
-    "description":  "Sistem saglik ve metrikleri",
+    "description":  "Sistem sağlık ve metrikleri",
     "version":  "1.0.0",
     "enabled":  true,
     "core":  false,

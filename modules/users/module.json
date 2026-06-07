@@ -1,7 +1,7 @@
 {
     "key":  "users",
     "name":  "Users",
-    "description":  "Kullanici yonetimi",
+    "description":  "Kullanıcı yönetimi",
     "version":  "1.0.0",
     "enabled":  true,
     "core":  true,
@@ -12,7 +12,7 @@
     "author":  "Kirpi Core",
     "menu":  [
                  {
-                     "title":  "Kullanicilar",
+                     "title":  "Kullanıcılar",
                      "title_key":  "users",
                      "icon":  "ti ti-users",
                      "url":  "users/view",

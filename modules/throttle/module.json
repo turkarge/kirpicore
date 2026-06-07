@@ -1,7 +1,7 @@
 {
     "key":  "throttle",
     "name":  "Throttle",
-    "description":  "Istek limitleme ve koruma",
+    "description":  "İstek limitleme ve koruma",
     "version":  "1.0.0",
     "enabled":  true,
     "core":  true,

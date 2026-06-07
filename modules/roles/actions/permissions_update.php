@@ -8,7 +8,7 @@ require_action('POST', true);
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Guvenlik dogrulamasi basarisiz oldu.',
+        'message' => 'Güvenlik doğrulaması başarısız oldu.',
     ], 419);
 }
 
@@ -18,14 +18,14 @@ $permissionSlugs = array_map('strval', $_POST['permission_slugs'] ?? []);
 if ($id <= 0) {
     json_response([
         'status' => 'error',
-        'message' => 'Gecersiz rol.',
+        'message' => 'Geçersiz rol.',
     ], 422);
 }
 
 if (!db_table_exists('permissions') || !db_table_exists('role_permissions')) {
     json_response([
         'status' => 'error',
-        'message' => 'Permission tablolari henuz kurulu degil.',
+        'message' => 'Permission tabloları henüz kurulu değil.',
     ], 422);
 }
 
@@ -45,14 +45,14 @@ try {
     if (!$role) {
         json_response([
             'status' => 'error',
-            'message' => 'Rol bulunamadi.',
+            'message' => 'Rol bulunamadı.',
         ], 404);
     }
 
     if (($role['name'] ?? '') === 'Super Admin') {
         json_response([
             'status' => 'error',
-            'message' => 'Super Admin rolu icin izin matrisi duzenlenmez.',
+            'message' => 'Super Admin rolü için izin matrisi düzenlenmez.',
         ], 422);
     }
 
@@ -65,11 +65,11 @@ try {
         'permission_slugs' => array_values($permissionSlugs),
     ], 'role', $id, 'success');
 
-    set_flash_message('success', '"' . ($role['name'] ?? 'Rol') . '" rolunun izinleri basariyla guncellendi.');
+    set_flash_message('success', '"' . ($role['name'] ?? 'Rol') . '" rolünün izinleri başarıyla güncellendi.');
 
     json_response([
         'status' => 'success',
-        'message' => '"' . ($role['name'] ?? 'Rol') . '" rolunun izinleri basariyla guncellendi.',
+        'message' => '"' . ($role['name'] ?? 'Rol') . '" rolünün izinleri başarıyla güncellendi.',
         'redirect' => base_url('roles/permissions?id=' . $id),
     ]);
 } catch (Throwable $e) {
@@ -77,6 +77,6 @@ try {
 
     json_response([
         'status' => 'error',
-        'message' => 'Rol izinleri guncellenirken bir hata olustu.',
+        'message' => 'Rol izinleri güncellenirken bir hata oluştu.',
     ], 500);
 }

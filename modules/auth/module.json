@@ -1,7 +1,7 @@
 {
     "key":  "auth",
     "name":  "Authentication",
-    "description":  "Login, logout ve oturum yonetimi",
+    "description":  "Login, logout ve oturum yönetimi",
     "version":  "1.0.0",
     "enabled":  true,
     "core":  true,

@@ -32,11 +32,11 @@ function kirpi_core_permission_catalog(): array
                     'slug' => 'users.status',
                 ],
                 [
-                    'name' => 'Kullanici Oturumu Dusurme',
+                    'name' => 'Kullanıcı Oturumu Düşürme',
                     'slug' => 'users.session.drop',
                 ],
                 [
-                    'name' => 'Kullanici Lock Key Sifirlama',
+                    'name' => 'Kullanıcı Lock Key Sıfırlama',
                     'slug' => 'users.lock.reset',
                 ],
             ],
@@ -96,11 +96,11 @@ function kirpi_core_permission_catalog(): array
             'title' => 'Mail',
             'permissions' => [
                 [
-                    'name' => 'Mail Modulu Goruntuleme',
+                    'name' => 'Mail Modülü Görüntüleme',
                     'slug' => 'mail.view',
                 ],
                 [
-                    'name' => 'Test Maili Gonderme',
+                    'name' => 'Test Maili Gönderme',
                     'slug' => 'mail.test',
                 ],
             ],
@@ -139,7 +139,7 @@ function kirpi_core_permission_catalog(): array
             'title' => 'Audit',
             'permissions' => [
                 [
-                    'name' => 'Audit Log Goruntuleme',
+                    'name' => 'Audit Log Görüntüleme',
                     'slug' => 'audit.view',
                 ],
             ],
@@ -148,11 +148,11 @@ function kirpi_core_permission_catalog(): array
             'title' => 'Ayarlar',
             'permissions' => [
                 [
-                    'name' => 'Ayarlari Goruntuleme',
+                    'name' => 'Ayarları Görüntüleme',
                     'slug' => 'settings.view',
                 ],
                 [
-                    'name' => 'Ayarlari Guncelleme',
+                    'name' => 'Ayarları Güncelleme',
                     'slug' => 'settings.update',
                 ],
             ],
@@ -161,11 +161,11 @@ function kirpi_core_permission_catalog(): array
             'title' => 'Queue',
             'permissions' => [
                 [
-                    'name' => 'Queue Goruntuleme',
+                    'name' => 'Queue Görüntüleme',
                     'slug' => 'queue.view',
                 ],
                 [
-                    'name' => 'Queue Yonetimi',
+                    'name' => 'Queue Yönetimi',
                     'slug' => 'queue.manage',
                 ],
             ],
@@ -174,11 +174,11 @@ function kirpi_core_permission_catalog(): array
             'title' => 'Backup',
             'permissions' => [
                 [
-                    'name' => 'Backup Goruntuleme',
+                    'name' => 'Backup Görüntüleme',
                     'slug' => 'backup.view',
                 ],
                 [
-                    'name' => 'Backup Olusturma',
+                    'name' => 'Backup Oluşturma',
                     'slug' => 'backup.create',
                 ],
                 [
@@ -186,7 +186,7 @@ function kirpi_core_permission_catalog(): array
                     'slug' => 'backup.restore',
                 ],
                 [
-                    'name' => 'Backup Indirme',
+                    'name' => 'Backup İndirme',
                     'slug' => 'backup.download',
                 ],
                 [
@@ -196,10 +196,10 @@ function kirpi_core_permission_catalog(): array
             ],
         ],
         'security' => [
-            'title' => 'Guvenlik',
+            'title' => 'Güvenlik',
             'permissions' => [
                 [
-                    'name' => 'Guvenlik Izleme Goruntuleme',
+                    'name' => 'Güvenlik İzleme Görüntüleme',
                     'slug' => 'security.view',
                 ],
             ],
@@ -208,7 +208,7 @@ function kirpi_core_permission_catalog(): array
             'title' => 'Health',
             'permissions' => [
                 [
-                    'name' => 'Health Metrics Goruntuleme',
+                    'name' => 'Health Metrics Görüntüleme',
                     'slug' => 'health.view',
                 ],
             ],
@@ -217,15 +217,15 @@ function kirpi_core_permission_catalog(): array
             'title' => 'Kirpi Intelligence',
             'permissions' => [
                 [
-                    'name' => 'AI Panel Goruntuleme',
+                    'name' => 'AI Panel Görüntüleme',
                     'slug' => 'ai.view',
                 ],
                 [
-                    'name' => 'AI Schema Registry Yonetimi',
+                    'name' => 'AI Schema Registry Yönetimi',
                     'slug' => 'ai.schema.manage',
                 ],
                 [
-                    'name' => 'AI Audit Log Goruntuleme',
+                    'name' => 'AI Audit Log Görüntüleme',
                     'slug' => 'ai.audit.view',
                 ],
             ],

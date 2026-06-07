@@ -8,7 +8,7 @@ require_action('POST', true);
 if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
     json_response([
         'status' => 'error',
-        'message' => 'Guvenlik dogrulamasi basarisiz oldu.',
+        'message' => 'Güvenlik doğrulaması başarısız oldu.',
     ], 419);
 }
 
@@ -20,14 +20,14 @@ $currentRoleId = (int) ($currentUser['role_id'] ?? 0);
 if ($id <= 0 || !in_array($status, [0, 1], true)) {
     json_response([
         'status' => 'error',
-        'message' => 'Gecersiz istek.',
+        'message' => 'Geçersiz istek.',
     ], 422);
 }
 
 if ($id === $currentRoleId && $status !== 1) {
     json_response([
         'status' => 'error',
-        'message' => 'Oturumdaki kullanicinin rolu pasif yapilamaz.',
+        'message' => 'Oturumdaki kullanıcının rolü pasif yapılamaz.',
     ], 422);
 }
 
@@ -47,14 +47,14 @@ try {
     if (!$role) {
         json_response([
             'status' => 'error',
-            'message' => 'Rol bulunamadi.',
+            'message' => 'Rol bulunamadı.',
         ], 404);
     }
 
     if (($role['name'] ?? '') === 'Super Admin' && $status !== 1) {
         json_response([
             'status' => 'error',
-            'message' => 'Super Admin rolu pasif yapilamaz.',
+            'message' => 'Super Admin rolü pasif yapılamaz.',
         ], 422);
     }
 
@@ -76,13 +76,13 @@ try {
 
     json_response([
         'status' => 'success',
-        'message' => '"' . ($role['name'] ?? 'Rol') . '" rolu ' . ($status === 1 ? 'aktif yapildi.' : 'pasif yapildi.'),
+        'message' => '"' . ($role['name'] ?? 'Rol') . '" rolü ' . ($status === 1 ? 'aktif yapıldı.' : 'pasif yapıldı.'),
     ]);
 } catch (Throwable $e) {
     error_log('roles toggle status error: ' . $e->getMessage());
 
     json_response([
         'status' => 'error',
-        'message' => 'Rol durumu guncellenirken bir hata olustu.',
+        'message' => 'Rol durumu güncellenirken bir hata oluştu.',
     ], 500);
 }

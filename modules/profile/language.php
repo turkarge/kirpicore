@@ -23,8 +23,8 @@ function profile_lang(string $key, ?string $default = null): string
                 // Profil Yönetimi
                 'my_account' => 'Hesabım',
                 'profile' => 'Profil',
-                'nav_user_menu' => 'Kullanici Menusu',
-                'user_fallback' => 'Kullanici',
+                'nav_user_menu' => 'Kullanıcı Menüsü',
+                'user_fallback' => 'Kullanıcı',
                 'profile_info' => 'Profil Bilgileri',
                 'name_surname' => 'Ad Soyad',
                 'email' => 'E-posta',
