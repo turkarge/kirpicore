@@ -72,6 +72,13 @@
                 } catch (error) {
                     console.warn("Tema tercihi kaydedilemedi:", error);
                 }
+
+                document.dispatchEvent(new CustomEvent("kirpi:theme.changed", {
+                    detail: {
+                        preference: safePreference,
+                        theme: safeTheme
+                    }
+                }));
             };
 
             applyThemePreference(getPreference());

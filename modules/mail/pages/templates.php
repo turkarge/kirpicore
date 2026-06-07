@@ -200,20 +200,56 @@ if ($tableReady) {
         return;
     }
 
-    tinymce.init({
-        selector: 'textarea.js-mail-template-html',
-        license_key: 'gpl',
-        menubar: false,
-        height: 360,
-        plugins: 'code link lists table autoresize',
-        toolbar: 'undo redo | blocks | bold italic underline | forecolor backcolor | alignleft aligncenter alignright | bullist numlist | table link | code',
-        branding: false,
-        browser_spellcheck: true,
-        contextmenu: false,
-        convert_urls: false,
-        valid_elements: '*[*]',
-        valid_children: '+body[style]',
-        autoresize_bottom_margin: 16
+    const selector = 'textarea.js-mail-template-html';
+    let currentTheme = null;
+
+    function getKirpiTheme() {
+        return document.documentElement.getAttribute('data-kirpi-theme') === 'dark' ? 'dark' : 'light';
+    }
+
+    function removeEditors() {
+        document.querySelectorAll(selector).forEach(function (textarea) {
+            const editor = textarea.id ? tinymce.get(textarea.id) : null;
+            if (editor) {
+                editor.save();
+                editor.remove();
+            }
+        });
+    }
+
+    function initEditors() {
+        const theme = getKirpiTheme();
+        currentTheme = theme;
+
+        tinymce.init({
+            selector: selector,
+            license_key: 'gpl',
+            menubar: false,
+            height: 360,
+            plugins: 'code link lists table autoresize',
+            toolbar: 'undo redo | blocks | bold italic underline | forecolor backcolor | alignleft aligncenter alignright | bullist numlist | table link | code',
+            skin: theme === 'dark' ? 'oxide-dark' : 'oxide',
+            content_css: theme === 'dark' ? 'dark' : 'default',
+            branding: false,
+            browser_spellcheck: true,
+            contextmenu: false,
+            convert_urls: false,
+            valid_elements: '*[*]',
+            valid_children: '+body[style]',
+            autoresize_bottom_margin: 16
+        });
+    }
+
+    initEditors();
+
+    document.addEventListener('kirpi:theme.changed', function (event) {
+        const nextTheme = event.detail && event.detail.theme === 'dark' ? 'dark' : 'light';
+        if (nextTheme === currentTheme) {
+            return;
+        }
+
+        removeEditors();
+        initEditors();
     });
 
     document.addEventListener('submit', function (event) {
