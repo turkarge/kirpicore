@@ -614,6 +614,46 @@ Gateway hiçbir durumda SQL çalıştırmaz. Üretilen veya bloklanan her sonuç
 
 External adapter gerçek modele bağlanmadan önce `config_json` içinde güvenli key referansı tanımlanmalıdır. Secret değerleri doğrudan audit veya prompt içine yazılmaz.
 
+## Controlled EXPLAIN Gate
+
+SQL Preview içinde kontrollü `EXPLAIN` kapısı bulunur.
+
+Varsayılan davranış:
+
+```text
+AI_SQL_EXPLAIN_ENABLED=false
+```
+
+Bu durumda `EXPLAIN` çalıştırılmaz ve sonuç `explain_disabled` olarak döner.
+
+Explain akışı:
+
+```text
+SQL Candidate
+ ↓
+SQL Preview
+ ↓
+SQL Guard
+ ↓
+Explain Gate
+ ↓
+explain_disabled / guard_blocked / success
+```
+
+Kurallar:
+
+* Guard geçmeden `EXPLAIN` çalışmaz.
+* Normal SQL execution her durumda kapalı kalır.
+* `EXPLAIN` açılsa bile gerçek veri okunmaz.
+* `EXPLAIN` sonucu yalnızca plan bilgisidir.
+* Hata veya kapalı durumları audit ve preview çıktısında neden kodu ile izlenir.
+
+İleride production ortamda açılması gerekirse yalnızca kontrollü env/config ile açılmalıdır:
+
+```text
+AI_SQL_EXPLAIN_ENABLED=true
+```
+
 ---
 
 # Faz 4 — AI Gateway

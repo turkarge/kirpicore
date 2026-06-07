@@ -156,6 +156,12 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Config olmayan external adapter `external_adapter_not_configured` sonucu verir.
    - Runtime bağlanmamış adapter `adapter_runtime_not_implemented` sonucu verir.
 
+15. **Controlled EXPLAIN Gate** - Tamamlandı
+   - SQL Preview içine kontrollü EXPLAIN kapısı eklendi.
+   - Varsayılan durumda `AI_SQL_EXPLAIN_ENABLED=false` olduğu için EXPLAIN çalıştırılmaz.
+   - Guard bloklarsa EXPLAIN de `guard_blocked` nedeni ile bloklanır.
+   - EXPLAIN açılsa bile normal SQL execution kapalı kalır ve gerçek veri okunmaz.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:
@@ -185,4 +191,4 @@ Doğrulanan son durum:
 - Mail templates export
 - Backup/audit operasyon raporları
 - Gerçek model adapter ile SQL candidate üretimi
-- SQL Preview sonrası kontrollü `EXPLAIN` tasarımı
+- Gerçek model adapter runtime bağlama tasarımı

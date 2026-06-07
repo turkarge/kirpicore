@@ -29,6 +29,7 @@ $preview = $sql !== ''
     ])
     : null;
 $guard = is_array($preview) ? ($preview['guard'] ?? null) : null;
+$explain = is_array($preview) ? (array) ($preview['explain'] ?? []) : [];
 
 $renderBadges = static function (array $items, string $class = 'bg-secondary-lt'): void {
     foreach ($items as $item) {
@@ -126,7 +127,9 @@ $renderBadges = static function (array $items, string $class = 'bg-secondary-lt'
                     <div class="card">
                         <div class="card-body">
                             <div class="subheader"><?php echo e(ai_lang('explain')); ?></div>
-                            <span class="badge bg-red-lt"><?php echo e(ai_lang('disabled')); ?></span>
+                            <span class="badge <?php echo (($explain['status'] ?? '') === 'success') ? 'bg-green-lt' : 'bg-red-lt'; ?>">
+                                <?php echo e((string) (($explain['status'] ?? '') === 'success' ? ai_lang('allowed') : ai_lang('disabled'))); ?>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -153,6 +156,56 @@ $renderBadges = static function (array $items, string $class = 'bg-secondary-lt'
                     <?php foreach ((array) ($preview['notes'] ?? []) as $note): ?>
                         <div class="list-group-item"><?php echo e((string) $note); ?></div>
                     <?php endforeach; ?>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h3 class="card-title"><?php echo e(ai_lang('explain_gate')); ?></h3>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="text-secondary small"><?php echo e(ai_lang('status')); ?></div>
+                            <span class="badge <?php echo (($explain['status'] ?? '') === 'success') ? 'bg-green-lt' : 'bg-red-lt'; ?>">
+                                <?php echo e((string) ($explain['status'] ?? 'blocked')); ?>
+                            </span>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-secondary small"><?php echo e(ai_lang('explain')); ?></div>
+                            <?php echo !empty($explain['enabled']) ? e(ai_lang('enabled')) : e(ai_lang('disabled')); ?>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-secondary small"><?php echo e(ai_lang('reason')); ?></div>
+                            <code><?php echo e((string) ($explain['reason'] ?? '-')); ?></code>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-secondary small"><?php echo e(ai_lang('data_read')); ?></div>
+                            <span class="badge bg-green-lt"><?php echo e(ai_lang('no')); ?></span>
+                        </div>
+                    </div>
+                    <?php if (!empty($explain['rows'])): ?>
+                        <div class="table-responsive mt-3">
+                            <table class="table table-vcenter card-table table-striped mb-0">
+                                <thead>
+                                <tr>
+                                    <?php foreach (array_keys((array) ($explain['rows'][0] ?? [])) as $column): ?>
+                                        <th><?php echo e((string) $column); ?></th>
+                                    <?php endforeach; ?>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <?php foreach ((array) $explain['rows'] as $row): ?>
+                                    <tr>
+                                        <?php foreach ((array) $row as $value): ?>
+                                            <td><?php echo e((string) $value); ?></td>
+                                        <?php endforeach; ?>
+                                    </tr>
+                                <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         <?php endif; ?>

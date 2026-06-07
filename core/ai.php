@@ -1997,12 +1997,19 @@ function kirpi_ai_preview_sql(string $sql, array $context = []): array
         $notes[] = 'Guard kontrolü blokladı; SQL üretim akışına geri dönülmelidir.';
     }
 
+    $explain = kirpi_ai_explain_sql($sql, [
+        'allowed_tables' => $allowedTables,
+        'guard' => $guard,
+        'audit' => false,
+    ]);
+
     $preview = [
         'status' => 'success',
         'decision' => $decision,
         'executable' => false,
         'execution_enabled' => false,
-        'explain_enabled' => false,
+        'explain_enabled' => !empty($explain['enabled']),
+        'explain' => $explain,
         'planner_question' => $plannerQuestion,
         'allowed_tables' => $allowedTables,
         'allowed_fields' => $allowedFields,
@@ -2025,11 +2032,87 @@ function kirpi_ai_preview_sql(string $sql, array $context = []): array
             'planner_question' => $plannerQuestion !== '' ? $plannerQuestion : null,
             'sql_length' => strlen($sql),
             'execution_enabled' => false,
-            'explain_enabled' => false,
+            'explain_enabled' => !empty($explain['enabled']),
+            'explain_status' => $explain['status'] ?? null,
+            'explain_reason' => $explain['reason'] ?? null,
         ], null, 'sql_preview', null);
     }
 
     return $preview;
+}
+
+function kirpi_ai_explain_sql(string $sql, array $context = []): array
+{
+    $sql = trim($sql);
+    $enabled = env_bool('AI_SQL_EXPLAIN_ENABLED', false);
+    $guard = $context['guard'] ?? null;
+    if (!is_array($guard)) {
+        $guard = kirpi_ai_sql_guard_readonly($sql, [
+            'allowed_tables' => (array) ($context['allowed_tables'] ?? []),
+            'audit' => false,
+        ]);
+    }
+
+    $base = [
+        'enabled' => $enabled,
+        'status' => 'blocked',
+        'reason' => null,
+        'rows' => [],
+        'execution_enabled' => false,
+        'data_read' => false,
+    ];
+
+    if ($sql === '') {
+        $base['reason'] = 'empty_sql';
+        return $base;
+    }
+
+    if (empty($guard['allowed'])) {
+        $base['reason'] = 'guard_blocked';
+        $base['guard_reasons'] = (array) ($guard['reasons'] ?? []);
+        return $base;
+    }
+
+    if (!$enabled) {
+        $base['reason'] = 'explain_disabled';
+        return $base;
+    }
+
+    try {
+        $stmt = db()->query('EXPLAIN ' . $sql);
+        $rows = $stmt !== false ? ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: []) : [];
+        $base['status'] = 'success';
+        $base['reason'] = null;
+        $base['rows'] = $rows;
+
+        if (!empty($context['audit'])) {
+            kirpi_ai_log_operation('sql_explain_check', 'success', [
+                'row_count' => count($rows),
+                'tables' => (array) ($guard['tables'] ?? []),
+                'sql_length' => strlen($sql),
+                'execution_enabled' => false,
+                'data_read' => false,
+            ], null, 'sql_explain', null);
+        }
+
+        return $base;
+    } catch (Throwable $e) {
+        error_log('ai sql explain error: ' . $e->getMessage());
+        $base['status'] = 'blocked';
+        $base['reason'] = 'explain_failed';
+
+        if (!empty($context['audit'])) {
+            kirpi_ai_log_operation('sql_explain_check', 'blocked', [
+                'reason' => 'explain_failed',
+                'tables' => (array) ($guard['tables'] ?? []),
+                'sql_length' => strlen($sql),
+                'execution_enabled' => false,
+                'data_read' => false,
+            ], null, 'sql_explain', null);
+        }
+
+        return $base;
+    }
 }
 
 function kirpi_ai_build_sql_candidate(array $input): array
