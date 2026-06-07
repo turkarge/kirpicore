@@ -74,29 +74,14 @@ $statusBadge = static fn (bool $ready): string => $ready ? 'bg-green-lt' : 'bg-r
             </div>
             <div class="col-auto ms-auto d-print-none">
                 <div class="btn-list">
+                    <?php if ($canManageSchema): ?>
+                        <a href="<?php echo base_url('ai/query-flow'); ?>" class="btn btn-primary">
+                            <?php echo e(ai_lang('query_flow')); ?>
+                        </a>
+                    <?php endif; ?>
                     <a href="<?php echo base_url('ai/schema'); ?>" class="btn btn-outline-primary">
                         <?php echo e(ai_lang('schema_discovery')); ?>
                     </a>
-                    <a href="<?php echo base_url('ai/planner'); ?>" class="btn btn-outline-secondary">
-                        <?php echo e(ai_lang('query_planner')); ?>
-                    </a>
-                    <?php if ($canManageSchema): ?>
-                        <a href="<?php echo base_url('ai/query-flow'); ?>" class="btn btn-outline-primary">
-                            <?php echo e(ai_lang('query_flow')); ?>
-                        </a>
-                        <a href="<?php echo base_url('ai/quality'); ?>" class="btn btn-outline-secondary">
-                            <?php echo e(ai_lang('schema_quality')); ?>
-                        </a>
-                        <a href="<?php echo base_url('ai/sql-guard'); ?>" class="btn btn-outline-secondary">
-                            <?php echo e(ai_lang('sql_guard')); ?>
-                        </a>
-                        <a href="<?php echo base_url('ai/sql-preview'); ?>" class="btn btn-outline-secondary">
-                            <?php echo e(ai_lang('sql_preview')); ?>
-                        </a>
-                        <a href="<?php echo base_url('ai/sql-candidate'); ?>" class="btn btn-outline-secondary">
-                            <?php echo e(ai_lang('sql_candidate')); ?>
-                        </a>
-                    <?php endif; ?>
                     <?php if ($canViewAudit): ?>
                         <a href="<?php echo base_url('ai/audit'); ?>" class="btn btn-outline-secondary">
                             <?php echo e(ai_lang('view_audit')); ?>
@@ -138,27 +123,9 @@ $statusBadge = static fn (bool $ready): string => $ready ? 'bg-green-lt' : 'bg-r
             <div class="col-lg-8">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title"><?php echo e(ai_lang('quick_actions')); ?></h3>
+                        <h3 class="card-title"><?php echo e(ai_lang('primary_workflows')); ?></h3>
                     </div>
                     <div class="list-group list-group-flush">
-                        <a href="<?php echo base_url('ai/schema'); ?>" class="list-group-item list-group-item-action">
-                            <div class="row align-items-center">
-                                <div class="col-auto"><i class="ti ti-database-search"></i></div>
-                                <div class="col">
-                                    <div><?php echo e(ai_lang('schema_discovery')); ?></div>
-                                    <div class="text-secondary small"><?php echo e(ai_lang('schema_discovery_detail')); ?></div>
-                                </div>
-                            </div>
-                        </a>
-                        <a href="<?php echo base_url('ai/planner'); ?>" class="list-group-item list-group-item-action">
-                            <div class="row align-items-center">
-                                <div class="col-auto"><i class="ti ti-route-square"></i></div>
-                                <div class="col">
-                                    <div><?php echo e(ai_lang('query_planner')); ?></div>
-                                    <div class="text-secondary small"><?php echo e(ai_lang('query_planner_detail')); ?></div>
-                                </div>
-                            </div>
-                        </a>
                         <?php if ($canManageSchema): ?>
                             <a href="<?php echo base_url('ai/query-flow'); ?>" class="list-group-item list-group-item-action">
                                 <div class="row align-items-center">
@@ -169,43 +136,16 @@ $statusBadge = static fn (bool $ready): string => $ready ? 'bg-green-lt' : 'bg-r
                                     </div>
                                 </div>
                             </a>
-                            <a href="<?php echo base_url('ai/quality'); ?>" class="list-group-item list-group-item-action">
-                                <div class="row align-items-center">
-                                    <div class="col-auto"><i class="ti ti-shield-check"></i></div>
-                                    <div class="col">
-                                        <div><?php echo e(ai_lang('schema_quality')); ?></div>
-                                        <div class="text-secondary small"><?php echo e(ai_lang('schema_quality_detail')); ?></div>
-                                    </div>
-                                </div>
-                            </a>
-                            <a href="<?php echo base_url('ai/sql-guard'); ?>" class="list-group-item list-group-item-action">
-                                <div class="row align-items-center">
-                                    <div class="col-auto"><i class="ti ti-shield-lock"></i></div>
-                                    <div class="col">
-                                        <div><?php echo e(ai_lang('sql_guard')); ?></div>
-                                        <div class="text-secondary small"><?php echo e(ai_lang('sql_guard_detail')); ?></div>
-                                    </div>
-                                </div>
-                            </a>
-                            <a href="<?php echo base_url('ai/sql-preview'); ?>" class="list-group-item list-group-item-action">
-                                <div class="row align-items-center">
-                                    <div class="col-auto"><i class="ti ti-file-search"></i></div>
-                                    <div class="col">
-                                        <div><?php echo e(ai_lang('sql_preview')); ?></div>
-                                        <div class="text-secondary small"><?php echo e(ai_lang('sql_preview_detail')); ?></div>
-                                    </div>
-                                </div>
-                            </a>
-                            <a href="<?php echo base_url('ai/sql-candidate'); ?>" class="list-group-item list-group-item-action">
-                                <div class="row align-items-center">
-                                    <div class="col-auto"><i class="ti ti-file-pencil"></i></div>
-                                    <div class="col">
-                                        <div><?php echo e(ai_lang('sql_candidate')); ?></div>
-                                        <div class="text-secondary small"><?php echo e(ai_lang('sql_candidate_detail')); ?></div>
-                                    </div>
-                                </div>
-                            </a>
                         <?php endif; ?>
+                        <a href="<?php echo base_url('ai/schema'); ?>" class="list-group-item list-group-item-action">
+                            <div class="row align-items-center">
+                                <div class="col-auto"><i class="ti ti-database-search"></i></div>
+                                <div class="col">
+                                    <div><?php echo e(ai_lang('schema_discovery')); ?></div>
+                                    <div class="text-secondary small"><?php echo e(ai_lang('schema_discovery_detail')); ?></div>
+                                </div>
+                            </div>
+                        </a>
                         <?php if ($canViewAudit): ?>
                             <a href="<?php echo base_url('ai/audit'); ?>" class="list-group-item list-group-item-action">
                                 <div class="row align-items-center">
@@ -219,6 +159,61 @@ $statusBadge = static fn (bool $ready): string => $ready ? 'bg-green-lt' : 'bg-r
                         <?php endif; ?>
                     </div>
                 </div>
+
+                <?php if ($canManageSchema): ?>
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h3 class="card-title"><?php echo e(ai_lang('technical_tools')); ?></h3>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            <a href="<?php echo base_url('ai/planner'); ?>" class="list-group-item list-group-item-action">
+                                <div class="row align-items-center">
+                                    <div class="col-auto"><i class="ti ti-route-square"></i></div>
+                                    <div class="col">
+                                        <div><?php echo e(ai_lang('query_planner')); ?></div>
+                                        <div class="text-secondary small"><?php echo e(ai_lang('query_planner_detail')); ?></div>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="<?php echo base_url('ai/quality'); ?>" class="list-group-item list-group-item-action">
+                                <div class="row align-items-center">
+                                    <div class="col-auto"><i class="ti ti-shield-check"></i></div>
+                                    <div class="col">
+                                        <div><?php echo e(ai_lang('schema_quality')); ?></div>
+                                        <div class="text-secondary small"><?php echo e(ai_lang('schema_quality_detail')); ?></div>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="<?php echo base_url('ai/sql-candidate'); ?>" class="list-group-item list-group-item-action">
+                                <div class="row align-items-center">
+                                    <div class="col-auto"><i class="ti ti-file-pencil"></i></div>
+                                    <div class="col">
+                                        <div><?php echo e(ai_lang('sql_candidate')); ?></div>
+                                        <div class="text-secondary small"><?php echo e(ai_lang('sql_candidate_detail')); ?></div>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="<?php echo base_url('ai/sql-preview'); ?>" class="list-group-item list-group-item-action">
+                                <div class="row align-items-center">
+                                    <div class="col-auto"><i class="ti ti-file-search"></i></div>
+                                    <div class="col">
+                                        <div><?php echo e(ai_lang('sql_preview')); ?></div>
+                                        <div class="text-secondary small"><?php echo e(ai_lang('sql_preview_detail')); ?></div>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="<?php echo base_url('ai/sql-guard'); ?>" class="list-group-item list-group-item-action">
+                                <div class="row align-items-center">
+                                    <div class="col-auto"><i class="ti ti-shield-lock"></i></div>
+                                    <div class="col">
+                                        <div><?php echo e(ai_lang('sql_guard')); ?></div>
+                                        <div class="text-secondary small"><?php echo e(ai_lang('sql_guard_detail')); ?></div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <div class="col-lg-4">

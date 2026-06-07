@@ -168,6 +168,11 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Mock/gateway üzerinden candidate üretimi ve preview sonucu aynı akışta görünür hale getirildi.
    - Audit zinciri görünürlüğü eklendi.
 
+17. **Kirpi Intelligence menü sadeleştirme** - Tamamlandı
+   - Yönetim menüsünde yalnızca ana girişler bırakıldı: Dashboard, Query Flow, Schema Discovery ve Audit Log.
+   - Query Planner, Schema Quality, SQL Guard, SQL Preview ve SQL Candidate teknik araç olarak Dashboard altında korundu.
+   - Route'lar kaldırılmadı; teknik ekranlar doğrudan bağlantı ve dashboard üzerinden erişilebilir kaldı.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:

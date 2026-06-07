@@ -689,6 +689,25 @@ Bu ekran:
 
 Query Flow, ayrı teknik ekranları kaldırmaz. Teknik ekranlar hata ayıklama ve parça parça doğrulama için korunur; Query Flow ise ana güvenli kullanım yüzüdür.
 
+## Menü Sadeleştirme Standardı
+
+Kirpi Intelligence yönetim menüsünde yalnızca ana kullanım girişleri gösterilir:
+
+* Dashboard
+* Query Flow
+* Schema Discovery
+* Audit Log
+
+Teknik ekranlar menüde gösterilmez, ancak route olarak korunur ve Dashboard içindeki Teknik Araçlar bölümünden erişilir:
+
+* Query Planner
+* Schema Quality
+* SQL Candidate
+* SQL Preview
+* SQL Guard
+
+Bu ayrım, günlük kullanımda menü karmaşasını azaltır ve güvenlik zincirinin parçalarını gerektiğinde erişilebilir tutar.
+
 ---
 
 # Faz 4 — AI Gateway

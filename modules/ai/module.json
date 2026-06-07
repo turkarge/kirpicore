@@ -33,16 +33,6 @@
             "weight": 20
         },
         {
-            "title": "Query Planner",
-            "title_key": "query_planner",
-            "icon": "ti ti-route-square",
-            "url": "ai/planner",
-            "permission": "ai.view",
-            "placement": "management",
-            "group": "intelligence",
-            "weight": 25
-        },
-        {
             "title": "Query Flow",
             "title_key": "query_flow",
             "icon": "ti ti-git-branch",
@@ -50,47 +40,7 @@
             "permission": "ai.schema.manage",
             "placement": "management",
             "group": "intelligence",
-            "weight": 26
-        },
-        {
-            "title": "Schema Quality",
-            "title_key": "schema_quality",
-            "icon": "ti ti-shield-check",
-            "url": "ai/quality",
-            "permission": "ai.schema.manage",
-            "placement": "management",
-            "group": "intelligence",
-            "weight": 30
-        },
-        {
-            "title": "SQL Guard",
-            "title_key": "sql_guard",
-            "icon": "ti ti-shield-lock",
-            "url": "ai/sql-guard",
-            "permission": "ai.schema.manage",
-            "placement": "management",
-            "group": "intelligence",
-            "weight": 35
-        },
-        {
-            "title": "SQL Preview",
-            "title_key": "sql_preview",
-            "icon": "ti ti-file-search",
-            "url": "ai/sql-preview",
-            "permission": "ai.schema.manage",
-            "placement": "management",
-            "group": "intelligence",
-            "weight": 36
-        },
-        {
-            "title": "SQL Candidate",
-            "title_key": "sql_candidate",
-            "icon": "ti ti-file-pencil",
-            "url": "ai/sql-candidate",
-            "permission": "ai.schema.manage",
-            "placement": "management",
-            "group": "intelligence",
-            "weight": 37
+            "weight": 25
         },
         {
             "title": "Audit Log",
