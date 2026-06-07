@@ -57,7 +57,12 @@ if ($tableReady) {
 
         $stmt = db()->prepare("
             SELECT d.id, d.document_type, d.original_name, d.mime_type, d.file_size, d.created_at, u.name AS uploaded_by_name,
-                   COUNT(dl.id) AS link_count
+                   COUNT(dl.id) AS link_count,
+                   GROUP_CONCAT(
+                       DISTINCT CONCAT(dl.entity_type, '#', dl.entity_id, ' (', dl.relation_type, ')')
+                       ORDER BY dl.entity_type ASC, dl.entity_id ASC
+                       SEPARATOR ', '
+                   ) AS entity_links
             FROM documents d
             LEFT JOIN users u ON u.id = d.uploaded_by_user_id
             LEFT JOIN document_links dl ON dl.document_id = d.id
@@ -228,6 +233,7 @@ $xlsExportUrl = base_url('documents/actions/export?' . http_build_query($filterP
                             <th><?php echo e(documents_lang('original_name')); ?></th>
                             <th><?php echo e(documents_lang('mime_type')); ?></th>
                             <th><?php echo e(documents_lang('file_size')); ?></th>
+                            <th><?php echo e(documents_lang('entity_links')); ?></th>
                             <th><?php echo e(documents_lang('uploaded_by')); ?></th>
                             <th><?php echo e(documents_lang('created_at')); ?></th>
                             <th><?php echo e(documents_lang('actions')); ?></th>
@@ -236,7 +242,7 @@ $xlsExportUrl = base_url('documents/actions/export?' . http_build_query($filterP
                         <tbody>
                         <?php if (empty($documents)): ?>
                             <tr>
-                                <td colspan="7" class="text-secondary"><?php echo e(documents_lang('no_records')); ?></td>
+                                <td colspan="8" class="text-secondary"><?php echo e(documents_lang('no_records')); ?></td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($documents as $document): ?>
@@ -251,6 +257,7 @@ $xlsExportUrl = base_url('documents/actions/export?' . http_build_query($filterP
                                     </td>
                                     <td><code><?php echo e((string) ($document['mime_type'] ?? '')); ?></code></td>
                                     <td><?php echo e(documents_format_size((int) ($document['file_size'] ?? 0))); ?></td>
+                                    <td><?php echo e((string) ($document['entity_links'] ?? '-')); ?></td>
                                     <td><?php echo e((string) ($document['uploaded_by_name'] ?? '-')); ?></td>
                                     <td><?php echo e(format_datetime((string) ($document['created_at'] ?? ''))); ?></td>
                                     <td>

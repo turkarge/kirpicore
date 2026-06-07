@@ -40,6 +40,7 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
 - Core Documents Registry eklendi.
 - Template ve Documents modülleri Content menü grubu altına alındı.
 - Standart modüller yeni template/document altyapısına uyumlu hale getirilmeye başlandı.
+- Documents listesi ve export çıktıları entity bağlantı özetini gösterir hale getirildi.
 
 ### Notifications
 

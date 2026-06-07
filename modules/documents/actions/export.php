@@ -51,7 +51,12 @@ $stmt = db()->prepare("
         d.file_size,
         d.created_at,
         u.name AS uploaded_by_name,
-        COUNT(dl.id) AS link_count
+        COUNT(dl.id) AS link_count,
+        GROUP_CONCAT(
+            DISTINCT CONCAT(dl.entity_type, '#', dl.entity_id, ' (', dl.relation_type, ')')
+            ORDER BY dl.entity_type ASC, dl.entity_id ASC
+            SEPARATOR ', '
+        ) AS entity_links
     FROM documents d
     LEFT JOIN users u ON u.id = d.uploaded_by_user_id
     LEFT JOIN document_links dl ON dl.document_id = d.id
@@ -73,6 +78,7 @@ while ($document = $stmt->fetch(PDO::FETCH_ASSOC)) {
         documents_format_size((int) ($document['file_size'] ?? 0)),
         (string) ($document['uploaded_by_name'] ?? ''),
         (int) ($document['link_count'] ?? 0),
+        (string) ($document['entity_links'] ?? ''),
         kirpi_format_datetime((string) ($document['created_at'] ?? '')),
     ];
 }
@@ -86,5 +92,6 @@ kirpi_export_response($format, 'documents-' . date('Ymd-His'), [
     documents_lang('file_size'),
     documents_lang('uploaded_by'),
     'Link',
+    documents_lang('entity_links'),
     documents_lang('created_at'),
 ], $rows);
