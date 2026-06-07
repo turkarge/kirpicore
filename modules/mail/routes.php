@@ -43,4 +43,11 @@ return [
         'auth' => true,
         'method' => 'POST',
     ],
+    'mail/actions/templates-export' => [
+        'file' => 'modules/mail/actions/templates_export.php',
+        'layout' => false,
+        'permission' => 'mail.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
 ];

@@ -60,12 +60,14 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
 - Export butonları gerçek link olarak çalışır; JS varsa mevcut filtreler URL'e eklenir.
 - AI schema discovery çıktısı JSON/CSV/XLS formatlarında export edilebilir hale getirildi.
 - AI schema kalite kontrol çıktısı JSON/CSV/XLS formatlarında export edilebilir hale getirildi.
+- Mail şablonları listesi CSV/XLS export standardına bağlandı.
 - Aşağıdaki modüllerde server-side export tamamlandı:
   - `notifications`
   - `documents`
   - `audit`
   - `users`
   - `roles`
+  - `mail`
 - Roles tarafında ek exportlar:
   - Permission Catalog
   - Role-Permission Matrix
@@ -201,7 +203,7 @@ Doğrulanan son durum:
 - Template export
 - Documents filtre/export iyileştirmesi
 - Settings/Modules export
-- Mail templates export
+- Mail templates export - Tamamlandı
 - Backup/audit operasyon raporları
 - Gerçek model adapter ile SQL candidate üretimi
 - Gerçek model adapter runtime bağlama tasarımı

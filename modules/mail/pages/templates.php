@@ -7,22 +7,51 @@ require_once BASE_PATH . '/modules/mail/language.php';
 
 $templates = [];
 $tableReady = kirpi_mail_templates_table_ready();
+$search = trim((string) ($_GET['search'] ?? ''));
+$statusFilter = trim((string) ($_GET['status'] ?? ''));
 
 if ($tableReady) {
     kirpi_mail_sync_system_templates();
 
     try {
-        $stmt = db()->query("
+        $where = [];
+        $params = [];
+
+        if ($search !== '') {
+            $where[] = '(template_key LIKE :search OR name LIKE :search OR subject LIKE :search OR html_body LIKE :search)';
+            $params[':search'] = '%' . $search . '%';
+        }
+
+        if ($statusFilter !== '' && in_array($statusFilter, ['0', '1'], true)) {
+            $where[] = 'is_active = :is_active';
+            $params[':is_active'] = (int) $statusFilter;
+        }
+
+        $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+
+        $stmt = db()->prepare("
             SELECT id, template_key, name, subject, html_body, is_active, is_system, updated_at
             FROM mail_templates
+            {$whereSql}
             ORDER BY is_system DESC, template_key ASC
         ");
+        $stmt->execute($params);
         $templates = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     } catch (Throwable $e) {
         error_log('mail templates page error: ' . $e->getMessage());
         $templates = [];
     }
 }
+
+$filterParams = [];
+if ($search !== '') {
+    $filterParams['search'] = $search;
+}
+if ($statusFilter !== '' && in_array($statusFilter, ['0', '1'], true)) {
+    $filterParams['status'] = $statusFilter;
+}
+$csvExportUrl = base_url('mail/actions/templates-export?' . http_build_query($filterParams + ['format' => 'csv']));
+$xlsExportUrl = base_url('mail/actions/templates-export?' . http_build_query($filterParams + ['format' => 'xls']));
 ?>
 
 <div class="page-header d-print-none">
@@ -48,6 +77,48 @@ if ($tableReady) {
                 <?php echo e(mail_lang('template_tables_missing')); ?>
             </div>
         <?php else: ?>
+            <div class="card mb-4">
+                <form method="get" action="">
+                    <div class="card-header">
+                        <h3 class="card-title"><?php echo e(mail_lang('filters')); ?></h3>
+                        <div class="card-actions">
+                            <div class="btn-list">
+                                <a href="<?php echo e($csvExportUrl); ?>" class="btn btn-outline-secondary">
+                                    <i class="ti ti-file-type-csv"></i>
+                                    <?php echo e(mail_lang('export_csv')); ?>
+                                </a>
+                                <a href="<?php echo e($xlsExportUrl); ?>" class="btn btn-outline-secondary">
+                                    <i class="ti ti-file-spreadsheet"></i>
+                                    <?php echo e(mail_lang('export_excel')); ?>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-12 col-lg-6">
+                                <label class="form-label"><?php echo e(mail_lang('search')); ?></label>
+                                <input type="text" name="search" class="form-control" value="<?php echo e($search); ?>" placeholder="<?php echo e(mail_lang('template_search_placeholder')); ?>">
+                            </div>
+                            <div class="col-12 col-lg-3">
+                                <label class="form-label"><?php echo e(mail_lang('status')); ?></label>
+                                <select name="status" class="form-select">
+                                    <option value=""><?php echo e(mail_lang('all_statuses')); ?></option>
+                                    <option value="1" <?php echo $statusFilter === '1' ? 'selected' : ''; ?>><?php echo e(mail_lang('is_active')); ?></option>
+                                    <option value="0" <?php echo $statusFilter === '0' ? 'selected' : ''; ?>><?php echo e(mail_lang('inactive')); ?></option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-lg-3">
+                                <div class="btn-list">
+                                    <button type="submit" class="btn btn-primary"><?php echo e(mail_lang('filter')); ?></button>
+                                    <a href="<?php echo base_url('mail/templates'); ?>" class="btn btn-outline-secondary"><?php echo e(mail_lang('clear')); ?></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
             <div class="card mb-4">
                 <form action="<?php echo base_url('mail/actions/template-create'); ?>" method="post" data-ajax="true">
                     <div class="card-header">

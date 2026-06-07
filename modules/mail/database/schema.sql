@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS mail_templates (
 
 INSERT IGNORE INTO mail_templates (template_key, name, subject, html_body, is_active, is_system)
 VALUES
-('auth.password_reset', 'Auth - Password Reset', '{{app_name}} - Sifre Sifirlama', '<p>Merhaba {{user_name}},</p><p>Sifrenizi sifirlamak icin asagidaki baglantiyi kullanin:</p><p><a href="{{reset_link}}">{{reset_link}}</a></p><p>Bu baglanti {{expires_minutes}} dakika gecerlidir.</p>', 1, 1),
-('queue.test_mail', 'Queue - Test Mail', '{{app_name}} Queue Test', '<p>Merhaba {{user_name}},</p><p>Bu e-posta kuyruk (queue) sistemi uzerinden gonderildi.</p><p>Tarih: {{sent_at}}</p>', 1, 1),
+('auth.password_reset', 'Auth - Password Reset', '{{app_name}} - Şifre Sıfırlama', '<p>Merhaba {{user_name}},</p><p>Şifrenizi sıfırlamak için aşağıdaki bağlantıyı kullanın:</p><p><a href="{{reset_link}}">{{reset_link}}</a></p><p>Bu bağlantı {{expires_minutes}} dakika geçerlidir.</p>', 1, 1),
+('queue.test_mail', 'Queue - Test Mail', '{{app_name}} Queue Test', '<p>Merhaba {{user_name}},</p><p>Bu e-posta kuyruk (queue) sistemi üzerinden gönderildi.</p><p>Tarih: {{sent_at}}</p>', 1, 1),
 ('mail.test_manual', 'Mail - Manual Test', '{{app_name}} Test Maili', '<p>{{{message_html}}}</p>', 1, 1),
-('users.session_dropped', 'Users - Session Dropped', '{{app_name}} - Oturum Sonlandirildi', '<p>Merhaba {{user_name}},</p><p>Oturumlariniz bir yonetici tarafindan sonlandirildi.</p><p>Lutfen yeniden giris yapin.</p>', 1, 1),
-('users.lock_key_reset', 'Users - Lock Key Reset', '{{app_name}} - Kilit Key Sifirlandi', '<p>Merhaba {{user_name}},</p><p>Oturum kilitleme key bilginiz yonetici tarafindan sifirlandi.</p><p>Profil ekranindan yeni key olusturabilirsiniz.</p>', 1, 1);
+('users.session_dropped', 'Users - Session Dropped', '{{app_name}} - Oturum Sonlandırıldı', '<p>Merhaba {{user_name}},</p><p>Oturumlarınız bir yönetici tarafından sonlandırıldı.</p><p>Lütfen yeniden giriş yapın.</p>', 1, 1),
+('users.lock_key_reset', 'Users - Lock Key Reset', '{{app_name}} - Kilit Key Sıfırlandı', '<p>Merhaba {{user_name}},</p><p>Oturum kilitleme key bilginiz yönetici tarafından sıfırlandı.</p><p>Profil ekranından yeni key oluşturabilirsiniz.</p>', 1, 1);

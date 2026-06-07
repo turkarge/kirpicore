@@ -413,7 +413,7 @@ function kirpi_mail_default_templates(): array
     return [
         'auth.password_reset' => [
             'name' => 'Auth - Password Reset',
-            'subject' => '{{app_name}} - Sifre Sifirlama',
+            'subject' => '{{app_name}} - Şifre Sıfırlama',
             'html_body' => '<p>Merhaba {{user_name}},</p><p>Şifrenizi sıfırlamak için aşağıdaki bağlantıyı kullanın:</p><p><a href="{{reset_link}}">{{reset_link}}</a></p><p>Bu bağlantı {{expires_minutes}} dakika geçerlidir.</p>',
             'is_active' => 1,
             'is_system' => 1,
@@ -421,7 +421,7 @@ function kirpi_mail_default_templates(): array
         'queue.test_mail' => [
             'name' => 'Queue - Test Mail',
             'subject' => '{{app_name}} Queue Test',
-            'html_body' => '<p>Merhaba {{user_name}},</p><p>Bu e-posta kuyruk (queue) sistemi uzerinden gonderildi.</p><p>Tarih: {{sent_at}}</p>',
+            'html_body' => '<p>Merhaba {{user_name}},</p><p>Bu e-posta kuyruk (queue) sistemi üzerinden gönderildi.</p><p>Tarih: {{sent_at}}</p>',
             'is_active' => 1,
             'is_system' => 1,
         ],
@@ -434,14 +434,14 @@ function kirpi_mail_default_templates(): array
         ],
         'users.session_dropped' => [
             'name' => 'Users - Session Dropped',
-            'subject' => '{{app_name}} - Oturum Sonlandirildi',
-            'html_body' => '<p>Merhaba {{user_name}},</p><p>Oturumlariniz bir yonetici tarafindan sonlandirildi.</p><p>Lutfen yeniden giris yapin.</p>',
+            'subject' => '{{app_name}} - Oturum Sonlandırıldı',
+            'html_body' => '<p>Merhaba {{user_name}},</p><p>Oturumlarınız bir yönetici tarafından sonlandırıldı.</p><p>Lütfen yeniden giriş yapın.</p>',
             'is_active' => 1,
             'is_system' => 1,
         ],
         'users.lock_key_reset' => [
             'name' => 'Users - Lock Key Reset',
-            'subject' => '{{app_name}} - Kilit Key Sifirlandi',
+            'subject' => '{{app_name}} - Kilit Key Sıfırlandı',
             'html_body' => '<p>Merhaba {{user_name}},</p><p>Oturum kilitleme key bilginiz yönetici tarafından sıfırlandı.</p><p>Profil ekranından yeni key oluşturabilirsiniz.</p>',
             'is_active' => 1,
             'is_system' => 1,
