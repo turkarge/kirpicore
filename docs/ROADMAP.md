@@ -180,6 +180,13 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Query Planner, Schema Quality, SQL Guard, SQL Preview ve SQL Candidate teknik araç olarak Dashboard altında korundu.
    - Route'lar kaldırılmadı; teknik ekranlar doğrudan bağlantı ve dashboard üzerinden erişilebilir kaldı.
 
+18. **SQL Generation Runtime Gate** - Tamamlandı
+   - SQL generation gateway, adapter tipi `sql_generation` olmayan kayıtları `adapter_type_not_supported` ile bloklar.
+   - External adapter secret kontrolü yalnız `api_key_env` veya `api_key_ref` referansları üzerinden yapılır; secret değerleri audit'e yazılmaz.
+   - Gerçek external runtime varsayılan olarak `AI_EXTERNAL_MODEL_RUNTIME_ENABLED=false` ile kapalıdır.
+   - Runtime kapalıyken sonuç `external_runtime_disabled` olarak audit zincirine yazılır.
+   - `openai-sql-placeholder` seed adapter kaydı eklendi; varsayılan olarak pasif kalır.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:
@@ -209,4 +216,5 @@ Doğrulanan son durum:
 - Mail templates export - Tamamlandı
 - Backup/audit operasyon raporları - Tamamlandı
 - Gerçek model adapter ile SQL candidate üretimi
-- Gerçek model adapter runtime bağlama tasarımı
+- Gerçek model adapter runtime bağlama tasarımı - Tamamlandı
+- Gerçek provider runtime implementasyonu

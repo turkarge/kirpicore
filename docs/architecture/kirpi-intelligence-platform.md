@@ -598,6 +598,7 @@ Gateway sorumlulukları:
 
 * Adapter kaydını bulmak
 * Adapter aktif mi kontrol etmek
+* SQL üretimi için adapter tipinin `sql_generation` olduğunu doğrulamak
 * External adapter config kontrolü yapmak
 * Mock adapter için güvenli mock üretimi çalıştırmak
 * Runtime bağlanmamış adapter'ları bloklamak
@@ -607,12 +608,38 @@ Güvenli blok durumları:
 
 * `adapter_not_found`
 * `adapter_disabled`
+* `adapter_type_not_supported`
 * `external_adapter_not_configured`
+* `external_runtime_disabled`
 * `adapter_runtime_not_implemented`
 
 Gateway hiçbir durumda SQL çalıştırmaz. Üretilen veya bloklanan her sonuç Preview/Guard zincirine bağlı kalır.
 
 External adapter gerçek modele bağlanmadan önce `config_json` içinde güvenli key referansı tanımlanmalıdır. Secret değerleri doğrudan audit veya prompt içine yazılmaz.
+
+External runtime kapısı varsayılan olarak kapalıdır:
+
+```text
+AI_EXTERNAL_MODEL_RUNTIME_ENABLED=false
+```
+
+Secret referansları:
+
+```json
+{
+  "api_key_env": "OPENAI_API_KEY"
+}
+```
+
+veya:
+
+```json
+{
+  "api_key_ref": "ai.openai.api_key"
+}
+```
+
+Runtime kapalıyken gateway `external_runtime_disabled` sonucu verir. Bu sayede gerçek provider implementasyonu eklenmeden önce adapter registry, secret referans politikası ve audit davranışı production ortamda güvenli kalır.
 
 ## Controlled EXPLAIN Gate
 

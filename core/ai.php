@@ -2187,6 +2187,53 @@ function kirpi_ai_build_sql_candidate(array $input): array
     return $candidate;
 }
 
+function kirpi_ai_blocked_sql_candidate(string $adapterKey, string $reason, array $details = []): array
+{
+    kirpi_ai_log_operation('sql_candidate_generate', 'blocked', array_merge([
+        'model_adapter' => $adapterKey,
+        'reason' => $reason,
+        'execution_enabled' => false,
+        'preview_required' => true,
+    ], $details), $adapterKey, 'sql_candidate', null);
+
+    return [
+        'status' => 'blocked',
+        'reason' => $reason,
+        'model_adapter' => $adapterKey,
+        'candidate_sql' => '',
+        'warnings' => [$reason],
+        'execution_enabled' => false,
+        'preview_required' => true,
+    ];
+}
+
+function kirpi_ai_adapter_secret_configured(array $adapter): bool
+{
+    $config = (array) ($adapter['config'] ?? []);
+    $apiKeyEnv = trim((string) ($config['api_key_env'] ?? ''));
+    if ($apiKeyEnv !== '' && trim((string) env($apiKeyEnv, '')) !== '') {
+        return true;
+    }
+
+    $apiKeyRef = trim((string) ($config['api_key_ref'] ?? ''));
+    if ($apiKeyRef !== '' && function_exists('kirpi_setting_get') && trim((string) kirpi_setting_get($apiKeyRef, '')) !== '') {
+        return true;
+    }
+
+    return false;
+}
+
+function kirpi_ai_adapter_runtime_enabled(array $adapter): bool
+{
+    $config = (array) ($adapter['config'] ?? []);
+
+    if (array_key_exists('runtime_enabled', $config)) {
+        return filter_var($config['runtime_enabled'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false;
+    }
+
+    return env_bool('AI_EXTERNAL_MODEL_RUNTIME_ENABLED', false);
+}
+
 function kirpi_ai_build_sql_generation_prompt(string $question, array $context = []): array
 {
     $question = trim($question);
@@ -2317,22 +2364,7 @@ function kirpi_ai_generate_sql_candidate(string $question, array $context = [], 
     $adapter = kirpi_ai_model_adapter($adapterKey);
 
     if ($adapter === null && $adapterKey !== 'mock-sql-generator') {
-        kirpi_ai_log_operation('sql_candidate_generate', 'blocked', [
-            'model_adapter' => $adapterKey,
-            'reason' => 'adapter_not_found',
-            'execution_enabled' => false,
-            'preview_required' => true,
-        ], $adapterKey, 'sql_candidate', null);
-
-        return [
-            'status' => 'blocked',
-            'reason' => 'adapter_not_found',
-            'model_adapter' => $adapterKey,
-            'candidate_sql' => '',
-            'warnings' => ['adapter_not_found'],
-            'execution_enabled' => false,
-            'preview_required' => true,
-        ];
+        return kirpi_ai_blocked_sql_candidate($adapterKey, 'adapter_not_found');
     }
 
     if ($adapterKey === 'mock-sql-generator' || (string) ($adapter['provider'] ?? '') === 'mock') {
@@ -2342,58 +2374,30 @@ function kirpi_ai_generate_sql_candidate(string $question, array $context = [], 
     }
 
     if ((int) ($adapter['is_enabled'] ?? 0) !== 1) {
-        kirpi_ai_log_operation('sql_candidate_generate', 'blocked', [
-            'model_adapter' => $adapterKey,
-            'reason' => 'adapter_disabled',
-            'execution_enabled' => false,
-            'preview_required' => true,
-        ], $adapterKey, 'sql_candidate', null);
-
-        return [
-            'status' => 'blocked',
-            'reason' => 'adapter_disabled',
-            'model_adapter' => $adapterKey,
-            'candidate_sql' => '',
-            'warnings' => ['adapter_disabled'],
-            'execution_enabled' => false,
-            'preview_required' => true,
-        ];
+        return kirpi_ai_blocked_sql_candidate($adapterKey, 'adapter_disabled');
     }
 
-    $config = (array) ($adapter['config'] ?? []);
-    if ((int) ($adapter['is_external'] ?? 0) === 1 && empty($config['api_key_ref']) && empty($config['api_key_env'])) {
-        kirpi_ai_log_operation('sql_candidate_generate', 'blocked', [
-            'model_adapter' => $adapterKey,
-            'reason' => 'external_adapter_not_configured',
-            'execution_enabled' => false,
-            'preview_required' => true,
-        ], $adapterKey, 'sql_candidate', null);
-
-        return [
-            'status' => 'blocked',
-            'reason' => 'external_adapter_not_configured',
-            'model_adapter' => $adapterKey,
-            'candidate_sql' => '',
-            'warnings' => ['external_adapter_not_configured'],
-            'execution_enabled' => false,
-            'preview_required' => true,
-        ];
+    if ((string) ($adapter['adapter_type'] ?? '') !== 'sql_generation') {
+        return kirpi_ai_blocked_sql_candidate($adapterKey, 'adapter_type_not_supported', [
+            'adapter_type' => (string) ($adapter['adapter_type'] ?? ''),
+            'required_adapter_type' => 'sql_generation',
+        ]);
     }
 
-    kirpi_ai_log_operation('sql_candidate_generate', 'blocked', [
-        'model_adapter' => $adapterKey,
-        'reason' => 'adapter_runtime_not_implemented',
-        'execution_enabled' => false,
-        'preview_required' => true,
-    ], $adapterKey, 'sql_candidate', null);
+    if ((int) ($adapter['is_external'] ?? 0) === 1 && !kirpi_ai_adapter_secret_configured($adapter)) {
+        return kirpi_ai_blocked_sql_candidate($adapterKey, 'external_adapter_not_configured', [
+            'secret_policy' => 'env_or_setting_reference_required',
+        ]);
+    }
 
-    return [
-        'status' => 'blocked',
-        'reason' => 'adapter_runtime_not_implemented',
-        'model_adapter' => $adapterKey,
-        'candidate_sql' => '',
-        'warnings' => ['adapter_runtime_not_implemented'],
-        'execution_enabled' => false,
-        'preview_required' => true,
-    ];
+    if (!kirpi_ai_adapter_runtime_enabled($adapter)) {
+        return kirpi_ai_blocked_sql_candidate($adapterKey, 'external_runtime_disabled', [
+            'runtime_flag' => 'AI_EXTERNAL_MODEL_RUNTIME_ENABLED',
+            'provider' => (string) ($adapter['provider'] ?? ''),
+        ]);
+    }
+
+    return kirpi_ai_blocked_sql_candidate($adapterKey, 'adapter_runtime_not_implemented', [
+        'provider' => (string) ($adapter['provider'] ?? ''),
+    ]);
 }

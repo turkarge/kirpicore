@@ -112,11 +112,13 @@ INSERT INTO ai_model_adapters (
     model_name,
     adapter_type,
     is_enabled,
-    is_external
+    is_external,
+    config_json
 ) VALUES
-    ('local-qwen-placeholder', 'qwen', 'qwen-local', 'chat', 0, 0),
-    ('openai-placeholder', 'openai', 'external-model', 'chat', 0, 1),
-    ('mock-sql-generator', 'mock', 'mock-sql-generator', 'sql_generation', 1, 0)
+    ('local-qwen-placeholder', 'qwen', 'qwen-local', 'chat', 0, 0, NULL),
+    ('openai-placeholder', 'openai', 'external-model', 'chat', 0, 1, JSON_OBJECT('api_key_env', 'OPENAI_API_KEY')),
+    ('openai-sql-placeholder', 'openai', 'external-sql-model', 'sql_generation', 0, 1, JSON_OBJECT('api_key_env', 'OPENAI_API_KEY')),
+    ('mock-sql-generator', 'mock', 'mock-sql-generator', 'sql_generation', 1, 0, NULL)
 ON DUPLICATE KEY UPDATE
     provider = VALUES(provider),
     model_name = VALUES(model_name),
