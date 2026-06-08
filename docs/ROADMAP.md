@@ -223,6 +223,11 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - `password`, `secret`, `token`, `key`, `cookie`, `session`, `dsn` gibi hassas anahtarlar maskelenir.
    - `AI_EXTERNAL_MODEL_RUNTIME_ENABLED` docker compose üzerinden app container'ına aktarılır hale getirildi.
 
+25. **Query Flow adapter seçimi sıkılaştırması** - Tamamlandı
+   - Query Flow ve SQL Candidate ekranları yalnız `sql_generation` tipindeki aktif adapter'ları listeler.
+   - Chat/genel amaçlı adapter'lar SQL üretim akışında seçilemez hale getirildi.
+   - Yanlış adapter URL ile gelirse ekran otomatik güvenli SQL generation adapter seçimine düşer.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:
@@ -261,4 +266,5 @@ Doğrulanan son durum:
 - Provider ayar yönetimi - Tamamlandı
 - Provider canlı test altyapısı - Tamamlandı
 - Env Reader izleme ekranı - Tamamlandı
+- Query Flow adapter seçimi sıkılaştırması - Tamamlandı
 - Gerçek provider canlı sağlayıcı doğrulaması

@@ -756,6 +756,24 @@ function kirpi_ai_model_adapters(): array
     }
 }
 
+function kirpi_ai_sql_generation_adapters(bool $enabledOnly = true): array
+{
+    $adapters = [];
+    foreach (kirpi_ai_model_adapters() as $adapter) {
+        if ((string) ($adapter['adapter_type'] ?? '') !== 'sql_generation') {
+            continue;
+        }
+
+        if ($enabledOnly && empty($adapter['is_enabled'])) {
+            continue;
+        }
+
+        $adapters[] = $adapter;
+    }
+
+    return $adapters;
+}
+
 function kirpi_ai_model_adapters_with_config(): array
 {
     if (!kirpi_ai_models_table_ready()) {

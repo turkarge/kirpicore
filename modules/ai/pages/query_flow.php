@@ -7,7 +7,7 @@ require_once BASE_PATH . '/modules/ai/language.php';
 
 $question = trim((string) ($_GET['question'] ?? ''));
 $limit = max(1, min(20, (int) ($_GET['limit'] ?? 5)));
-$modelAdapter = trim((string) ($_GET['model_adapter'] ?? 'mock-sql-generator'));
+$requestedModelAdapter = trim((string) ($_GET['model_adapter'] ?? 'mock-sql-generator'));
 $generateCandidate = (string) ($_GET['generate_candidate'] ?? '') === '1';
 $plan = $question !== '' ? kirpi_ai_build_query_plan($question, ['limit' => $limit]) : null;
 $allowedTables = is_array($plan) ? (array) ($plan['allowed_tables'] ?? []) : [];
@@ -16,6 +16,20 @@ $candidate = null;
 $preview = null;
 $guard = null;
 $explain = [];
+
+$adapters = kirpi_ai_sql_generation_adapters();
+$adapterOptions = [
+    'mock-sql-generator' => ai_lang('mock_sql_generator'),
+];
+foreach ($adapters as $adapter) {
+    $key = trim((string) ($adapter['adapter_key'] ?? ''));
+    if ($key !== '' && $key !== 'mock-sql-generator') {
+        $adapterOptions[$key] = $key . ' / ' . (string) ($adapter['model_name'] ?? '');
+    }
+}
+$modelAdapter = array_key_exists($requestedModelAdapter, $adapterOptions)
+    ? $requestedModelAdapter
+    : (string) array_key_first($adapterOptions);
 
 if ($generateCandidate && $question !== '' && !empty($allowedTables)) {
     $candidate = kirpi_ai_generate_sql_candidate($question, [
@@ -33,17 +47,6 @@ if ($generateCandidate && $question !== '' && !empty($allowedTables)) {
         ]);
         $guard = is_array($preview) ? ($preview['guard'] ?? null) : null;
         $explain = is_array($preview) ? (array) ($preview['explain'] ?? []) : [];
-    }
-}
-
-$adapters = kirpi_ai_model_adapters();
-$adapterOptions = [
-    'mock-sql-generator' => ai_lang('mock_sql_generator'),
-];
-foreach ($adapters as $adapter) {
-    $key = trim((string) ($adapter['adapter_key'] ?? ''));
-    if ($key !== '') {
-        $adapterOptions[$key] = $key . ' / ' . (string) ($adapter['model_name'] ?? '');
     }
 }
 

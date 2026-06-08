@@ -7,7 +7,7 @@ require_once BASE_PATH . '/modules/ai/language.php';
 
 $question = trim((string) ($_GET['question'] ?? ($_GET['planner_question'] ?? '')));
 $candidateSql = trim((string) ($_GET['candidate_sql'] ?? ($_GET['sql'] ?? '')));
-$modelAdapter = trim((string) ($_GET['model_adapter'] ?? 'manual'));
+$requestedModelAdapter = trim((string) ($_GET['model_adapter'] ?? 'manual'));
 $confidence = max(0, min(100, (int) ($_GET['confidence'] ?? 0)));
 $generateCandidate = (string) ($_GET['generate_candidate'] ?? '') === '1';
 $allowedTablesInput = trim((string) ($_GET['allowed_tables'] ?? ''));
@@ -24,6 +24,21 @@ $allowedTables = array_values(array_filter(array_map(
     preg_split('/[\s,]+/', $allowedTablesInput) ?: []
 )));
 $candidate = null;
+$adapters = kirpi_ai_sql_generation_adapters();
+$adapterOptions = [
+    'manual' => ai_lang('manual_candidate'),
+    'mock-sql-generator' => ai_lang('mock_sql_generator'),
+];
+foreach ($adapters as $adapter) {
+    $key = trim((string) ($adapter['adapter_key'] ?? ''));
+    if ($key !== '' && $key !== 'mock-sql-generator') {
+        $adapterOptions[$key] = $key . ' / ' . (string) ($adapter['model_name'] ?? '');
+    }
+}
+$modelAdapter = array_key_exists($requestedModelAdapter, $adapterOptions)
+    ? $requestedModelAdapter
+    : 'manual';
+
 if ($generateCandidate) {
     $candidate = kirpi_ai_generate_sql_candidate($question, [
         'allowed_tables' => $allowedTables,
@@ -42,17 +57,6 @@ if ($generateCandidate) {
         'allowed_fields' => $allowedFields,
         'audit' => true,
     ]);
-}
-$adapters = kirpi_ai_model_adapters();
-$adapterOptions = [
-    'manual' => ai_lang('manual_candidate'),
-    'mock-sql-generator' => ai_lang('mock_sql_generator'),
-];
-foreach ($adapters as $adapter) {
-    $key = trim((string) ($adapter['adapter_key'] ?? ''));
-    if ($key !== '') {
-        $adapterOptions[$key] = $key . ' / ' . (string) ($adapter['model_name'] ?? '');
-    }
 }
 $previewUrl = $candidate !== null
     ? base_url('ai/sql-preview?' . http_build_query([
