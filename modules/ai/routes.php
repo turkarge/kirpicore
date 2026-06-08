@@ -64,6 +64,13 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'ai/providers' => [
+        'file' => 'modules/ai/pages/providers.php',
+        'layout' => true,
+        'permission' => 'ai.adapters.manage',
+        'auth' => true,
+        'method' => 'GET',
+    ],
     'ai/actions/sync-schema' => [
         'file' => 'modules/ai/actions/sync_schema.php',
         'layout' => false,
@@ -84,5 +91,12 @@ return [
         'permission' => 'ai.schema.manage',
         'auth' => true,
         'method' => 'GET',
+    ],
+    'ai/actions/provider-update' => [
+        'file' => 'modules/ai/actions/provider_update.php',
+        'layout' => false,
+        'permission' => 'ai.adapters.manage',
+        'auth' => true,
+        'method' => 'POST',
     ],
 ];

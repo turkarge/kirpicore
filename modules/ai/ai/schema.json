@@ -50,7 +50,7 @@
       "entity": "model_adapter",
       "table": "ai_model_adapters",
       "description": "AI model adapter registry",
-      "permission": "ai.schema.manage",
+      "permission": "ai.adapters.manage",
       "metadata": {
         "aliases": ["model adapter", "llm adapter", "ai model"]
       },

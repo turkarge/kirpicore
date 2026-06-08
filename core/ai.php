@@ -756,6 +756,40 @@ function kirpi_ai_model_adapters(): array
     }
 }
 
+function kirpi_ai_model_adapters_with_config(): array
+{
+    if (!kirpi_ai_models_table_ready()) {
+        return [];
+    }
+
+    try {
+        $stmt = db()->query("
+            SELECT adapter_key, provider, model_name, adapter_type, is_enabled, is_external, config_json, updated_at
+            FROM ai_model_adapters
+            ORDER BY is_enabled DESC, adapter_type ASC, adapter_key ASC
+        ");
+
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        foreach ($rows as &$row) {
+            $config = [];
+            if (!empty($row['config_json'])) {
+                $decoded = json_decode((string) $row['config_json'], true);
+                if (is_array($decoded)) {
+                    $config = $decoded;
+                }
+            }
+            $row['config'] = $config;
+            $row['secret_configured'] = kirpi_ai_adapter_secret_configured($row);
+        }
+        unset($row);
+
+        return $rows;
+    } catch (Throwable $e) {
+        error_log('ai model adapter config list error: ' . $e->getMessage());
+        return [];
+    }
+}
+
 function kirpi_ai_model_adapter(string $adapterKey): ?array
 {
     if (!kirpi_ai_models_table_ready()) {
@@ -797,6 +831,164 @@ function kirpi_ai_model_adapter(string $adapterKey): ?array
     } catch (Throwable $e) {
         error_log('ai model adapter read error: ' . $e->getMessage());
         return null;
+    }
+}
+
+function kirpi_ai_setting_secret_key(string $adapterKey): string
+{
+    $normalized = strtolower(trim($adapterKey));
+    $normalized = preg_replace('/[^a-z0-9_.-]+/', '.', $normalized) ?: 'default';
+    $normalized = trim($normalized, '.');
+
+    return 'ai.adapter.' . $normalized . '.api_key';
+}
+
+function kirpi_ai_update_model_adapter(string $adapterKey, array $input, ?int $updatedBy = null): array
+{
+    $adapter = kirpi_ai_model_adapter($adapterKey);
+    if ($adapter === null) {
+        return [
+            'success' => false,
+            'message' => 'adapter_not_found',
+        ];
+    }
+
+    $provider = strtolower(trim((string) ($input['provider'] ?? $adapter['provider'] ?? '')));
+    $modelName = trim((string) ($input['model_name'] ?? $adapter['model_name'] ?? ''));
+    $adapterType = strtolower(trim((string) ($input['adapter_type'] ?? $adapter['adapter_type'] ?? 'sql_generation')));
+    $baseUrl = rtrim(trim((string) ($input['base_url'] ?? '')), '/');
+    $secretSource = strtolower(trim((string) ($input['secret_source'] ?? 'setting')));
+    $apiKeyEnv = trim((string) ($input['api_key_env'] ?? ''));
+    $apiKeyRef = trim((string) ($input['api_key_ref'] ?? ''));
+    $apiKeyValue = trim((string) ($input['api_key_value'] ?? ''));
+    $isEnabled = !empty($input['is_enabled']) ? 1 : 0;
+    $runtimeEnabled = !empty($input['runtime_enabled']);
+    $isExternal = $provider === 'mock' ? 0 : 1;
+
+    if (!in_array($provider, ['mock', 'openai', 'openai_compatible'], true)) {
+        return [
+            'success' => false,
+            'message' => 'provider_invalid',
+        ];
+    }
+
+    if ($modelName === '') {
+        return [
+            'success' => false,
+            'message' => 'model_missing',
+        ];
+    }
+
+    if (!in_array($adapterType, ['chat', 'sql_generation'], true)) {
+        return [
+            'success' => false,
+            'message' => 'adapter_type_invalid',
+        ];
+    }
+
+    if (!in_array($secretSource, ['setting', 'env'], true)) {
+        $secretSource = 'setting';
+    }
+
+    $timeout = max(5, min(120, (int) ($input['timeout_seconds'] ?? 30)));
+    $temperature = max(0, min(1, (float) ($input['temperature'] ?? 0)));
+    $maxTokens = max(128, min(4096, (int) ($input['max_tokens'] ?? 700)));
+    $config = [
+        'runtime_enabled' => $runtimeEnabled,
+        'timeout_seconds' => $timeout,
+        'temperature' => $temperature,
+        'max_tokens' => $maxTokens,
+    ];
+
+    if ($provider === 'openai_compatible') {
+        if ($baseUrl === '') {
+            return [
+                'success' => false,
+                'message' => 'base_url_missing',
+            ];
+        }
+        $config['base_url'] = $baseUrl;
+    } elseif ($provider === 'openai' && $baseUrl !== '') {
+        $config['base_url'] = $baseUrl;
+    }
+
+    if ($provider !== 'mock') {
+        $config['model'] = $modelName;
+        if ($secretSource === 'env') {
+            if ($apiKeyEnv === '') {
+                return [
+                    'success' => false,
+                    'message' => 'api_key_env_missing',
+                ];
+            }
+            $config['api_key_env'] = $apiKeyEnv;
+        } else {
+            $apiKeyRef = $apiKeyRef !== '' ? $apiKeyRef : kirpi_ai_setting_secret_key($adapterKey);
+            $config['api_key_ref'] = $apiKeyRef;
+            if ($apiKeyValue !== '') {
+                if (!kirpi_setting_set($apiKeyRef, $apiKeyValue, $updatedBy, true)) {
+                    return [
+                        'success' => false,
+                        'message' => 'api_key_save_failed',
+                    ];
+                }
+            }
+        }
+    } else {
+        $config = [];
+        $isEnabled = 1;
+        $isExternal = 0;
+    }
+
+    $configJson = empty($config) ? null : json_encode($config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if ($configJson === false) {
+        return [
+            'success' => false,
+            'message' => 'config_encode_failed',
+        ];
+    }
+
+    try {
+        $stmt = db()->prepare("
+            UPDATE ai_model_adapters
+            SET
+                provider = :provider,
+                model_name = :model_name,
+                adapter_type = :adapter_type,
+                is_enabled = :is_enabled,
+                is_external = :is_external,
+                config_json = :config_json
+            WHERE adapter_key = :adapter_key
+            LIMIT 1
+        ");
+        $stmt->execute([
+            ':provider' => $provider,
+            ':model_name' => $modelName,
+            ':adapter_type' => $adapterType,
+            ':is_enabled' => $isEnabled,
+            ':is_external' => $isExternal,
+            ':config_json' => $configJson,
+            ':adapter_key' => $adapterKey,
+        ]);
+
+        return [
+            'success' => true,
+            'changed_keys' => [
+                'provider',
+                'model_name',
+                'adapter_type',
+                'is_enabled',
+                'is_external',
+                'config_json',
+                $apiKeyValue !== '' && isset($config['api_key_ref']) ? 'api_key_ref_secret' : null,
+            ],
+        ];
+    } catch (Throwable $e) {
+        error_log('ai model adapter update error: ' . $e->getMessage());
+        return [
+            'success' => false,
+            'message' => 'adapter_update_failed',
+        ];
     }
 }
 
@@ -2236,13 +2428,17 @@ function kirpi_ai_adapter_secret(array $adapter): string
 
 function kirpi_ai_adapter_runtime_enabled(array $adapter): bool
 {
+    if (!env_bool('AI_EXTERNAL_MODEL_RUNTIME_ENABLED', false)) {
+        return false;
+    }
+
     $config = (array) ($adapter['config'] ?? []);
 
     if (array_key_exists('runtime_enabled', $config)) {
         return filter_var($config['runtime_enabled'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false;
     }
 
-    return env_bool('AI_EXTERNAL_MODEL_RUNTIME_ENABLED', false);
+    return false;
 }
 
 function kirpi_ai_http_json_post(string $url, array $headers, array $payload, int $timeoutSeconds = 30): array

@@ -225,6 +225,10 @@ function kirpi_core_permission_catalog(): array
                     'slug' => 'ai.schema.manage',
                 ],
                 [
+                    'name' => 'AI Adapter Yönetimi',
+                    'slug' => 'ai.adapters.manage',
+                ],
+                [
                     'name' => 'AI Audit Log Görüntüleme',
                     'slug' => 'ai.audit.view',
                 ],

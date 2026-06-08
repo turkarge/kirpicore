@@ -12,6 +12,7 @@ $indexReady = kirpi_ai_schema_index_ready();
 $manifestCount = kirpi_ai_schema_manifest_count();
 $latestSync = kirpi_ai_latest_schema_sync();
 $canManageSchema = check_permission('ai.schema.manage');
+$canManageAdapters = check_permission('ai.adapters.manage');
 $canViewAudit = check_permission('ai.audit.view');
 $qualityReport = $canManageSchema ? kirpi_ai_schema_quality_report(1) : null;
 $qualityMeta = is_array($qualityReport) ? (array) ($qualityReport['meta'] ?? []) : [];
@@ -77,6 +78,11 @@ $statusBadge = static fn (bool $ready): string => $ready ? 'bg-green-lt' : 'bg-r
                     <?php if ($canManageSchema): ?>
                         <a href="<?php echo base_url('ai/query-flow'); ?>" class="btn btn-primary">
                             <?php echo e(ai_lang('query_flow')); ?>
+                        </a>
+                    <?php endif; ?>
+                    <?php if ($canManageAdapters): ?>
+                        <a href="<?php echo base_url('ai/providers'); ?>" class="btn btn-outline-primary">
+                            <?php echo e(ai_lang('provider_settings', 'Provider Ayarları')); ?>
                         </a>
                     <?php endif; ?>
                     <a href="<?php echo base_url('ai/schema'); ?>" class="btn btn-outline-primary">
@@ -193,6 +199,17 @@ $statusBadge = static fn (bool $ready): string => $ready ? 'bg-green-lt' : 'bg-r
                                     </div>
                                 </div>
                             </a>
+                            <?php if ($canManageAdapters): ?>
+                                <a href="<?php echo base_url('ai/providers'); ?>" class="list-group-item list-group-item-action">
+                                    <div class="row align-items-center">
+                                        <div class="col-auto"><i class="ti ti-plug-connected"></i></div>
+                                        <div class="col">
+                                            <div><?php echo e(ai_lang('provider_settings', 'Provider Ayarları')); ?></div>
+                                            <div class="text-secondary small"><?php echo e(ai_lang('provider_settings_detail', 'Model provider ve adapter ayarları arayüzden yönetilir; global runtime kapısı env içinde kalır.')); ?></div>
+                                        </div>
+                                    </div>
+                                </a>
+                            <?php endif; ?>
                             <a href="<?php echo base_url('ai/sql-preview'); ?>" class="list-group-item list-group-item-action">
                                 <div class="row align-items-center">
                                     <div class="col-auto"><i class="ti ti-file-search"></i></div>

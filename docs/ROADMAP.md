@@ -77,7 +77,7 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
 
 ## Devam Eden Standartlaştırma
 
-- Gerçek provider runtime production aktivasyonu ve sağlayıcı testleri.
+- Gerçek provider canlı sağlayıcı testi.
 
 ## Yarın Planı
 
@@ -158,7 +158,7 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Mock adapter mevcut güvenli üretim akışını kullanır.
    - External veya disabled adapter durumları güvenli şekilde bloklanır.
    - Config olmayan external adapter `external_adapter_not_configured` sonucu verir.
-   - Runtime bağlanmamış adapter `adapter_runtime_not_implemented` sonucu verir.
+   - Runtime kapalı adapter `external_runtime_disabled` sonucu verir.
 
 15. **Controlled EXPLAIN Gate** - Tamamlandı
    - SQL Preview içine kontrollü EXPLAIN kapısı eklendi.
@@ -204,6 +204,13 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Provider yanıtı JSON veya düz SQL metninden standart `SQL Candidate` formatına dönüştürülür.
    - Üretilen aday SQL yine çalıştırılmaz; Preview + Guard zinciri zorunlu kalır.
 
+22. **Provider ayar yönetimi** - Tamamlandı
+   - Kirpi Intelligence altına Provider Ayarları ekranı eklendi.
+   - Provider, model, base URL, timeout, temperature, max tokens, adapter aktifliği ve adapter runtime onayı arayüzden yönetilir.
+   - API key değeri `api_key_ref` ile `app_settings` tablosuna secret olarak yazılabilir; audit ve response içinde secret değeri gösterilmez.
+   - Env tabanlı secret kullanılacaksa `api_key_env` arayüzden seçilir, gerçek env değeri deploy ortamında kalır.
+   - Global kill-switch `AI_EXTERNAL_MODEL_RUNTIME_ENABLED` kritik env ayarı olarak zorunlu kaldı; adapter runtime onayı bu kapıyı baypas edemez.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:
@@ -239,4 +246,5 @@ Doğrulanan son durum:
 - Gerçek model adapter ile SQL candidate üretimi
 - Gerçek model adapter runtime bağlama tasarımı - Tamamlandı
 - Gerçek provider runtime implementasyonu - Tamamlandı
-- Gerçek provider production aktivasyonu ve canlı sağlayıcı testleri
+- Provider ayar yönetimi - Tamamlandı
+- Gerçek provider canlı sağlayıcı testi

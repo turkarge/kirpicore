@@ -615,7 +615,6 @@ Güvenli blok durumları:
 * `adapter_type_not_supported`
 * `external_adapter_not_configured`
 * `external_runtime_disabled`
-* `adapter_runtime_not_implemented`
 
 Gateway hiçbir durumda SQL çalıştırmaz. Üretilen veya bloklanan her sonuç Preview/Guard zincirine bağlı kalır.
 
@@ -658,7 +657,7 @@ Runtime girişleri:
 
 Runtime kuralları:
 
-* Runtime çağrısı yalnız `AI_EXTERNAL_MODEL_RUNTIME_ENABLED=true` olduğunda yapılır.
+* Runtime çağrısı yalnız `AI_EXTERNAL_MODEL_RUNTIME_ENABLED=true` ve adapter `runtime_enabled=true` olduğunda yapılır.
 * Adapter aktif değilse çağrı yapılmaz.
 * Adapter tipi `sql_generation` değilse çağrı yapılmaz.
 * Secret değeri yalnız `api_key_env` veya `api_key_ref` ile çözülür.
@@ -686,6 +685,31 @@ OpenAI-compatible provider için `config_json` örneği:
   "max_tokens": 700
 }
 ```
+
+## Provider Ayar Yönetimi
+
+Provider production aktivasyonu için operasyonel ayarlar arayüzden yönetilir.
+
+Arayüzden yönetilen alanlar:
+
+* Adapter aktif/pasif durumu
+* Adapter runtime onayı
+* Provider tipi
+* Model adı
+* OpenAI-compatible base URL
+* Timeout
+* Temperature
+* Max tokens
+* Secret kaynağı (`api_key_ref` veya `api_key_env`)
+* `api_key_ref` kullanıldığında secret değerinin `app_settings` tablosuna secret olarak yazılması
+
+Env içinde kalan kritik ayarlar:
+
+* `AI_EXTERNAL_MODEL_RUNTIME_ENABLED`
+* `AI_SQL_EXPLAIN_ENABLED`
+* Env tabanlı secret kullanılacaksa ilgili API key env değişkeni
+
+Global runtime kapısı kapalıyken adapter arayüzden aktif edilse bile provider çağrısı yapılmaz. Bu standart, production ortamda son onayı deploy/env seviyesinde tutar.
 
 ## Controlled EXPLAIN Gate
 

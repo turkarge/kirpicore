@@ -43,6 +43,16 @@
             "weight": 25
         },
         {
+            "title": "Provider Ayarları",
+            "title_key": "provider_settings",
+            "icon": "ti ti-plug-connected",
+            "url": "ai/providers",
+            "permission": "ai.adapters.manage",
+            "placement": "management",
+            "group": "intelligence",
+            "weight": 30
+        },
+        {
             "title": "Audit Log",
             "title_key": "view_audit",
             "icon": "ti ti-history",
