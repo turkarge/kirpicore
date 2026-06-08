@@ -86,6 +86,17 @@ $adapterTypeOptions = [
                                 </div>
                             </div>
                             <div class="card-actions">
+                                <?php if (!$isMock): ?>
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-primary js-ai-provider-test"
+                                        data-url="<?php echo e(base_url('ai/actions/provider-test')); ?>"
+                                        data-adapter-key="<?php echo e($adapterKey); ?>"
+                                    >
+                                        <i class="ti ti-plug-connected"></i>
+                                        <?php echo e(ai_lang('test_provider', 'Bağlantıyı Test Et')); ?>
+                                    </button>
+                                <?php endif; ?>
                                 <span class="badge <?php echo !empty($adapter['is_enabled']) ? 'bg-green-lt' : 'bg-red-lt'; ?>">
                                     <?php echo e(!empty($adapter['is_enabled']) ? ai_lang('enabled') : ai_lang('disabled')); ?>
                                 </span>

@@ -99,4 +99,11 @@ return [
         'auth' => true,
         'method' => 'POST',
     ],
+    'ai/actions/provider-test' => [
+        'file' => 'modules/ai/actions/provider_test.php',
+        'layout' => false,
+        'permission' => 'ai.adapters.manage',
+        'auth' => true,
+        'method' => 'POST',
+    ],
 ];

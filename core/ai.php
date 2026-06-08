@@ -2809,6 +2809,136 @@ function kirpi_ai_external_generate_sql_candidate(string $question, array $conte
     return $candidate;
 }
 
+function kirpi_ai_test_model_adapter(string $adapterKey): array
+{
+    $adapterKey = trim($adapterKey);
+    $adapter = kirpi_ai_model_adapter($adapterKey);
+
+    if ($adapter === null) {
+        return [
+            'status' => 'blocked',
+            'reason' => 'adapter_not_found',
+        ];
+    }
+
+    $provider = strtolower(trim((string) ($adapter['provider'] ?? '')));
+    $config = (array) ($adapter['config'] ?? []);
+
+    if ((string) ($adapter['provider'] ?? '') === 'mock') {
+        return [
+            'status' => 'blocked',
+            'reason' => 'mock_adapter_not_testable',
+        ];
+    }
+
+    if ((int) ($adapter['is_enabled'] ?? 0) !== 1) {
+        return [
+            'status' => 'blocked',
+            'reason' => 'adapter_disabled',
+        ];
+    }
+
+    if (!in_array($provider, ['openai', 'openai_compatible'], true)) {
+        return [
+            'status' => 'blocked',
+            'reason' => 'provider_runtime_not_supported',
+        ];
+    }
+
+    if (!kirpi_ai_adapter_secret_configured($adapter)) {
+        return [
+            'status' => 'blocked',
+            'reason' => 'external_adapter_not_configured',
+        ];
+    }
+
+    if (!kirpi_ai_adapter_runtime_enabled($adapter)) {
+        return [
+            'status' => 'blocked',
+            'reason' => 'external_runtime_disabled',
+        ];
+    }
+
+    $baseUrl = rtrim(trim((string) ($config['base_url'] ?? '')), '/');
+    if ($baseUrl === '') {
+        $baseUrl = $provider === 'openai' ? 'https://api.openai.com/v1' : '';
+    }
+    if ($baseUrl === '') {
+        return [
+            'status' => 'blocked',
+            'reason' => 'provider_base_url_missing',
+        ];
+    }
+
+    $model = trim((string) ($config['model'] ?? $adapter['model_name'] ?? ''));
+    if ($model === '') {
+        return [
+            'status' => 'blocked',
+            'reason' => 'provider_model_missing',
+        ];
+    }
+
+    $timeout = max(5, min(120, (int) ($config['timeout_seconds'] ?? 30)));
+    $endpoint = $baseUrl . '/chat/completions';
+    $payload = [
+        'model' => $model,
+        'temperature' => 0,
+        'max_tokens' => 80,
+        'messages' => [
+            [
+                'role' => 'system',
+                'content' => 'Return only JSON. Do not include secrets or real data.',
+            ],
+            [
+                'role' => 'user',
+                'content' => 'Return exactly this JSON object: {"status":"ok","purpose":"provider_test"}',
+            ],
+        ],
+    ];
+
+    $startedAt = microtime(true);
+    $http = kirpi_ai_http_json_post($endpoint, [
+        'Authorization: Bearer ' . kirpi_ai_adapter_secret($adapter),
+    ], $payload, $timeout);
+    $durationMs = (int) round((microtime(true) - $startedAt) * 1000);
+    $statusCode = (int) ($http['status_code'] ?? 0);
+
+    if (!($http['success'] ?? false)) {
+        kirpi_ai_log_operation('provider_runtime_test', 'failed', [
+            'model_adapter' => $adapterKey,
+            'provider' => $provider,
+            'reason' => 'provider_request_failed',
+            'status_code' => $statusCode,
+            'duration_ms' => $durationMs,
+        ], $adapterKey, 'ai_model_adapter', null);
+
+        return [
+            'status' => 'failed',
+            'reason' => 'provider_request_failed',
+            'status_code' => $statusCode,
+            'duration_ms' => $durationMs,
+        ];
+    }
+
+    $content = trim((string) (($http['json']['choices'][0]['message']['content'] ?? '') ?: ''));
+    $responseOk = $content !== '';
+
+    kirpi_ai_log_operation('provider_runtime_test', $responseOk ? 'success' : 'failed', [
+        'model_adapter' => $adapterKey,
+        'provider' => $provider,
+        'reason' => $responseOk ? 'response_received' : 'provider_empty_response',
+        'status_code' => $statusCode,
+        'duration_ms' => $durationMs,
+    ], $adapterKey, 'ai_model_adapter', null);
+
+    return [
+        'status' => $responseOk ? 'success' : 'failed',
+        'reason' => $responseOk ? 'response_received' : 'provider_empty_response',
+        'status_code' => $statusCode,
+        'duration_ms' => $durationMs,
+    ];
+}
+
 function kirpi_ai_generate_sql_candidate(string $question, array $context = [], string $adapterKey = 'mock-sql-generator'): array
 {
     $adapterKey = trim($adapterKey) !== '' ? trim($adapterKey) : 'mock-sql-generator';

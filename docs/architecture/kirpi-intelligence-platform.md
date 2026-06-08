@@ -711,6 +711,21 @@ Env içinde kalan kritik ayarlar:
 
 Global runtime kapısı kapalıyken adapter arayüzden aktif edilse bile provider çağrısı yapılmaz. Bu standart, production ortamda son onayı deploy/env seviyesinde tutar.
 
+## Provider Canlı Test Standardı
+
+Provider Ayarları ekranında canlı bağlantı testi bulunur.
+
+Test kuralları:
+
+* Test yalnız `ai.adapters.manage` yetkisi ile çalışır.
+* Test yalnız `AI_EXTERNAL_MODEL_RUNTIME_ENABLED=true` ve adapter `runtime_enabled=true` olduğunda provider çağrısı yapar.
+* Test SQL üretmez.
+* Test veri okumaz.
+* Test yalnız küçük bir JSON cevap isteği gönderir.
+* Secret değeri request dışındaki hiçbir kayıt, response, notification veya audit detayına yazılmaz.
+* Ham provider cevabı kullanıcıya veya audit'e yazılmaz.
+* Sonuç `provider_runtime_test` olarak genel audit ve AI audit zincirine işlenir.
+
 ## Controlled EXPLAIN Gate
 
 SQL Preview içinde kontrollü `EXPLAIN` kapısı bulunur.

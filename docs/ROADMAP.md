@@ -77,7 +77,7 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
 
 ## Devam Eden Standartlaştırma
 
-- Gerçek provider canlı sağlayıcı testi.
+- Gerçek provider canlı sağlayıcı doğrulaması.
 
 ## Yarın Planı
 
@@ -211,6 +211,12 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Env tabanlı secret kullanılacaksa `api_key_env` arayüzden seçilir, gerçek env değeri deploy ortamında kalır.
    - Global kill-switch `AI_EXTERNAL_MODEL_RUNTIME_ENABLED` kritik env ayarı olarak zorunlu kaldı; adapter runtime onayı bu kapıyı baypas edemez.
 
+23. **Provider canlı test altyapısı** - Tamamlandı
+   - Provider Ayarları ekranına `Bağlantıyı Test Et` aksiyonu eklendi.
+   - Test çağrısı global `AI_EXTERNAL_MODEL_RUNTIME_ENABLED` ve adapter `runtime_enabled` kapıları arkasında çalışır.
+   - Test SQL üretmez, veri okumaz ve secret/ham provider cevabını response veya audit içine yazmaz.
+   - Test sonucu genel audit ve AI audit zincirine `provider_runtime_test` olarak yazılır.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:
@@ -247,4 +253,5 @@ Doğrulanan son durum:
 - Gerçek model adapter runtime bağlama tasarımı - Tamamlandı
 - Gerçek provider runtime implementasyonu - Tamamlandı
 - Provider ayar yönetimi - Tamamlandı
-- Gerçek provider canlı sağlayıcı testi
+- Provider canlı test altyapısı - Tamamlandı
+- Gerçek provider canlı sağlayıcı doğrulaması

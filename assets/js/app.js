@@ -24,6 +24,7 @@
             this.bindConfirmTriggers();
             this.bindAjaxForms();
             this.initAiLauncher();
+            this.bindAiProviderTests();
         },
 
         bootstrapGlobals() {
@@ -801,6 +802,51 @@
                 setOpen(false, true);
                 rememberClosed();
                 toggle.focus();
+            });
+        },
+
+        bindAiProviderTests() {
+            document.addEventListener("click", async (event) => {
+                const trigger = event.target.closest(".js-ai-provider-test");
+                if (!trigger) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                const url = trigger.dataset.url || "";
+                const adapterKey = trigger.dataset.adapterKey || "";
+                if (!url || !adapterKey) {
+                    return;
+                }
+
+                trigger.disabled = true;
+                const originalHtml = trigger.innerHTML;
+                trigger.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Test ediliyor';
+
+                try {
+                    const response = await this.post(url, {
+                        adapter_key: adapterKey
+                    });
+                    const responseText = (await response.text()).replace(/^\uFEFF/, "");
+                    let result = null;
+                    try {
+                        result = JSON.parse(responseText);
+                    } catch (error) {
+                        this.toast(`Provider testi beklenmeyen yanıt döndürdü (HTTP ${response.status}).`, "error");
+                        return;
+                    }
+
+                    if (result.message) {
+                        this.toast(result.message, result.status || (response.ok ? "success" : "error"));
+                    }
+                } catch (error) {
+                    console.warn("Provider test error:", error);
+                    this.toast("Provider testi sırasında bir hata oluştu.", "error");
+                } finally {
+                    trigger.disabled = false;
+                    trigger.innerHTML = originalHtml;
+                }
             });
         },
 
