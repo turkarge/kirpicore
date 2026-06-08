@@ -39,6 +39,8 @@ Tamamlanan uygulama başlıkları:
 * `ai/actions/export-schema` schema bilgisini JSON/CSV/XLS formatlarında dışarı verir.
 * `ai/actions/export-quality` schema kalite raporunu JSON/CSV/XLS formatlarında dışarı verir.
 * Schema Quality Gate eksik açıklama, eksik yetki, fieldsız entity ve olası hassas alan uyarılarını üretir.
+* AI öncesi kapanışta tüm standart modüller schema manifest kapsamına alındı.
+* Son doğrulama sonucu `34 entity / 294 field / 4655 index / 0 hata` ve kalite sonucu `0 uyarı / 0 hata` olarak kaydedildi.
 
 Son doğrulama sonucu:
 

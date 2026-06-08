@@ -203,6 +203,8 @@ Schema tanımı en az şu bilgileri içermelidir:
 
 AI discovery, kullanıcının mevcut RBAC yetkilerini aşamaz.
 
+AI öncesi Core kapanışında tüm standart modüller `ai/schema.json` kapsamına alınmıştır. DB tablosu olmayan ekranlar için hayali tablo yayınlanmaz; yalnız mevcut Core tablolarından türetilen read-only metadata entity'leri kullanılabilir.
+
 ## Geriye Uyumluluk
 
 - `module.json` yoksa default değerler kullanılır.

@@ -78,7 +78,6 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
 ## Devam Eden Standartlaştırma
 
 - Gerçek provider runtime implementasyonu.
-- AI öncesi schema/metadata kapsamının genişletilmesi.
 
 ## Yarın Planı
 
@@ -191,6 +190,13 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Template Registry notification target/variable/default katalogları yeni standart event key'lerini kapsayacak şekilde genişletildi.
    - Module manifest standardı tamamlanan export ve notification davranışını yansıtacak şekilde güncellendi.
 
+20. **AI öncesi schema/metadata kapanış turu** - Tamamlandı
+   - Eksik kalan standart modül manifestleri eklendi: Auth, Dashboard, Health, Profile ve Security.
+   - Manifestler yalnız mevcut Core tablolarına bağlandı; hayali/virtual tablo yayınlanmadı.
+   - Hassas alanlar `is_sensitive` ve gerektiğinde `is_filterable=false` olarak işaretlendi.
+   - Schema sync sonucu: `34 entity / 294 field / 4655 index / 0 hata`.
+   - Schema quality sonucu: `0 uyarı / 0 hata`.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:
@@ -222,6 +228,7 @@ Doğrulanan son durum:
 - Queue/API/Health/Security export - Tamamlandı
 - Notification event yayılımı - Tamamlandı
 - Template notification katalog entegrasyonu - Tamamlandı
+- AI öncesi schema/metadata kapsamı - Tamamlandı
 - Gerçek model adapter ile SQL candidate üretimi
 - Gerçek model adapter runtime bağlama tasarımı - Tamamlandı
 - Gerçek provider runtime implementasyonu
