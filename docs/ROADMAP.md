@@ -77,7 +77,7 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
 
 ## Devam Eden Standartlaştırma
 
-- Gerçek provider runtime implementasyonu.
+- Gerçek provider runtime production aktivasyonu ve sağlayıcı testleri.
 
 ## Yarın Planı
 
@@ -197,6 +197,13 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Schema sync sonucu: `34 entity / 294 field / 4655 index / 0 hata`.
    - Schema quality sonucu: `0 uyarı / 0 hata`.
 
+21. **Provider runtime implementasyonu** - Tamamlandı
+   - SQL Generation Gateway, `openai` ve `openai_compatible` provider runtime akışını destekler hale getirildi.
+   - Secret çözümü yalnız `api_key_env` veya `api_key_ref` üzerinden yapılır; secret audit'e veya prompt'a yazılmaz.
+   - Runtime çağrısı varsayılan kapalı `AI_EXTERNAL_MODEL_RUNTIME_ENABLED=false` kapısının arkasında kalır.
+   - Provider yanıtı JSON veya düz SQL metninden standart `SQL Candidate` formatına dönüştürülür.
+   - Üretilen aday SQL yine çalıştırılmaz; Preview + Guard zinciri zorunlu kalır.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:
@@ -231,4 +238,5 @@ Doğrulanan son durum:
 - AI öncesi schema/metadata kapsamı - Tamamlandı
 - Gerçek model adapter ile SQL candidate üretimi
 - Gerçek model adapter runtime bağlama tasarımı - Tamamlandı
-- Gerçek provider runtime implementasyonu
+- Gerçek provider runtime implementasyonu - Tamamlandı
+- Gerçek provider production aktivasyonu ve canlı sağlayıcı testleri

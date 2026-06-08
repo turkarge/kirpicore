@@ -645,6 +645,48 @@ veya:
 
 Runtime kapalıyken gateway `external_runtime_disabled` sonucu verir. Bu sayede gerçek provider implementasyonu eklenmeden önce adapter registry, secret referans politikası ve audit davranışı production ortamda güvenli kalır.
 
+## Provider Runtime Standardı
+
+İlk gerçek runtime katmanı `openai` ve `openai_compatible` provider tiplerini destekler.
+
+Runtime girişleri:
+
+* Kullanıcı sorusu
+* Planner context içindeki izinli tablo listesi
+* Planner context içindeki izinli field listesi
+* Adapter registry kaydı
+
+Runtime kuralları:
+
+* Runtime çağrısı yalnız `AI_EXTERNAL_MODEL_RUNTIME_ENABLED=true` olduğunda yapılır.
+* Adapter aktif değilse çağrı yapılmaz.
+* Adapter tipi `sql_generation` değilse çağrı yapılmaz.
+* Secret değeri yalnız `api_key_env` veya `api_key_ref` ile çözülür.
+* Secret değeri audit, prompt, notification veya response içine yazılmaz.
+* Provider yanıtı JSON veya düz SQL metninden `SQL Candidate` standardına dönüştürülür.
+* Üretilen SQL hiçbir koşulda doğrudan çalıştırılmaz.
+* Candidate her zaman Preview + Guard zincirine bağlı kalır.
+
+Desteklenen provider blok durumları:
+
+* `provider_runtime_not_supported`
+* `provider_base_url_missing`
+* `provider_model_missing`
+* `provider_request_failed`
+
+OpenAI-compatible provider için `config_json` örneği:
+
+```json
+{
+  "base_url": "https://example-provider.local/v1",
+  "model": "sql-safe-model",
+  "api_key_env": "PROVIDER_API_KEY",
+  "timeout_seconds": 30,
+  "temperature": 0,
+  "max_tokens": 700
+}
+```
+
 ## Controlled EXPLAIN Gate
 
 SQL Preview içinde kontrollü `EXPLAIN` kapısı bulunur.

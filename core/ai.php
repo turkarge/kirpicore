@@ -2209,18 +2209,29 @@ function kirpi_ai_blocked_sql_candidate(string $adapterKey, string $reason, arra
 
 function kirpi_ai_adapter_secret_configured(array $adapter): bool
 {
+    return kirpi_ai_adapter_secret($adapter) !== '';
+}
+
+function kirpi_ai_adapter_secret(array $adapter): string
+{
     $config = (array) ($adapter['config'] ?? []);
     $apiKeyEnv = trim((string) ($config['api_key_env'] ?? ''));
-    if ($apiKeyEnv !== '' && trim((string) env($apiKeyEnv, '')) !== '') {
-        return true;
+    if ($apiKeyEnv !== '') {
+        $value = trim((string) env($apiKeyEnv, ''));
+        if ($value !== '') {
+            return $value;
+        }
     }
 
     $apiKeyRef = trim((string) ($config['api_key_ref'] ?? ''));
-    if ($apiKeyRef !== '' && function_exists('kirpi_setting_get') && trim((string) kirpi_setting_get($apiKeyRef, '')) !== '') {
-        return true;
+    if ($apiKeyRef !== '' && function_exists('kirpi_setting_get')) {
+        $value = trim((string) kirpi_setting_get($apiKeyRef, ''));
+        if ($value !== '') {
+            return $value;
+        }
     }
 
-    return false;
+    return '';
 }
 
 function kirpi_ai_adapter_runtime_enabled(array $adapter): bool
@@ -2232,6 +2243,126 @@ function kirpi_ai_adapter_runtime_enabled(array $adapter): bool
     }
 
     return env_bool('AI_EXTERNAL_MODEL_RUNTIME_ENABLED', false);
+}
+
+function kirpi_ai_http_json_post(string $url, array $headers, array $payload, int $timeoutSeconds = 30): array
+{
+    $body = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if ($body === false) {
+        return [
+            'success' => false,
+            'status_code' => 0,
+            'error' => 'json_encode_failed',
+            'body' => '',
+            'json' => null,
+        ];
+    }
+
+    $headers[] = 'Content-Type: application/json';
+
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => $headers,
+            CURLOPT_POSTFIELDS => $body,
+            CURLOPT_TIMEOUT => max(1, $timeoutSeconds),
+        ]);
+        $responseBody = (string) curl_exec($ch);
+        $error = curl_error($ch);
+        $statusCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+    } else {
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'POST',
+                'header' => implode("\r\n", $headers),
+                'content' => $body,
+                'timeout' => max(1, $timeoutSeconds),
+                'ignore_errors' => true,
+            ],
+        ]);
+        $responseBody = (string) @file_get_contents($url, false, $context);
+        $error = $responseBody === '' ? 'http_request_failed' : '';
+        $statusCode = 0;
+        foreach (($http_response_header ?? []) as $headerLine) {
+            if (preg_match('/^HTTP\/\S+\s+(\d+)/', (string) $headerLine, $matches) === 1) {
+                $statusCode = (int) ($matches[1] ?? 0);
+                break;
+            }
+        }
+    }
+
+    $decoded = null;
+    if ($responseBody !== '') {
+        $json = json_decode($responseBody, true);
+        if (is_array($json)) {
+            $decoded = $json;
+        }
+    }
+
+    return [
+        'success' => $statusCode >= 200 && $statusCode < 300 && is_array($decoded),
+        'status_code' => $statusCode,
+        'error' => $error,
+        'body' => $responseBody,
+        'json' => $decoded,
+    ];
+}
+
+function kirpi_ai_extract_sql_from_model_text(string $text): array
+{
+    $text = trim($text);
+    $warnings = [];
+
+    if ($text === '') {
+        return [
+            'sql' => '',
+            'confidence' => 0,
+            'warnings' => ['empty_model_response'],
+        ];
+    }
+
+    $decoded = json_decode($text, true);
+    if (is_array($decoded)) {
+        $sql = trim((string) ($decoded['sql'] ?? $decoded['candidate_sql'] ?? ''));
+        $confidence = (float) ($decoded['confidence'] ?? 0.65);
+        $modelWarnings = array_values(array_filter(array_map('strval', (array) ($decoded['warnings'] ?? []))));
+
+        return [
+            'sql' => $sql,
+            'confidence' => max(0, min(1, $confidence)),
+            'warnings' => $modelWarnings,
+        ];
+    }
+
+    if (preg_match('/```(?:sql)?\s*(.*?)```/is', $text, $matches) === 1) {
+        $text = trim((string) ($matches[1] ?? $text));
+        $warnings[] = 'fenced_sql_extracted';
+    } else {
+        $warnings[] = 'plain_text_sql_extracted';
+    }
+
+    return [
+        'sql' => $text,
+        'confidence' => 0.55,
+        'warnings' => $warnings,
+    ];
+}
+
+function kirpi_ai_parse_chat_completion_response(array $response): array
+{
+    $content = trim((string) ($response['choices'][0]['message']['content'] ?? ''));
+    if ($content === '') {
+        return [
+            'sql' => '',
+            'confidence' => 0,
+            'warnings' => ['chat_completion_content_missing'],
+        ];
+    }
+
+    return kirpi_ai_extract_sql_from_model_text($content);
 }
 
 function kirpi_ai_build_sql_generation_prompt(string $question, array $context = []): array
@@ -2252,6 +2383,8 @@ function kirpi_ai_build_sql_generation_prompt(string $question, array $context =
         '- Do not invent tables or fields.',
         '- Do not execute SQL.',
         '- The candidate must still pass SQL Preview and SQL Guard.',
+        '- Return only JSON with keys: sql, confidence, warnings.',
+        '- sql must be a single SELECT statement or an empty string if no safe candidate can be produced.',
         '',
         'User question:',
         $question !== '' ? $question : '-',
@@ -2358,6 +2491,128 @@ function kirpi_ai_mock_generate_sql_candidate(string $question, array $context =
     return $candidate;
 }
 
+function kirpi_ai_external_generate_sql_candidate(string $question, array $context, array $adapter): array
+{
+    $adapterKey = (string) ($adapter['adapter_key'] ?? '');
+    $provider = strtolower(trim((string) ($adapter['provider'] ?? '')));
+    $config = (array) ($adapter['config'] ?? []);
+    $prompt = kirpi_ai_build_sql_generation_prompt($question, $context);
+    $allowedTables = (array) ($prompt['allowed_tables'] ?? []);
+    $allowedFields = (array) ($prompt['allowed_fields'] ?? []);
+
+    if (!in_array($provider, ['openai', 'openai_compatible'], true)) {
+        return kirpi_ai_blocked_sql_candidate($adapterKey, 'provider_runtime_not_supported', [
+            'provider' => $provider,
+        ]);
+    }
+
+    $secret = kirpi_ai_adapter_secret($adapter);
+    if ($secret === '') {
+        return kirpi_ai_blocked_sql_candidate($adapterKey, 'external_adapter_not_configured', [
+            'secret_policy' => 'env_or_setting_reference_required',
+        ]);
+    }
+
+    $baseUrl = rtrim(trim((string) ($config['base_url'] ?? '')), '/');
+    if ($baseUrl === '') {
+        $baseUrl = $provider === 'openai' ? 'https://api.openai.com/v1' : '';
+    }
+    if ($baseUrl === '') {
+        return kirpi_ai_blocked_sql_candidate($adapterKey, 'provider_base_url_missing', [
+            'provider' => $provider,
+        ]);
+    }
+
+    $model = trim((string) ($config['model'] ?? $adapter['model_name'] ?? ''));
+    if ($model === '') {
+        return kirpi_ai_blocked_sql_candidate($adapterKey, 'provider_model_missing', [
+            'provider' => $provider,
+        ]);
+    }
+
+    $timeout = max(5, min(120, (int) ($config['timeout_seconds'] ?? 30)));
+    $temperature = max(0, min(1, (float) ($config['temperature'] ?? 0)));
+    $maxTokens = max(128, min(4096, (int) ($config['max_tokens'] ?? 700)));
+    $endpoint = $baseUrl . '/chat/completions';
+    $payload = [
+        'model' => $model,
+        'temperature' => $temperature,
+        'max_tokens' => $maxTokens,
+        'messages' => [
+            [
+                'role' => 'system',
+                'content' => 'You generate safe read-only SQL candidates. Return only JSON. Never include secrets or real data.',
+            ],
+            [
+                'role' => 'user',
+                'content' => (string) ($prompt['prompt'] ?? ''),
+            ],
+        ],
+    ];
+
+    $http = kirpi_ai_http_json_post($endpoint, [
+        'Authorization: Bearer ' . $secret,
+    ], $payload, $timeout);
+
+    if (!($http['success'] ?? false)) {
+        kirpi_ai_log_operation('sql_candidate_generate', 'failed', [
+            'model_adapter' => $adapterKey,
+            'provider' => $provider,
+            'reason' => 'provider_request_failed',
+            'status_code' => (int) ($http['status_code'] ?? 0),
+            'prompt_hash' => (string) ($prompt['prompt_hash'] ?? ''),
+            'execution_enabled' => false,
+            'preview_required' => true,
+        ], $adapterKey, 'sql_candidate', null);
+
+        return [
+            'status' => 'blocked',
+            'reason' => 'provider_request_failed',
+            'model_adapter' => $adapterKey,
+            'candidate_sql' => '',
+            'warnings' => ['provider_request_failed'],
+            'execution_enabled' => false,
+            'preview_required' => true,
+        ];
+    }
+
+    $parsed = kirpi_ai_parse_chat_completion_response((array) ($http['json'] ?? []));
+    $candidateSql = trim((string) ($parsed['sql'] ?? ''));
+    $warnings = array_values(array_unique(array_merge(
+        ['external_provider_generation'],
+        array_map('strval', (array) ($parsed['warnings'] ?? []))
+    )));
+
+    $candidate = kirpi_ai_build_sql_candidate([
+        'question' => $question,
+        'candidate_sql' => $candidateSql,
+        'model_adapter' => $adapterKey,
+        'confidence' => (float) ($parsed['confidence'] ?? 0.65),
+        'prompt_hash' => (string) ($prompt['prompt_hash'] ?? ''),
+        'generation_mode' => 'external_provider',
+        'allowed_tables' => $allowedTables,
+        'allowed_fields' => $allowedFields,
+    ]);
+    $candidate['warnings'] = array_values(array_unique(array_merge((array) ($candidate['warnings'] ?? []), $warnings)));
+    $candidate['prompt_hash'] = (string) ($prompt['prompt_hash'] ?? '');
+    $candidate['generation_mode'] = 'external_provider';
+
+    kirpi_ai_log_operation($candidateSql !== '' ? 'sql_candidate_generate' : 'sql_candidate_generate_empty', $candidateSql !== '' ? 'success' : 'blocked', [
+        'question' => $question !== '' ? $question : null,
+        'model_adapter' => $adapterKey,
+        'provider' => $provider,
+        'generation_mode' => 'external_provider',
+        'prompt_hash' => $candidate['prompt_hash'],
+        'warnings' => $candidate['warnings'],
+        'allowed_tables' => $allowedTables,
+        'sql_length' => strlen($candidateSql),
+        'execution_enabled' => false,
+        'preview_required' => true,
+    ], $adapterKey, 'sql_candidate', null);
+
+    return $candidate;
+}
+
 function kirpi_ai_generate_sql_candidate(string $question, array $context = [], string $adapterKey = 'mock-sql-generator'): array
 {
     $adapterKey = trim($adapterKey) !== '' ? trim($adapterKey) : 'mock-sql-generator';
@@ -2397,7 +2652,5 @@ function kirpi_ai_generate_sql_candidate(string $question, array $context = [], 
         ]);
     }
 
-    return kirpi_ai_blocked_sql_candidate($adapterKey, 'adapter_runtime_not_implemented', [
-        'provider' => (string) ($adapter['provider'] ?? ''),
-    ]);
+    return kirpi_ai_external_generate_sql_candidate($question, $context, $adapter);
 }
