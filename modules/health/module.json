@@ -20,6 +20,16 @@
                      "placement":  "management",
                      "group":  "monitoring",
                      "weight":  520
+                 },
+                 {
+                     "title":  "Env Reader",
+                     "title_key":  "env_reader",
+                     "icon":  "ti ti-file-settings",
+                     "url":  "health/env",
+                     "permission":  "health.env.view",
+                     "placement":  "management",
+                     "group":  "monitoring",
+                     "weight":  525
                  }
              ]
 }

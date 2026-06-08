@@ -34,6 +34,7 @@ services:
       AUTO_DB_INSTALL: ${AUTO_DB_INSTALL:-true}
       AUTO_WEB_SETUP: ${AUTO_WEB_SETUP:-true}
       SETUP_KEY: ${SETUP_KEY:-}
+      AI_EXTERNAL_MODEL_RUNTIME_ENABLED: ${AI_EXTERNAL_MODEL_RUNTIME_ENABLED:-false}
     expose:
       - "80"
     healthcheck:

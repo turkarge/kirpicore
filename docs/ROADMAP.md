@@ -217,6 +217,12 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Test SQL üretmez, veri okumaz ve secret/ham provider cevabını response veya audit içine yazmaz.
    - Test sonucu genel audit ve AI audit zincirine `provider_runtime_test` olarak yazılır.
 
+24. **Env Reader izleme ekranı** - Tamamlandı
+   - Monitoring / İzleme altına `Env Reader` sayfası eklendi.
+   - Sayfa çalışan container içindeki env değerlerini `getenv`, `$_ENV` ve güvenli `$_SERVER` kaynaklarından okur.
+   - `password`, `secret`, `token`, `key`, `cookie`, `session`, `dsn` gibi hassas anahtarlar maskelenir.
+   - `AI_EXTERNAL_MODEL_RUNTIME_ENABLED` docker compose üzerinden app container'ına aktarılır hale getirildi.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:
@@ -254,4 +260,5 @@ Doğrulanan son durum:
 - Gerçek provider runtime implementasyonu - Tamamlandı
 - Provider ayar yönetimi - Tamamlandı
 - Provider canlı test altyapısı - Tamamlandı
+- Env Reader izleme ekranı - Tamamlandı
 - Gerçek provider canlı sağlayıcı doğrulaması

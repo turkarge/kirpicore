@@ -211,6 +211,10 @@ function kirpi_core_permission_catalog(): array
                     'name' => 'Health Metrics Görüntüleme',
                     'slug' => 'health.view',
                 ],
+                [
+                    'name' => 'Env Reader Görüntüleme',
+                    'slug' => 'health.env.view',
+                ],
             ],
         ],
         'ai' => [

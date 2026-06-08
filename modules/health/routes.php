@@ -8,6 +8,13 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'health/env' => [
+        'file' => 'modules/health/pages/env.php',
+        'layout' => true,
+        'permission' => 'health.env.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
     'health/actions/export' => [
         'file' => 'modules/health/actions/export.php',
         'layout' => false,
