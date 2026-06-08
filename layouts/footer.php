@@ -26,6 +26,60 @@ if (!defined('KIRPI_CORE_ENTRY')) {
         </footer>
         </div>
 </div>
+
+<?php
+$canUseAiLauncher = check_permission('ai.view');
+$canUseAiQueryFlow = check_permission('ai.schema.manage');
+$canManageAiAdapters = check_permission('ai.adapters.manage');
+$canViewAiAudit = check_permission('ai.audit.view');
+
+if ($canUseAiLauncher):
+?>
+<div class="kirpi-ai-launcher" data-ai-launcher>
+    <div class="kirpi-ai-launcher__panel" data-ai-launcher-panel aria-hidden="true">
+        <div class="kirpi-ai-launcher__panel-header">
+            <div>
+                <div class="kirpi-ai-launcher__eyebrow">Kirpi AI</div>
+                <div class="kirpi-ai-launcher__title">Kirpi Intelligence</div>
+            </div>
+            <button type="button" class="kirpi-ai-launcher__close" data-ai-launcher-close aria-label="Kapat">
+                <i class="ti ti-x"></i>
+            </button>
+        </div>
+        <div class="kirpi-ai-launcher__body">
+            <div class="kirpi-ai-launcher__text">
+                AI altyapısı hazır. Güvenli sorgu akışını başlatabilir veya provider ayarlarını kontrol edebilirsiniz.
+            </div>
+            <div class="kirpi-ai-launcher__actions">
+                <?php if ($canUseAiQueryFlow): ?>
+                    <a href="<?php echo base_url('ai/query-flow'); ?>" class="kirpi-ai-launcher__action kirpi-ai-launcher__action--primary">
+                        <i class="ti ti-git-branch"></i>
+                        <span>Query Flow</span>
+                    </a>
+                <?php endif; ?>
+                <?php if ($canManageAiAdapters): ?>
+                    <a href="<?php echo base_url('ai/providers'); ?>" class="kirpi-ai-launcher__action">
+                        <i class="ti ti-plug-connected"></i>
+                        <span>Provider Ayarları</span>
+                    </a>
+                <?php endif; ?>
+                <?php if ($canViewAiAudit): ?>
+                    <a href="<?php echo base_url('ai/audit'); ?>" class="kirpi-ai-launcher__action">
+                        <i class="ti ti-history"></i>
+                        <span>Audit Log</span>
+                    </a>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+    <button type="button" class="kirpi-ai-launcher__bubble" data-ai-launcher-toggle aria-expanded="false" aria-label="Kirpi Intelligence">
+        <span class="kirpi-ai-launcher__ring"></span>
+        <img src="<?php echo asset_url('img/ai-assistant.gif'); ?>" alt="" class="kirpi-ai-launcher__image">
+        <span class="kirpi-ai-launcher__label">AI</span>
+    </button>
+</div>
+<?php endif; ?>
+
 <script src="<?php echo asset_url('js/jquery-3.7.1.min.js'); ?>"></script>
 <script src="<?php echo asset_url('js/bootstrap.bundle.min.js'); ?>"></script>
 <script src="<?php echo asset_url('js/tabler.min.js'); ?>"></script>

@@ -23,6 +23,7 @@
             this.bindModalTriggers();
             this.bindConfirmTriggers();
             this.bindAjaxForms();
+            this.initAiLauncher();
         },
 
         bootstrapGlobals() {
@@ -731,6 +732,78 @@
                 await this.submitAjaxForm(form);
             }, true);
         },
+
+        initAiLauncher() {
+            const launcher = document.querySelector("[data-ai-launcher]");
+            if (!launcher) {
+                return;
+            }
+
+            const toggle = launcher.querySelector("[data-ai-launcher-toggle]");
+            const close = launcher.querySelector("[data-ai-launcher-close]");
+            const panel = launcher.querySelector("[data-ai-launcher-panel]");
+
+            if (!toggle || !panel) {
+                return;
+            }
+
+            const setOpen = (isOpen, compact = false) => {
+                launcher.classList.toggle("is-open", isOpen);
+                launcher.classList.toggle("is-minimized", !isOpen && compact);
+                toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+                panel.setAttribute("aria-hidden", isOpen ? "false" : "true");
+            };
+
+            const rememberClosed = () => {
+                try {
+                    window.localStorage.setItem("kirpi_ai_launcher_minimized", "1");
+                } catch (error) {
+                    console.warn("AI launcher tercihi kaydedilemedi:", error);
+                }
+            };
+
+            try {
+                setOpen(false, window.localStorage.getItem("kirpi_ai_launcher_minimized") === "1");
+            } catch (error) {
+                setOpen(false);
+            }
+
+            toggle.addEventListener("click", (event) => {
+                event.preventDefault();
+                const nextOpen = !launcher.classList.contains("is-open");
+                setOpen(nextOpen);
+                if (!nextOpen) {
+                    rememberClosed();
+                }
+            });
+
+            if (close) {
+                close.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    setOpen(false, true);
+                    rememberClosed();
+                    toggle.focus();
+                });
+            }
+
+            document.addEventListener("click", (event) => {
+                if (!launcher.classList.contains("is-open") || launcher.contains(event.target)) {
+                    return;
+                }
+                setOpen(false, true);
+                rememberClosed();
+            });
+
+            document.addEventListener("keydown", (event) => {
+                if (event.key !== "Escape" || !launcher.classList.contains("is-open")) {
+                    return;
+                }
+                setOpen(false, true);
+                rememberClosed();
+                toggle.focus();
+            });
+        },
+
         toast(message, type = "info") {
             if (window.toastr && typeof toastr[type] === "function") {
                 try {
