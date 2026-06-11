@@ -173,6 +173,24 @@ body {
     display: none !important;
 }
 
+.kirpi-code-block {
+    display: block;
+    max-width: 100%;
+    overflow: auto;
+    background: color-mix(in srgb, var(--kirpi-surface-strong) 94%, var(--kirpi-shell-bg));
+    border: 1px solid var(--kirpi-border);
+    color: var(--kirpi-text);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.kirpi-code-block code {
+    color: inherit;
+    background: transparent;
+    font-size: .8125rem;
+    line-height: 1.55;
+}
+
 .navbar .dropdown-toggle::after {
     display: none !important;
 }

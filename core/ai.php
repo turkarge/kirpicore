@@ -2579,6 +2579,16 @@ function kirpi_ai_extract_sql_from_model_text(string $text): array
         $sql = trim((string) ($decoded['sql'] ?? $decoded['candidate_sql'] ?? ''));
         $confidence = (float) ($decoded['confidence'] ?? 0.65);
         $modelWarnings = array_values(array_filter(array_map('strval', (array) ($decoded['warnings'] ?? []))));
+        if ($sql !== '' && !str_starts_with(strtolower(ltrim($sql)), 'select')) {
+            $extractedSql = kirpi_ai_extract_select_statement_from_text($sql);
+            if ($extractedSql !== '') {
+                $sql = $extractedSql;
+                $warnings[] = 'sql_statement_extracted';
+            } else {
+                $sql = '';
+                $warnings[] = 'sql_statement_missing';
+            }
+        }
 
         return [
             'sql' => $sql,
@@ -2594,11 +2604,44 @@ function kirpi_ai_extract_sql_from_model_text(string $text): array
         $warnings[] = 'plain_text_sql_extracted';
     }
 
+    $sql = kirpi_ai_extract_select_statement_from_text($text);
+    if ($sql === '') {
+        $warnings[] = 'sql_statement_missing';
+
+        return [
+            'sql' => '',
+            'confidence' => 0,
+            'warnings' => array_values(array_unique($warnings)),
+        ];
+    }
+
     return [
-        'sql' => $text,
+        'sql' => $sql,
         'confidence' => 0.55,
         'warnings' => $warnings,
     ];
+}
+
+function kirpi_ai_extract_select_statement_from_text(string $text): string
+{
+    $text = trim($text);
+    if ($text === '') {
+        return '';
+    }
+
+    if (preg_match('/\bselect\b[\s\S]*?\bfrom\b[\s\S]*/i', $text, $matches) !== 1) {
+        return '';
+    }
+
+    $sql = trim((string) ($matches[0] ?? ''));
+    $sql = preg_split('/\r?\n\s*(?:warnings?|confidence|explanation|açıklama)\s*[:=]/i', $sql)[0] ?? $sql;
+    $sql = trim($sql);
+    $semicolonPos = strpos($sql, ';');
+    if ($semicolonPos !== false) {
+        $sql = substr($sql, 0, $semicolonPos);
+    }
+
+    return trim($sql);
 }
 
 function kirpi_ai_parse_chat_completion_response(array $response): array
@@ -2628,6 +2671,7 @@ function kirpi_ai_build_sql_generation_prompt(string $question, array $context =
         'Task: Produce one read-only SQL candidate for the given user question.',
         'Hard rules:',
         '- Return a single SELECT statement only.',
+        '- Do not explain, reason, summarize, or include markdown.',
         '- Do not use SELECT * or table.*. Select explicit allowed fields only.',
         '- Do not use semicolons, comments, UNION, subqueries, DDL, DML, system schemas, or unsafe functions.',
         '- Use only the allowed tables and fields below.',

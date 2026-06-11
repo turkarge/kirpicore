@@ -233,6 +233,8 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - JSON yanıt reasoning metninden sonra gelse bile güvenli JSON bloğu ayrıştırılır.
    - SQL üretim prompt'u `SELECT *` ve `table.*` kullanımını açıkça yasaklar.
    - Candidate ve SQL Guard katmanları wildcard select kullanımını `wildcard_select_not_allowed` ile bloklar.
+   - Açıklama/prose çıktıları artık SQL candidate olarak kabul edilmez; gerçek `SELECT ... FROM ...` yoksa candidate boş döner.
+   - Query Flow Aday SQL kutusu light/dark tema uyumlu okunur kod bloğu standardına alındı.
 
 ## Gün Sonu Notu - 2026-06-04
 

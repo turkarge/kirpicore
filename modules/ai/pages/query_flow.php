@@ -226,7 +226,7 @@ $stepBadge = static function (bool $done): string {
                             </div>
                             <div class="col-12">
                                 <div class="text-secondary small mb-1"><?php echo e(ai_lang('candidate_sql')); ?></div>
-                                <pre class="bg-body-tertiary p-3 rounded"><code><?php echo e((string) ($candidate['candidate_sql'] ?? '')); ?></code></pre>
+                                <pre class="kirpi-code-block p-3 rounded"><code><?php echo e((string) ($candidate['candidate_sql'] ?? '')); ?></code></pre>
                             </div>
                             <?php if (!empty($candidate['warnings'])): ?>
                                 <div class="col-12">
