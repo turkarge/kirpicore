@@ -237,6 +237,7 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Query Flow Aday SQL kutusu light/dark tema uyumlu okunur kod bloğu standardına alındı.
    - SQL adapter secret çözümü adapter ref, provider ref ve aynı provider'daki yapılandırılmış adapter fallback sırasıyla çalışır.
    - Query Flow model adapter listesi secret/runtime eksiklerini dropdown ve uyarı alanında görünür kılar.
+   - Aktif ama `chat` tipindeki adapterlar Query Flow'da neden gizlendiğini açıklayan bilgi alanında listelenir.
 
 ## Gün Sonu Notu - 2026-06-04
 

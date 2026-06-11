@@ -17,6 +17,13 @@ $preview = null;
 $guard = null;
 $explain = [];
 
+$hiddenActiveAdapters = [];
+foreach (kirpi_ai_model_adapters_with_config() as $adapter) {
+    if (!empty($adapter['is_enabled']) && (string) ($adapter['adapter_type'] ?? '') !== 'sql_generation') {
+        $hiddenActiveAdapters[] = $adapter;
+    }
+}
+
 $adapters = kirpi_ai_sql_generation_adapters();
 $adapterOptions = [
     'mock-sql-generator' => ai_lang('mock_sql_generator'),
@@ -155,6 +162,26 @@ $stepBadge = static function (bool $done): string {
                             <?php endif; ?>
                         </div>
                         <a href="<?php echo base_url('ai/providers'); ?>" class="btn btn-sm btn-outline-primary mt-2">
+                            <?php echo e(ai_lang('provider_settings', 'Provider Ayarları')); ?>
+                        </a>
+                    </div>
+                <?php endif; ?>
+                <?php if (!empty($hiddenActiveAdapters)): ?>
+                    <div class="alert alert-info mt-3 mb-0">
+                        <div class="fw-semibold"><?php echo e(ai_lang('query_flow_hidden_adapters', 'Bazı aktif adapterlar Query Flow listesinde gösterilmiyor.')); ?></div>
+                        <div class="small mb-2">
+                            <?php echo e(ai_lang('query_flow_hidden_adapters_hint', 'Query Flow yalnız Adapter Tipi SQL Generation olan adapterları listeler. Chat adapterlar bağlantı testi için kullanılabilir, SQL üretim akışında kullanılmaz.')); ?>
+                        </div>
+                        <div class="mb-2">
+                            <?php foreach ($hiddenActiveAdapters as $adapter): ?>
+                                <span class="badge bg-blue-lt me-1 mb-1">
+                                    <?php echo e((string) ($adapter['adapter_key'] ?? '')); ?>
+                                    /
+                                    <?php echo e((string) ($adapter['adapter_type'] ?? '')); ?>
+                                </span>
+                            <?php endforeach; ?>
+                        </div>
+                        <a href="<?php echo base_url('ai/providers'); ?>" class="btn btn-sm btn-outline-primary">
                             <?php echo e(ai_lang('provider_settings', 'Provider Ayarları')); ?>
                         </a>
                     </div>

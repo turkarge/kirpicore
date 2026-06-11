@@ -103,6 +103,9 @@ $adapterTypeOptions = [
                                 <span class="badge <?php echo !empty($adapter['secret_configured']) || $isMock ? 'bg-green-lt' : 'bg-yellow-lt'; ?>">
                                     <?php echo e(!empty($adapter['secret_configured']) || $isMock ? ai_lang('secret_ready', 'Secret hazır') : ai_lang('secret_missing', 'Secret eksik')); ?>
                                 </span>
+                                <span class="badge <?php echo (string) ($adapter['adapter_type'] ?? '') === 'sql_generation' && !empty($adapter['is_enabled']) ? 'bg-green-lt' : 'bg-secondary-lt'; ?>">
+                                    <?php echo e((string) ($adapter['adapter_type'] ?? '') === 'sql_generation' && !empty($adapter['is_enabled']) ? ai_lang('query_flow_visible', 'Query Flow görünür') : ai_lang('query_flow_hidden', 'Query Flow gizli')); ?>
+                                </span>
                             </div>
                         </div>
                         <div class="card-body">
