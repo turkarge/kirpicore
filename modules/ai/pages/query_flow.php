@@ -94,6 +94,72 @@ $renderBadges = static function (array $items, string $class = 'bg-secondary-lt'
 $stepBadge = static function (bool $done): string {
     return $done ? 'bg-green-lt' : 'bg-secondary-lt';
 };
+
+$sanitizeAdapter = static function (array $adapter): array {
+    $config = (array) ($adapter['config'] ?? []);
+    $safeConfig = [];
+    foreach ($config as $key => $value) {
+        $key = (string) $key;
+        if (preg_match('/(secret|token|password|api[_-]?key)$/i', $key) === 1 && !in_array($key, ['api_key_ref', 'api_key_env'], true)) {
+            $safeConfig[$key] = '[masked]';
+            continue;
+        }
+        $safeConfig[$key] = is_scalar($value) || $value === null ? $value : '[non-scalar]';
+    }
+
+    return [
+        'adapter_key' => (string) ($adapter['adapter_key'] ?? ''),
+        'provider' => (string) ($adapter['provider'] ?? ''),
+        'model_name' => (string) ($adapter['model_name'] ?? ''),
+        'adapter_type' => (string) ($adapter['adapter_type'] ?? ''),
+        'is_enabled' => !empty($adapter['is_enabled']),
+        'is_external' => !empty($adapter['is_external']),
+        'secret_configured' => !empty($adapter['secret_configured']),
+        'runtime_enabled' => kirpi_ai_adapter_runtime_enabled($adapter),
+        'query_flow_visible' => (string) ($adapter['adapter_type'] ?? '') === 'sql_generation' && !empty($adapter['is_enabled']),
+        'config' => $safeConfig,
+        'updated_at' => (string) ($adapter['updated_at'] ?? ''),
+    ];
+};
+
+$allAdaptersForDebug = kirpi_ai_model_adapters_with_config();
+$debugPayload = [
+    'generated_at' => date('c'),
+    'page' => 'ai/query-flow',
+    'request' => [
+        'question' => $question,
+        'limit' => $limit,
+        'requested_model_adapter' => $requestedModelAdapter,
+        'resolved_model_adapter' => $modelAdapter,
+        'generate_candidate' => $generateCandidate,
+    ],
+    'runtime' => [
+        'global_runtime_enabled' => env_bool('AI_EXTERNAL_MODEL_RUNTIME_ENABLED', false),
+        'sql_explain_enabled' => env_bool('AI_SQL_EXPLAIN_ENABLED', false),
+    ],
+    'adapter_selection' => [
+        'options' => $adapterOptions,
+        'selected_adapter' => is_array($selectedAdapter) ? $sanitizeAdapter($selectedAdapter) : null,
+        'hidden_active_adapters' => array_map($sanitizeAdapter, $hiddenActiveAdapters),
+        'all_adapters' => array_map($sanitizeAdapter, $allAdaptersForDebug),
+    ],
+    'planner' => [
+        'status' => is_array($plan) ? 'ready' : 'missing',
+        'allowed_tables' => $allowedTables,
+        'allowed_fields' => $allowedFields,
+        'plan' => $plan,
+    ],
+    'candidate' => $candidate,
+    'preview' => $preview,
+    'guard' => $guard,
+    'explain' => $explain,
+    'notes' => [
+        'secrets_are_masked_or_omitted',
+        'secret_configured_is_boolean_only',
+        'api_key_ref_and_api_key_env_are_references_not_secret_values',
+    ],
+];
+$debugJson = json_encode($debugPayload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?: '{}';
 ?>
 
 <div class="page-header d-print-none">
@@ -105,13 +171,21 @@ $stepBadge = static function (bool $done): string {
                 <div class="text-secondary mt-1"><?php echo e(ai_lang('query_flow_detail')); ?></div>
             </div>
             <div class="col-auto ms-auto d-print-none">
-                <a href="<?php echo base_url('ai/view'); ?>" class="btn btn-outline-secondary">
-                    <?php echo e(ai_lang('back_to_ai')); ?>
-                </a>
+                <div class="btn-list">
+                    <button type="button" class="btn btn-outline-primary js-ai-debug-copy" data-debug-target="ai-query-flow-debug-json">
+                        <i class="ti ti-copy"></i>
+                        <?php echo e(ai_lang('copy_debug_json', 'Debug JSON Kopyala')); ?>
+                    </button>
+                    <a href="<?php echo base_url('ai/view'); ?>" class="btn btn-outline-secondary">
+                        <?php echo e(ai_lang('back_to_ai')); ?>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<script type="application/json" id="ai-query-flow-debug-json"><?php echo $debugJson; ?></script>
 
 <div class="page-body">
     <div class="container-xl">

@@ -239,6 +239,12 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Query Flow model adapter listesi secret/runtime eksiklerini dropdown ve uyarı alanında görünür kılar.
    - Aktif ama `chat` tipindeki adapterlar Query Flow'da neden gizlendiğini açıklayan bilgi alanında listelenir.
 
+27. **Query Flow debug export ve adapter seed koruması** - Tamamlandı
+   - Query Flow ekranına `Debug JSON Kopyala` aksiyonu eklendi.
+   - Debug JSON; soru, limit, runtime kapıları, seçili adapter, gizlenen adapterlar, tüm adapter tanımları, planner, candidate, preview, guard ve explain sonucunu tek pakette toplar.
+   - Secret değerleri JSON içinde maskelenir veya yalnız referans olarak gösterilir.
+   - AI adapter seed akışı mevcut provider/model/adapter tipi/runtime ayarlarını `ON DUPLICATE KEY UPDATE` ile ezmeyecek şekilde düzeltildi.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:

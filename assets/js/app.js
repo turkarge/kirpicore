@@ -25,6 +25,7 @@
             this.bindAjaxForms();
             this.initAiLauncher();
             this.bindAiProviderTests();
+            this.bindAiDebugCopy();
         },
 
         bootstrapGlobals() {
@@ -843,6 +844,52 @@
                 } catch (error) {
                     console.warn("Provider test error:", error);
                     this.toast("Provider testi sırasında bir hata oluştu.", "error");
+                } finally {
+                    trigger.disabled = false;
+                    trigger.innerHTML = originalHtml;
+                }
+            });
+        },
+
+        bindAiDebugCopy() {
+            document.addEventListener("click", async (event) => {
+                const trigger = event.target.closest(".js-ai-debug-copy");
+                if (!trigger) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                const targetId = trigger.dataset.debugTarget || "";
+                const source = targetId ? document.getElementById(targetId) : null;
+                const value = source ? (source.textContent || "").trim() : "";
+                if (!value) {
+                    this.toast("Debug JSON bulunamadi.", "warning");
+                    return;
+                }
+
+                const originalHtml = trigger.innerHTML;
+                trigger.disabled = true;
+
+                try {
+                    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+                        await navigator.clipboard.writeText(value);
+                    } else {
+                        const textarea = document.createElement("textarea");
+                        textarea.value = value;
+                        textarea.setAttribute("readonly", "readonly");
+                        textarea.style.position = "fixed";
+                        textarea.style.left = "-9999px";
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand("copy");
+                        textarea.remove();
+                    }
+
+                    this.toast("Debug JSON panoya kopyalandi.", "success");
+                } catch (error) {
+                    console.warn("Debug JSON copy error:", error);
+                    this.toast("Debug JSON kopyalanamadi.", "error");
                 } finally {
                     trigger.disabled = false;
                     trigger.innerHTML = originalHtml;

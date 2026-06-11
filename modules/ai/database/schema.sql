@@ -120,7 +120,4 @@ INSERT INTO ai_model_adapters (
     ('openai-sql-placeholder', 'openai', 'external-sql-model', 'sql_generation', 0, 1, JSON_OBJECT('api_key_env', 'OPENAI_API_KEY')),
     ('mock-sql-generator', 'mock', 'mock-sql-generator', 'sql_generation', 1, 0, NULL)
 ON DUPLICATE KEY UPDATE
-    provider = VALUES(provider),
-    model_name = VALUES(model_name),
-    adapter_type = VALUES(adapter_type),
-    is_external = VALUES(is_external);
+    adapter_key = VALUES(adapter_key);
