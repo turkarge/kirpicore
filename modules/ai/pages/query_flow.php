@@ -38,7 +38,7 @@ if ($generateCandidate && $question !== '' && !empty($allowedTables)) {
     ], $modelAdapter);
 
     $candidateSql = trim((string) ($candidate['candidate_sql'] ?? ''));
-    if ($candidateSql !== '') {
+    if ($candidateSql !== '' && (string) ($candidate['status'] ?? '') !== 'blocked') {
         $preview = kirpi_ai_preview_sql($candidateSql, [
             'planner_question' => $question,
             'allowed_tables' => $allowedTables,

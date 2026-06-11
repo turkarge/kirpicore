@@ -2107,6 +2107,10 @@ function kirpi_ai_sql_guard_readonly(string $sql, array $options = []): array
         $reasons[] = 'union_not_allowed';
     }
 
+    if (kirpi_ai_sql_uses_wildcard_select($normalized)) {
+        $reasons[] = 'wildcard_select_not_allowed';
+    }
+
     if (preg_match('/\b(from|join)\s*\(/i', $canonical) === 1) {
         $reasons[] = 'subquery_not_allowed';
     }
@@ -2159,6 +2163,22 @@ function kirpi_ai_sql_guard_readonly(string $sql, array $options = []): array
     }
 
     return $result;
+}
+
+function kirpi_ai_sql_uses_wildcard_select(string $sql): bool
+{
+    $sql = trim($sql);
+    if ($sql === '') {
+        return false;
+    }
+
+    if (preg_match('/^\s*select\s+(?:distinct\s+)?(.+?)\s+from\s/is', $sql, $matches) !== 1) {
+        return false;
+    }
+
+    $selectList = (string) ($matches[1] ?? '');
+
+    return preg_match('/(^|,|\s)(`?[a-zA-Z_][a-zA-Z0-9_]*`?\.)?\*(?=\s*(,|$))/i', $selectList) === 1;
 }
 
 function kirpi_ai_preview_sql(string $sql, array $context = []): array
@@ -2353,6 +2373,10 @@ function kirpi_ai_build_sql_candidate(array $input): array
         $warnings[] = 'candidate_sql_empty';
     }
 
+    if ($candidateSql !== '' && kirpi_ai_sql_uses_wildcard_select($candidateSql)) {
+        $warnings[] = 'wildcard_select_not_allowed';
+    }
+
     if (empty($allowedTables)) {
         $warnings[] = 'allowed_tables_missing';
     }
@@ -2362,7 +2386,7 @@ function kirpi_ai_build_sql_candidate(array $input): array
     }
 
     $candidate = [
-        'status' => $candidateSql === '' ? 'empty' : 'ready',
+        'status' => in_array('wildcard_select_not_allowed', $warnings, true) ? 'blocked' : ($candidateSql === '' ? 'empty' : 'ready'),
         'question' => $question,
         'planner_context' => [
             'allowed_tables' => $allowedTables,
@@ -2380,7 +2404,7 @@ function kirpi_ai_build_sql_candidate(array $input): array
     ];
 
     if (!empty($input['audit']) && $candidateSql !== '') {
-        kirpi_ai_log_operation('sql_candidate_review', 'success', [
+        kirpi_ai_log_operation('sql_candidate_review', $candidate['status'] === 'blocked' ? 'blocked' : 'success', [
             'question' => $question !== '' ? $question : null,
             'model_adapter' => $modelAdapter,
             'confidence' => $confidence,
@@ -2538,7 +2562,19 @@ function kirpi_ai_extract_sql_from_model_text(string $text): array
         ];
     }
 
+    if (preg_match('/<think\b[^>]*>.*?<\/think>/is', $text) === 1) {
+        $text = trim((string) preg_replace('/<think\b[^>]*>.*?<\/think>/is', '', $text));
+        $warnings[] = 'model_reasoning_stripped';
+    }
+
     $decoded = json_decode($text, true);
+    if (!is_array($decoded) && preg_match('/\{.*\}/s', $text, $matches) === 1) {
+        $decoded = json_decode((string) ($matches[0] ?? ''), true);
+        if (is_array($decoded)) {
+            $warnings[] = 'json_object_extracted';
+        }
+    }
+
     if (is_array($decoded)) {
         $sql = trim((string) ($decoded['sql'] ?? $decoded['candidate_sql'] ?? ''));
         $confidence = (float) ($decoded['confidence'] ?? 0.65);
@@ -2547,7 +2583,7 @@ function kirpi_ai_extract_sql_from_model_text(string $text): array
         return [
             'sql' => $sql,
             'confidence' => max(0, min(1, $confidence)),
-            'warnings' => $modelWarnings,
+            'warnings' => array_values(array_unique(array_merge($warnings, $modelWarnings))),
         ];
     }
 
@@ -2592,6 +2628,7 @@ function kirpi_ai_build_sql_generation_prompt(string $question, array $context =
         'Task: Produce one read-only SQL candidate for the given user question.',
         'Hard rules:',
         '- Return a single SELECT statement only.',
+        '- Do not use SELECT * or table.*. Select explicit allowed fields only.',
         '- Do not use semicolons, comments, UNION, subqueries, DDL, DML, system schemas, or unsafe functions.',
         '- Use only the allowed tables and fields below.',
         '- Do not invent tables or fields.',

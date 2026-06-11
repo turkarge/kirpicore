@@ -59,6 +59,7 @@ if ($generateCandidate) {
     ]);
 }
 $previewUrl = $candidate !== null
+    && (string) ($candidate['status'] ?? '') !== 'blocked'
     ? base_url('ai/sql-preview?' . http_build_query([
         'planner_question' => $question,
         'allowed_tables' => implode(', ', $allowedTables),

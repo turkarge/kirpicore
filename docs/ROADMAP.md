@@ -228,6 +228,12 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Chat/genel amaçlı adapter'lar SQL üretim akışında seçilemez hale getirildi.
    - Yanlış adapter URL ile gelirse ekran otomatik güvenli SQL generation adapter seçimine düşer.
 
+26. **Provider çıktı güvenliği sıkılaştırması** - Tamamlandı
+   - Provider yanıtındaki `<think>...</think>` reasoning bloğu candidate parser içinde temizlenir.
+   - JSON yanıt reasoning metninden sonra gelse bile güvenli JSON bloğu ayrıştırılır.
+   - SQL üretim prompt'u `SELECT *` ve `table.*` kullanımını açıkça yasaklar.
+   - Candidate ve SQL Guard katmanları wildcard select kullanımını `wildcard_select_not_allowed` ile bloklar.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:
@@ -267,4 +273,5 @@ Doğrulanan son durum:
 - Provider canlı test altyapısı - Tamamlandı
 - Env Reader izleme ekranı - Tamamlandı
 - Query Flow adapter seçimi sıkılaştırması - Tamamlandı
+- Provider çıktı güvenliği sıkılaştırması - Tamamlandı
 - Gerçek provider canlı sağlayıcı doğrulaması
