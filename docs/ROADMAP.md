@@ -235,6 +235,8 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Candidate ve SQL Guard katmanları wildcard select kullanımını `wildcard_select_not_allowed` ile bloklar.
    - Açıklama/prose çıktıları artık SQL candidate olarak kabul edilmez; gerçek `SELECT ... FROM ...` yoksa candidate boş döner.
    - Query Flow Aday SQL kutusu light/dark tema uyumlu okunur kod bloğu standardına alındı.
+   - SQL adapter secret çözümü adapter ref, provider ref ve aynı provider'daki yapılandırılmış adapter fallback sırasıyla çalışır.
+   - Query Flow model adapter listesi secret/runtime eksiklerini dropdown ve uyarı alanında görünür kılar.
 
 ## Gün Sonu Notu - 2026-06-04
 

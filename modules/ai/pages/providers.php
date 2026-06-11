@@ -67,7 +67,7 @@ $adapterTypeOptions = [
                 $provider = (string) ($adapter['provider'] ?? '');
                 $config = (array) ($adapter['config'] ?? []);
                 $isMock = $provider === 'mock';
-                $apiKeyRef = (string) ($config['api_key_ref'] ?? kirpi_ai_setting_secret_key($adapterKey));
+                $apiKeyRef = (string) ($config['api_key_ref'] ?? kirpi_ai_provider_secret_key($provider));
                 $apiKeyEnv = (string) ($config['api_key_env'] ?? '');
                 $secretSource = $apiKeyEnv !== '' ? 'env' : 'setting';
                 $baseUrl = (string) ($config['base_url'] ?? '');

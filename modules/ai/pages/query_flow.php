@@ -24,12 +24,34 @@ $adapterOptions = [
 foreach ($adapters as $adapter) {
     $key = trim((string) ($adapter['adapter_key'] ?? ''));
     if ($key !== '' && $key !== 'mock-sql-generator') {
-        $adapterOptions[$key] = $key . ' / ' . (string) ($adapter['model_name'] ?? '');
+        $labelParts = [
+            (string) ($adapter['provider'] ?? 'provider'),
+            (string) ($adapter['model_name'] ?? ''),
+            '(' . $key . ')',
+        ];
+        $statusParts = [];
+        if (empty($adapter['secret_configured'])) {
+            $statusParts[] = ai_lang('secret_missing', 'Secret eksik');
+        }
+        if (!kirpi_ai_adapter_runtime_enabled($adapter)) {
+            $statusParts[] = ai_lang('runtime_disabled', 'Runtime kapalı');
+        }
+        $adapterOptions[$key] = implode(' / ', array_filter($labelParts));
+        if (!empty($statusParts)) {
+            $adapterOptions[$key] .= ' - ' . implode(', ', $statusParts);
+        }
     }
 }
 $modelAdapter = array_key_exists($requestedModelAdapter, $adapterOptions)
     ? $requestedModelAdapter
     : (string) array_key_first($adapterOptions);
+$selectedAdapter = null;
+foreach ($adapters as $adapter) {
+    if ((string) ($adapter['adapter_key'] ?? '') === $modelAdapter) {
+        $selectedAdapter = $adapter;
+        break;
+    }
+}
 
 if ($generateCandidate && $question !== '' && !empty($allowedTables)) {
     $candidate = kirpi_ai_generate_sql_candidate($question, [
@@ -121,6 +143,22 @@ $stepBadge = static function (bool $done): string {
                         </div>
                     </div>
                 </form>
+                <?php if (is_array($selectedAdapter) && (empty($selectedAdapter['secret_configured']) || !kirpi_ai_adapter_runtime_enabled($selectedAdapter))): ?>
+                    <div class="alert alert-warning mt-3 mb-0">
+                        <div class="fw-semibold"><?php echo e(ai_lang('adapter_not_ready', 'Seçili adapter canlı üretim için hazır değil.')); ?></div>
+                        <div class="small">
+                            <?php if (empty($selectedAdapter['secret_configured'])): ?>
+                                <?php echo e(ai_lang('adapter_secret_missing_hint', 'Provider Ayarları ekranında bu adapter için API key kaynağını yapılandırın.')); ?>
+                            <?php endif; ?>
+                            <?php if (!kirpi_ai_adapter_runtime_enabled($selectedAdapter)): ?>
+                                <?php echo e(ai_lang('adapter_runtime_missing_hint', 'Global runtime kapısı ve adapter runtime onayı açık olmalıdır.')); ?>
+                            <?php endif; ?>
+                        </div>
+                        <a href="<?php echo base_url('ai/providers'); ?>" class="btn btn-sm btn-outline-primary mt-2">
+                            <?php echo e(ai_lang('provider_settings', 'Provider Ayarları')); ?>
+                        </a>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
 

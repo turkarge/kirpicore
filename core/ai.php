@@ -759,7 +759,7 @@ function kirpi_ai_model_adapters(): array
 function kirpi_ai_sql_generation_adapters(bool $enabledOnly = true): array
 {
     $adapters = [];
-    foreach (kirpi_ai_model_adapters() as $adapter) {
+    foreach (kirpi_ai_model_adapters_with_config() as $adapter) {
         if ((string) ($adapter['adapter_type'] ?? '') !== 'sql_generation') {
             continue;
         }
@@ -861,6 +861,15 @@ function kirpi_ai_setting_secret_key(string $adapterKey): string
     return 'ai.adapter.' . $normalized . '.api_key';
 }
 
+function kirpi_ai_provider_secret_key(string $provider): string
+{
+    $normalized = strtolower(trim($provider));
+    $normalized = preg_replace('/[^a-z0-9_.-]+/', '.', $normalized) ?: 'default';
+    $normalized = trim($normalized, '.');
+
+    return 'ai.provider.' . $normalized . '.api_key';
+}
+
 function kirpi_ai_update_model_adapter(string $adapterKey, array $input, ?int $updatedBy = null): array
 {
     $adapter = kirpi_ai_model_adapter($adapterKey);
@@ -949,6 +958,11 @@ function kirpi_ai_update_model_adapter(string $adapterKey, array $input, ?int $u
                         'success' => false,
                         'message' => 'api_key_save_failed',
                     ];
+                }
+
+                $providerSecretRef = kirpi_ai_provider_secret_key($provider);
+                if ($providerSecretRef !== $apiKeyRef) {
+                    kirpi_setting_set($providerSecretRef, $apiKeyValue, $updatedBy, true);
                 }
             }
         }
@@ -2463,6 +2477,68 @@ function kirpi_ai_adapter_secret(array $adapter): string
         if ($value !== '') {
             return $value;
         }
+    }
+
+    $provider = strtolower(trim((string) ($adapter['provider'] ?? '')));
+    if ($provider !== '' && function_exists('kirpi_setting_get')) {
+        $providerRef = kirpi_ai_provider_secret_key($provider);
+        $value = trim((string) kirpi_setting_get($providerRef, ''));
+        if ($value !== '') {
+            return $value;
+        }
+    }
+
+    $fallbackRef = kirpi_ai_adapter_fallback_secret_ref($adapter);
+    if ($fallbackRef !== '' && function_exists('kirpi_setting_get')) {
+        $value = trim((string) kirpi_setting_get($fallbackRef, ''));
+        if ($value !== '') {
+            return $value;
+        }
+    }
+
+    return '';
+}
+
+function kirpi_ai_adapter_fallback_secret_ref(array $adapter): string
+{
+    if (!kirpi_ai_models_table_ready() || !function_exists('kirpi_setting_get')) {
+        return '';
+    }
+
+    $provider = strtolower(trim((string) ($adapter['provider'] ?? '')));
+    if ($provider === '' || $provider === 'mock') {
+        return '';
+    }
+
+    $currentKey = trim((string) ($adapter['adapter_key'] ?? ''));
+
+    try {
+        $stmt = db()->prepare("
+            SELECT adapter_key, config_json
+            FROM ai_model_adapters
+            WHERE provider = :provider
+              AND adapter_key <> :adapter_key
+              AND config_json IS NOT NULL
+            ORDER BY is_enabled DESC, adapter_type ASC, adapter_key ASC
+        ");
+        $stmt->execute([
+            ':provider' => $provider,
+            ':adapter_key' => $currentKey,
+        ]);
+
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $row) {
+            $decoded = json_decode((string) ($row['config_json'] ?? ''), true);
+            if (!is_array($decoded)) {
+                continue;
+            }
+
+            $ref = trim((string) ($decoded['api_key_ref'] ?? ''));
+            if ($ref !== '' && trim((string) kirpi_setting_get($ref, '')) !== '') {
+                return $ref;
+            }
+        }
+    } catch (Throwable $e) {
+        error_log('ai adapter fallback secret lookup error: ' . $e->getMessage());
     }
 
     return '';
