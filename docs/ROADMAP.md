@@ -286,3 +286,37 @@ Doğrulanan son durum:
 - Query Flow adapter seçimi sıkılaştırması - Tamamlandı
 - Provider çıktı güvenliği sıkılaştırması - Tamamlandı
 - Gerçek provider canlı sağlayıcı doğrulaması
+
+## Gün Sonu Notu - 2026-06-11
+
+Bugünkü çalışma AI modülü üzerinde gerçek provider entegrasyonu ve Query Flow teşhis kabiliyetiyle kapatıldı.
+
+Tamamlanan son durum:
+
+- Provider ayarları canlı test akışı başarılı doğrulandı.
+- Query Flow yalnız `sql_generation` adapterlarını listeleyecek şekilde sıkılaştırıldı.
+- Chat tipindeki aktif adapterların Query Flow'da neden gizlendiği görünür hale getirildi.
+- Provider response parser `<think>`, açıklama metni, prose ve wildcard SQL risklerine karşı sertleştirildi.
+- Aday SQL kutusu light/dark tema uyumlu okunur hale getirildi.
+- `Debug JSON Kopyala` aksiyonu eklendi; test sonucu ve mevcut konfigürasyonlar tek JSON paketi olarak paylaşılabilir hale geldi.
+- AI adapter seed akışının kullanıcı/provider ayarlarını ezmesi engellendi.
+
+## Yarın Planı - AI Kapanış ve Core Test Turu
+
+1. **AI modülü tek oturum kapanışı**
+   - Kullanıcıdan gelen Debug JSON üzerinden gerçek provider çıktısı incelenecek.
+   - Model prompt'u ve response parser, yalnız temiz JSON/SQL candidate kabul edecek şekilde son kez sıkılaştırılacak.
+   - Uzun açıklama/reasoning metni Aday SQL alanına düşmeyecek.
+   - Query Flow, Provider Ayarları, Env Reader ve AI Audit zinciri birlikte doğrulanacak.
+   - Son durumda AI modülü `production-ready preview/gateway` seviyesiyle kapatılacak.
+
+2. **Kirpi Core ekran ekran test turu**
+   - Yönetim, Erişim Yönetimi, İçerik Yönetimi, İletişim, Operasyon, Monitoring / İzleme ve Kirpi Intelligence grupları sırayla gezilecek.
+   - Her standart modülde liste, filtre, export, temel aksiyon, audit/notification etkisi ve tema uyumu kontrol edilecek.
+   - Bulunan küçük UI/metin/akış hataları aynı tur içinde düzeltilecek.
+
+3. **Deployment standardizasyon tasarımı**
+   - Her yeni Core tabanlı uygulamada servis çakışmasını önlemek için env tabanlı uygulama prefix standardı hazırlanacak.
+   - Docker compose service/container/network/volume/project isimleri bu prefix üzerinden üretilecek.
+   - Varsayılan örnek: `KIRPI_APP_PREFIX=kirpicore`.
+   - DB adı, session cookie adı, container adları, network/volume adları ve gerekiyorsa public route/proxy etiketleri bu standarda bağlanacak.
