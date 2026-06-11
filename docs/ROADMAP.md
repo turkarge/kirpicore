@@ -319,4 +319,5 @@ Tamamlanan son durum:
    - Her yeni Core tabanlı uygulamada servis çakışmasını önlemek için env tabanlı uygulama prefix standardı hazırlanacak.
    - Docker compose service/container/network/volume/project isimleri bu prefix üzerinden üretilecek.
    - Varsayılan örnek: `KIRPI_APP_PREFIX=kirpicore`.
-   - DB adı, session cookie adı, container adları, network/volume adları ve gerekiyorsa public route/proxy etiketleri bu standarda bağlanacak.
+   - Çalışma portları env üzerinden konfigüre edilecek; örnek: `KIRPI_APP_HTTP_PORT`, `KIRPI_DB_PORT`.
+   - DB adı, session cookie adı, container adları, network/volume adları, servis portları ve gerekiyorsa public route/proxy etiketleri bu standarda bağlanacak.
