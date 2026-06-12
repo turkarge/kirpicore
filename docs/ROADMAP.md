@@ -321,6 +321,7 @@ Tamamlanan son durum:
    - Yönetim, Erişim Yönetimi, İçerik Yönetimi, İletişim, Operasyon, Monitoring / İzleme ve Kirpi Intelligence grupları sırayla gezilecek.
    - Her standart modülde liste, filtre, export, temel aksiyon, audit/notification etkisi ve tema uyumu kontrol edilecek.
    - Bulunan küçük UI/metin/akış hataları aynı tur içinde düzeltilecek.
+   - Manuel test sonuçları `docs/testing/kirpi-core-ui-test-checklist.md` içindeki 76 maddelik standart kontrol listesine işlenecek.
 
 3. **Deployment standardizasyon tasarımı**
    - Her yeni Core tabanlı uygulamada servis çakışmasını önlemek için env tabanlı uygulama prefix standardı hazırlanacak.
