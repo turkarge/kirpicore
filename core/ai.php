@@ -890,6 +890,7 @@ function kirpi_ai_update_model_adapter(string $adapterKey, array $input, ?int $u
     $apiKeyValue = trim((string) ($input['api_key_value'] ?? ''));
     $isEnabled = !empty($input['is_enabled']) ? 1 : 0;
     $runtimeEnabled = !empty($input['runtime_enabled']);
+    $structuredOutput = !empty($input['structured_output']);
     $isExternal = $provider === 'mock' ? 0 : 1;
 
     if (!in_array($provider, ['mock', 'openai', 'openai_compatible'], true)) {
@@ -925,6 +926,7 @@ function kirpi_ai_update_model_adapter(string $adapterKey, array $input, ?int $u
         'timeout_seconds' => $timeout,
         'temperature' => $temperature,
         'max_tokens' => $maxTokens,
+        'structured_output' => $structuredOutput,
     ];
 
     if ($provider === 'openai_compatible') {
@@ -2092,6 +2094,18 @@ function kirpi_ai_sql_guard_readonly(string $sql, array $options = []): array
         static fn ($table): string => strtolower(trim((string) $table, " \t\n\r\0\x0B`")),
         (array) ($options['allowed_tables'] ?? [])
     )));
+    $allowedFields = [];
+    foreach ((array) ($options['allowed_fields'] ?? []) as $table => $fields) {
+        $normalizedTable = strtolower(trim((string) $table, " \t\n\r\0\x0B`"));
+        if ($normalizedTable === '') {
+            continue;
+        }
+
+        $allowedFields[$normalizedTable] = array_values(array_unique(array_filter(array_map(
+            static fn ($field): string => strtolower(trim((string) $field, " \t\n\r\0\x0B`")),
+            (array) $fields
+        ))));
+    }
 
     if ($canonical === '') {
         $reasons[] = 'empty_sql';
@@ -2155,6 +2169,11 @@ function kirpi_ai_sql_guard_readonly(string $sql, array $options = []): array
         }
     }
 
+    $fieldCheck = kirpi_ai_sql_validate_allowed_fields($normalized, $tables, $allowedFields);
+    if (!$fieldCheck['allowed']) {
+        $reasons[] = 'field_not_allowed';
+    }
+
     $reasons = array_values(array_unique($reasons));
     $allowed = empty($reasons);
     $result = [
@@ -2164,6 +2183,9 @@ function kirpi_ai_sql_guard_readonly(string $sql, array $options = []): array
         'reasons' => $reasons,
         'tables' => $tables,
         'allowed_tables' => $allowedTables,
+        'detected_fields' => $fieldCheck['detected_fields'],
+        'blocked_fields' => $fieldCheck['blocked_fields'],
+        'allowed_fields' => $allowedFields,
     ];
 
     if (!empty($options['audit']) && $normalized !== '') {
@@ -2172,11 +2194,89 @@ function kirpi_ai_sql_guard_readonly(string $sql, array $options = []): array
             'reasons' => $reasons,
             'tables' => $tables,
             'allowed_tables' => $allowedTables,
+            'detected_fields' => $fieldCheck['detected_fields'],
+            'blocked_fields' => $fieldCheck['blocked_fields'],
             'sql_length' => strlen($normalized),
         ], null, 'sql_guard', null);
     }
 
     return $result;
+}
+
+function kirpi_ai_sql_validate_allowed_fields(string $sql, array $tables, array $allowedFields): array
+{
+    if ($sql === '' || empty($allowedFields)) {
+        return [
+            'allowed' => true,
+            'detected_fields' => [],
+            'blocked_fields' => [],
+        ];
+    }
+
+    $withoutStrings = preg_replace("/'(?:''|[^'])*'|\"(?:\"\"|[^\"])*\"/s", ' ', $sql) ?? $sql;
+    $aliases = [];
+    if (preg_match_all('/\b(?:from|join)\s+(`?[a-zA-Z_][a-zA-Z0-9_]*`?)(?:\s+(?:as\s+)?(`?[a-zA-Z_][a-zA-Z0-9_]*`?))?/i', $withoutStrings, $tableMatches, PREG_SET_ORDER) > 0) {
+        $reservedAliases = ['where', 'join', 'left', 'right', 'inner', 'outer', 'cross', 'on', 'group', 'order', 'limit', 'having'];
+        foreach ($tableMatches as $match) {
+            $table = strtolower(str_replace('`', '', (string) ($match[1] ?? '')));
+            $alias = strtolower(str_replace('`', '', (string) ($match[2] ?? '')));
+            $aliases[$table] = $table;
+            if ($alias !== '' && !in_array($alias, $reservedAliases, true)) {
+                $aliases[$alias] = $table;
+            }
+        }
+    }
+
+    $detected = [];
+    $blocked = [];
+    if (preg_match_all('/\b(`?[a-zA-Z_][a-zA-Z0-9_]*`?)\s*\.\s*(`?[a-zA-Z_][a-zA-Z0-9_]*`?)\b/', $withoutStrings, $qualifiedMatches, PREG_SET_ORDER) > 0) {
+        foreach ($qualifiedMatches as $match) {
+            $qualifier = strtolower(str_replace('`', '', (string) ($match[1] ?? '')));
+            $field = strtolower(str_replace('`', '', (string) ($match[2] ?? '')));
+            $table = $aliases[$qualifier] ?? $qualifier;
+            $key = $table . '.' . $field;
+            $detected[] = $key;
+            if (!in_array($field, (array) ($allowedFields[$table] ?? []), true)) {
+                $blocked[] = $key;
+            }
+        }
+    }
+
+    $unqualifiedSql = preg_replace('/\b`?[a-zA-Z_][a-zA-Z0-9_]*`?\s*\.\s*`?[a-zA-Z_][a-zA-Z0-9_]*`?\b/', ' ', $withoutStrings) ?? $withoutStrings;
+    $unqualifiedSql = preg_replace('/\b(?:from|join)\s+`?[a-zA-Z_][a-zA-Z0-9_]*`?(?:\s+(?:as\s+)?`?[a-zA-Z_][a-zA-Z0-9_]*`?)?/i', ' ', $unqualifiedSql) ?? $unqualifiedSql;
+    $unqualifiedSql = preg_replace('/\b[a-zA-Z_][a-zA-Z0-9_]*\s*\(/', '(', $unqualifiedSql) ?? $unqualifiedSql;
+    $unqualifiedSql = preg_replace('/\bas\s+`?[a-zA-Z_][a-zA-Z0-9_]*`?/i', ' ', $unqualifiedSql) ?? $unqualifiedSql;
+
+    $keywords = [
+        'select', 'distinct', 'from', 'join', 'left', 'right', 'inner', 'outer', 'cross', 'on',
+        'where', 'and', 'or', 'not', 'is', 'null', 'true', 'false', 'in', 'like', 'between',
+        'group', 'by', 'order', 'asc', 'desc', 'having', 'limit', 'offset', 'case', 'when',
+        'then', 'else', 'end', 'as', 'all', 'any', 'exists',
+    ];
+    $tableNames = array_values(array_unique(array_merge($tables, array_keys($aliases))));
+    $allowedUnion = array_values(array_unique(array_merge(...array_values($allowedFields))));
+    if (preg_match_all('/\b`?([a-zA-Z_][a-zA-Z0-9_]*)`?\b/', $unqualifiedSql, $identifierMatches) > 0) {
+        foreach ((array) ($identifierMatches[1] ?? []) as $identifier) {
+            $field = strtolower((string) $identifier);
+            if (in_array($field, $keywords, true) || in_array($field, $tableNames, true)) {
+                continue;
+            }
+
+            $detected[] = $field;
+            if (!in_array($field, $allowedUnion, true)) {
+                $blocked[] = $field;
+            }
+        }
+    }
+
+    $detected = array_values(array_unique($detected));
+    $blocked = array_values(array_unique($blocked));
+
+    return [
+        'allowed' => empty($blocked),
+        'detected_fields' => $detected,
+        'blocked_fields' => $blocked,
+    ];
 }
 
 function kirpi_ai_sql_uses_wildcard_select(string $sql): bool
@@ -2225,6 +2325,7 @@ function kirpi_ai_preview_sql(string $sql, array $context = []): array
 
     $guard = kirpi_ai_sql_guard_readonly($sql, [
         'allowed_tables' => $allowedTables,
+        'allowed_fields' => $allowedFields,
         'audit' => false,
     ]);
     $guardAllowed = !empty($guard['allowed']);
@@ -2293,6 +2394,7 @@ function kirpi_ai_explain_sql(string $sql, array $context = []): array
     if (!is_array($guard)) {
         $guard = kirpi_ai_sql_guard_readonly($sql, [
             'allowed_tables' => (array) ($context['allowed_tables'] ?? []),
+            'allowed_fields' => (array) ($context['allowed_fields'] ?? []),
             'audit' => false,
         ]);
     }
@@ -2391,6 +2493,16 @@ function kirpi_ai_build_sql_candidate(array $input): array
         $warnings[] = 'wildcard_select_not_allowed';
     }
 
+    $guard = $candidateSql !== '' ? kirpi_ai_sql_guard_readonly($candidateSql, [
+        'allowed_tables' => $allowedTables,
+        'allowed_fields' => $allowedFields,
+        'audit' => false,
+    ]) : null;
+    if (is_array($guard) && empty($guard['allowed'])) {
+        $warnings[] = 'guard_blocked';
+        $warnings = array_merge($warnings, array_map('strval', (array) ($guard['reasons'] ?? [])));
+    }
+
     if (empty($allowedTables)) {
         $warnings[] = 'allowed_tables_missing';
     }
@@ -2400,7 +2512,7 @@ function kirpi_ai_build_sql_candidate(array $input): array
     }
 
     $candidate = [
-        'status' => in_array('wildcard_select_not_allowed', $warnings, true) ? 'blocked' : ($candidateSql === '' ? 'empty' : 'ready'),
+        'status' => in_array('guard_blocked', $warnings, true) ? 'blocked' : ($candidateSql === '' ? 'empty' : 'ready'),
         'question' => $question,
         'planner_context' => [
             'allowed_tables' => $allowedTables,
@@ -2415,6 +2527,7 @@ function kirpi_ai_build_sql_candidate(array $input): array
         'generated_at' => date('c'),
         'execution_enabled' => false,
         'preview_required' => true,
+        'guard' => $guard,
     ];
 
     if (!empty($input['audit']) && $candidateSql !== '') {
@@ -2920,10 +3033,23 @@ function kirpi_ai_external_generate_sql_candidate(string $question, array $conte
             ],
         ],
     ];
+    $structuredOutput = !array_key_exists('structured_output', $config) || filter_var($config['structured_output'], FILTER_VALIDATE_BOOLEAN);
+    if ($structuredOutput) {
+        $payload['response_format'] = ['type' => 'json_object'];
+    }
 
     $http = kirpi_ai_http_json_post($endpoint, [
         'Authorization: Bearer ' . $secret,
     ], $payload, $timeout);
+
+    $structuredOutputFallback = false;
+    if ($structuredOutput && !($http['success'] ?? false) && in_array((int) ($http['status_code'] ?? 0), [400, 404, 415, 422], true)) {
+        unset($payload['response_format']);
+        $http = kirpi_ai_http_json_post($endpoint, [
+            'Authorization: Bearer ' . $secret,
+        ], $payload, $timeout);
+        $structuredOutputFallback = true;
+    }
 
     if (!($http['success'] ?? false)) {
         kirpi_ai_log_operation('sql_candidate_generate', 'failed', [
@@ -2951,6 +3077,7 @@ function kirpi_ai_external_generate_sql_candidate(string $question, array $conte
     $candidateSql = trim((string) ($parsed['sql'] ?? ''));
     $warnings = array_values(array_unique(array_merge(
         ['external_provider_generation'],
+        $structuredOutputFallback ? ['structured_output_fallback'] : [],
         array_map('strval', (array) ($parsed['warnings'] ?? []))
     )));
 
@@ -2968,13 +3095,15 @@ function kirpi_ai_external_generate_sql_candidate(string $question, array $conte
     $candidate['prompt_hash'] = (string) ($prompt['prompt_hash'] ?? '');
     $candidate['generation_mode'] = 'external_provider';
 
-    kirpi_ai_log_operation($candidateSql !== '' ? 'sql_candidate_generate' : 'sql_candidate_generate_empty', $candidateSql !== '' ? 'success' : 'blocked', [
+    $candidateReady = (string) ($candidate['status'] ?? '') === 'ready';
+    kirpi_ai_log_operation($candidateReady ? 'sql_candidate_generate' : 'sql_candidate_generate_blocked', $candidateReady ? 'success' : 'blocked', [
         'question' => $question !== '' ? $question : null,
         'model_adapter' => $adapterKey,
         'provider' => $provider,
         'generation_mode' => 'external_provider',
         'prompt_hash' => $candidate['prompt_hash'],
         'warnings' => $candidate['warnings'],
+        'guard_reasons' => (array) ($candidate['guard']['reasons'] ?? []),
         'allowed_tables' => $allowedTables,
         'sql_length' => strlen($candidateSql),
         'execution_enabled' => false,

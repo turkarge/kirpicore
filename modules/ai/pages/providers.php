@@ -72,6 +72,7 @@ $adapterTypeOptions = [
                 $secretSource = $apiKeyEnv !== '' ? 'env' : 'setting';
                 $baseUrl = (string) ($config['base_url'] ?? '');
                 $runtimeAdapterEnabled = filter_var($config['runtime_enabled'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                $structuredOutputEnabled = !array_key_exists('structured_output', $config) || filter_var($config['structured_output'], FILTER_VALIDATE_BOOLEAN);
                 ?>
                 <div class="col-12">
                     <form action="<?php echo base_url('ai/actions/provider-update'); ?>" method="post" data-ajax="true" class="card">
@@ -175,6 +176,12 @@ $adapterTypeOptions = [
                                     <label class="form-check form-switch mb-2">
                                         <input class="form-check-input" type="checkbox" name="is_enabled" value="1" <?php echo !empty($adapter['is_enabled']) ? 'checked' : ''; ?> <?php echo $isMock ? 'disabled' : ''; ?>>
                                         <span class="form-check-label"><?php echo e(ai_lang('adapter_enabled', 'Adapter aktif')); ?></span>
+                                    </label>
+                                </div>
+                                <div class="col-md-6 col-lg-3 d-flex align-items-end">
+                                    <label class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" name="structured_output" value="1" <?php echo $structuredOutputEnabled ? 'checked' : ''; ?> <?php echo $isMock ? 'disabled' : ''; ?>>
+                                        <span class="form-check-label"><?php echo e(ai_lang('structured_output', 'Yapılandırılmış JSON çıktı')); ?></span>
                                     </label>
                                 </div>
                                 <div class="col-md-6 col-lg-3 d-flex align-items-end">

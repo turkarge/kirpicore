@@ -23,6 +23,7 @@ $allowedTables = array_values(array_filter(array_map(
 $result = $sql !== ''
     ? kirpi_ai_sql_guard_readonly($sql, [
         'allowed_tables' => $allowedTables,
+        'allowed_fields' => $allowedFields,
         'audit' => true,
     ])
     : null;
