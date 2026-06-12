@@ -330,7 +330,6 @@
         initMobileNavigation() {
             const collapseEl = document.getElementById("navbar-menu");
             const toggle = document.querySelector(".js-mobile-nav-toggle");
-            const close = collapseEl?.querySelector(".js-mobile-nav-close");
 
             if (!collapseEl || !toggle || !(window.bootstrap && bootstrap.Collapse)) {
                 return;
@@ -347,12 +346,6 @@
                     collapseEl.addEventListener("hidden.bs.collapse", () => toggle.focus(), { once: true });
                 }
             };
-
-            close?.addEventListener("click", (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                hide(true);
-            });
 
             collapseEl.addEventListener("show.bs.collapse", () => {
                 document.body.classList.add("mobile-nav-open");

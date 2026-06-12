@@ -266,7 +266,14 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
             <div class="d-flex flex-column flex-md-row flex-fill align-items-stretch align-items-md-center">
                 <div class="d-flex d-md-none align-items-center justify-content-between border-bottom px-3 py-2 mobile-nav-header">
                     <strong><?php echo e($navToggleLabel); ?></strong>
-                    <button type="button" class="btn btn-icon btn-ghost-secondary js-mobile-nav-close" aria-label="Kapat">
+                    <button
+                        type="button"
+                        class="btn btn-icon btn-ghost-secondary"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#navbar-menu"
+                        aria-controls="navbar-menu"
+                        aria-expanded="true"
+                        aria-label="Kapat">
                         <i class="ti ti-x fs-2"></i>
                     </button>
                 </div>
