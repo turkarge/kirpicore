@@ -36,6 +36,8 @@ $fallbackMessages = [
     'provider_model_missing' => 'Provider model adı eksik.',
     'provider_request_failed' => 'Provider isteği başarısız oldu.',
     'provider_empty_response' => 'Provider boş cevap döndürdü.',
+    'provider_response_invalid' => 'Provider yanıt verdi ancak beklenen JSON sözleşmesini karşılamadı.',
+    'response_contract_valid' => 'Provider bağlantısı ve JSON yanıt sözleşmesi doğrulandı.',
     'response_received' => 'Provider bağlantı testi başarılı.',
 ];
 

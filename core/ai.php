@@ -2757,8 +2757,8 @@ function kirpi_ai_extract_sql_from_model_text(string $text): array
     }
 
     $decoded = json_decode($text, true);
-    if (!is_array($decoded) && preg_match('/\{.*\}/s', $text, $matches) === 1) {
-        $decoded = json_decode((string) ($matches[0] ?? ''), true);
+    if (!is_array($decoded)) {
+        $decoded = kirpi_ai_extract_json_object_from_model_text($text);
         if (is_array($decoded)) {
             $warnings[] = 'json_object_extracted';
         }
@@ -2809,6 +2809,67 @@ function kirpi_ai_extract_sql_from_model_text(string $text): array
         'confidence' => 0.55,
         'warnings' => $warnings,
     ];
+}
+
+function kirpi_ai_extract_json_object_from_model_text(string $text): ?array
+{
+    $text = trim((string) preg_replace('/<think\b[^>]*>.*?<\/think>/is', '', $text));
+    if ($text === '') {
+        return null;
+    }
+
+    $decoded = json_decode($text, true);
+    if (is_array($decoded)) {
+        return $decoded;
+    }
+
+    $length = strlen($text);
+    for ($start = 0; $start < $length; $start++) {
+        if ($text[$start] !== '{') {
+            continue;
+        }
+
+        $depth = 0;
+        $inString = false;
+        $escaped = false;
+        for ($index = $start; $index < $length; $index++) {
+            $char = $text[$index];
+            if ($inString) {
+                if ($escaped) {
+                    $escaped = false;
+                } elseif ($char === '\\') {
+                    $escaped = true;
+                } elseif ($char === '"') {
+                    $inString = false;
+                }
+                continue;
+            }
+
+            if ($char === '"') {
+                $inString = true;
+                continue;
+            }
+            if ($char === '{') {
+                $depth++;
+                continue;
+            }
+            if ($char !== '}') {
+                continue;
+            }
+
+            $depth--;
+            if ($depth === 0) {
+                $candidate = substr($text, $start, $index - $start + 1);
+                $decoded = json_decode($candidate, true);
+                if (is_array($decoded)) {
+                    return $decoded;
+                }
+                break;
+            }
+        }
+    }
+
+    return null;
 }
 
 function kirpi_ai_extract_select_statement_from_text(string $text): string
@@ -3199,11 +3260,21 @@ function kirpi_ai_test_model_adapter(string $adapterKey): array
             ],
         ],
     ];
+    $structuredOutput = !array_key_exists('structured_output', $config) || filter_var($config['structured_output'], FILTER_VALIDATE_BOOLEAN);
+    if ($structuredOutput) {
+        $payload['response_format'] = ['type' => 'json_object'];
+    }
 
     $startedAt = microtime(true);
     $http = kirpi_ai_http_json_post($endpoint, [
         'Authorization: Bearer ' . kirpi_ai_adapter_secret($adapter),
     ], $payload, $timeout);
+    if ($structuredOutput && !($http['success'] ?? false) && in_array((int) ($http['status_code'] ?? 0), [400, 404, 415, 422], true)) {
+        unset($payload['response_format']);
+        $http = kirpi_ai_http_json_post($endpoint, [
+            'Authorization: Bearer ' . kirpi_ai_adapter_secret($adapter),
+        ], $payload, $timeout);
+    }
     $durationMs = (int) round((microtime(true) - $startedAt) * 1000);
     $statusCode = (int) ($http['status_code'] ?? 0);
 
@@ -3225,19 +3296,22 @@ function kirpi_ai_test_model_adapter(string $adapterKey): array
     }
 
     $content = trim((string) (($http['json']['choices'][0]['message']['content'] ?? '') ?: ''));
-    $responseOk = $content !== '';
+    $testResponse = kirpi_ai_extract_json_object_from_model_text($content);
+    $responseOk = is_array($testResponse)
+        && (string) ($testResponse['status'] ?? '') === 'ok'
+        && (string) ($testResponse['purpose'] ?? '') === 'provider_test';
 
     kirpi_ai_log_operation('provider_runtime_test', $responseOk ? 'success' : 'failed', [
         'model_adapter' => $adapterKey,
         'provider' => $provider,
-        'reason' => $responseOk ? 'response_received' : 'provider_empty_response',
+        'reason' => $responseOk ? 'response_contract_valid' : ($content === '' ? 'provider_empty_response' : 'provider_response_invalid'),
         'status_code' => $statusCode,
         'duration_ms' => $durationMs,
     ], $adapterKey, 'ai_model_adapter', null);
 
     return [
         'status' => $responseOk ? 'success' : 'failed',
-        'reason' => $responseOk ? 'response_received' : 'provider_empty_response',
+        'reason' => $responseOk ? 'response_contract_valid' : ($content === '' ? 'provider_empty_response' : 'provider_response_invalid'),
         'status_code' => $statusCode,
         'duration_ms' => $durationMs,
     ];

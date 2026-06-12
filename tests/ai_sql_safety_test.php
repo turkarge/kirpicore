@@ -30,6 +30,9 @@ $proseJson = kirpi_ai_extract_sql_from_model_text('Result: {"sql":"SELECT id FRO
 $assert(($proseJson['sql'] ?? '') === 'SELECT id FROM users', 'JSON embedded after prose must be parsed.');
 $assert(in_array('json_object_extracted', (array) ($proseJson['warnings'] ?? []), true), 'Embedded JSON extraction warning is missing.');
 
+$nestedJson = kirpi_ai_extract_json_object_from_model_text('prefix {"status":"ok","purpose":"provider_test","meta":{"message":"brace } inside string"}} suffix {invalid}');
+$assert(($nestedJson['purpose'] ?? '') === 'provider_test', 'Balanced JSON extraction must support nested objects and braces inside strings.');
+
 $prose = kirpi_ai_extract_sql_from_model_text('The safest answer is to list active users.');
 $assert(($prose['sql'] ?? '') === '', 'Prose-only model output must not become SQL.');
 $assert(in_array('sql_statement_missing', (array) ($prose['warnings'] ?? []), true), 'Missing SQL warning is required.');

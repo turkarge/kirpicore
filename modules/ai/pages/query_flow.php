@@ -373,6 +373,12 @@ $debugJson = json_encode($debugPayload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICO
                                     <?php $renderBadges((array) ($candidate['warnings'] ?? []), 'bg-yellow-lt'); ?>
                                 </div>
                             <?php endif; ?>
+                            <?php if (!empty($candidate['guard']['blocked_fields'])): ?>
+                                <div class="col-12">
+                                    <div class="text-secondary small mb-1"><?php echo e(ai_lang('blocked_fields', 'Bloklanan Alanlar')); ?></div>
+                                    <?php $renderBadges((array) ($candidate['guard']['blocked_fields'] ?? []), 'bg-red-lt'); ?>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

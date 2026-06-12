@@ -139,6 +139,22 @@ $renderBadges = static function (array $items, string $class = 'bg-secondary-lt'
                 </div>
             </div>
 
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h3 class="card-title"><?php echo e(ai_lang('detected_fields', 'Yakalanan Alanlar')); ?></h3>
+                </div>
+                <div class="card-body">
+                    <?php $renderBadges((array) ($result['detected_fields'] ?? [])); ?>
+                    <?php if (empty($result['detected_fields'])): ?>
+                        <span class="text-secondary">-</span>
+                    <?php endif; ?>
+                    <?php if (!empty($result['blocked_fields'])): ?>
+                        <div class="text-secondary small mt-3 mb-1"><?php echo e(ai_lang('blocked_fields', 'Bloklanan Alanlar')); ?></div>
+                        <?php $renderBadges((array) ($result['blocked_fields'] ?? []), 'bg-red-lt'); ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+
             <div class="alert alert-warning mt-3">
                 <?php echo e(ai_lang('sql_guard_no_execute')); ?>
             </div>
