@@ -61,10 +61,21 @@ if (!$route_info) {
             continue;
         }
 
-        $pattern = preg_replace('/\{[a-zA-Z_][a-zA-Z0-9_]*\}/', '([^/]+)', preg_quote((string) $routeKey, '#'));
-        if ($pattern === null) {
+        $routeKeyString = (string) $routeKey;
+        $pattern = '';
+        $offset = 0;
+        if (preg_match_all('/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/', $routeKeyString, $placeholderMatches, PREG_OFFSET_CAPTURE) === false) {
             continue;
         }
+
+        foreach (($placeholderMatches[0] ?? []) as $placeholderMatch) {
+            $placeholder = (string) ($placeholderMatch[0] ?? '');
+            $position = (int) ($placeholderMatch[1] ?? 0);
+            $pattern .= preg_quote(substr($routeKeyString, $offset, $position - $offset), '#');
+            $pattern .= '([^/]+)';
+            $offset = $position + strlen($placeholder);
+        }
+        $pattern .= preg_quote(substr($routeKeyString, $offset), '#');
 
         if (preg_match('#^' . $pattern . '$#', $request_path, $matches) !== 1) {
             continue;
