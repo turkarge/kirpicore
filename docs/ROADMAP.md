@@ -245,6 +245,16 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
    - Secret değerleri JSON içinde maskelenir veya yalnız referans olarak gösterilir.
    - AI adapter seed akışı mevcut provider/model/adapter tipi/runtime ayarlarını `ON DUPLICATE KEY UPDATE` ile ezmeyecek şekilde düzeltildi.
 
+28. **Kirpi Intelligence v1.0 güvenlik kapanışı** - Tamamlandı
+   - Gerçek provider debug çıktısı doğrulandı: reasoning temizlendi, açık alanlı SQL üretildi, Preview ve Guard başarıyla geçti, veri çalıştırılmadı.
+   - OpenAI/OpenAI-compatible isteklerine yapılandırılmış JSON çıktı modu eklendi; desteklemeyen servisler güvenli düz metin fallback akışına alınır.
+   - Provider bağlantı testi artık yalnız cevap varlığını değil beklenen JSON sözleşmesini doğrular.
+   - SQL Guard tablo sınırına ek olarak Planner tarafından yayınlanan `allowed_fields` listesini de zorunlu uygular.
+   - İzin dışı alanlar `field_not_allowed` ile bloklanır ve Guard/Query Flow ekranlarında görünür hale gelir.
+   - Candidate, Preview aşamasından önce Guard kontrolünden geçer; bloklanan candidate audit zincirine başarı olarak yazılmaz.
+   - Reasoning, prose, fenced JSON, gömülü JSON, wildcard, izin dışı tablo ve izin dışı alan senaryolarını kapsayan regresyon testi eklendi.
+   - AI modül sürümü `1.0.0` olarak kapatıldı.
+
 ## Gün Sonu Notu - 2026-06-04
 
 Bugünkü KIP hazırlık çalışması tamamlandı. Core tarafında schema zinciri aşağıdaki hale getirildi:
@@ -285,7 +295,7 @@ Doğrulanan son durum:
 - Env Reader izleme ekranı - Tamamlandı
 - Query Flow adapter seçimi sıkılaştırması - Tamamlandı
 - Provider çıktı güvenliği sıkılaştırması - Tamamlandı
-- Gerçek provider canlı sağlayıcı doğrulaması
+- Gerçek provider canlı sağlayıcı doğrulaması - Tamamlandı
 
 ## Gün Sonu Notu - 2026-06-11
 
@@ -301,14 +311,11 @@ Tamamlanan son durum:
 - `Debug JSON Kopyala` aksiyonu eklendi; test sonucu ve mevcut konfigürasyonlar tek JSON paketi olarak paylaşılabilir hale geldi.
 - AI adapter seed akışının kullanıcı/provider ayarlarını ezmesi engellendi.
 
-## Yarın Planı - AI Kapanış ve Core Test Turu
+## Plan - Core Test Turu ve Deployment Standardizasyonu
 
-1. **AI modülü tek oturum kapanışı**
-   - Kullanıcıdan gelen Debug JSON üzerinden gerçek provider çıktısı incelenecek.
-   - Model prompt'u ve response parser, yalnız temiz JSON/SQL candidate kabul edecek şekilde son kez sıkılaştırılacak.
-   - Uzun açıklama/reasoning metni Aday SQL alanına düşmeyecek.
-   - Query Flow, Provider Ayarları, Env Reader ve AI Audit zinciri birlikte doğrulanacak.
-   - Son durumda AI modülü `production-ready preview/gateway` seviyesiyle kapatılacak.
+1. **AI modülü tek oturum kapanışı** - Tamamlandı
+   - Kirpi Intelligence `v1.0.0` production-ready preview/gateway seviyesiyle kapatıldı.
+   - Gerçek SQL yürütme ve gerçek veri okuma bilinçli olarak kapalı tutuldu.
 
 2. **Kirpi Core ekran ekran test turu**
    - Yönetim, Erişim Yönetimi, İçerik Yönetimi, İletişim, Operasyon, Monitoring / İzleme ve Kirpi Intelligence grupları sırayla gezilecek.

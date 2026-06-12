@@ -52,6 +52,51 @@ Health check: app/db ok
 
 Sonraki çalışma, kalite uyarılarındaki gürültüyü azaltmak ve gerçek hassas alan işaretlerini netleştirmektir.
 
+## Kirpi Intelligence v1.0 Kapanış Durumu - 2026-06-12
+
+Kirpi Intelligence modülü Core için güvenli AI preview/gateway katmanı olarak `v1.0.0` seviyesinde tamamlandı.
+
+Tamamlanan v1.0 kapsamı:
+
+* Schema Registry, metadata index, Discovery ve Quality Gate
+* RBAC sınırlarına göre Query Planner
+* OpenAI ve OpenAI-compatible provider adapter yönetimi
+* Env veya Settings referanslı secret politikası
+* Global ve adapter seviyesinde runtime kill-switch
+* Yapılandırılmış JSON çıktı isteği ve uyumsuz provider fallback akışı
+* Reasoning/prose temizleyen ve yalnız SQL candidate kabul eden response parser
+* Planner tabanlı izinli tablo ve izinli alan doğrulaması
+* Read-only SQL Guard, SQL Preview ve kontrollü EXPLAIN kapısı
+* AI Audit zinciri ve maskelenmiş Debug JSON export
+* Provider JSON sözleşme testi
+* Parser ve SQL güvenlik regresyon testleri
+
+Doğrulanan güvenli akış:
+
+```text
+Doğal Dil Sorusu
+  -> Query Planner
+  -> Provider Gateway
+  -> Structured SQL Candidate
+  -> Table + Field Guard
+  -> SQL Preview
+  -> Audit
+```
+
+v1.0 güvenlik sınırı:
+
+* Üretilen SQL doğrudan çalıştırılmaz.
+* Gerçek veri okunmaz.
+* `SELECT *`, izin dışı tablo, izin dışı alan, DDL/DML, `UNION`, subquery ve riskli ifadeler bloklanır.
+* Secret veya ham provider cevabı audit/debug çıktısına yazılmaz.
+* Gerçek SQL execution, Tool Registry, Needle, Event Intelligence ve Insight Engine sonraki bağımsız ürün fazlarıdır; Kirpi Intelligence v1.0 kapanışını engellemez.
+
+Regresyon testi:
+
+```bash
+php tests/ai_sql_safety_test.php
+```
+
 ---
 
 ## Amaç
