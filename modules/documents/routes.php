@@ -36,4 +36,11 @@ return [
         'auth' => true,
         'method' => 'POST',
     ],
+    'documents/actions/bulk-delete' => [
+        'file' => 'modules/documents/actions/bulk_delete.php',
+        'layout' => false,
+        'permission' => 'documents.manage',
+        'auth' => true,
+        'method' => 'POST',
+    ],
 ];

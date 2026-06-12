@@ -11,65 +11,69 @@ $search = trim((string) ($_GET['search'] ?? ''));
 $documentType = trim((string) ($_GET['document_type'] ?? ''));
 $entityType = trim((string) ($_GET['entity_type'] ?? ''));
 $entityId = (int) ($_GET['entity_id'] ?? 0);
+$page = max(1, (int) ($_GET['page'] ?? 1));
+$perPage = (int) ($_GET['per_page'] ?? 24);
+$perPage = in_array($perPage, [12, 24, 48, 96], true) ? $perPage : 24;
 $documentTypes = [];
 $entityTypes = [];
+$totalRecords = 0;
+$stats = ['total_files' => 0, 'total_size' => 0, 'linked_files' => 0, 'recent_files' => 0];
+
+$where = [];
+$params = [];
+if ($search !== '') {
+    $where[] = '(d.original_name LIKE :search OR d.mime_type LIKE :search OR d.storage_path LIKE :search)';
+    $params[':search'] = '%' . $search . '%';
+}
+if ($documentType !== '') {
+    $where[] = 'd.document_type = :document_type';
+    $params[':document_type'] = $documentType;
+}
+if ($entityType !== '') {
+    $where[] = 'EXISTS (SELECT 1 FROM document_links dlf WHERE dlf.document_id = d.id AND dlf.entity_type = :entity_type)';
+    $params[':entity_type'] = $entityType;
+}
+if ($entityId > 0) {
+    $where[] = 'EXISTS (SELECT 1 FROM document_links dli WHERE dli.document_id = d.id AND dli.entity_id = :entity_id)';
+    $params[':entity_id'] = $entityId;
+}
+$whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
 if ($tableReady) {
     try {
-        $documentTypes = db()->query("
-            SELECT DISTINCT document_type
+        $documentTypes = db()->query("SELECT DISTINCT document_type FROM documents WHERE document_type <> '' ORDER BY document_type")->fetchAll(PDO::FETCH_COLUMN) ?: [];
+        $entityTypes = db()->query("SELECT DISTINCT entity_type FROM document_links WHERE entity_type <> '' ORDER BY entity_type")->fetchAll(PDO::FETCH_COLUMN) ?: [];
+
+        $statsRow = db()->query("
+            SELECT COUNT(*) AS total_files,
+                   COALESCE(SUM(file_size), 0) AS total_size,
+                   SUM(EXISTS(SELECT 1 FROM document_links dl WHERE dl.document_id = documents.id)) AS linked_files,
+                   SUM(created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)) AS recent_files
             FROM documents
-            WHERE document_type IS NOT NULL AND document_type <> ''
-            ORDER BY document_type ASC
-        ")->fetchAll(PDO::FETCH_COLUMN) ?: [];
-
-        $entityTypes = db()->query("
-            SELECT DISTINCT entity_type
-            FROM document_links
-            WHERE entity_type IS NOT NULL AND entity_type <> ''
-            ORDER BY entity_type ASC
-        ")->fetchAll(PDO::FETCH_COLUMN) ?: [];
-
-        $where = [];
-        $params = [];
-
-        if ($search !== '') {
-            $where[] = '(d.original_name LIKE :search OR d.mime_type LIKE :search OR d.storage_path LIKE :search)';
-            $params[':search'] = '%' . $search . '%';
+        ")->fetch(PDO::FETCH_ASSOC) ?: [];
+        foreach ($stats as $key => $value) {
+            $stats[$key] = (int) ($statsRow[$key] ?? 0);
         }
 
-        if ($documentType !== '') {
-            $where[] = 'd.document_type = :document_type';
-            $params[':document_type'] = $documentType;
-        }
-
-        if ($entityType !== '') {
-            $where[] = 'dl.entity_type = :entity_type';
-            $params[':entity_type'] = $entityType;
-        }
-
-        if ($entityId > 0) {
-            $where[] = 'dl.entity_id = :entity_id';
-            $params[':entity_id'] = $entityId;
-        }
-
-        $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+        $countStmt = db()->prepare("SELECT COUNT(*) FROM documents d {$whereSql}");
+        $countStmt->execute($params);
+        $totalRecords = (int) $countStmt->fetchColumn();
+        $totalPages = max(1, (int) ceil($totalRecords / $perPage));
+        $page = min($page, $totalPages);
+        $offset = ($page - 1) * $perPage;
 
         $stmt = db()->prepare("
-            SELECT d.id, d.document_type, d.original_name, d.mime_type, d.file_size, d.created_at, u.name AS uploaded_by_name,
+            SELECT d.id, d.document_type, d.original_name, d.mime_type, d.file_size, d.created_at,
+                   u.name AS uploaded_by_name,
                    COUNT(dl.id) AS link_count,
-                   GROUP_CONCAT(
-                       DISTINCT CONCAT(dl.entity_type, '#', dl.entity_id, ' (', dl.relation_type, ')')
-                       ORDER BY dl.entity_type ASC, dl.entity_id ASC
-                       SEPARATOR ', '
-                   ) AS entity_links
+                   GROUP_CONCAT(DISTINCT CONCAT(dl.entity_type, '#', dl.entity_id) ORDER BY dl.entity_type, dl.entity_id SEPARATOR ', ') AS entity_links
             FROM documents d
             LEFT JOIN users u ON u.id = d.uploaded_by_user_id
             LEFT JOIN document_links dl ON dl.document_id = d.id
             {$whereSql}
             GROUP BY d.id, d.document_type, d.original_name, d.mime_type, d.file_size, d.created_at, u.name
             ORDER BY d.id DESC
-            LIMIT 100
+            LIMIT {$perPage} OFFSET {$offset}
         ");
         $stmt->execute($params);
         $documents = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
@@ -79,21 +83,26 @@ if ($tableReady) {
     }
 }
 
-$filterParams = [];
-if ($search !== '') {
-    $filterParams['search'] = $search;
-}
-if ($documentType !== '') {
-    $filterParams['document_type'] = $documentType;
-}
-if ($entityType !== '') {
-    $filterParams['entity_type'] = $entityType;
-}
-if ($entityId > 0) {
-    $filterParams['entity_id'] = $entityId;
-}
+$totalPages = max(1, (int) ceil($totalRecords / $perPage));
+$fromRecord = $totalRecords > 0 ? (($page - 1) * $perPage) + 1 : 0;
+$toRecord = min($totalRecords, $page * $perPage);
+$filterParams = array_filter([
+    'search' => $search,
+    'document_type' => $documentType,
+    'entity_type' => $entityType,
+    'entity_id' => $entityId > 0 ? $entityId : null,
+    'per_page' => $perPage,
+], static fn ($value): bool => $value !== '' && $value !== null);
+$pageUrl = static function (int $targetPage) use ($filterParams): string {
+    return base_url('documents/view?' . http_build_query($filterParams + ['page' => $targetPage]));
+};
 $csvExportUrl = base_url('documents/actions/export?' . http_build_query($filterParams + ['format' => 'csv']));
 $xlsExportUrl = base_url('documents/actions/export?' . http_build_query($filterParams + ['format' => 'xls']));
+$showingText = str_replace(
+    ['{total}', '{from}', '{to}'],
+    [(string) $totalRecords, (string) $fromRecord, (string) $toRecord],
+    documents_lang('showing_records')
+);
 ?>
 
 <div class="page-header d-print-none">
@@ -101,186 +110,206 @@ $xlsExportUrl = base_url('documents/actions/export?' . http_build_query($filterP
         <div class="row g-2 align-items-center">
             <div class="col">
                 <div class="page-pretitle"><?php echo e(documents_lang('documents')); ?></div>
-                <h2 class="page-title"><?php echo e(documents_lang('page_title')); ?></h2>
+                <h2 class="page-title"><?php echo e(documents_lang('file_library')); ?></h2>
                 <div class="text-secondary mt-1"><?php echo e(documents_lang('page_hint')); ?></div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <div class="btn-list">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="ti ti-download"></i> Export
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a href="<?php echo e($csvExportUrl); ?>" class="dropdown-item"><i class="ti ti-file-type-csv me-2"></i><?php echo e(documents_lang('export_csv')); ?></a>
+                            <a href="<?php echo e($xlsExportUrl); ?>" class="dropdown-item"><i class="ti ti-file-spreadsheet me-2"></i><?php echo e(documents_lang('export_excel')); ?></a>
+                        </div>
+                    </div>
+                    <?php if (check_permission('documents.upload')): ?>
+                        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#document-upload-panel">
+                            <i class="ti ti-upload"></i> <?php echo e(documents_lang('upload_files')); ?>
+                        </button>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <div class="page-body">
-    <div class="container-xl">
+    <div class="container-xl" data-document-manager>
         <?php if (!$tableReady): ?>
             <div class="alert alert-warning"><?php echo e(documents_lang('tables_missing')); ?></div>
         <?php else: ?>
-            <div class="card mb-4">
-                <form method="get" action="">
-                    <div class="card-header">
-                        <h3 class="card-title"><?php echo e(documents_lang('filters')); ?></h3>
-                        <div class="card-actions">
-                            <div class="btn-list">
-                                <a href="<?php echo e($csvExportUrl); ?>" class="btn btn-outline-secondary">
-                                    <i class="ti ti-file-type-csv"></i>
-                                    <?php echo e(documents_lang('export_csv')); ?>
-                                </a>
-                                <a href="<?php echo e($xlsExportUrl); ?>" class="btn btn-outline-secondary">
-                                    <i class="ti ti-file-spreadsheet"></i>
-                                    <?php echo e(documents_lang('export_excel')); ?>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3 align-items-end">
-                            <div class="col-12 col-lg-4">
-                                <label class="form-label"><?php echo e(documents_lang('search')); ?></label>
-                                <input type="search" name="search" class="form-control" value="<?php echo e($search); ?>" placeholder="<?php echo e(documents_lang('search_placeholder')); ?>">
-                            </div>
-                            <div class="col-12 col-lg-2">
-                                <label class="form-label"><?php echo e(documents_lang('document_type')); ?></label>
-                                <select name="document_type" class="form-select">
-                                    <option value=""><?php echo e(documents_lang('all_document_types')); ?></option>
-                                    <?php foreach ($documentTypes as $type): ?>
-                                        <option value="<?php echo e((string) $type); ?>" <?php echo $documentType === (string) $type ? 'selected' : ''; ?>>
-                                            <?php echo e((string) $type); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="col-12 col-lg-2">
-                                <label class="form-label"><?php echo e(documents_lang('entity_type')); ?></label>
-                                <select name="entity_type" class="form-select">
-                                    <option value=""><?php echo e(documents_lang('all_entity_types')); ?></option>
-                                    <?php foreach ($entityTypes as $type): ?>
-                                        <option value="<?php echo e((string) $type); ?>" <?php echo $entityType === (string) $type ? 'selected' : ''; ?>>
-                                            <?php echo e((string) $type); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="col-12 col-lg-2">
-                                <label class="form-label"><?php echo e(documents_lang('entity_id')); ?></label>
-                                <input type="number" name="entity_id" class="form-control" min="1" value="<?php echo $entityId > 0 ? $entityId : ''; ?>">
-                            </div>
-                            <div class="col-12 col-lg-2">
-                                <div class="btn-list">
-                                    <button type="submit" class="btn btn-primary"><?php echo e(documents_lang('filter')); ?></button>
-                                    <a href="<?php echo base_url('documents/view'); ?>" class="btn btn-outline-secondary"><?php echo e(documents_lang('clear')); ?></a>
+            <div class="row g-3 mb-4">
+                <?php
+                $statCards = [
+                    ['total_files', $stats['total_files'], 'ti-files', 'blue'],
+                    ['total_storage', documents_format_size($stats['total_size']), 'ti-database', 'azure'],
+                    ['linked_files', $stats['linked_files'], 'ti-link', 'green'],
+                    ['recent_files', $stats['recent_files'], 'ti-clock', 'orange'],
+                ];
+                ?>
+                <?php foreach ($statCards as [$label, $value, $icon, $tone]): ?>
+                    <div class="col-6 col-lg-3">
+                        <div class="card document-stat-card">
+                            <div class="card-body d-flex align-items-center gap-3">
+                                <span class="avatar bg-<?php echo e($tone); ?>-lt"><i class="ti <?php echo e($icon); ?> fs-2"></i></span>
+                                <div class="min-w-0">
+                                    <div class="text-secondary small"><?php echo e(documents_lang($label)); ?></div>
+                                    <div class="h2 mb-0"><?php echo e((string) $value); ?></div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </form>
+                <?php endforeach; ?>
             </div>
 
             <?php if (check_permission('documents.upload')): ?>
-                <div class="card mb-4">
-                    <form action="<?php echo base_url('documents/actions/upload'); ?>" method="post" enctype="multipart/form-data" data-ajax="true">
-                        <div class="card-header">
-                            <h3 class="card-title"><?php echo e(documents_lang('upload_document')); ?></h3>
-                        </div>
+                <div class="collapse mb-4" id="document-upload-panel">
+                    <form action="<?php echo base_url('documents/actions/upload'); ?>" method="post" enctype="multipart/form-data" class="card" data-document-upload-form>
+                        <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+                        <div class="card-header"><h3 class="card-title"><?php echo e(documents_lang('upload_files')); ?></h3></div>
                         <div class="card-body">
-                            <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
-                            <div class="row g-3">
-                                <div class="col-12 col-lg-3">
-                                    <label class="form-label form-required"><?php echo e(documents_lang('document_type')); ?></label>
-                                    <input type="text" name="document_type" class="form-control" required value="attachment">
-                                    <small class="form-hint"><?php echo e(documents_lang('type_hint')); ?></small>
+                            <div class="row g-4">
+                                <div class="col-lg-8">
+                                    <label class="document-dropzone" data-document-dropzone>
+                                        <input type="file" name="document_files[]" multiple hidden data-document-file-input>
+                                        <span class="document-dropzone__icon"><i class="ti ti-cloud-upload"></i></span>
+                                        <strong><?php echo e(documents_lang('drop_files')); ?></strong>
+                                        <span><?php echo e(documents_lang('drop_files_hint')); ?></span>
+                                        <small><?php echo e(implode(', ', array_map('strtoupper', array_unique(array_values(documents_allowed_mime_types()))))); ?> · <?php echo e(documents_format_size(documents_max_upload_size())); ?> / dosya</small>
+                                    </label>
+                                    <div class="document-upload-queue mt-3" data-document-upload-queue hidden></div>
                                 </div>
-                                <div class="col-12 col-lg-3">
-                                    <label class="form-label"><?php echo e(documents_lang('entity_type')); ?></label>
-                                    <input type="text" name="entity_type" class="form-control">
-                                    <small class="form-hint"><?php echo e(documents_lang('entity_hint')); ?></small>
-                                </div>
-                                <div class="col-12 col-lg-2">
-                                    <label class="form-label"><?php echo e(documents_lang('entity_id')); ?></label>
-                                    <input type="number" name="entity_id" class="form-control" min="1">
-                                </div>
-                                <div class="col-12 col-lg-4">
-                                    <label class="form-label form-required"><?php echo e(documents_lang('file')); ?></label>
-                                    <input type="file" name="document_file" class="form-control" required>
+                                <div class="col-lg-4">
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <label class="form-label form-required"><?php echo e(documents_lang('document_type')); ?></label>
+                                            <input type="text" name="document_type" class="form-control" required value="attachment">
+                                        </div>
+                                        <div class="col-8">
+                                            <label class="form-label"><?php echo e(documents_lang('entity_type')); ?></label>
+                                            <input type="text" name="entity_type" class="form-control">
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="form-label"><?php echo e(documents_lang('entity_id')); ?></label>
+                                            <input type="number" name="entity_id" class="form-control" min="1">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer text-end">
-                            <button type="submit" class="btn btn-primary"><?php echo e(documents_lang('save')); ?></button>
+                        <div class="card-footer d-flex align-items-center justify-content-between gap-3">
+                            <div class="text-secondary small" data-document-upload-status></div>
+                            <button type="submit" class="btn btn-primary" disabled data-document-upload-submit>
+                                <i class="ti ti-upload"></i> <?php echo e(documents_lang('save')); ?>
+                            </button>
                         </div>
                     </form>
                 </div>
             <?php endif; ?>
 
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title"><?php echo e(documents_lang('document_list')); ?></h3>
-                    <div class="card-actions">
-                        <div class="btn-list">
-                            <a href="<?php echo e($csvExportUrl); ?>" class="btn btn-outline-secondary">
-                                <i class="ti ti-file-type-csv"></i>
-                                <?php echo e(documents_lang('export_csv')); ?>
-                            </a>
-                            <a href="<?php echo e($xlsExportUrl); ?>" class="btn btn-outline-secondary">
-                                <i class="ti ti-file-spreadsheet"></i>
-                                <?php echo e(documents_lang('export_excel')); ?>
-                            </a>
-                        </div>
+            <div class="document-toolbar mb-3">
+                <form method="get" action="<?php echo base_url('documents/view'); ?>" class="document-filter-form">
+                    <div class="input-icon document-search">
+                        <span class="input-icon-addon"><i class="ti ti-search"></i></span>
+                        <input type="search" name="search" class="form-control" value="<?php echo e($search); ?>" placeholder="<?php echo e(documents_lang('search_placeholder')); ?>">
                     </div>
+                    <select name="document_type" class="form-select">
+                        <option value=""><?php echo e(documents_lang('all_document_types')); ?></option>
+                        <?php foreach ($documentTypes as $type): ?>
+                            <option value="<?php echo e((string) $type); ?>" <?php echo $documentType === (string) $type ? 'selected' : ''; ?>><?php echo e((string) $type); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <select name="entity_type" class="form-select">
+                        <option value=""><?php echo e(documents_lang('all_entity_types')); ?></option>
+                        <?php foreach ($entityTypes as $type): ?>
+                            <option value="<?php echo e((string) $type); ?>" <?php echo $entityType === (string) $type ? 'selected' : ''; ?>><?php echo e((string) $type); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <input type="number" name="entity_id" class="form-control document-entity-id" min="1" value="<?php echo $entityId > 0 ? $entityId : ''; ?>" placeholder="Entity ID">
+                    <input type="hidden" name="per_page" value="<?php echo $perPage; ?>">
+                    <button type="submit" class="btn btn-outline-primary"><i class="ti ti-filter"></i></button>
+                    <a href="<?php echo base_url('documents/view'); ?>" class="btn btn-icon btn-outline-secondary" title="<?php echo e(documents_lang('clear')); ?>"><i class="ti ti-x"></i></a>
+                </form>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-icon btn-outline-secondary active" data-document-view="grid" title="<?php echo e(documents_lang('grid_view')); ?>"><i class="ti ti-layout-grid"></i></button>
+                    <button type="button" class="btn btn-icon btn-outline-secondary" data-document-view="list" title="<?php echo e(documents_lang('list_view')); ?>"><i class="ti ti-list"></i></button>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-vcenter card-table table-striped">
-                        <thead>
-                        <tr>
-                            <th><?php echo e(documents_lang('document_type')); ?></th>
-                            <th><?php echo e(documents_lang('original_name')); ?></th>
-                            <th><?php echo e(documents_lang('mime_type')); ?></th>
-                            <th><?php echo e(documents_lang('file_size')); ?></th>
-                            <th><?php echo e(documents_lang('entity_links')); ?></th>
-                            <th><?php echo e(documents_lang('uploaded_by')); ?></th>
-                            <th><?php echo e(documents_lang('created_at')); ?></th>
-                            <th><?php echo e(documents_lang('actions')); ?></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <?php if (empty($documents)): ?>
-                            <tr>
-                                <td colspan="8" class="text-secondary"><?php echo e(documents_lang('no_records')); ?></td>
-                            </tr>
-                        <?php else: ?>
-                            <?php foreach ($documents as $document): ?>
-                                <?php $documentId = (int) ($document['id'] ?? 0); ?>
-                                <tr>
-                                    <td><code><?php echo e((string) ($document['document_type'] ?? '')); ?></code></td>
-                                    <td>
-                                        <?php echo e((string) ($document['original_name'] ?? '')); ?>
-                                        <?php if ((int) ($document['link_count'] ?? 0) > 0): ?>
-                                            <span class="badge bg-blue-lt ms-2"><?php echo (int) ($document['link_count'] ?? 0); ?></span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td><code><?php echo e((string) ($document['mime_type'] ?? '')); ?></code></td>
-                                    <td><?php echo e(documents_format_size((int) ($document['file_size'] ?? 0))); ?></td>
-                                    <td><?php echo e((string) ($document['entity_links'] ?? '-')); ?></td>
-                                    <td><?php echo e((string) ($document['uploaded_by_name'] ?? '-')); ?></td>
-                                    <td><?php echo e(format_datetime((string) ($document['created_at'] ?? ''))); ?></td>
-                                    <td>
-                                        <div class="btn-list flex-nowrap">
-                                            <a href="<?php echo base_url('documents/actions/download/' . $documentId); ?>" class="btn btn-sm btn-outline-primary">
-                                                <?php echo e(documents_lang('download')); ?>
-                                            </a>
-                                            <?php if (check_permission('documents.manage')): ?>
-                                                <form action="<?php echo base_url('documents/actions/delete'); ?>" method="post" data-ajax="true" class="d-inline">
-                                                    <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
-                                                    <input type="hidden" name="id" value="<?php echo $documentId; ?>">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="<?php echo e(documents_lang('delete')); ?>?">
-                                                        <?php echo e(documents_lang('delete')); ?>
-                                                    </button>
-                                                </form>
-                                            <?php endif; ?>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                        </tbody>
-                    </table>
+            </div>
+
+            <div class="document-selection-bar mb-3" data-document-selection-bar hidden>
+                <div class="d-flex align-items-center gap-3">
+                    <strong data-document-selection-count></strong>
+                    <button type="button" class="btn btn-sm btn-outline-primary" data-document-download-selected><i class="ti ti-download"></i><?php echo e(documents_lang('download_selected')); ?></button>
+                    <?php if (check_permission('documents.manage')): ?>
+                        <form id="documents-bulk-delete-form" action="<?php echo base_url('documents/actions/bulk-delete'); ?>" method="post" data-ajax="true">
+                            <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+                            <input type="hidden" name="ids" value="[]" data-document-selected-ids>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-confirm="<?php echo e(documents_lang('delete_selected')); ?>?" data-form="documents-bulk-delete-form"><i class="ti ti-trash"></i><?php echo e(documents_lang('delete_selected')); ?></button>
+                        </form>
+                    <?php endif; ?>
+                </div>
+                <button type="button" class="btn btn-sm btn-ghost-secondary" data-document-clear-selection><?php echo e(documents_lang('clear')); ?></button>
+            </div>
+
+            <?php if (empty($documents)): ?>
+                <div class="document-empty-state">
+                    <i class="ti ti-folder-open"></i>
+                    <h3><?php echo e(documents_lang('no_records')); ?></h3>
+                    <p><?php echo e(documents_lang('drop_files_hint')); ?></p>
+                </div>
+            <?php else: ?>
+                <div class="document-grid" data-document-collection data-view="grid">
+                    <?php foreach ($documents as $document): ?>
+                        <?php
+                        $documentId = (int) ($document['id'] ?? 0);
+                        $presentation = documents_file_presentation((string) ($document['mime_type'] ?? ''), (string) ($document['original_name'] ?? ''));
+                        $downloadUrl = base_url('documents/actions/download/' . $documentId);
+                        $deleteFormId = 'document-delete-' . $documentId;
+                        ?>
+                        <article class="document-item" data-document-item data-document-id="<?php echo $documentId; ?>" data-download-url="<?php echo e($downloadUrl); ?>">
+                            <label class="document-select"><input type="checkbox" class="form-check-input" data-document-select value="<?php echo $documentId; ?>"><span class="visually-hidden"><?php echo e(documents_lang('select_files')); ?></span></label>
+                            <div class="document-item__visual bg-<?php echo e($presentation['tone']); ?>-lt"><i class="ti <?php echo e($presentation['icon']); ?>"></i><span><?php echo e($presentation['label']); ?></span></div>
+                            <div class="document-item__body">
+                                <div class="document-item__name" title="<?php echo e((string) ($document['original_name'] ?? '')); ?>"><?php echo e((string) ($document['original_name'] ?? '')); ?></div>
+                                <div class="document-item__meta"><span><?php echo e(documents_format_size((int) ($document['file_size'] ?? 0))); ?></span><span><?php echo e(kirpi_format_datetime((string) ($document['created_at'] ?? ''))); ?></span></div>
+                                <div class="document-item__details">
+                                    <span class="badge bg-secondary-lt"><?php echo e((string) ($document['document_type'] ?? '')); ?></span>
+                                    <?php if ((int) ($document['link_count'] ?? 0) > 0): ?><span class="badge bg-blue-lt"><i class="ti ti-link"></i><?php echo (int) $document['link_count']; ?></span><?php endif; ?>
+                                    <span class="text-secondary text-truncate"><?php echo e((string) ($document['uploaded_by_name'] ?? '-')); ?></span>
+                                </div>
+                                <?php if (!empty($document['entity_links'])): ?><div class="document-item__links text-secondary"><?php echo e((string) $document['entity_links']); ?></div><?php endif; ?>
+                            </div>
+                            <div class="document-item__actions">
+                                <a href="<?php echo e($downloadUrl); ?>" class="btn btn-icon btn-sm btn-outline-primary" title="<?php echo e(documents_lang('download')); ?>"><i class="ti ti-download"></i></a>
+                                <?php if (check_permission('documents.manage')): ?>
+                                    <form id="<?php echo e($deleteFormId); ?>" action="<?php echo base_url('documents/actions/delete'); ?>" method="post" data-ajax="true">
+                                        <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>"><input type="hidden" name="id" value="<?php echo $documentId; ?>">
+                                        <button type="button" class="btn btn-icon btn-sm btn-outline-danger" data-confirm="<?php echo e(documents_lang('delete')); ?>?" data-form="<?php echo e($deleteFormId); ?>" title="<?php echo e(documents_lang('delete')); ?>"><i class="ti ti-trash"></i></button>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
+                        </article>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mt-4">
+                <div class="text-secondary"><?php echo e($showingText); ?></div>
+                <div class="d-flex align-items-center gap-3">
+                    <form method="get" action="<?php echo base_url('documents/view'); ?>" class="d-flex align-items-center gap-2">
+                        <?php foreach ($filterParams as $key => $value): if ($key === 'per_page') continue; ?><input type="hidden" name="<?php echo e((string) $key); ?>" value="<?php echo e((string) $value); ?>"><?php endforeach; ?>
+                        <label class="text-secondary text-nowrap"><?php echo e(documents_lang('per_page')); ?></label>
+                        <select name="per_page" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <?php foreach ([12, 24, 48, 96] as $size): ?><option value="<?php echo $size; ?>" <?php echo $perPage === $size ? 'selected' : ''; ?>><?php echo $size; ?></option><?php endforeach; ?>
+                        </select>
+                    </form>
+                    <div class="btn-group">
+                        <a class="btn btn-sm btn-outline-secondary <?php echo $page <= 1 ? 'disabled' : ''; ?>" href="<?php echo e($pageUrl(max(1, $page - 1))); ?>"><i class="ti ti-chevron-left"></i><?php echo e(documents_lang('previous')); ?></a>
+                        <span class="btn btn-sm btn-outline-secondary disabled"><?php echo $page; ?> / <?php echo $totalPages; ?></span>
+                        <a class="btn btn-sm btn-outline-secondary <?php echo $page >= $totalPages ? 'disabled' : ''; ?>" href="<?php echo e($pageUrl(min($totalPages, $page + 1))); ?>"><?php echo e(documents_lang('next')); ?><i class="ti ti-chevron-right"></i></a>
+                    </div>
                 </div>
             </div>
         <?php endif; ?>

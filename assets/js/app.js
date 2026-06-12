@@ -23,6 +23,7 @@
             this.bindModalTriggers();
             this.bindConfirmTriggers();
             this.bindAjaxForms();
+            this.initDocumentManager();
             this.initAiLauncher();
             this.bindAiProviderTests();
             this.bindAiDebugCopy();
@@ -733,6 +734,211 @@
                 event.preventDefault();
                 await this.submitAjaxForm(form);
             }, true);
+        },
+
+        initDocumentManager() {
+            const manager = document.querySelector("[data-document-manager]");
+            if (!manager) {
+                return;
+            }
+
+            const collection = manager.querySelector("[data-document-collection]");
+            const viewButtons = manager.querySelectorAll("[data-document-view]");
+            const selectionBar = manager.querySelector("[data-document-selection-bar]");
+            const selectionCount = manager.querySelector("[data-document-selection-count]");
+            const selectedIdsInput = manager.querySelector("[data-document-selected-ids]");
+            const checkboxes = Array.from(manager.querySelectorAll("[data-document-select]"));
+            const selectedLabel = "dosya secildi";
+
+            const applyView = (view) => {
+                const safeView = view === "list" ? "list" : "grid";
+                if (collection) {
+                    collection.dataset.view = safeView;
+                }
+                viewButtons.forEach((button) => {
+                    button.classList.toggle("active", button.dataset.documentView === safeView);
+                });
+                try {
+                    localStorage.setItem("kirpi.documents.view", safeView);
+                } catch (error) {
+                    console.warn("Document view preference error:", error);
+                }
+            };
+
+            let initialView = "grid";
+            try {
+                initialView = localStorage.getItem("kirpi.documents.view") || "grid";
+            } catch (error) {
+                initialView = "grid";
+            }
+            applyView(initialView);
+            viewButtons.forEach((button) => button.addEventListener("click", () => applyView(button.dataset.documentView)));
+
+            const selectedIds = () => checkboxes.filter((checkbox) => checkbox.checked).map((checkbox) => checkbox.value);
+            const syncSelection = () => {
+                const ids = selectedIds();
+                if (selectionBar) {
+                    selectionBar.hidden = ids.length === 0;
+                }
+                if (selectionCount) {
+                    selectionCount.textContent = `${ids.length} ${selectedLabel}`;
+                }
+                if (selectedIdsInput) {
+                    selectedIdsInput.value = JSON.stringify(ids);
+                }
+                checkboxes.forEach((checkbox) => {
+                    const item = checkbox.closest("[data-document-item]");
+                    if (item) {
+                        item.classList.toggle("is-selected", checkbox.checked);
+                    }
+                });
+            };
+            checkboxes.forEach((checkbox) => checkbox.addEventListener("change", syncSelection));
+
+            const clearSelection = manager.querySelector("[data-document-clear-selection]");
+            if (clearSelection) {
+                clearSelection.addEventListener("click", () => {
+                    checkboxes.forEach((checkbox) => { checkbox.checked = false; });
+                    syncSelection();
+                });
+            }
+
+            const downloadSelected = manager.querySelector("[data-document-download-selected]");
+            if (downloadSelected) {
+                downloadSelected.addEventListener("click", () => {
+                    const selectedItems = Array.from(manager.querySelectorAll("[data-document-item]")).filter((item) => {
+                        const checkbox = item.querySelector("[data-document-select]");
+                        return checkbox && checkbox.checked;
+                    });
+                    selectedItems.forEach((item, index) => {
+                        const url = item.dataset.downloadUrl;
+                        if (!url) return;
+                        setTimeout(() => {
+                            const link = document.createElement("a");
+                            link.href = url;
+                            link.style.display = "none";
+                            document.body.appendChild(link);
+                            link.click();
+                            link.remove();
+                        }, index * 300);
+                    });
+                });
+            }
+
+            const uploadForm = manager.querySelector("[data-document-upload-form]");
+            if (!uploadForm) {
+                return;
+            }
+
+            const fileInput = uploadForm.querySelector("[data-document-file-input]");
+            const dropzone = uploadForm.querySelector("[data-document-dropzone]");
+            const queue = uploadForm.querySelector("[data-document-upload-queue]");
+            const submit = uploadForm.querySelector("[data-document-upload-submit]");
+            const status = uploadForm.querySelector("[data-document-upload-status]");
+
+            const renderQueue = () => {
+                if (!fileInput || !queue || !submit) return;
+                const files = Array.from(fileInput.files || []);
+                queue.replaceChildren();
+                queue.hidden = files.length === 0;
+                submit.disabled = files.length === 0;
+
+                files.forEach((file) => {
+                    const row = document.createElement("div");
+                    row.className = "document-upload-queue__item";
+                    const icon = document.createElement("i");
+                    icon.className = "ti ti-file";
+                    const info = document.createElement("div");
+                    info.className = "min-w-0 flex-fill";
+                    const name = document.createElement("div");
+                    name.className = "text-truncate fw-medium";
+                    name.textContent = file.name;
+                    const meta = document.createElement("div");
+                    meta.className = "text-secondary small";
+                    meta.textContent = this.formatBytes(file.size);
+                    info.append(name, meta);
+                    row.append(icon, info);
+                    queue.appendChild(row);
+                });
+                if (status) {
+                    status.textContent = files.length > 0 ? `${files.length} dosya yuklemeye hazir` : "";
+                }
+            };
+
+            if (fileInput) {
+                fileInput.addEventListener("change", renderQueue);
+            }
+            if (dropzone && fileInput) {
+                ["dragenter", "dragover"].forEach((eventName) => {
+                    dropzone.addEventListener(eventName, (event) => {
+                        event.preventDefault();
+                        dropzone.classList.add("is-dragging");
+                    });
+                });
+                ["dragleave", "drop"].forEach((eventName) => {
+                    dropzone.addEventListener(eventName, (event) => {
+                        event.preventDefault();
+                        dropzone.classList.remove("is-dragging");
+                    });
+                });
+                dropzone.addEventListener("drop", (event) => {
+                    const transfer = new DataTransfer();
+                    Array.from(event.dataTransfer?.files || []).forEach((file) => transfer.items.add(file));
+                    fileInput.files = transfer.files;
+                    renderQueue();
+                });
+            }
+
+            uploadForm.addEventListener("submit", (event) => {
+                event.preventDefault();
+                if (!fileInput || !fileInput.files || fileInput.files.length === 0 || !submit) {
+                    this.toast("En az bir dosya secin.", "warning");
+                    return;
+                }
+
+                submit.disabled = true;
+                const originalHtml = submit.innerHTML;
+                submit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Yukleniyor';
+                const formData = new FormData(uploadForm);
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", uploadForm.action, true);
+                xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+
+                xhr.upload.addEventListener("progress", (progressEvent) => {
+                    if (!status || !progressEvent.lengthComputable) return;
+                    const percent = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+                    status.textContent = `Dosyalar sunucuya aktariliyor: %${percent}`;
+                });
+
+                xhr.addEventListener("load", () => {
+                    let result = null;
+                    try {
+                        result = JSON.parse((xhr.responseText || "").replace(/^\uFEFF/, ""));
+                    } catch (error) {
+                        this.toast("Sunucu beklenmeyen bir yanit dondurdu.", "error");
+                    }
+                    if (result?.message) {
+                        this.toast(result.message, result.status || "info");
+                    }
+                    if (result?.status === "success") {
+                        this.persistPendingToast(result.message || "Dosyalar yuklendi.", "success");
+                        window.location.reload();
+                    }
+                });
+                xhr.addEventListener("error", () => this.toast("Dosyalar yuklenemedi.", "error"));
+                xhr.addEventListener("loadend", () => {
+                    submit.disabled = false;
+                    submit.innerHTML = originalHtml;
+                });
+                xhr.send(formData);
+            });
+        },
+
+        formatBytes(bytes) {
+            const value = Number(bytes) || 0;
+            if (value >= 1024 * 1024) return `${(value / 1024 / 1024).toFixed(2)} MB`;
+            if (value >= 1024) return `${(value / 1024).toFixed(2)} KB`;
+            return `${value} B`;
         },
 
         initAiLauncher() {

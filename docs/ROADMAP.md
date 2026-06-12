@@ -322,6 +322,7 @@ Tamamlanan son durum:
    - Her standart modülde liste, filtre, export, temel aksiyon, audit/notification etkisi ve tema uyumu kontrol edilecek.
    - Bulunan küçük UI/metin/akış hataları aynı tur içinde düzeltilecek.
    - Manuel test sonuçları `docs/testing/kirpi-core-ui-test-checklist.md` içindeki 94 maddelik standart kontrol listesine işlenecek.
+   - Documents modülü `v2.0.0` kurumsal dosya yöneticisine yükseltildi: çoklu sürükle-bırak yükleme, progress, kart/liste görünümü, seçim, toplu silme/indirme, istatistik ve sayfalama.
 
 3. **Deployment standardizasyon tasarımı**
    - Her yeni Core tabanlı uygulamada servis çakışmasını önlemek için env tabanlı uygulama prefix standardı hazırlanacak.

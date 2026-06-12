@@ -51,6 +51,54 @@ function documents_format_size(int $bytes): string
     return $bytes . ' B';
 }
 
+function documents_normalize_uploads(array $files): array
+{
+    if (!isset($files['name'])) {
+        return [];
+    }
+
+    if (!is_array($files['name'])) {
+        return [$files];
+    }
+
+    $normalized = [];
+    foreach ($files['name'] as $index => $name) {
+        $normalized[] = [
+            'name' => $name,
+            'type' => $files['type'][$index] ?? '',
+            'tmp_name' => $files['tmp_name'][$index] ?? '',
+            'error' => $files['error'][$index] ?? UPLOAD_ERR_NO_FILE,
+            'size' => $files['size'][$index] ?? 0,
+        ];
+    }
+
+    return $normalized;
+}
+
+function documents_file_presentation(string $mimeType, string $fileName = ''): array
+{
+    $extension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+    $mimeType = strtolower(trim($mimeType));
+
+    if (str_starts_with($mimeType, 'image/')) {
+        return ['icon' => 'ti-photo', 'tone' => 'blue', 'label' => strtoupper($extension ?: 'IMG')];
+    }
+    if ($mimeType === 'application/pdf') {
+        return ['icon' => 'ti-file-type-pdf', 'tone' => 'red', 'label' => 'PDF'];
+    }
+    if (in_array($extension, ['xls', 'xlsx', 'csv'], true)) {
+        return ['icon' => 'ti-file-spreadsheet', 'tone' => 'green', 'label' => strtoupper($extension)];
+    }
+    if (in_array($extension, ['doc', 'docx'], true)) {
+        return ['icon' => 'ti-file-type-docx', 'tone' => 'azure', 'label' => strtoupper($extension)];
+    }
+    if ($extension === 'txt' || $mimeType === 'text/plain') {
+        return ['icon' => 'ti-file-text', 'tone' => 'secondary', 'label' => 'TXT'];
+    }
+
+    return ['icon' => 'ti-file', 'tone' => 'secondary', 'label' => strtoupper($extension ?: 'FILE')];
+}
+
 function document_store_upload(array $file, string $documentType = 'attachment'): array
 {
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
