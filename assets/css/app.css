@@ -195,6 +195,33 @@ body {
     display: none !important;
 }
 
+.mobile-nav-header {
+    color: var(--kirpi-text);
+}
+
+@media (max-width: 767.98px) {
+    #navbar-menu.show,
+    #navbar-menu.collapsing {
+        width: 100%;
+        margin-top: .5rem;
+        border-top: 1px solid var(--kirpi-border);
+        background: var(--kirpi-surface-strong);
+    }
+
+    #navbar-menu .navbar-nav {
+        padding: .5rem;
+    }
+
+    #navbar-menu .nav-link {
+        min-height: 2.75rem;
+        border-radius: 6px;
+    }
+
+    body.mobile-nav-open {
+        overflow-x: hidden;
+    }
+}
+
 .js-notification-dot {
     width: 0.55rem;
     height: 0.55rem;

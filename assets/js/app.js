@@ -19,6 +19,7 @@
             this.initMainModal();
             this.initSecondaryModal();
             this.initDropdowns();
+            this.initMobileNavigation();
             this.bindNotificationDropdown();
             this.bindModalTriggers();
             this.bindConfirmTriggers();
@@ -322,6 +323,68 @@
                 const collapseEl = document.getElementById("navbar-menu");
                 if (collapseEl && collapseEl.classList.contains("show") && window.bootstrap && bootstrap.Collapse) {
                     bootstrap.Collapse.getOrCreateInstance(collapseEl, { toggle: false }).hide();
+                }
+            });
+        },
+
+        initMobileNavigation() {
+            const collapseEl = document.getElementById("navbar-menu");
+            const toggle = document.querySelector(".js-mobile-nav-toggle");
+            const close = collapseEl?.querySelector(".js-mobile-nav-close");
+
+            if (!collapseEl || !toggle || !(window.bootstrap && bootstrap.Collapse)) {
+                return;
+            }
+
+            const instance = bootstrap.Collapse.getOrCreateInstance(collapseEl, { toggle: false });
+            const isMobile = () => window.matchMedia("(max-width: 767.98px)").matches;
+            const hide = (restoreFocus = false) => {
+                if (!isMobile() || !collapseEl.classList.contains("show")) {
+                    return;
+                }
+                instance.hide();
+                if (restoreFocus) {
+                    collapseEl.addEventListener("hidden.bs.collapse", () => toggle.focus(), { once: true });
+                }
+            };
+
+            close?.addEventListener("click", (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                hide(true);
+            });
+
+            collapseEl.addEventListener("show.bs.collapse", () => {
+                document.body.classList.add("mobile-nav-open");
+                toggle.setAttribute("aria-expanded", "true");
+            });
+            collapseEl.addEventListener("hidden.bs.collapse", () => {
+                document.body.classList.remove("mobile-nav-open");
+                toggle.setAttribute("aria-expanded", "false");
+            });
+
+            document.addEventListener("click", (event) => {
+                if (!isMobile() || !collapseEl.classList.contains("show")) {
+                    return;
+                }
+                if (collapseEl.contains(event.target) || toggle.contains(event.target)) {
+                    return;
+                }
+                hide(false);
+            });
+
+            document.addEventListener("keydown", (event) => {
+                if (event.key === "Escape") {
+                    hide(true);
+                }
+            });
+
+            window.addEventListener("resize", () => {
+                if (!isMobile()) {
+                    document.body.classList.remove("mobile-nav-open");
+                    if (collapseEl.classList.contains("show")) {
+                        instance.hide();
+                    }
                 }
             });
         },

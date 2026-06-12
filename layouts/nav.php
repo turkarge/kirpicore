@@ -83,7 +83,7 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
 
 <header class="navbar navbar-expand-md d-print-none">
     <div class="container-xl">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu"
+        <button class="navbar-toggler js-mobile-nav-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu"
             aria-controls="navbar-menu" aria-expanded="false" aria-label="<?php echo e($navToggleLabel); ?>">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -264,6 +264,12 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
 
         <div class="collapse navbar-collapse" id="navbar-menu">
             <div class="d-flex flex-column flex-md-row flex-fill align-items-stretch align-items-md-center">
+                <div class="d-flex d-md-none align-items-center justify-content-between border-bottom px-3 py-2 mobile-nav-header">
+                    <strong><?php echo e($navToggleLabel); ?></strong>
+                    <button type="button" class="btn btn-icon btn-ghost-secondary js-mobile-nav-close" aria-label="Kapat">
+                        <i class="ti ti-x fs-2"></i>
+                    </button>
+                </div>
                 <ul class="navbar-nav">
                     <?php foreach ($menu as $item): ?>
                         <?php
