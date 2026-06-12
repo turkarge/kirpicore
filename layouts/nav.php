@@ -83,7 +83,7 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
 
 <header class="navbar navbar-expand-md d-print-none">
     <div class="container-xl">
-        <button class="navbar-toggler js-mobile-nav-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu"
+        <button class="navbar-toggler js-mobile-nav-toggle" type="button"
             aria-controls="navbar-menu" aria-expanded="false" aria-label="<?php echo e($navToggleLabel); ?>">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -268,9 +268,7 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                     <strong><?php echo e($navToggleLabel); ?></strong>
                     <button
                         type="button"
-                        class="btn btn-icon btn-ghost-secondary"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#navbar-menu"
+                        class="btn btn-icon btn-ghost-secondary js-mobile-nav-close"
                         aria-controls="navbar-menu"
                         aria-expanded="true"
                         aria-label="Kapat">

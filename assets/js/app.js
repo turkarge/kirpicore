@@ -330,6 +330,7 @@
         initMobileNavigation() {
             const collapseEl = document.getElementById("navbar-menu");
             const toggle = document.querySelector(".js-mobile-nav-toggle");
+            const close = collapseEl?.querySelector(".js-mobile-nav-close");
 
             if (!collapseEl || !toggle || !(window.bootstrap && bootstrap.Collapse)) {
                 return;
@@ -337,23 +338,47 @@
 
             const instance = bootstrap.Collapse.getOrCreateInstance(collapseEl, { toggle: false });
             const isMobile = () => window.matchMedia("(max-width: 767.98px)").matches;
-            const hide = (restoreFocus = false) => {
-                if (!isMobile() || !collapseEl.classList.contains("show")) {
+            const show = () => {
+                if (!isMobile() || collapseEl.classList.contains("show") || collapseEl.classList.contains("collapsing")) {
                     return;
                 }
-                instance.hide();
+                instance.show();
+            };
+            const hide = (restoreFocus = false) => {
+                if (!collapseEl.classList.contains("show") || collapseEl.classList.contains("collapsing")) {
+                    return;
+                }
                 if (restoreFocus) {
                     collapseEl.addEventListener("hidden.bs.collapse", () => toggle.focus(), { once: true });
                 }
+                instance.hide();
             };
+
+            toggle.addEventListener("click", (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                if (collapseEl.classList.contains("show")) {
+                    hide(false);
+                    return;
+                }
+                show();
+            });
+
+            close?.addEventListener("click", (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                hide(true);
+            });
 
             collapseEl.addEventListener("show.bs.collapse", () => {
                 document.body.classList.add("mobile-nav-open");
                 toggle.setAttribute("aria-expanded", "true");
+                close?.setAttribute("aria-expanded", "true");
             });
             collapseEl.addEventListener("hidden.bs.collapse", () => {
                 document.body.classList.remove("mobile-nav-open");
                 toggle.setAttribute("aria-expanded", "false");
+                close?.setAttribute("aria-expanded", "false");
             });
 
             document.addEventListener("click", (event) => {
