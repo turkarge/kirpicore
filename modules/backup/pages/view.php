@@ -65,8 +65,24 @@ if ($backupReady) {
     </div>
 </div>
 
-<div class="page-body">
+<div class="page-body" data-backup-manager>
     <div class="container-xl">
+        <div
+            id="backup-operation-status"
+            class="alert d-none align-items-center gap-2 mb-4"
+            role="status"
+            aria-live="polite"
+            data-message-create="<?php echo e(backup_lang('working_create')); ?>"
+            data-message-verify="<?php echo e(backup_lang('working_verify')); ?>"
+            data-message-restore="<?php echo e(backup_lang('working_restore')); ?>"
+            data-message-delete="<?php echo e(backup_lang('working_delete')); ?>"
+            data-message-default="<?php echo e(backup_lang('working_default')); ?>"
+            data-message-failed="<?php echo e(backup_lang('operation_failed')); ?>"
+        >
+            <span class="spinner-border spinner-border-sm" aria-hidden="true" data-backup-status-spinner></span>
+            <span data-backup-status-text></span>
+        </div>
+
         <?php if (!$backupReady): ?>
             <div class="alert alert-warning">
                 <?php echo e(backup_lang('backup_tables_missing')); ?>
@@ -77,7 +93,7 @@ if ($backupReady) {
             <div class="card-header">
                 <h3 class="card-title"><?php echo e(backup_lang('new_backup')); ?></h3>
             </div>
-            <form action="<?php echo base_url('backup/actions/create'); ?>" method="post" data-ajax="true">
+            <form action="<?php echo base_url('backup/actions/create'); ?>" method="post" data-ajax="true" data-backup-operation="create">
                 <div class="card-body">
                     <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                     <div class="row g-3">
@@ -86,7 +102,7 @@ if ($backupReady) {
                             <input type="text" name="label" class="form-control" placeholder="<?php echo e(backup_lang('label_placeholder')); ?>" <?php echo !$backupReady ? 'disabled' : ''; ?>>
                         </div>
                         <div class="col-12 col-md-4 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary w-100" <?php echo !$backupReady ? 'disabled' : ''; ?>><?php echo e(backup_lang('create_backup')); ?></button>
+                            <button type="submit" class="btn btn-primary w-100" data-backup-control <?php echo !$backupReady ? 'disabled' : ''; ?>><?php echo e(backup_lang('create_backup')); ?></button>
                         </div>
                     </div>
                 </div>
@@ -128,23 +144,23 @@ if ($backupReady) {
                                         <div class="d-flex gap-2">
                                             <a href="<?php echo base_url('backup/actions/download?id=' . (int) ($backup['id'] ?? 0)); ?>" class="btn btn-sm btn-outline-primary"><?php echo e(backup_lang('download')); ?></a>
 
-                                            <form id="backup-verify-form-<?php echo (int) ($backup['id'] ?? 0); ?>" action="<?php echo base_url('backup/actions/verify'); ?>" method="post" data-ajax="true" class="m-0">
+                                            <form id="backup-verify-form-<?php echo (int) ($backup['id'] ?? 0); ?>" action="<?php echo base_url('backup/actions/verify'); ?>" method="post" data-ajax="true" data-backup-operation="verify" class="m-0">
                                                 <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                                                 <input type="hidden" name="backup_id" value="<?php echo (int) ($backup['id'] ?? 0); ?>">
                                             </form>
-                                            <a href="#" class="btn btn-sm btn-outline-warning" data-confirm="<?php echo e(backup_lang('verify_confirm')); ?>" data-form="backup-verify-form-<?php echo (int) ($backup['id'] ?? 0); ?>"><?php echo e(backup_lang('verify')); ?></a>
+                                            <a href="#" class="btn btn-sm btn-outline-warning" data-backup-control data-confirm="<?php echo e(backup_lang('verify_confirm')); ?>" data-form="backup-verify-form-<?php echo (int) ($backup['id'] ?? 0); ?>"><?php echo e(backup_lang('verify')); ?></a>
 
-                                            <form id="backup-restore-form-<?php echo (int) ($backup['id'] ?? 0); ?>" action="<?php echo base_url('backup/actions/restore'); ?>" method="post" data-ajax="true" class="m-0">
+                                            <form id="backup-restore-form-<?php echo (int) ($backup['id'] ?? 0); ?>" action="<?php echo base_url('backup/actions/restore'); ?>" method="post" data-ajax="true" data-backup-operation="restore" class="m-0">
                                                 <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                                                 <input type="hidden" name="backup_id" value="<?php echo (int) ($backup['id'] ?? 0); ?>">
                                             </form>
-                                            <a href="#" class="btn btn-sm btn-outline-danger" data-confirm="<?php echo e(backup_lang('restore_confirm')); ?>" data-form="backup-restore-form-<?php echo (int) ($backup['id'] ?? 0); ?>"><?php echo e(backup_lang('restore')); ?></a>
+                                            <a href="#" class="btn btn-sm btn-outline-danger" data-backup-control data-confirm="<?php echo e(backup_lang('restore_confirm')); ?>" data-form="backup-restore-form-<?php echo (int) ($backup['id'] ?? 0); ?>"><?php echo e(backup_lang('restore')); ?></a>
 
-                                            <form id="backup-delete-form-<?php echo (int) ($backup['id'] ?? 0); ?>" action="<?php echo base_url('backup/actions/delete'); ?>" method="post" data-ajax="true" class="m-0">
+                                            <form id="backup-delete-form-<?php echo (int) ($backup['id'] ?? 0); ?>" action="<?php echo base_url('backup/actions/delete'); ?>" method="post" data-ajax="true" data-backup-operation="delete" class="m-0">
                                                 <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                                                 <input type="hidden" name="backup_id" value="<?php echo (int) ($backup['id'] ?? 0); ?>">
                                             </form>
-                                            <a href="#" class="btn btn-sm btn-outline-secondary" data-confirm="<?php echo e(backup_lang('delete_confirm')); ?>" data-form="backup-delete-form-<?php echo (int) ($backup['id'] ?? 0); ?>"><?php echo e(backup_lang('delete')); ?></a>
+                                            <a href="#" class="btn btn-sm btn-outline-secondary" data-backup-control data-confirm="<?php echo e(backup_lang('delete_confirm')); ?>" data-form="backup-delete-form-<?php echo (int) ($backup['id'] ?? 0); ?>"><?php echo e(backup_lang('delete')); ?></a>
                                         </div>
                                     </td>
                                 </tr>

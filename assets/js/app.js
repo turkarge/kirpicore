@@ -356,6 +356,10 @@
 
             toggle.addEventListener("click", (event) => {
                 event.preventDefault();
+
+                if (trigger.classList.contains("disabled") || trigger.getAttribute("aria-disabled") === "true") {
+                    return;
+                }
                 event.stopPropagation();
                 if (collapseEl.classList.contains("show")) {
                     hide(false);
@@ -596,7 +600,7 @@
                         const form = document.getElementById(formId);
                         if (form) {
                             if (form.matches("form[data-ajax='true']")) {
-                                this.submitAjaxForm(form);
+                                this.submitAjaxForm(form, trigger);
                                 return;
                             }
 
@@ -625,15 +629,24 @@
             });
         },
 
-        async submitAjaxForm(form) {
+        async submitAjaxForm(form, trigger = null) {
             if (!form || !form.matches("form[data-ajax='true']")) {
                 return;
             }
 
-            const submitButton = form.querySelector("[type='submit']");
+            const submitButton = trigger || form.querySelector("[type='submit']");
             if (submitButton) {
                 submitButton.disabled = true;
             }
+
+            let result = null;
+
+            document.dispatchEvent(new CustomEvent("kirpi:form.start", {
+                detail: {
+                    form: form,
+                    trigger: submitButton
+                }
+            }));
 
             try {
                 const formData = new FormData(form);
@@ -655,10 +668,17 @@
 
                 if (!response.ok && responseText.trim() === "") {
                     this.toast(`Islem basarisiz oldu (HTTP ${response.status}).`, "error");
+                    document.dispatchEvent(new CustomEvent("kirpi:form.error", {
+                        detail: {
+                            form: form,
+                            trigger: submitButton,
+                            result: null,
+                            error: new Error(`HTTP ${response.status}`)
+                        }
+                    }));
                     return;
                 }
 
-                let result = null;
                 try {
                     result = JSON.parse(responseText);
                 } catch (parseError) {
@@ -667,6 +687,14 @@
                     } else {
                         this.toast("Sunucu beklenmeyen bir yanit dondurdu.", "error");
                     }
+                    document.dispatchEvent(new CustomEvent("kirpi:form.error", {
+                        detail: {
+                            form: form,
+                            trigger: submitButton,
+                            result: null,
+                            error: parseError
+                        }
+                    }));
                     return;
                 }
 
@@ -685,6 +713,17 @@
                     }
                 }));
 
+                if (result.status !== "success") {
+                    document.dispatchEvent(new CustomEvent("kirpi:form.error", {
+                        detail: {
+                            form: form,
+                            trigger: submitButton,
+                            result: result,
+                            error: null
+                        }
+                    }));
+                }
+
                 if (result.reload_page) {
                     if (result.message) {
                         this.persistPendingToast(result.message, result.status || "info");
@@ -700,10 +739,26 @@
             } catch (error) {
                 console.error("AJAX form submit error:", error);
                 this.toast("Islem sirasinda bir hata olustu.", "error");
+                document.dispatchEvent(new CustomEvent("kirpi:form.error", {
+                    detail: {
+                        form: form,
+                        trigger: submitButton,
+                        result: result,
+                        error: error
+                    }
+                }));
             } finally {
                 if (submitButton) {
                     submitButton.disabled = false;
                 }
+
+                document.dispatchEvent(new CustomEvent("kirpi:form.complete", {
+                    detail: {
+                        form: form,
+                        trigger: submitButton,
+                        result: result
+                    }
+                }));
             }
         },
 
@@ -813,7 +868,7 @@
                 }
 
                 event.preventDefault();
-                await this.submitAjaxForm(form);
+                await this.submitAjaxForm(form, event.submitter || null);
             }, true);
         },
 

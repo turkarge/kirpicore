@@ -49,6 +49,14 @@ function backup_lang(string $key, ?string $default = null): string
                 'restore_confirm' => 'Bu backup geri yüklenecek. Emin misiniz?',
                 'delete_confirm' => 'Bu backup kaydı silinecek. Emin misiniz?',
 
+                // İşlem Durumu
+                'working_create' => 'Backup oluşturuluyor. Bu işlem birkaç dakika sürebilir.',
+                'working_verify' => 'Backup doğrulanıyor. Lütfen işlem tamamlanana kadar bekleyin.',
+                'working_restore' => 'Backup geri yükleniyor. Bu işlem birkaç dakika sürebilir.',
+                'working_delete' => 'Backup siliniyor. Lütfen bekleyin.',
+                'working_default' => 'Backup işlemi yürütülüyor. Lütfen bekleyin.',
+                'operation_failed' => 'Backup işlemi tamamlanamadı. Ayrıntılar için bildirimi kontrol edin.',
+
                 // Hata ve Bilgilendirme Mesajları
                 'backup_tables_missing' => 'Backup tabloları kurulu değil. Kurulum için setup veya db:install çalıştırın.',
                 'table_not_ready' => 'Backup tablosu henüz kurulu değil.',
@@ -96,6 +104,12 @@ function backup_lang(string $key, ?string $default = null): string
                 'verify_confirm' => 'This backup will be validated with checksum and dry-run restore. Continue?',
                 'restore_confirm' => 'This backup will be restored. Continue?',
                 'delete_confirm' => 'This backup record will be deleted. Continue?',
+                'working_create' => 'Backup is being created. This may take a few minutes.',
+                'working_verify' => 'Backup is being verified. Please wait until the operation completes.',
+                'working_restore' => 'Backup is being restored. This may take a few minutes.',
+                'working_delete' => 'Backup is being deleted. Please wait.',
+                'working_default' => 'A backup operation is in progress. Please wait.',
+                'operation_failed' => 'The backup operation could not be completed. Check the notification for details.',
                 'recent_restores' => 'Recent Restore Logs',
                 'restored_by' => 'Restored By',
                 'created_at' => 'Created At',
