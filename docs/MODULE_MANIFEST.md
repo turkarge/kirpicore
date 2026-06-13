@@ -130,16 +130,18 @@ Kullanım:
 
 Liste ekranı olan core modüllerde aşağıdaki standart uygulanır:
 
-- Liste filtreleri HTML form elemanlarıyla görünür olmalıdır.
-- AJAX tablo varsa filtre parametreleri hem tablo endpoint'ine hem export endpoint'ine aynı isimlerle taşınmalıdır.
+- Uygulama tabloları `docs/KIRPI_TABLE.md` içindeki KirpiTable sözleşmesini kullanmalıdır.
+- Statik tablolar `standard`, `report`, `compact` veya `matrix` profillerinden biriyle işaretlenmelidir.
+- Büyük veya aksiyon içeren listeler `ajax/<module_key>/datatable` endpoint'i ve `core/kirpi_table.php` yardımcılarıyla sunucu taraflı çalışmalıdır.
+- Global arama ve kolon filtreleri tablo toolbar'ında yer alır; aynı işi yapan ayrı üst filtre paneli oluşturulmaz.
+- Filtre parametreleri tablo endpoint'ine ve export endpoint'ine aynı anlamla taşınmalıdır.
 - Export endpoint standardı: `modules/<module_key>/actions/export.php`
 - Route standardı: `<module_key>/actions/export`
 - Yetki standardı:
   - Liste export için `<module_key>.view`
   - Hassas matris/katalog export için ilgili özel yetki (`roles.permissions` gibi)
 - CSV ve XLS çıktıları `core/export.php` içindeki helper'lar ile üretilir.
-- Export butonları gerçek `<a href="...">` link olmalıdır.
-- JavaScript yalnızca mevcut filtreleri export linkine eklemek için kullanılmalıdır; JS çalışmasa bile filtresiz export başlamalıdır.
+- KirpiTable istemci export'u görünen veriyi; server export'u tüm filtrelenmiş sonucu üretir.
 - Export dosyaları en fazla makul bir sınırla üretilmelidir. Mevcut standart limit `5000` kayıttır.
 
 Tamamlanan server-side export modülleri:

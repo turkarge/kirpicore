@@ -331,9 +331,12 @@ Tamamlanan son durum:
    - Çalışma portları env üzerinden konfigüre edilecek; örnek: `KIRPI_APP_HTTP_PORT`, `KIRPI_DB_PORT`.
    - DB adı, session cookie adı, container adları, network/volume adları, servis portları ve gerekiyorsa public route/proxy etiketleri bu standarda bağlanacak.
 
-4. **KirpiTable standart tablo sistemi** - Pilot aşaması
+4. **KirpiTable standart tablo sistemi** - Tamamlandı
    - DataTables 2.3.8 ve Bootstrap 5 entegrasyonu Core içine yerel asset olarak eklendi.
    - Ortak `KirpiTable` adaptörü; server-side veri, global/kolon arama, sıralama, sayfalama, responsive görünüm, seçim, kolon görünürlüğü, kolon sıralama, sabit başlık, klavye navigasyonu ve state kaydı sağlar.
    - CSV, Excel, yazdırma, kopyalama ve tüm filtrelenmiş sonuçları sunucu tarafında export etme akışları standardize edildi.
-   - Kullanıcılar modülü pilot ekran olarak yeni tablo sistemine geçirildi.
-   - Pilot doğrulamasından sonra Roller, Notifications ve kalan standart liste ekranları aynı sözleşmeye taşınacak.
+   - Kullanıcılar, Roller, Audit ve Bildirimler listeleri ortak server-side endpoint sözleşmesine geçirildi.
+   - Core içindeki tüm uygulama tabloları `standard`, `report`, `compact`, `matrix` veya manuel server-side profile bağlandı.
+   - Ortak PHP istek, sıralama, parametre bağlama ve JSON response yardımcıları `core/kirpi_table.php` içinde standardize edildi.
+   - Statik sözleşme ve gerçek MySQL endpoint smoke testleri eklendi.
+   - Geliştirici standardı `docs/KIRPI_TABLE.md` içinde belgelendi.

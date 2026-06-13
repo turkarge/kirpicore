@@ -34,6 +34,7 @@ Yapı özellikleri:
 - API token ve scope yönetimi
 - Backup/restore, health metrics, throttle ve audit log
 - Server-side CSV/XLS export standardı
+- DataTables 2 tabanlı ortak KirpiTable liste ve rapor standardı
 - Template, Documents ve Notifications registry altyapısı
 - PWA temeli
 
@@ -333,6 +334,7 @@ Kapsayıcı kullanıcısının (`www-data`) yazma izni olmalı.
 
 - [SETUP.md](SETUP.md)
 - [docs/MODULE_MANIFEST.md](docs/MODULE_MANIFEST.md)
+- [docs/KIRPI_TABLE.md](docs/KIRPI_TABLE.md)
 - [docs/ROADMAP.md](docs/ROADMAP.md)
 - [docs/API_USERS.md](docs/API_USERS.md)
 - [docs/MAIL_TEMPLATES.md](docs/MAIL_TEMPLATES.md)
