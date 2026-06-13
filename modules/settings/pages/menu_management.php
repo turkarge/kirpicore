@@ -44,7 +44,7 @@ $managementMenus = array_values(array_filter($moduleMenus, static fn(array $item
                 <h3 class="card-title"><?php echo e(settings_lang('fixed_menu_items')); ?></h3>
             </div>
             <div class="table-responsive">
-                <table class="table table-vcenter card-table">
+                <table data-kirpi-table="report" data-table-title="Sabit Menü Öğeleri" class="table table-vcenter card-table">
                     <thead>
                         <tr>
                             <th><?php echo e(settings_lang('name')); ?></th>
@@ -73,7 +73,7 @@ $managementMenus = array_values(array_filter($moduleMenus, static fn(array $item
                 <h3 class="card-title"><?php echo e(settings_lang('top_menu_items')); ?></h3>
             </div>
             <div class="table-responsive">
-                <table class="table table-vcenter card-table">
+                <table data-kirpi-table="report" data-table-title="Üst Menü Öğeleri" class="table table-vcenter card-table">
                     <thead>
                         <tr>
                             <th><?php echo e(settings_lang('name')); ?></th>
@@ -113,7 +113,7 @@ $managementMenus = array_values(array_filter($moduleMenus, static fn(array $item
                 <h3 class="card-title"><?php echo e(settings_lang('management_menu_items')); ?></h3>
             </div>
             <div class="table-responsive">
-                <table class="table table-vcenter card-table">
+                <table data-kirpi-table="report" data-table-title="Yönetim Menüsü Öğeleri" class="table table-vcenter card-table">
                     <thead>
                         <tr>
                             <th><?php echo e(settings_lang('name')); ?></th>

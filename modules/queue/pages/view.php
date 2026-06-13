@@ -119,7 +119,7 @@ if ($queueReady) {
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table table-vcenter card-table table-striped">
+                <table data-kirpi-table="standard" data-table-title="Queue İşleri" class="table table-vcenter card-table table-striped">
                     <thead>
                         <tr>
                             <th>ID</th>

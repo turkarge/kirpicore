@@ -217,7 +217,7 @@ $renderBadges = static function (array $items): void {
                         <h3 class="card-title"><?php echo e(ai_lang('candidate_entities')); ?></h3>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-vcenter card-table table-striped mb-0">
+                        <table data-kirpi-table="report" data-table-title="Planner Aday Entityleri" class="table table-vcenter card-table table-striped mb-0">
                             <thead>
                             <tr>
                                 <th><?php echo e(ai_lang('score')); ?></th>

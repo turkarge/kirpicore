@@ -98,7 +98,7 @@ if ($backupReady) {
                 <h3 class="card-title"><?php echo e(backup_lang('recent_backups')); ?></h3>
             </div>
             <div class="table-responsive">
-                <table class="table table-vcenter card-table table-striped">
+                <table data-kirpi-table="standard" data-table-title="Yedekler" class="table table-vcenter card-table table-striped">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -160,7 +160,7 @@ if ($backupReady) {
                 <h3 class="card-title"><?php echo e(backup_lang('recent_restores')); ?></h3>
             </div>
             <div class="table-responsive">
-                <table class="table table-vcenter card-table table-striped">
+                <table data-kirpi-table="report" data-table-title="Restore Kayıtları" class="table table-vcenter card-table table-striped">
                     <thead>
                         <tr>
                             <th>ID</th>

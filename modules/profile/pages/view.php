@@ -236,7 +236,7 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
 
                                             <hr class="my-4">
                                             <div class="table-responsive">
-                                                <table class="table table-vcenter card-table table-striped mb-0">
+                                                <table data-kirpi-table="standard" data-table-title="API Tokenları" class="table table-vcenter card-table table-striped mb-0">
                                                     <thead>
                                                     <tr>
                                                         <th>ID</th>

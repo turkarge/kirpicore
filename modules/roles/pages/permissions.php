@@ -126,7 +126,7 @@ try {
 
             <div class="card">
                 <div class="table-responsive">
-                    <table class="table table-vcenter card-table table-striped">
+                    <table data-kirpi-table="matrix" data-table-title="Rol Yetki Matrisi" class="table table-vcenter card-table table-striped">
                         <thead>
                             <tr>
                                 <th style="min-width: 220px;"><?php echo e(roles_lang('module')); ?></th>

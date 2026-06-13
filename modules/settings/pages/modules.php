@@ -77,7 +77,7 @@ foreach ($requiredByMap as $moduleKey => $dependents) {
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table table-vcenter card-table table-striped mb-0">
+                <table data-kirpi-table="standard" data-table-title="Modül Registry" class="table table-vcenter card-table table-striped mb-0">
                     <thead>
                     <tr>
                         <th>Key</th>

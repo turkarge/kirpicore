@@ -116,7 +116,7 @@ try {
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table table-vcenter card-table table-striped">
+                <table data-kirpi-table="compact" data-table-title="Güvenlik Kontrolleri" class="table table-vcenter card-table table-striped">
                     <thead>
                     <tr>
                         <th><?php echo e(security_lang('col_check')); ?></th>
@@ -150,7 +150,7 @@ try {
                 <h3 class="card-title"><?php echo e(security_lang('dirs_title')); ?></h3>
             </div>
             <div class="table-responsive">
-                <table class="table table-vcenter card-table table-striped">
+                <table data-kirpi-table="compact" data-table-title="Dizin Güvenliği" class="table table-vcenter card-table table-striped">
                     <thead>
                     <tr>
                         <th><?php echo e(security_lang('col_folder')); ?></th>

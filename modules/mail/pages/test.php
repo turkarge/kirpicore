@@ -54,7 +54,7 @@ if (db_table_exists('mail_logs')) {
                         <h3 class="card-title"><?php echo e(mail_lang('mail_configuration')); ?></h3>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-vcenter card-table table-striped">
+                        <table data-kirpi-table="compact" data-table-title="Mail Yapılandırması" class="table table-vcenter card-table table-striped">
                             <thead>
                             <tr>
                                 <th><?php echo e(mail_lang('check')); ?></th>
@@ -137,7 +137,7 @@ if (db_table_exists('mail_logs')) {
                 <h3 class="card-title"><?php echo e(mail_lang('recent_mail_logs')); ?></h3>
             </div>
             <div class="table-responsive">
-                <table class="table table-vcenter card-table table-striped">
+                <table data-kirpi-table="report" data-table-title="Mail Logları" class="table table-vcenter card-table table-striped">
                     <thead>
                     <tr>
                         <th><?php echo e(mail_lang('date')); ?></th>

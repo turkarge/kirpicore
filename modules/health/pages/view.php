@@ -221,7 +221,7 @@ $statusBadge = static function (string $status): string {
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table table-vcenter card-table table-striped">
+                <table data-kirpi-table="report" data-table-title="Sistem Sağlığı" class="table table-vcenter card-table table-striped">
                     <thead>
                     <tr>
                         <th><?php echo e(health_lang('component')); ?></th>

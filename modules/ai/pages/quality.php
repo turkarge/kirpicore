@@ -77,7 +77,7 @@ $qualityExportUrl = static function (string $format): string {
                     <h3 class="card-title"><?php echo e(ai_lang('module')); ?></h3>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-vcenter card-table table-striped mb-0">
+                    <table data-kirpi-table="report" data-table-title="Schema Kalite Modülleri" class="table table-vcenter card-table table-striped mb-0">
                         <thead>
                         <tr>
                             <th><?php echo e(ai_lang('module')); ?></th>
@@ -104,7 +104,7 @@ $qualityExportUrl = static function (string $format): string {
                 <h3 class="card-title"><?php echo e(ai_lang('schema_quality')); ?></h3>
             </div>
             <div class="table-responsive">
-                <table class="table table-vcenter card-table table-striped mb-0">
+                <table data-kirpi-table="report" data-table-title="Schema Kalite Bulguları" class="table table-vcenter card-table table-striped mb-0">
                     <thead>
                     <tr>
                         <th><?php echo e(ai_lang('severity')); ?></th>

@@ -165,7 +165,7 @@ $statusBadge = static function (string $status): string {
                 <h3 class="card-title"><?php echo e(audit_lang('module_distribution')); ?></h3>
             </div>
             <div class="table-responsive">
-                <table class="table table-vcenter card-table table-striped">
+                <table data-kirpi-table="report" data-table-title="Audit Modül Dağılımı" class="table table-vcenter card-table table-striped">
                     <thead>
                     <tr>
                         <th><?php echo e(audit_lang('module')); ?></th>
@@ -202,7 +202,7 @@ $statusBadge = static function (string $status): string {
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table table-vcenter card-table table-striped kirpi-sortable-report" data-report-title="<?php echo e(audit_lang('audit_overview')); ?>">
+                <table data-kirpi-table="report" data-table-title="<?php echo e(audit_lang('audit_overview')); ?>" class="table table-vcenter card-table table-striped">
                     <thead>
                     <tr>
                         <th data-type="number">ID</th>

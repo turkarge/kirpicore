@@ -96,7 +96,7 @@ $renderSelect = static function (string $name, string $label, array $options, st
                 <h3 class="card-title"><?php echo e(ai_lang('latest_entities')); ?></h3>
             </div>
             <div class="table-responsive">
-                <table class="table table-vcenter card-table table-striped mb-0">
+                <table data-kirpi-table="report" data-table-title="Son Schema Entity Kayıtları" class="table table-vcenter card-table table-striped mb-0">
                     <thead>
                     <tr>
                         <th><?php echo e(ai_lang('module')); ?></th>
@@ -184,7 +184,7 @@ $renderSelect = static function (string $name, string $label, array $options, st
                 </form>
             </div>
             <div class="table-responsive">
-                <table class="table table-vcenter card-table table-striped mb-0">
+                <table data-kirpi-table="report" data-table-title="Schema Discovery" class="table table-vcenter card-table table-striped mb-0">
                     <thead>
                     <tr>
                         <th><?php echo e(ai_lang('module')); ?></th>
@@ -248,7 +248,7 @@ $renderSelect = static function (string $name, string $label, array $options, st
 
             <?php if ($searchQuery !== ''): ?>
                 <div class="table-responsive">
-                    <table class="table table-vcenter card-table table-striped mb-0">
+                    <table data-kirpi-table="report" data-table-title="Schema Arama Sonuçları" class="table table-vcenter card-table table-striped mb-0">
                         <thead>
                         <tr>
                             <th><?php echo e(ai_lang('score')); ?></th>

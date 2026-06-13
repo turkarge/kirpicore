@@ -186,7 +186,7 @@ $renderBadges = static function (array $items, string $class = 'bg-secondary-lt'
                     </div>
                     <?php if (!empty($explain['rows'])): ?>
                         <div class="table-responsive mt-3">
-                            <table class="table table-vcenter card-table table-striped mb-0">
+                            <table data-kirpi-table="compact" data-table-title="EXPLAIN Önizleme" class="table table-vcenter card-table table-striped mb-0">
                                 <thead>
                                 <tr>
                                     <?php foreach (array_keys((array) ($explain['rows'][0] ?? [])) as $column): ?>

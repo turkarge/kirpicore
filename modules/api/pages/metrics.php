@@ -205,7 +205,7 @@ if ($tableReady) {
                         <h3 class="card-title"><?php echo e(api_lang('top_endpoints')); ?></h3>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-vcenter card-table table-striped mb-0">
+                        <table data-kirpi-table="report" data-table-title="API Endpoint Metrikleri" class="table table-vcenter card-table table-striped mb-0">
                             <thead>
                             <tr>
                                 <th><?php echo e(api_lang('method')); ?></th>
@@ -239,7 +239,7 @@ if ($tableReady) {
                 <h3 class="card-title"><?php echo e(api_lang('recent_errors')); ?> (<?php echo e($windowLabel); ?>)</h3>
             </div>
             <div class="table-responsive">
-                <table class="table table-vcenter card-table table-striped mb-0">
+                <table data-kirpi-table="report" data-table-title="API Hataları" class="table table-vcenter card-table table-striped mb-0">
                     <thead>
                     <tr>
                         <th><?php echo e(api_lang('time')); ?></th>

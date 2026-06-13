@@ -124,7 +124,7 @@ $formatDetails = static function (?string $json): string {
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="table table-vcenter card-table table-striped">
+                <table data-kirpi-table="report" data-table-title="AI Audit Log" class="table table-vcenter card-table table-striped">
                     <thead>
                     <tr>
                         <th>ID</th>

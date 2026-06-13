@@ -141,7 +141,7 @@ $visibleCount = max(0, count($envItems) - $maskedCount);
 
         <div class="card">
             <div class="table-responsive">
-                <table class="table table-vcenter card-table table-striped">
+                <table data-kirpi-table="standard" data-table-title="Ortam Değişkenleri" class="table table-vcenter card-table table-striped">
                     <thead>
                     <tr>
                         <th><?php echo e(health_lang('key')); ?></th>

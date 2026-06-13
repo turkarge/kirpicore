@@ -68,10 +68,22 @@
             throw new Error("DataTables yüklenmedi.");
         }
 
+        if (DataTable.isDataTable(element)) {
+            return new DataTable.Api(element);
+        }
+
         const stateKey = options.stateKey || element.id || "table";
+        const configuredColumns = options.columns || Array.from(element.querySelectorAll("thead tr:first-child th")).map(() => ({}));
+        const serverSide = options.serverSide !== false;
+        const enableSelection = options.select !== false;
+        const enableResponsive = options.responsive !== false;
+        const enablePaging = options.paging !== false;
+        const enableButtons = options.buttons !== false;
+        const filterDefinitions = options.columnFilters || [];
+        const hasColumnFilters = filterDefinitions.some(Boolean);
         const filterRow = document.createElement("tr");
         filterRow.className = "kirpi-table-column-filters";
-        (options.columnFilters || options.columns.map(() => null)).forEach((filter, index) => {
+        (hasColumnFilters ? filterDefinitions : []).forEach((filter, index) => {
             const cell = document.createElement("th");
             if (filter) {
                 let control;
@@ -91,18 +103,18 @@
                     control.placeholder = filter.placeholder || "Filtrele";
                 }
                 control.dataset.columnFilter = String(index);
-                control.dataset.columnName = options.columns[index]?.name || options.columns[index]?.data || String(index);
+                control.dataset.columnName = configuredColumns[index]?.name || configuredColumns[index]?.data || String(index);
                 control.dataset.tableFilter = element.id;
                 control.setAttribute("aria-label", filter.label || filter.placeholder || "Kolon filtresi");
                 cell.appendChild(control);
             }
             filterRow.appendChild(cell);
         });
-        element.tHead?.appendChild(filterRow);
+        if (hasColumnFilters) element.tHead?.appendChild(filterRow);
 
         const table = new DataTable(element, {
             processing: true,
-            serverSide: true,
+            serverSide,
             deferRender: true,
             searchDelay: 350,
             stateSave: true,
@@ -112,23 +124,24 @@
                 try { return JSON.parse(localStorage.getItem(`kirpi_table_${stateKey}`) || "null"); }
                 catch (_) { return null; }
             },
-            ajax: options.ajax,
+            ajax: serverSide ? options.ajax : undefined,
             columns: options.columns,
             order: options.order || [],
             orderMulti: true,
-            pageLength: 10,
+            pageLength: options.pageLength || 10,
             lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
             autoWidth: false,
             titleRow: 0,
-            responsive: { details: { type: "inline", target: "tr" } },
-            select: { style: "multi+shift", selector: "td:first-child", headerCheckbox: "select-page" },
-            colReorder: { columns: ":not(:first-child):not(:last-child)" },
+            paging: enablePaging,
+            responsive: enableResponsive ? { details: { type: "inline", target: "tr" } } : false,
+            select: enableSelection ? { style: "multi+shift", selector: "td:first-child", headerCheckbox: "select-page" } : false,
+            colReorder: options.colReorder === false ? false : { columns: options.reorderColumns || ":not(:first-child):not(:last-child)" },
             fixedHeader: { header: true, headerOffset: document.querySelector(".navbar")?.offsetHeight || 0 },
             keys: { columns: ":not(:first-child):not(:last-child)", keys: [9, 13, 37, 38, 39, 40] },
             rowId: options.rowId,
             language,
             layout: {
-                topStart: {
+                topStart: enableButtons ? {
                     buttons: [
                         { extend: "collection", text: '<i class="ti ti-download me-2"></i>Dışa aktar', buttons: exportButtons(options) },
                         {
@@ -146,12 +159,17 @@
                                 }
                             ]
                         },
-                        { text: '<i class="ti ti-refresh"></i><span class="visually-hidden">Yenile</span>', titleAttr: "Tabloyu yenile", className: "btn-icon kirpi-table-refresh", action: (_, dt) => dt.ajax.reload(null, false) }
+                        {
+                            text: '<i class="ti ti-refresh"></i><span class="visually-hidden">Yenile</span>',
+                            titleAttr: "Tabloyu yenile",
+                            className: "btn-icon kirpi-table-refresh",
+                            action: (_, dt) => serverSide ? dt.ajax.reload(null, false) : dt.draw(false)
+                        }
                     ]
-                },
-                topEnd: "search",
-                bottomStart: ["pageLength", "info"],
-                bottomEnd: "paging"
+                } : null,
+                topEnd: options.search === false ? null : "search",
+                bottomStart: enablePaging ? ["pageLength", "info"] : "info",
+                bottomEnd: enablePaging ? "paging" : null
             }
         });
 
@@ -161,7 +179,7 @@
             return name && !/^\d+$/.test(name) ? table.column(`${name}:name`) : table.column(Number(control.dataset.columnFilter));
         };
         const syncColumnFilters = () => {
-            options.columns.forEach((column, index) => {
+            configuredColumns.forEach((column, index) => {
                 const name = column.name || column.data || String(index);
                 const apiColumn = name && !/^\d+$/.test(String(name)) ? table.column(`${name}:name`) : table.column(index);
                 const value = apiColumn.search();
@@ -218,6 +236,68 @@
         return table;
     };
 
+    const profileOptions = (element) => {
+        const profile = element.dataset.kirpiTable || "standard";
+        const title = element.dataset.tableTitle || document.querySelector(".page-title")?.textContent?.trim() || document.title;
+        const slug = `${window.location.pathname}-${title}`
+            .toLocaleLowerCase("tr-TR")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, "");
+        const sameTitleIndex = Array.from(document.querySelectorAll(`table[data-table-title="${CSS.escape(title)}"]`)).indexOf(element);
+        const id = element.id || `kirpi-table-${slug || "table"}-${Math.max(0, sameTitleIndex)}`;
+        element.id = id;
+        const base = {
+            serverSide: false,
+            stateKey: id,
+            exportTitle: title,
+            select: false,
+            order: [],
+            pageLength: Number(element.dataset.pageLength || 25),
+            exportColumns: ":visible",
+            reorderColumns: ":not(:last-child)"
+        };
+
+        if (profile === "compact") {
+            return { ...base, buttons: false, paging: false, search: false, colReorder: false, responsive: true };
+        }
+        if (profile === "matrix") {
+            return { ...base, buttons: false, paging: false, search: true, colReorder: false, responsive: false };
+        }
+        if (profile === "report") {
+            return { ...base, select: false, paging: true, responsive: true };
+        }
+        return { ...base, select: element.dataset.selectable === "true", paging: true, responsive: true };
+    };
+
+    const enhance = (root = document) => {
+        const selector = 'table[data-kirpi-table]:not([data-kirpi-ready="true"])';
+        const elements = [
+            ...(root.matches?.(selector) ? [root] : []),
+            ...(root.querySelectorAll?.(selector) || [])
+        ];
+        elements.forEach((element) => {
+            if (element.querySelector("tbody td[colspan], tbody th[colspan]")) {
+                element.dataset.kirpiReady = "empty";
+                return;
+            }
+            element.dataset.kirpiReady = "true";
+            try {
+                create(element, profileOptions(element));
+            } catch (error) {
+                element.dataset.kirpiReady = "error";
+                console.error("KirpiTable başlatılamadı:", error);
+            }
+        });
+    };
+
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) enhance(node);
+        }));
+    });
+
     const post = async (path, data) => {
         const formData = new FormData();
         Object.entries(data || {}).forEach(([key, value]) => formData.append(key, value));
@@ -243,5 +323,9 @@
         if (window.toastr) toastr.error(error?.message || "İşlem tamamlanamadı.");
     };
 
-    window.KirpiTable = { create, escape, post, notify, notifyError };
+    window.KirpiTable = { create, enhance, escape, post, notify, notifyError };
+    document.addEventListener("DOMContentLoaded", () => {
+        enhance(document);
+        observer.observe(document.body, { childList: true, subtree: true });
+    });
 })(window, document);
