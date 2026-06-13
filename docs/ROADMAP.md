@@ -77,7 +77,7 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
 
 ## Devam Eden Standartlaştırma
 
-- Gerçek provider canlı sağlayıcı doğrulaması.
+- Deployment standardizasyonu: uygulama prefix'i, servis portları ve Docker kaynak izolasyonu.
 
 ## Yarın Planı
 
@@ -317,14 +317,14 @@ Tamamlanan son durum:
    - Kirpi Intelligence `v1.0.0` production-ready preview/gateway seviyesiyle kapatıldı.
    - Gerçek SQL yürütme ve gerçek veri okuma bilinçli olarak kapalı tutuldu.
 
-2. **Kirpi Core ekran ekran test turu**
-   - Yönetim, Erişim Yönetimi, İçerik Yönetimi, İletişim, Operasyon, Monitoring / İzleme ve Kirpi Intelligence grupları sırayla gezilecek.
-   - Her standart modülde liste, filtre, export, temel aksiyon, audit/notification etkisi ve tema uyumu kontrol edilecek.
-   - Bulunan küçük UI/metin/akış hataları aynı tur içinde düzeltilecek.
-   - Manuel test sonuçları `docs/testing/kirpi-core-ui-test-checklist.md` içindeki 94 maddelik standart kontrol listesine işlenecek.
+2. **Kirpi Core ekran ekran test turu** - Tamamlandı
+   - Yönetim, Erişim Yönetimi, İçerik Yönetimi, İletişim, Operasyon, Monitoring / İzleme ve Kirpi Intelligence grupları test edildi.
+   - Liste, filtre, export, temel aksiyon, audit/notification etkisi ve tema uyumu kontrolleri tamamlandı.
+   - Manuel test sonuçları `docs/testing/kirpi-core-ui-test-checklist.md` içinde `94/94` başarılı ve yayına uygun olarak kapatıldı.
+   - Backup uzun işlemlerine görünür durum, spinner ve çift gönderim kilidi eklendi.
    - Documents modülü `v2.0.0` kurumsal dosya yöneticisine yükseltildi: çoklu sürükle-bırak yükleme, progress, kart/liste görünümü, seçim, toplu silme/indirme, istatistik ve sayfalama.
 
-3. **Deployment standardizasyon tasarımı**
+3. **Deployment standardizasyon tasarımı** - Sıradaki Faz
    - Her yeni Core tabanlı uygulamada servis çakışmasını önlemek için env tabanlı uygulama prefix standardı hazırlanacak.
    - Docker compose service/container/network/volume/project isimleri bu prefix üzerinden üretilecek.
    - Varsayılan örnek: `KIRPI_APP_PREFIX=kirpicore`.

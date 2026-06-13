@@ -1,9 +1,9 @@
 # Kirpi Core Ekran Test Kontrol Listesi
 
-Test tarihi: `2026-06-12`
+Test tarihi: `2026-06-13`
 Test eden: `Ramazan ÖZKAYNAK`
 Ortam / URL: `https://core.kirpinetwork.com`
-Commit / sürüm: `bac9c9d110a7859c59dddba866f4e238558453ee`
+Commit / sürüm: `a00b93a` (deployment standardizasyonu öncesi uygulama baseline)
 Tarayıcı ve cihaz: `Google Chrome Sürüm 149.0.7827.115 (Resmi Derleme) (64 bit) | Windows 11 Pro Build 26200.8655`
 
 ## Kullanım
@@ -98,7 +98,7 @@ Notlar: `____________________________________________________________________`
 - `[x] OPS-14` API Metrics ekranı açılıyor; sayaçlar, filtreler ve export çalışıyor.
 - `[x] OPS-15` Env Reader mevcut env anahtarlarını gösteriyor; secret/token/password değerleri maskeli.
 
-Notlar: `Backup işlemlerindeki bazı aksiyonlar için butonlara tıklayınca sanki hiç bir şey olmuyormuş gibi izlenim veriyor ama sonradan bildirimi geliyor. Eğer görev çalışıyorsa çelişiyor gibi bir bildirim verebilir`
+Notlar: `Backup işlemlerine görünür işlem durumu, spinner, işlem bazlı bekleme mesajı ve çift/eşzamanlı gönderim kilidi eklendi. Başarı ve hata sonuçları aynı durum alanında gösteriliyor.`
 
 ## 6. Sistem Ayarları ve Modüller
 
@@ -166,14 +166,10 @@ Notlar: `____________________________________________________________________`
 | API ve Yetki | 8 | 0 | 0 | 0 |
 | **Toplam** | **94** | **0** | **0** | **0** |
 
-Genel karar: `[ ] Yayına uygun` `[ ] Düzeltme sonrası tekrar test` `[ ] Bloke`
+Genel karar: `[x] Yayına uygun` `[ ] Düzeltme sonrası tekrar test` `[ ] Bloke`
 
-Kritik bulgular:
-
-1. `__________________________________________________________________`
-2. `__________________________________________________________________`
-3. `__________________________________________________________________`
+Kritik bulgular: `Yok.`
 
 Ek notlar / ekran görüntüsü bağlantıları:
 
-`__________________________________________________________________________`
+`94/94 kontrol başarılı. Deployment standardizasyonu ayrı çalışma fazı olarak izlenecek.`
