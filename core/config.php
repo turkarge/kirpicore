@@ -40,9 +40,25 @@ if (session_status() === PHP_SESSION_NONE) {
     $sessionIdleTimeout = max(300, (int) env('SESSION_IDLE_TIMEOUT_SECONDS', 7200));
     $sessionRotateSeconds = max(60, (int) env('SESSION_ID_ROTATE_SECONDS', 900));
     $sessionVersion = preg_replace('/[^a-zA-Z0-9]/', '', $appVer);
+    $appPrefix = preg_replace('/[^a-zA-Z0-9]/', '', (string) env('KIRPI_APP_PREFIX', 'kirpicore'));
 
     if ($sessionVersion === '' || $sessionVersion === null) {
         $sessionVersion = '100';
+    }
+
+    if ($appPrefix === '' || $appPrefix === null) {
+        $appPrefix = 'kirpicore';
+    }
+
+    $defaultSessionCookieName = strtoupper($appPrefix) . 'SESSID_' . $sessionVersion;
+    $sessionCookieName = preg_replace(
+        '/[^a-zA-Z0-9]/',
+        '',
+        (string) env('SESSION_COOKIE_NAME', $defaultSessionCookieName)
+    );
+
+    if ($sessionCookieName === '' || $sessionCookieName === null) {
+        $sessionCookieName = $defaultSessionCookieName;
     }
 
     if (!$isHttpsRequest && $appTrustProxy) {
@@ -61,7 +77,7 @@ if (session_status() === PHP_SESSION_NONE) {
     ini_set('session.cookie_samesite', 'Lax');
     ini_set('session.sid_length', '64');
     ini_set('session.sid_bits_per_character', '6');
-    session_name('KIRPISESSID_' . $sessionVersion);
+    session_name($sessionCookieName);
 
     if ($isHttpsRequest) {
         ini_set('session.cookie_secure', '1');
@@ -96,6 +112,7 @@ define('APP_VER', $appVer);
 define('APP_ENV', $appEnv);
 define('APP_DEBUG', $appDebug);
 define('APP_TRUST_PROXY', $appTrustProxy);
+define('KIRPI_APP_PREFIX', env('KIRPI_APP_PREFIX', 'kirpicore'));
 define('SESSION_IDLE_TIMEOUT_SECONDS', max(300, (int) env('SESSION_IDLE_TIMEOUT_SECONDS', 7200)));
 define('SESSION_ID_ROTATE_SECONDS', max(60, (int) env('SESSION_ID_ROTATE_SECONDS', 900)));
 
