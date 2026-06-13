@@ -48,7 +48,7 @@ Yapı özellikleri:
 ## 3. Hızlı Başlangıç (Yerel Docker)
 
 ```bash
-docker compose up -d --build
+docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
 ```
 
 Erişim:
@@ -56,7 +56,7 @@ Erişim:
 - Uygulama: `http://localhost:8080`
 - DB host (container içi): `db:3306`
 
-Lokal geliştirmede host portuna bağlamak için ek bir compose override dosyasıyla `8080:80` port eşlemesi verilebilir.
+Yerel host portları `.env` içindeki `KIRPI_APP_HTTP_PORT` ve `KIRPI_DB_HOST_PORT` ile değiştirilebilir. Production Compose host port yayınlamaz.
 
 İlk kurulum:
 
@@ -82,6 +82,8 @@ Aşağıdaki değerleri Dokploy `Environment Settings` alanına giriniz.
 ### Zorunlu Değişkenler
 
 ```env
+KIRPI_APP_PREFIX=kirpicore
+COMPOSE_PROJECT_NAME=kirpicore
 APP_NAME="Kirpi Core"
 APP_VER=1.0.15
 APP_ENV=production
@@ -91,6 +93,7 @@ APP_DEFAULT_ROUTE=dashboard/view
 BASE_URL=https://core.kirpinetwork.com
 APP_TRUST_PROXY=true
 APP_LOCALE=tr
+SESSION_COOKIE_NAME=KIRPICORESESSID
 
 DB_HOST=db
 DB_PORT=3306
@@ -111,6 +114,8 @@ MAIL_FROM_ADDRESS=your_mail@example.com
 MAIL_FROM_NAME="Kirpi Core"
 ```
 
+Mevcut bir Dokploy kurulumunu bu standarda geçiriyorsanız deploy öncesinde mevcut DB, uploads ve logs volume adlarını env içine sabitlemeniz zorunludur. Ayrıntılı ve veri kayıpsız geçiş adımları için [Deployment Standardı](docs/DEPLOYMENT_STANDARD.md) belgesini izleyin.
+
 ### Güvenlik ve Session
 
 ```env
@@ -119,6 +124,17 @@ SESSION_IDLE_TIMEOUT_SECONDS=7200
 SESSION_ID_ROTATE_SECONDS=900
 SECURITY_HEADERS_ENABLED=true
 AUTH_LOGIN_COVER_IMAGE=https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1400&q=80
+```
+
+### Kaynak İzolasyonu
+
+Yeni kurulumlarda aşağıdaki adlar `KIRPI_APP_PREFIX` üzerinden otomatik üretilir. Mevcut kurulumlarda gerçek legacy volume adları yazılmalıdır:
+
+```env
+KIRPI_NETWORK_NAME=
+KIRPI_DB_VOLUME_NAME=
+KIRPI_UPLOADS_VOLUME_NAME=
+KIRPI_LOGS_VOLUME_NAME=
 ```
 
 ### Kurulum ve Otomatik DB Kontrolleri

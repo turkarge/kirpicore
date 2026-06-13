@@ -5,6 +5,8 @@ $compose = file_get_contents($root . '/docker-compose.yml');
 $localCompose = file_get_contents($root . '/docker-compose.local.yml');
 $config = file_get_contents($root . '/core/config.php');
 $validator = file_get_contents($root . '/scripts/validate-deployment.ps1');
+$envExample = file_get_contents($root . '/.env.example');
+$deploymentDocs = file_get_contents($root . '/docs/DEPLOYMENT_STANDARD.md');
 
 $assertions = [
     'compose project prefix' => str_contains($compose, 'name: ${KIRPI_APP_PREFIX:-kirpicore}'),
@@ -21,6 +23,13 @@ $assertions = [
     'local database port override' => str_contains($localCompose, 'KIRPI_DB_HOST_PORT'),
     'dual instance validator' => str_contains($validator, 'Compose proje adlari ayrismadi')
         && str_contains($validator, 'Volume adlari ayrismadi'),
+    'example prefix variables' => str_contains($envExample, 'KIRPI_APP_PREFIX=kirpicore')
+        && str_contains($envExample, 'COMPOSE_PROJECT_NAME=kirpicore'),
+    'example local ports' => str_contains($envExample, 'KIRPI_APP_HTTP_PORT=8080')
+        && str_contains($envExample, 'KIRPI_DB_HOST_PORT=3306'),
+    'legacy migration warning' => str_contains($deploymentDocs, 'Volume adlarını doğrulamadan deploy etmeyin'),
+    'dokploy keeps internal ports' => str_contains($deploymentDocs, 'app')
+        && str_contains($deploymentDocs, 'db:3306'),
 ];
 
 $failed = array_keys(array_filter($assertions, static fn (bool $passed): bool => !$passed));

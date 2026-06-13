@@ -77,7 +77,7 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
 
 ## Devam Eden Standartlaştırma
 
-- Deployment standardizasyonu: uygulama prefix'i, servis portları ve Docker kaynak izolasyonu.
+- Yeni Core tabanlı uygulamalarda deployment standardının proje başlangıcında uygulanması.
 
 ## Yarın Planı
 
@@ -324,12 +324,16 @@ Tamamlanan son durum:
    - Backup uzun işlemlerine görünür durum, spinner ve çift gönderim kilidi eklendi.
    - Documents modülü `v2.0.0` kurumsal dosya yöneticisine yükseltildi: çoklu sürükle-bırak yükleme, progress, kart/liste görünümü, seçim, toplu silme/indirme, istatistik ve sayfalama.
 
-3. **Deployment standardizasyon tasarımı** - Sıradaki Faz
-   - Her yeni Core tabanlı uygulamada servis çakışmasını önlemek için env tabanlı uygulama prefix standardı hazırlanacak.
-   - Docker compose service/container/network/volume/project isimleri bu prefix üzerinden üretilecek.
+3. **Deployment standardizasyon tasarımı** - Tamamlandı
+   - Her yeni Core tabanlı uygulamada servis çakışmasını önleyen env tabanlı uygulama prefix standardı hazırlandı.
+   - Docker Compose proje, image, container, network ve volume isimleri bu prefix üzerinden ayrıştırıldı.
    - Varsayılan örnek: `KIRPI_APP_PREFIX=kirpicore`.
-   - Çalışma portları env üzerinden konfigüre edilecek; örnek: `KIRPI_APP_HTTP_PORT`, `KIRPI_DB_PORT`.
-   - DB adı, session cookie adı, container adları, network/volume adları, servis portları ve gerekiyorsa public route/proxy etiketleri bu standarda bağlanacak.
+   - Çalışma portları env üzerinden konfigüre edildi: `KIRPI_APP_HTTP_PORT`, `KIRPI_DB_HOST_PORT`.
+   - DB adı, session cookie adı, network/volume adları ve servis portları izolasyon standardına bağlandı.
+   - Production Compose host port yayınlamaz; yerel HTTP/DB portları `docker-compose.local.yml` üzerinden env ile yönetilir.
+   - Mevcut kurulumların gerçek volume adlarını koruyan override sözleşmesi eklendi.
+   - İki farklı prefix ve portla eşzamanlı çalışan iki stack Docker üzerinde doğrulandı.
+   - Geçiş ve yeni uygulama standardı `docs/DEPLOYMENT_STANDARD.md` içinde belgelendi.
 
 4. **KirpiTable standart tablo sistemi** - Tamamlandı
    - DataTables 2.3.8 ve Bootstrap 5 entegrasyonu Core içine yerel asset olarak eklendi.

@@ -11,7 +11,7 @@ Bu doküman, Kirpi Core sisteminin lokal ve Dokploy üretim ortamında standart 
 ## 2. Lokal Kurulum (Docker)
 
 ```bash
-docker compose up -d --build
+docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
 ```
 
 Erişim:
@@ -32,6 +32,8 @@ Erişim:
 Aşağıdaki blok, Dokploy için referans production baseline'dir.
 
 ```env
+KIRPI_APP_PREFIX=kirpicore
+COMPOSE_PROJECT_NAME=kirpicore
 APP_NAME="Kirpi Core"
 APP_VER=1.0.15
 APP_ENV=production
@@ -41,6 +43,13 @@ APP_DEFAULT_ROUTE=dashboard/view
 BASE_URL=https://core.kirpinetwork.com
 APP_TRUST_PROXY=true
 APP_LOCALE=tr
+SESSION_COOKIE_NAME=KIRPICORESESSID
+
+# Mevcut Dokploy kurulumunda gerçek volume adları zorunludur.
+KIRPI_NETWORK_NAME=
+KIRPI_DB_VOLUME_NAME=
+KIRPI_UPLOADS_VOLUME_NAME=
+KIRPI_LOGS_VOLUME_NAME=
 
 SESSION_COOKIE_DOMAIN=
 SESSION_IDLE_TIMEOUT_SECONDS=7200
@@ -148,6 +157,8 @@ php shell.php db:tables
 
 ## 6. Doğrulama Checklist
 
+- `KIRPI_APP_PREFIX` bu uygulamaya özel ve stabil mi?
+- Mevcut kurulumda üç legacy volume adı env içine doğru yazıldı mı?
 - `BASE_URL` doğru mu?
 - `DB_*` bilgileri doğru mu?
 - `MAIL_*` bilgileri doğru mu?
@@ -176,6 +187,7 @@ php shell.php db:tables
 ## 8. Ilgili Dokumanlar
 
 - [README.md](README.md)
+- [docs/DEPLOYMENT_STANDARD.md](docs/DEPLOYMENT_STANDARD.md)
 - [docs/MODULE_MANIFEST.md](docs/MODULE_MANIFEST.md)
 - [docs/API_USERS.md](docs/API_USERS.md)
 - [docs/MAIL_TEMPLATES.md](docs/MAIL_TEMPLATES.md)
