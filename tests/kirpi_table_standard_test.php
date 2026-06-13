@@ -40,6 +40,23 @@ foreach (['MutationObserver', 'data-kirpi-table', 'tbody td[colspan]', 'serverSi
     }
 }
 
+foreach (['users', 'roles', 'audit', 'notifications'] as $module) {
+    $route = file_get_contents($root . "/modules/{$module}/routes.php");
+    $action = file_get_contents($root . "/modules/{$module}/actions/datatable.php");
+    $page = file_get_contents($root . "/modules/{$module}/pages/" . ($module === 'audit' || $module === 'notifications' ? 'list.php' : 'view.php'));
+    if (!str_contains((string) $route, "ajax/{$module}/datatable")
+        || !str_contains((string) $action, 'kirpi_table_request')
+        || !str_contains((string) $page, 'kirpi-data-table')) {
+        fwrite(STDERR, "Server-side KirpiTable contract is incomplete: {$module}.\n");
+        exit(1);
+    }
+}
+
+if (!is_file($root . '/tests/kirpi_table_endpoint_smoke.php')) {
+    fwrite(STDERR, "KirpiTable database endpoint smoke test is missing.\n");
+    exit(1);
+}
+
 $pageFiles = glob($root . '/modules/*/pages/*.php') ?: [];
 $unmarked = [];
 foreach ($pageFiles as $file) {
@@ -47,14 +64,11 @@ foreach ($pageFiles as $file) {
     if (!str_contains((string) $source, '<table')) {
         continue;
     }
-    if (str_ends_with(str_replace('\\', '/', $file), '/modules/users/pages/view.php')) {
-        continue;
-    }
     if (preg_match_all('/<table\b[^>]*>/', (string) $source, $matches) === false) {
         continue;
     }
     foreach ($matches[0] as $tableTag) {
-        if (!str_contains($tableTag, 'data-kirpi-table=')) {
+        if (!str_contains($tableTag, 'data-kirpi-table=') && !str_contains($tableTag, 'kirpi-data-table')) {
             $unmarked[] = str_replace($root . DIRECTORY_SEPARATOR, '', $file);
         }
     }

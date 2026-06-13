@@ -15,8 +15,8 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
-    'ajax/notifications/table' => [
-        'file' => 'modules/notifications/partials/table.php',
+    'ajax/notifications/datatable' => [
+        'file' => 'modules/notifications/actions/datatable.php',
         'layout' => false,
         'permission' => 'notifications.view',
         'auth' => true,

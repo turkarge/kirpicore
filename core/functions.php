@@ -3,6 +3,7 @@
 require_once BASE_PATH . '/core/helpers.php';
 require_once BASE_PATH . '/core/http.php';
 require_once BASE_PATH . '/core/export.php';
+require_once BASE_PATH . '/core/kirpi_table.php';
 require_once BASE_PATH . '/core/auth.php';
 require_once BASE_PATH . '/core/audit.php';
 require_once BASE_PATH . '/core/settings.php';

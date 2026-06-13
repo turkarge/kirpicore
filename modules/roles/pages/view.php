@@ -4,6 +4,22 @@ if (!defined('KIRPI_CORE_ENTRY')) {
 }
 
 require_once BASE_PATH . '/modules/roles/language.php';
+
+$tableConfig = [
+    'endpoint' => base_url('ajax/roles/datatable'),
+    'exportEndpoint' => base_url('roles/actions/export'),
+    'permissions' => [
+        'edit' => check_permission('roles.edit'),
+        'status' => check_permission('roles.status'),
+        'permissions' => check_permission('roles.permissions'),
+    ],
+    'labels' => [
+        'active' => roles_lang('active'),
+        'inactive' => roles_lang('inactive'),
+        'edit' => roles_lang('edit'),
+        'permissions' => roles_lang('permissions'),
+    ],
+];
 ?>
 
 <div class="page-header d-print-none">
@@ -13,33 +29,15 @@ require_once BASE_PATH . '/modules/roles/language.php';
                 <div class="page-pretitle"><?php echo e(roles_lang('system_management')); ?></div>
                 <h2 class="page-title"><?php echo e(roles_lang('roles')); ?></h2>
             </div>
-
             <div class="col-auto ms-auto d-print-none">
                 <div class="btn-list">
-                    <a href="<?php echo base_url('roles/actions/export?type=roles&format=csv'); ?>" class="btn btn-outline-secondary js-roles-export" data-type="roles" data-format="csv">
-                        <i class="ti ti-file-type-csv"></i>
-                        <?php echo e(roles_lang('csv_export')); ?>
-                    </a>
-                    <a href="<?php echo base_url('roles/actions/export?type=roles&format=xls'); ?>" class="btn btn-outline-secondary js-roles-export" data-type="roles" data-format="xls">
-                        <i class="ti ti-file-spreadsheet"></i>
-                        <?php echo e(roles_lang('excel_export')); ?>
-                    </a>
                     <?php if (check_permission('roles.permissions')): ?>
-                        <a href="<?php echo base_url('roles/actions/export?type=permissions&format=xls'); ?>" class="btn btn-outline-secondary">
-                            <i class="ti ti-list-check"></i>
-                            <?php echo e(roles_lang('permission_catalog_export')); ?>
-                        </a>
-                        <a href="<?php echo base_url('roles/actions/export?type=matrix&format=xls'); ?>" class="btn btn-outline-secondary">
-                            <i class="ti ti-table-export"></i>
-                            <?php echo e(roles_lang('permission_matrix_export')); ?>
+                        <a href="<?php echo base_url('roles/permissions'); ?>" class="btn btn-outline-secondary">
+                            <i class="ti ti-shield-check"></i>
+                            <?php echo e(roles_lang('permissions')); ?>
                         </a>
                     <?php endif; ?>
-                    <a
-                        href="#"
-                        class="btn btn-primary btn-modal-trigger"
-                        data-url="/ajax/roles/create"
-                        data-size="modal-md"
-                    >
+                    <a href="#" class="btn btn-primary btn-modal-trigger" data-url="/ajax/roles/create" data-size="modal-md">
                         <i class="ti ti-plus"></i>
                         <?php echo e(roles_lang('new_role')); ?>
                     </a>
@@ -51,33 +49,22 @@ require_once BASE_PATH . '/modules/roles/language.php';
 
 <div class="page-body">
     <div class="container-xl">
-        <div class="card">
-            <div class="card-body border-bottom py-3">
-                <div class="row g-2 align-items-center">
-                    <div class="col-12 col-md-9">
-                        <input
-                            type="text"
-                            id="roles-search"
-                            class="form-control"
-                            placeholder="<?php echo e(roles_lang('search_placeholder')); ?>"
-                        >
-                    </div>
-
-                    <div class="col-12 col-md-3">
-                        <select id="roles-status-filter" class="form-select">
-                            <option value=""><?php echo e(roles_lang('all_statuses')); ?></option>
-                            <option value="1"><?php echo e(roles_lang('active')); ?></option>
-                            <option value="0"><?php echo e(roles_lang('inactive')); ?></option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div id="roles-table-container">
-                <div class="kirpi-loading">
-                    <div class="spinner-border" role="status"></div>
-                </div>
+        <div class="card kirpi-table-card">
+            <div class="card-body p-0">
+                <table id="roles-data-table" class="table table-vcenter table-striped w-100 kirpi-data-table">
+                    <thead>
+                        <tr>
+                            <th><?php echo e(roles_lang('table_role')); ?></th>
+                            <th><?php echo e(roles_lang('table_status')); ?></th>
+                            <th><?php echo e(roles_lang('table_user_count')); ?></th>
+                            <th><?php echo e(roles_lang('table_permission_count')); ?></th>
+                            <th class="w-1 text-center" title="İşlemler" aria-label="İşlemler"><i class="ti ti-settings"></i></th>
+                        </tr>
+                    </thead>
+                </table>
             </div>
         </div>
     </div>
 </div>
+
+<script type="application/json" id="roles-table-config"><?php echo json_encode($tableConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?></script>

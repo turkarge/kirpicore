@@ -32,9 +32,17 @@ if (!str_contains((string) $routeSource, "'ajax/users/datatable'")) {
     exit(1);
 }
 
-foreach (['recordsTotal', 'recordsFiltered', "'data' =>", ':global_name', ':global_email', ':global_role'] as $token) {
+foreach (['kirpi_table_request', 'kirpi_table_response', ':global_name', ':global_email', ':global_role'] as $token) {
     if (!str_contains((string) $endpointSource, $token)) {
         fwrite(STDERR, "Users DataTables response contract is missing {$token}.\n");
+        exit(1);
+    }
+}
+
+$helperSource = file_get_contents($root . '/core/kirpi_table.php');
+foreach (['recordsTotal', 'recordsFiltered', 'kirpi_table_order_sql', 'kirpi_table_bind'] as $token) {
+    if (!str_contains((string) $helperSource, $token)) {
+        fwrite(STDERR, "Core KirpiTable server contract is missing {$token}.\n");
         exit(1);
     }
 }

@@ -15,8 +15,8 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
-    'ajax/audit/table' => [
-        'file' => 'modules/audit/partials/table.php',
+    'ajax/audit/datatable' => [
+        'file' => 'modules/audit/actions/datatable.php',
         'layout' => false,
         'permission' => 'audit.view',
         'auth' => true,

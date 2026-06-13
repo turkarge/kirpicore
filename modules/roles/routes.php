@@ -15,8 +15,8 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
-    'ajax/roles/table' => [
-        'file' => 'modules/roles/partials/table.php',
+    'ajax/roles/datatable' => [
+        'file' => 'modules/roles/actions/datatable.php',
         'layout' => false,
         'permission' => 'roles.view',
         'auth' => true,

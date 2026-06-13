@@ -230,7 +230,8 @@
         });
 
         document.addEventListener("kirpi:theme.changed", () => {
-            table.columns.adjust().responsive.recalc();
+            table.columns.adjust();
+            if (enableResponsive && table.responsive) table.responsive.recalc();
         });
 
         return table;

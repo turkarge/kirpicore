@@ -5,13 +5,9 @@ if (!defined('KIRPI_CORE_ENTRY')) {
 
 require_action('GET', true);
 
-$draw = max(0, (int) ($_GET['draw'] ?? 0));
-$start = max(0, (int) ($_GET['start'] ?? 0));
-$length = (int) ($_GET['length'] ?? 10);
-$length = min(100, max(10, $length));
-$columns = is_array($_GET['columns'] ?? null) ? $_GET['columns'] : [];
-$orders = is_array($_GET['order'] ?? null) ? $_GET['order'] : [];
-$globalSearch = trim((string) ($_GET['search']['value'] ?? ''));
+$request = kirpi_table_request();
+$columns = $request['columns'];
+$globalSearch = $request['search'];
 $roleId = trim((string) ($_GET['role_id'] ?? ''));
 $status = trim((string) ($_GET['status'] ?? ''));
 
@@ -68,30 +64,14 @@ foreach ($columns as $index => $column) {
     $params[$parameter] = '%' . $searchValue . '%';
 }
 
-$orderParts = [];
-foreach (array_slice($orders, 0, 3) as $order) {
-    if (!is_array($order)) {
-        continue;
-    }
-    $columnIndex = (int) ($order['column'] ?? -1);
-    $column = $columns[$columnIndex] ?? null;
-    $columnName = is_array($column) ? (string) ($column['name'] ?? $column['data'] ?? '') : '';
-    if (!isset($columnMap[$columnName])) {
-        continue;
-    }
-    $direction = strtolower((string) ($order['dir'] ?? 'asc')) === 'desc' ? 'DESC' : 'ASC';
-    $orderParts[] = $columnMap[$columnName] . ' ' . $direction;
-}
-$orderSql = $orderParts ? implode(', ', $orderParts) : 'u.id DESC';
+$orderSql = kirpi_table_order_sql($request, $columnMap, 'u.id DESC');
 $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
 try {
     $total = (int) db()->query('SELECT COUNT(id) FROM users')->fetchColumn();
 
     $countStmt = db()->prepare("SELECT COUNT(u.id) FROM users u LEFT JOIN roles r ON r.id = u.role_id {$whereSql}");
-    foreach ($params as $key => $value) {
-        $countStmt->bindValue($key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
-    }
+    kirpi_table_bind($countStmt, $params);
     $countStmt->execute();
     $filtered = (int) $countStmt->fetchColumn();
 
@@ -112,11 +92,9 @@ try {
         ORDER BY {$orderSql}
         LIMIT :length OFFSET :start
     ");
-    foreach ($params as $key => $value) {
-        $stmt->bindValue($key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
-    }
-    $stmt->bindValue(':length', $length, PDO::PARAM_INT);
-    $stmt->bindValue(':start', $start, PDO::PARAM_INT);
+    kirpi_table_bind($stmt, $params);
+    $stmt->bindValue(':length', $request['length'], PDO::PARAM_INT);
+    $stmt->bindValue(':start', $request['start'], PDO::PARAM_INT);
     $stmt->execute();
 
     $data = [];
@@ -140,16 +118,11 @@ try {
         ];
     }
 
-    json_response([
-        'draw' => $draw,
-        'recordsTotal' => $total,
-        'recordsFiltered' => $filtered,
-        'data' => $data,
-    ]);
+    kirpi_table_response($request, $total, $filtered, $data);
 } catch (Throwable $e) {
     error_log('users datatable error: ' . $e->getMessage());
     json_response([
-        'draw' => $draw,
+        'draw' => $request['draw'],
         'recordsTotal' => 0,
         'recordsFiltered' => 0,
         'data' => [],

@@ -15,10 +15,42 @@ $statusFilter = trim((string) ($_GET['status'] ?? ''));
 $moduleFilter = trim((string) ($_GET['module'] ?? ''));
 $actionFilter = trim((string) ($_GET['action'] ?? ''));
 $userIdFilter = (int) ($_GET['user_id'] ?? 0);
+$searchFilter = trim((string) ($_GET['search'] ?? ''));
+$userFilter = trim((string) ($_GET['user'] ?? ''));
+$routeFilter = trim((string) ($_GET['route'] ?? ''));
+$ipFilter = trim((string) ($_GET['ip'] ?? ''));
+$dateFilter = trim((string) ($_GET['date'] ?? ''));
 $format = trim((string) ($_GET['format'] ?? 'csv'));
 
 $where = [];
 $params = [];
+
+if ($searchFilter !== '') {
+    $where[] = '(u.name LIKE :global_user OR a.module_key LIKE :global_module OR a.action_key LIKE :global_action OR a.route_path LIKE :global_route OR a.ip_address LIKE :global_ip)';
+    foreach (['user', 'module', 'action', 'route', 'ip'] as $key) {
+        $params[':global_' . $key] = '%' . $searchFilter . '%';
+    }
+}
+
+if ($userFilter !== '') {
+    $where[] = 'u.name LIKE :user_name';
+    $params[':user_name'] = '%' . $userFilter . '%';
+}
+
+if ($routeFilter !== '') {
+    $where[] = 'a.route_path LIKE :route_path';
+    $params[':route_path'] = '%' . $routeFilter . '%';
+}
+
+if ($ipFilter !== '') {
+    $where[] = 'a.ip_address LIKE :ip_address';
+    $params[':ip_address'] = '%' . $ipFilter . '%';
+}
+
+if ($dateFilter !== '') {
+    $where[] = 'a.created_at LIKE :created_at';
+    $params[':created_at'] = '%' . $dateFilter . '%';
+}
 
 if ($statusFilter !== '') {
     $where[] = 'a.status = :status';

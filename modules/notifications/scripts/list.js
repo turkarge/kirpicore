@@ -1,146 +1,61 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const tableContainer = document.getElementById("notifications-table-container");
-    const searchInput = document.getElementById("notifications-search");
-    const statusFilter = document.getElementById("notifications-status-filter");
-    const sourceFilter = document.getElementById("notifications-source-filter");
-    const templateFilter = document.getElementById("notifications-template-filter");
-    const exportButtons = document.querySelectorAll(".js-notifications-export");
+    const element = document.getElementById("notifications-data-table");
+    const configElement = document.getElementById("notifications-table-config");
+    if (!element || !configElement || !window.KirpiTable) return;
+    const config = JSON.parse(configElement.textContent || "{}");
+    const labels = config.labels || {};
+    const optionList = (values, allLabel) => [{ value: "", label: allLabel }, ...(values || []).map((value) => ({ value, label: value }))];
 
-    if (!tableContainer) {
-        return;
-    }
-
-    let currentPage = 1;
-    let debounceTimer = null;
-
-    function buildUrl(page = 1) {
-        const params = new URLSearchParams();
-        params.set("page", page);
-        appendFilters(params);
-
-        return `${window.KIRPI_CONFIG.baseUrl}/ajax/notifications/table?${params.toString()}`;
-    }
-
-    function appendFilters(params) {
-        if (searchInput && searchInput.value.trim() !== "") {
-            params.set("search", searchInput.value.trim());
+    const table = KirpiTable.create(element, {
+        ajax: { url: config.endpoint },
+        select: false,
+        rowId: "row_key",
+        order: [[4, "desc"]],
+        columns: [
+            { data: "title", name: "title", render: (value, type, row) => type === "display" ? `<div class="fw-medium">${KirpiTable.escape(value)}</div><div class="text-secondary">${KirpiTable.escape(row.message)}</div>${row.template_key ? `<div class="mt-1"><code>${KirpiTable.escape(row.template_key)}</code></div>` : ""}` : value },
+            { data: "source_module", name: "source_module", render: (value, type, row) => type === "display" ? `${value ? `<span class="badge bg-blue-lt">${KirpiTable.escape(value)}</span>` : '<span class="text-secondary">-</span>'}${row.entity_type ? `<div class="text-secondary small mt-1">${KirpiTable.escape(row.entity_type)}${row.entity_id ? ` #${Number(row.entity_id)}` : ""}</div>` : ""}` : value },
+            { data: "channel", name: "channel" },
+            { data: "read_status", name: "read_status", render: (value, type) => type === "display" ? `<span class="badge ${value === "read" ? "bg-success-lt" : "bg-warning-lt"}">${KirpiTable.escape(value === "read" ? labels.read : labels.unread)}</span>` : value },
+            { data: "created_at_display", name: "created_at" },
+            { data: null, name: "actions", orderable: false, searchable: false, render: (_, type, row) => type === "display" && row.read_status === "unread" ? `<div class="dropdown kirpi-row-actions"><button class="btn btn-sm btn-icon btn-ghost-secondary js-kirpi-row-menu" type="button" aria-expanded="false" aria-label="İşlemler"><i class="ti ti-dots-vertical"></i></button><div class="dropdown-menu dropdown-menu-end"><button type="button" class="dropdown-item js-notification-read" data-id="${Number(row.id)}"><i class="ti ti-check me-2"></i>${KirpiTable.escape(labels.markRead)}</button></div></div>` : "" }
+        ],
+        columnFilters: [
+            { placeholder: "Başlık veya mesaj ara", label: "Bildirime göre filtrele" },
+            { type: "select", label: "Kaynağa göre filtrele", options: optionList(config.sourceModules, "Tüm kaynaklar") },
+            { placeholder: "Kanal ara", label: "Kanala göre filtrele" },
+            { type: "select", label: "Duruma göre filtrele", options: [{ value: "", label: labels.all }, { value: "unread", label: labels.unread }, { value: "read", label: labels.read }] },
+            { placeholder: "Tarih ara", label: "Tarihe göre filtrele" },
+            null
+        ],
+        exportColumns: [0, 1, 2, 3, 4],
+        exportTitle: "Bildirimler",
+        stateKey: "notifications",
+        serverExport: {
+            endpoint: config.exportEndpoint,
+            filters: (dt) => ({
+                search: dt.column("title:name").search(),
+                source_module: dt.column("source_module:name").search(),
+                status: dt.column("read_status:name").search()
+            })
         }
-
-        if (statusFilter && statusFilter.value !== "") {
-            params.set("status", statusFilter.value);
-        }
-
-        if (sourceFilter && sourceFilter.value !== "") {
-            params.set("source_module", sourceFilter.value);
-        }
-
-        if (templateFilter && templateFilter.value !== "") {
-            params.set("template_key", templateFilter.value);
-        }
-    }
-
-    async function loadTable(page = 1) {
-        currentPage = page;
-
-        tableContainer.innerHTML = `
-            <div class="kirpi-loading">
-                <div class="spinner-border" role="status"></div>
-            </div>
-        `;
-
-        try {
-            const response = await fetch(buildUrl(page), {
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest"
-                }
-            });
-
-            const html = await response.text();
-            tableContainer.innerHTML = html;
-        } catch (error) {
-            const i18n = window.KIRPI_NOTIFICATIONS_I18N || {};
-            const loadErrorText = i18n.listLoadError || "Bildirim listesi yüklenirken bir hata oluştu.";
-
-            tableContainer.innerHTML = `
-                <div class="p-4">
-                    <div class="alert alert-danger mb-0">
-                        ${loadErrorText}
-                    </div>
-                </div>
-            `;
-        }
-    }
-
-    function triggerReload() {
-        loadTable(1);
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener("input", function () {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(triggerReload, 300);
-        });
-    }
-
-    if (statusFilter) {
-        statusFilter.addEventListener("change", triggerReload);
-    }
-
-    if (sourceFilter) {
-        sourceFilter.addEventListener("change", triggerReload);
-    }
-
-    if (templateFilter) {
-        templateFilter.addEventListener("change", triggerReload);
-    }
-
-    exportButtons.forEach((button) => {
-        button.addEventListener("click", function (event) {
-            event.preventDefault();
-            const params = new URLSearchParams();
-            params.set("format", button.dataset.format || "csv");
-            appendFilters(params);
-            window.location.href = `${window.KIRPI_CONFIG.baseUrl}/notifications/actions/export?${params.toString()}`;
-        });
     });
 
-    document.addEventListener("click", function (event) {
-        const paginationLink = event.target.closest(".pagination .page-link");
-        if (!paginationLink || !paginationLink.closest("#notifications-table-container")) {
-            return;
-        }
-
-        event.preventDefault();
-
-        const page = parseInt(paginationLink.dataset.page || "1", 10);
-        if (!Number.isNaN(page)) {
-            loadTable(page);
+    element.addEventListener("click", async function (event) {
+        const button = event.target.closest(".js-notification-read");
+        if (!button) return;
+        button.disabled = true;
+        try {
+            const result = await KirpiTable.post(config.markReadEndpoint, { id: button.dataset.id });
+            KirpiTable.notify(result);
+            table.ajax.reload(null, false);
+        } catch (error) {
+            KirpiTable.notifyError(error);
+        } finally {
+            button.disabled = false;
         }
     });
 
     document.addEventListener("kirpi:form.success", function (event) {
-        const form = event.detail.form;
-        const result = event.detail.result || {};
-
-        if (!form) {
-            return;
-        }
-
-        const isMarkRead = form.classList.contains("notifications-mark-read-form");
-        const isMarkAllRead = form.id === "notifications-mark-all-read-form";
-
-        if (!isMarkRead && !isMarkAllRead) {
-            return;
-        }
-
-        if (result.status === "success") {
-            setTimeout(function () {
-                loadTable(currentPage);
-            }, 150);
-        }
+        if (event.detail.form?.id === "notifications-mark-all-read-form") table.ajax.reload(null, false);
     });
-
-    if (searchInput && !searchInput.disabled) {
-        loadTable(1);
-    }
 });

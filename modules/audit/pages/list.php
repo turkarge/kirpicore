@@ -1,18 +1,14 @@
 <?php
-if (!defined('KIRPI_CORE_ENTRY')) {
-    exit;
-}
+if (!defined('KIRPI_CORE_ENTRY')) exit;
 
 require_once BASE_PATH . '/modules/audit/language.php';
-
-$auditTableReady = db_table_exists('audit_logs');
+$ready = db_table_exists('audit_logs');
+$tableConfig = [
+    'endpoint' => base_url('ajax/audit/datatable'),
+    'exportEndpoint' => base_url('audit/actions/export'),
+    'labels' => ['all' => audit_lang('all')],
+];
 ?>
-
-<script>
-window.KIRPI_AUDIT_I18N = {
-    loadError: <?php echo json_encode(audit_lang('load_error')); ?>
-};
-</script>
 
 <div class="page-header d-print-none">
     <div class="container-xl">
@@ -27,71 +23,28 @@ window.KIRPI_AUDIT_I18N = {
 
 <div class="page-body">
     <div class="container-xl">
-        <?php if (!$auditTableReady): ?>
-            <div class="alert alert-warning">
-                <?php echo e(audit_lang('table_missing')); ?>
-            </div>
-        <?php endif; ?>
-
-        <div class="card mb-4">
-            <div class="card-header">
-                <h3 class="card-title"><?php echo e(audit_lang('filters')); ?></h3>
-            </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-12 col-md-2">
-                        <label class="form-label"><?php echo e(audit_lang('status')); ?></label>
-                        <select id="audit-status-filter" class="form-select" <?php echo !$auditTableReady ? 'disabled' : ''; ?>>
-                            <option value=""><?php echo e(audit_lang('all')); ?></option>
-                            <option value="success">success</option>
-                            <option value="failed">failed</option>
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-3">
-                        <label class="form-label"><?php echo e(audit_lang('module')); ?></label>
-                        <input id="audit-module-filter" type="text" class="form-control" <?php echo !$auditTableReady ? 'disabled' : ''; ?>>
-                    </div>
-                    <div class="col-12 col-md-3">
-                        <label class="form-label"><?php echo e(audit_lang('action')); ?></label>
-                        <input id="audit-action-filter" type="text" class="form-control" <?php echo !$auditTableReady ? 'disabled' : ''; ?>>
-                    </div>
-                    <div class="col-12 col-md-2">
-                        <label class="form-label"><?php echo e(audit_lang('user_id')); ?></label>
-                        <input id="audit-user-filter" type="number" min="1" class="form-control" <?php echo !$auditTableReady ? 'disabled' : ''; ?>>
-                    </div>
+        <?php if (!$ready): ?>
+            <div class="alert alert-warning"><?php echo e(audit_lang('table_missing')); ?></div>
+        <?php else: ?>
+            <div class="card kirpi-table-card">
+                <div class="card-body p-0">
+                    <table id="audit-data-table" class="table table-vcenter table-striped w-100 kirpi-data-table">
+                        <thead><tr>
+                            <th>ID</th>
+                            <th><?php echo e(audit_lang('date')); ?></th>
+                            <th><?php echo e(audit_lang('user')); ?></th>
+                            <th><?php echo e(audit_lang('module')); ?></th>
+                            <th><?php echo e(audit_lang('action')); ?></th>
+                            <th><?php echo e(audit_lang('status')); ?></th>
+                            <th><?php echo e(audit_lang('route')); ?></th>
+                            <th><?php echo e(audit_lang('ip')); ?></th>
+                            <th><?php echo e(audit_lang('detail')); ?></th>
+                        </tr></thead>
+                    </table>
                 </div>
             </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title"><?php echo e(audit_lang('records')); ?></h3>
-                <?php if ($auditTableReady): ?>
-                    <div class="card-actions">
-                        <div class="btn-list">
-                            <a href="<?php echo base_url('audit/actions/export?format=csv'); ?>" class="btn btn-outline-secondary js-audit-export" data-format="csv">
-                                <i class="ti ti-file-type-csv"></i>
-                                <?php echo e(audit_lang('csv_export')); ?>
-                            </a>
-                            <a href="<?php echo base_url('audit/actions/export?format=xls'); ?>" class="btn btn-outline-secondary js-audit-export" data-format="xls">
-                                <i class="ti ti-file-spreadsheet"></i>
-                                <?php echo e(audit_lang('excel_export')); ?>
-                            </a>
-                        </div>
-                    </div>
-                <?php endif; ?>
-            </div>
-            <div id="audit-table-container">
-                <?php if ($auditTableReady): ?>
-                    <div class="kirpi-loading">
-                        <div class="spinner-border" role="status"></div>
-                    </div>
-                <?php else: ?>
-                    <div class="p-4 text-secondary">
-                        <?php echo e(audit_lang('table_waiting')); ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
+        <?php endif; ?>
     </div>
 </div>
+
+<script type="application/json" id="audit-table-config"><?php echo json_encode($tableConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?></script>

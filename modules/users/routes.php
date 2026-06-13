@@ -8,13 +8,6 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
-    'ajax/users/table' => [
-        'file' => 'modules/users/partials/table.php',
-        'layout' => false,
-        'permission' => 'users.view',
-        'auth' => true,
-        'method' => 'GET',
-    ],
     'ajax/users/create' => [
         'file' => 'modules/users/modals/create.php',
         'layout' => false,

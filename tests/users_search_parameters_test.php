@@ -1,7 +1,6 @@
 <?php
 
 $files = [
-    __DIR__ . '/../modules/users/partials/table.php',
     __DIR__ . '/../modules/users/actions/export.php',
     __DIR__ . '/../modules/api/v1/users/index.php',
 ];
