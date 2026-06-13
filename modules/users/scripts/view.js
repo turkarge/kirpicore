@@ -9,22 +9,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const config = JSON.parse(configElement.textContent || "{}");
     const permissions = config.permissions || {};
     const labels = config.labels || {};
-    const roleFilter = document.getElementById("users-role-filter");
-    const statusFilter = document.getElementById("users-status-filter");
-    const resetButton = document.getElementById("users-filter-reset");
+    const selectionShell = document.getElementById("users-selection-shell");
     const selectionBar = document.getElementById("users-selection-bar");
     const selectionCount = document.getElementById("users-selection-count");
     const selectionClear = document.getElementById("users-selection-clear");
-    const filterStateKey = "kirpi_table_users_external_filters";
-
-    try {
-        const savedFilters = JSON.parse(localStorage.getItem(filterStateKey) || "{}");
-        if (roleFilter && savedFilters.role_id !== undefined) roleFilter.value = savedFilters.role_id;
-        if (statusFilter && savedFilters.status !== undefined) statusFilter.value = savedFilters.status;
-    } catch (_) {
-        localStorage.removeItem(filterStateKey);
-    }
-
     const renderActions = (data) => {
         const id = Number(data.id || 0);
         const actions = [];
@@ -43,17 +31,11 @@ document.addEventListener("DOMContentLoaded", function () {
             return "";
         }
 
-        return `<div class="dropdown"><button class="btn btn-sm btn-icon btn-ghost-secondary" type="button" data-bs-toggle="dropdown" aria-label="İşlemler"><i class="ti ti-dots-vertical"></i></button><div class="dropdown-menu dropdown-menu-end">${actions.join("")}</div></div>`;
+        return `<div class="dropdown kirpi-row-actions"><button class="btn btn-sm btn-icon btn-ghost-secondary js-kirpi-row-menu" type="button" aria-expanded="false" aria-label="İşlemler"><i class="ti ti-dots-vertical"></i></button><div class="dropdown-menu dropdown-menu-end">${actions.join("")}</div></div>`;
     };
 
     const table = KirpiTable.create(tableElement, {
-        ajax: {
-            url: config.endpoint,
-            data: function (payload) {
-                payload.role_id = roleFilter?.value || "";
-                payload.status = statusFilter?.value || "";
-            }
-        },
+        ajax: { url: config.endpoint },
         rowId: "row_key",
         order: [[5, "desc"]],
         columns: [
@@ -69,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     return `<div class="d-flex align-items-center">${avatar}<span class="fw-medium">${KirpiTable.escape(value)}</span></div>`;
                 }
             },
-            { data: "email", name: "email", render: (value, type) => type === "display" ? `<a href="mailto:${KirpiTable.escape(value)}">${KirpiTable.escape(value)}</a>` : value },
+            { data: "email", name: "email", render: (value, type) => type === "display" ? `<a class="link-secondary" href="mailto:${KirpiTable.escape(value)}">${KirpiTable.escape(value)}</a>` : value },
             {
                 data: "role_name",
                 name: "role_name",
@@ -118,8 +100,6 @@ document.addEventListener("DOMContentLoaded", function () {
         serverExport: {
             endpoint: config.exportEndpoint,
             filters: (dt) => ({
-                role_id: roleFilter?.value || "",
-                status: statusFilter?.value || "",
                 name: dt.column("name:name").search(),
                 email: dt.column("email:name").search(),
                 role: dt.column("role_name:name").search(),
@@ -130,28 +110,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     const reload = () => table.ajax.reload(null, false);
-    const saveExternalFilters = () => localStorage.setItem(filterStateKey, JSON.stringify({
-        role_id: roleFilter?.value || "",
-        status: statusFilter?.value || ""
-    }));
-
-    roleFilter?.addEventListener("change", () => { saveExternalFilters(); reload(); });
-    statusFilter?.addEventListener("change", () => { saveExternalFilters(); reload(); });
-    resetButton?.addEventListener("click", function () {
-        if (roleFilter) roleFilter.value = "";
-        if (statusFilter) statusFilter.value = "";
-        table.search("");
-        table.columns().search("");
-        table.state.clear();
-        localStorage.removeItem(filterStateKey);
-        tableElement.querySelectorAll("[data-column-filter]").forEach((control) => { control.value = ""; });
-        table.ajax.reload();
-    });
-
     const updateSelection = () => {
         const count = table.rows({ selected: true }).count();
         if (selectionCount) selectionCount.textContent = String(count);
-        if (selectionBar) selectionBar.hidden = count === 0;
+        if (selectionShell) selectionShell.hidden = count === 0;
+        if (selectionBar) selectionBar.hidden = false;
     };
     table.on("select deselect draw", updateSelection);
     selectionClear?.addEventListener("click", () => table.rows().deselect());

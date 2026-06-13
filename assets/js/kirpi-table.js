@@ -131,16 +131,22 @@
                 topStart: {
                     buttons: [
                         { extend: "collection", text: '<i class="ti ti-download me-2"></i>Dışa aktar', buttons: exportButtons(options) },
-                        { extend: "colvis", text: '<i class="ti ti-columns-3 me-2"></i>Kolonlar', columns: ":not(:first-child):not(:last-child)" },
-                        { text: '<i class="ti ti-refresh me-2"></i>Yenile', action: (_, dt) => dt.ajax.reload(null, false) },
                         {
-                            text: '<i class="ti ti-restore me-2"></i>Görünümü sıfırla',
-                            action: (_, dt) => {
-                                localStorage.removeItem(`kirpi_table_${stateKey}`);
-                                dt.state.clear();
-                                window.location.reload();
-                            }
-                        }
+                            extend: "collection",
+                            text: '<i class="ti ti-columns-3 me-2"></i>Kolonlar',
+                            buttons: [
+                                { extend: "columnsToggle", columns: ":not(:first-child):not(:last-child)" },
+                                {
+                                    text: '<i class="ti ti-restore me-2"></i>Görünümü sıfırla',
+                                    action: (_, dt) => {
+                                        localStorage.removeItem(`kirpi_table_${stateKey}`);
+                                        dt.state.clear();
+                                        window.location.reload();
+                                    }
+                                }
+                            ]
+                        },
+                        { text: '<i class="ti ti-refresh"></i><span class="visually-hidden">Yenile</span>', titleAttr: "Tabloyu yenile", className: "btn-icon kirpi-table-refresh", action: (_, dt) => dt.ajax.reload(null, false) }
                     ]
                 },
                 topEnd: "search",
@@ -187,6 +193,14 @@
         document.addEventListener("click", handleColumnFilter);
         table.on("draw column-reorder column-visibility", syncColumnFilters);
         syncColumnFilters();
+
+        element.addEventListener("click", (event) => {
+            const toggle = event.target.closest(".js-kirpi-row-menu");
+            if (!toggle || !(window.bootstrap && bootstrap.Dropdown)) return;
+            event.preventDefault();
+            event.stopPropagation();
+            bootstrap.Dropdown.getOrCreateInstance(toggle, { boundary: "viewport", popperConfig: { strategy: "fixed" } }).toggle();
+        });
 
         document.addEventListener("kirpi:theme.changed", () => {
             table.columns.adjust().responsive.recalc();

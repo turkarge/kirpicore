@@ -25,6 +25,7 @@ foreach ($requiredAssets as $asset) {
 $routeSource = file_get_contents($root . '/modules/users/routes.php');
 $endpointSource = file_get_contents($root . '/modules/users/actions/datatable.php');
 $scriptSource = file_get_contents($root . '/modules/users/scripts/view.js');
+$pageSource = file_get_contents($root . '/modules/users/pages/view.php');
 
 if (!str_contains((string) $routeSource, "'ajax/users/datatable'")) {
     fwrite(STDERR, "Users DataTables route is missing.\n");
@@ -43,6 +44,23 @@ foreach (['DataTable.render.select()', 'columnFilters', 'serverExport', 'stateKe
         fwrite(STDERR, "Users table configuration is missing {$token}.\n");
         exit(1);
     }
+}
+
+foreach (['users-role-filter', 'users-status-filter', 'users-filter-reset'] as $removedControl) {
+    if (str_contains((string) $pageSource, $removedControl)) {
+        fwrite(STDERR, "Redundant external filter remains: {$removedControl}.\n");
+        exit(1);
+    }
+}
+
+if (!str_contains((string) $pageSource, 'ti ti-settings')) {
+    fwrite(STDERR, "Actions column settings icon is missing.\n");
+    exit(1);
+}
+
+if (!str_contains((string) $scriptSource, 'js-kirpi-row-menu') || str_contains((string) $scriptSource, 'data-bs-toggle="dropdown"')) {
+    fwrite(STDERR, "Controlled row actions dropdown contract is invalid.\n");
+    exit(1);
 }
 
 fwrite(STDOUT, "Users DataTables contract tests passed.\n");

@@ -3,7 +3,7 @@
 }
 
 .kirpi-table-card .dt-container {
-    padding: 1rem;
+    padding: .875rem 1rem .75rem;
 }
 
 .kirpi-table-card .dt-layout-row:first-child {
@@ -20,6 +20,7 @@
 
 .kirpi-table-card .dt-buttons .btn {
     margin: 0;
+    min-height: 34px;
 }
 
 .kirpi-table-card div.dt-search label,
@@ -35,6 +36,9 @@
 }
 
 .kirpi-data-table thead th {
+    color: var(--tblr-body-color);
+    font-size: .75rem;
+    font-weight: 700;
     white-space: nowrap;
 }
 
@@ -50,7 +54,35 @@
 }
 
 .kirpi-data-table tbody td {
+    height: 50px;
     vertical-align: middle;
+}
+
+.kirpi-data-table tbody tr:hover > * {
+    background-color: color-mix(in srgb, var(--tblr-primary) 4%, var(--tblr-bg-surface));
+}
+
+.kirpi-data-table th:last-child,
+.kirpi-data-table td:last-child {
+    text-align: center;
+}
+
+.kirpi-row-actions {
+    display: inline-block;
+}
+
+.kirpi-row-actions .dropdown-menu {
+    min-width: 13rem;
+    z-index: 1080;
+}
+
+.kirpi-table-refresh {
+    width: 34px;
+    padding-inline: 0 !important;
+}
+
+.kirpi-table-selection-shell[hidden] {
+    display: none;
 }
 
 .kirpi-data-table tbody tr.selected > * {
@@ -67,7 +99,7 @@
     align-items: center;
     justify-content: flex-end;
     gap: .5rem;
-    min-height: 38px;
+    min-height: 30px;
 }
 
 .kirpi-table-selection[hidden] {
