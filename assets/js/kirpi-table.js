@@ -16,7 +16,7 @@
         lengthMenu: "Sayfada _MENU_ kayıt",
         loadingRecords: "Yükleniyor...",
         processing: "Veriler hazırlanıyor...",
-        search: "Ara:",
+        search: "",
         searchPlaceholder: "Tabloda ara...",
         zeroRecords: "Eşleşen kayıt bulunamadı",
         paginate: { first: "İlk", last: "Son", next: "Sonraki", previous: "Önceki" },
@@ -187,6 +187,10 @@
                 bottomEnd: enablePaging ? "paging" : null
             }
         });
+
+        if (enableButtons) {
+            table.table().container().querySelector(".dt-layout-row")?.classList.add("kirpi-table-toolbar");
+        }
 
         let filterTimer = null;
         const filterColumn = (control) => {

@@ -87,7 +87,7 @@ SQL kolonları yalnız sabit bir `$columnMap` üzerinden sıralanır. İstemcide
 ## Filtre ve Export
 
 - Ayrı bir üst filtre paneli oluşturulmaz; global arama ve kolon filtreleri KirpiTable içinde tutulur.
-- Global arama toolbar'ın solunda, tablo araçları sağında gösterilir.
+- Global arama etiketsiz ve tam genişlikte gösterilir; tablo araçları arama alanının sağında birleşik input-group eki olarak yer alır.
 - Dışa aktarma, kolon yönetimi ve yenileme aksiyonları metin düğmeleri yerine tooltip içeren kompakt ikon grubu olarak sunulur.
 - `columnFilters` dizisi `columns` dizisiyle aynı sırada olmalıdır.
 - Tam sonuç export'u gerekiyorsa `serverExport.endpoint` tanımlanır.
