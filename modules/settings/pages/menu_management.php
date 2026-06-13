@@ -17,18 +17,6 @@ $managementMenus = array_values(array_filter($moduleMenus, static fn(array $item
                 <div class="page-pretitle"><?php echo e(settings_lang('system_management')); ?></div>
                 <h2 class="page-title"><?php echo e(settings_lang('menu_management')); ?></h2>
             </div>
-            <div class="col-auto ms-auto d-print-none">
-                <div class="btn-list">
-                    <a href="<?php echo base_url('settings/actions/export?type=menu&format=csv'); ?>" class="btn btn-outline-secondary">
-                        <i class="ti ti-file-type-csv"></i>
-                        <?php echo e(settings_lang('export_csv')); ?>
-                    </a>
-                    <a href="<?php echo base_url('settings/actions/export?type=menu&format=xls'); ?>" class="btn btn-outline-secondary">
-                        <i class="ti ti-file-spreadsheet"></i>
-                        <?php echo e(settings_lang('export_excel')); ?>
-                    </a>
-                </div>
-            </div>
         </div>
     </div>
 </div>

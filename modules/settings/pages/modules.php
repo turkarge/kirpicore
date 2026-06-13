@@ -63,18 +63,6 @@ foreach ($requiredByMap as $moduleKey => $dependents) {
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title"><?php echo e(settings_lang('modules')); ?></h3>
-                <div class="card-actions">
-                    <div class="btn-list">
-                        <a href="<?php echo base_url('settings/actions/export?type=modules&format=csv'); ?>" class="btn btn-outline-secondary">
-                            <i class="ti ti-file-type-csv"></i>
-                            <?php echo e(settings_lang('export_csv')); ?>
-                        </a>
-                        <a href="<?php echo base_url('settings/actions/export?type=modules&format=xls'); ?>" class="btn btn-outline-secondary">
-                            <i class="ti ti-file-spreadsheet"></i>
-                            <?php echo e(settings_lang('export_excel')); ?>
-                        </a>
-                    </div>
-                </div>
             </div>
             <div class="table-responsive">
                 <table data-kirpi-table="standard" data-table-title="Modül Registry" class="table table-vcenter card-table table-striped mb-0">

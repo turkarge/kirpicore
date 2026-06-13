@@ -40,6 +40,27 @@ foreach (['MutationObserver', 'data-kirpi-table', 'tbody td[colspan]', 'serverSi
     }
 }
 
+foreach (['kirpi-table-tool', 'element.closest(".card")?.classList.add("kirpi-table-card")', 'window.location.reload()'] as $token) {
+    if (!str_contains((string) $script, $token)) {
+        fwrite(STDERR, "KirpiTable toolbar contract is missing {$token}.\n");
+        exit(1);
+    }
+}
+
+$settingsModules = file_get_contents($root . '/modules/settings/pages/modules.php');
+$settingsMenus = file_get_contents($root . '/modules/settings/pages/menu_management.php');
+$securityPage = file_get_contents($root . '/modules/security/pages/view.php');
+foreach ([$settingsModules, $settingsMenus, $securityPage] as $page) {
+    if (str_contains((string) $page, 'ti-file-type-csv') || str_contains((string) $page, 'ti-file-spreadsheet')) {
+        fwrite(STDERR, "Duplicate page-level table export control remains.\n");
+        exit(1);
+    }
+}
+if (substr_count((string) $securityPage, 'data-kirpi-table="standard"') < 2) {
+    fwrite(STDERR, "Security monitoring tables do not use the standard KirpiTable profile.\n");
+    exit(1);
+}
+
 foreach (['users', 'roles', 'audit', 'notifications'] as $module) {
     $route = file_get_contents($root . "/modules/{$module}/routes.php");
     $action = file_get_contents($root . "/modules/{$module}/actions/datatable.php");

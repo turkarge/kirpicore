@@ -72,6 +72,9 @@
             return new DataTable.Api(element);
         }
 
+        element.classList.add("kirpi-data-table");
+        element.closest(".card")?.classList.add("kirpi-table-card");
+
         const stateKey = options.stateKey || element.id || "table";
         const configuredColumns = options.columns || Array.from(element.querySelectorAll("thead tr:first-child th")).map(() => ({}));
         const serverSide = options.serverSide !== false;
@@ -142,11 +145,24 @@
             language,
             layout: {
                 topStart: enableButtons ? {
+                    search: {
+                        placeholder: language.searchPlaceholder
+                    }
+                } : (options.search === false ? null : "search"),
+                topEnd: enableButtons ? {
                     buttons: [
-                        { extend: "collection", text: '<i class="ti ti-download me-2"></i>Dışa aktar', buttons: exportButtons(options) },
                         {
                             extend: "collection",
-                            text: '<i class="ti ti-columns-3 me-2"></i>Kolonlar',
+                            text: '<i class="ti ti-download"></i><span class="visually-hidden">Dışa aktar</span>',
+                            titleAttr: "Dışa aktar",
+                            className: "btn-icon kirpi-table-tool",
+                            buttons: exportButtons(options)
+                        },
+                        {
+                            extend: "collection",
+                            text: '<i class="ti ti-columns-3"></i><span class="visually-hidden">Kolonlar</span>',
+                            titleAttr: "Kolonları yönet",
+                            className: "btn-icon kirpi-table-tool",
                             buttons: [
                                 { extend: "columnsToggle", columns: ":not(:first-child):not(:last-child)" },
                                 {
@@ -162,12 +178,11 @@
                         {
                             text: '<i class="ti ti-refresh"></i><span class="visually-hidden">Yenile</span>',
                             titleAttr: "Tabloyu yenile",
-                            className: "btn-icon kirpi-table-refresh",
-                            action: (_, dt) => serverSide ? dt.ajax.reload(null, false) : dt.draw(false)
+                            className: "btn-icon kirpi-table-tool kirpi-table-refresh",
+                            action: (_, dt) => serverSide ? dt.ajax.reload(null, false) : window.location.reload()
                         }
                     ]
                 } : null,
-                topEnd: options.search === false ? null : "search",
                 bottomStart: enablePaging ? ["pageLength", "info"] : "info",
                 bottomEnd: enablePaging ? "paging" : null
             }

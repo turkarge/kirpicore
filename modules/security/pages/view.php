@@ -110,13 +110,9 @@ try {
         <div class="card mb-4">
             <div class="card-header">
                 <h3 class="card-title"><?php echo e(security_lang('security_checks_title')); ?></h3>
-                <div class="card-actions">
-                    <a href="<?php echo base_url('security/actions/export?format=csv'); ?>" class="btn btn-outline-secondary"><?php echo e(security_lang('export_csv')); ?></a>
-                    <a href="<?php echo base_url('security/actions/export?format=xls'); ?>" class="btn btn-outline-secondary"><?php echo e(security_lang('export_excel')); ?></a>
-                </div>
             </div>
             <div class="table-responsive">
-                <table data-kirpi-table="compact" data-table-title="Güvenlik Kontrolleri" class="table table-vcenter card-table table-striped">
+                <table data-kirpi-table="standard" data-table-title="Güvenlik Kontrolleri" class="table table-vcenter card-table table-striped">
                     <thead>
                     <tr>
                         <th><?php echo e(security_lang('col_check')); ?></th>
@@ -150,7 +146,7 @@ try {
                 <h3 class="card-title"><?php echo e(security_lang('dirs_title')); ?></h3>
             </div>
             <div class="table-responsive">
-                <table data-kirpi-table="compact" data-table-title="Dizin Güvenliği" class="table table-vcenter card-table table-striped">
+                <table data-kirpi-table="standard" data-table-title="Dizin Güvenliği" class="table table-vcenter card-table table-striped">
                     <thead>
                     <tr>
                         <th><?php echo e(security_lang('col_folder')); ?></th>
