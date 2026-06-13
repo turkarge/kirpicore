@@ -63,4 +63,11 @@ if (!str_contains((string) $scriptSource, 'js-kirpi-row-menu') || str_contains((
     exit(1);
 }
 
+$kirpiTableSource = file_get_contents($root . '/assets/js/kirpi-table.js');
+if (!str_contains((string) $kirpiTableSource, '.kirpi-row-actions .dropdown-item')
+    || !str_contains((string) $kirpiTableSource, 'getOrCreateInstance(actionToggle).hide()')) {
+    fwrite(STDERR, "Row actions dropdown does not close before action handling.\n");
+    exit(1);
+}
+
 fwrite(STDOUT, "Users DataTables contract tests passed.\n");

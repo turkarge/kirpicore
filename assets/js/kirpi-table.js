@@ -195,6 +195,15 @@
         syncColumnFilters();
 
         element.addEventListener("click", (event) => {
+            const action = event.target.closest(".kirpi-row-actions .dropdown-item");
+            if (action && window.bootstrap && bootstrap.Dropdown) {
+                const actionToggle = action.closest(".kirpi-row-actions")?.querySelector(".js-kirpi-row-menu");
+                if (actionToggle) {
+                    bootstrap.Dropdown.getOrCreateInstance(actionToggle).hide();
+                }
+                return;
+            }
+
             const toggle = event.target.closest(".js-kirpi-row-menu");
             if (!toggle || !(window.bootstrap && bootstrap.Dropdown)) return;
             event.preventDefault();
