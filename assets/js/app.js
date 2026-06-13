@@ -356,10 +356,6 @@
 
             toggle.addEventListener("click", (event) => {
                 event.preventDefault();
-
-                if (trigger.classList.contains("disabled") || trigger.getAttribute("aria-disabled") === "true") {
-                    return;
-                }
                 event.stopPropagation();
                 if (collapseEl.classList.contains("show")) {
                     hide(false);
@@ -588,6 +584,10 @@
                 if (!trigger) return;
 
                 event.preventDefault();
+
+                if (trigger.classList.contains("disabled") || trigger.getAttribute("aria-disabled") === "true") {
+                    return;
+                }
 
                 const message = trigger.dataset.confirm || "Emin misiniz?";
                 confirmText.textContent = message;
