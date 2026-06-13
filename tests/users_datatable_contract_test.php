@@ -64,10 +64,18 @@ if (!str_contains((string) $scriptSource, 'js-kirpi-row-menu') || str_contains((
 }
 
 $kirpiTableSource = file_get_contents($root . '/assets/js/kirpi-table.js');
+$kirpiTableCss = file_get_contents($root . '/assets/css/kirpi-table.css');
 if (!str_contains((string) $kirpiTableSource, '.kirpi-row-actions .dropdown-item')
     || !str_contains((string) $kirpiTableSource, 'getOrCreateInstance(actionToggle).hide()')) {
     fwrite(STDERR, "Row actions dropdown does not close before action handling.\n");
     exit(1);
+}
+
+foreach (['background-color: var(--tblr-bg-surface) !important', 'div.dt-button-collection .dt-button:hover', 'div.dt-button-collection .dt-button.dt-button-active'] as $token) {
+    if (!str_contains((string) $kirpiTableCss, $token)) {
+        fwrite(STDERR, "DataTables collection theme contract is missing {$token}.\n");
+        exit(1);
+    }
 }
 
 fwrite(STDOUT, "Users DataTables contract tests passed.\n");

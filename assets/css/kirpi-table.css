@@ -112,9 +112,41 @@ html[data-bs-theme="dark"] table.dataTable > tbody > tr {
     --dt-row-hover: 255, 255, 255;
 }
 
-html[data-bs-theme="dark"] div.dt-button-collection {
-    background: var(--tblr-bg-surface);
-    border-color: var(--tblr-border-color);
+div.dt-button-collection {
+    overflow: hidden;
+    padding: .375rem;
+    color: var(--tblr-body-color);
+    background-color: var(--tblr-bg-surface) !important;
+    border: 1px solid var(--tblr-border-color) !important;
+    border-radius: var(--tblr-border-radius, 4px);
+    box-shadow: var(--tblr-box-shadow-dropdown, 0 .5rem 1rem rgba(0, 0, 0, .16));
+}
+
+div.dt-button-collection .dt-button {
+    width: 100%;
+    margin: 0;
+    padding: .5rem .75rem;
+    color: var(--tblr-body-color) !important;
+    text-align: left;
+    background-color: var(--tblr-bg-surface) !important;
+    border: 0 !important;
+    border-radius: var(--tblr-border-radius, 4px);
+    box-shadow: none !important;
+}
+
+div.dt-button-collection .dt-button:hover,
+div.dt-button-collection .dt-button:focus {
+    color: var(--tblr-body-color) !important;
+    background-color: var(--tblr-bg-surface-secondary) !important;
+}
+
+div.dt-button-collection .dt-button.dt-button-active {
+    color: var(--tblr-primary) !important;
+    background-color: var(--tblr-primary-lt) !important;
+}
+
+div.dt-button-collection .dt-button + .dt-button {
+    margin-top: .125rem;
 }
 
 @media (max-width: 767.98px) {
