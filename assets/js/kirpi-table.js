@@ -188,8 +188,10 @@
             }
         });
 
-        if (enableButtons) {
+        const mountToolbar = () => {
+            if (!enableButtons) return;
             const container = table.table().container();
+            if (container.querySelector(".kirpi-table-control")) return;
             const search = container.querySelector(".dt-search");
             const buttons = container.querySelector(".dt-buttons");
             const layoutRow = search?.closest(".dt-layout-row") || buttons?.closest(".dt-layout-row");
@@ -202,7 +204,10 @@
                 layoutRow.replaceChildren(toolbar);
                 layoutRow.className = "dt-layout-row kirpi-table-toolbar";
             }
-        }
+        };
+        table.on("init", mountToolbar);
+        window.requestAnimationFrame(mountToolbar);
+        window.setTimeout(mountToolbar, 0);
 
         let filterTimer = null;
         const filterColumn = (control) => {
