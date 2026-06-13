@@ -17,8 +17,11 @@ $where = [];
 $params = [];
 
 if ($search !== '') {
-    $where[] = "(u.name LIKE :search OR u.email LIKE :search OR r.name LIKE :search)";
-    $params[':search'] = '%' . $search . '%';
+    $where[] = "(u.name LIKE :search_name OR u.email LIKE :search_email OR r.name LIKE :search_role)";
+    $searchPattern = '%' . $search . '%';
+    $params[':search_name'] = $searchPattern;
+    $params[':search_email'] = $searchPattern;
+    $params[':search_role'] = $searchPattern;
 }
 
 if ($roleId !== '') {
