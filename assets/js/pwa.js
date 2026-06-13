@@ -19,7 +19,11 @@
             baseUrl += '/';
         }
 
-        navigator.serviceWorker.register(baseUrl + 'service-worker.js', { scope: baseUrl })
+        var serviceWorkerVersion = (window.KIRPI_CONFIG && window.KIRPI_CONFIG.serviceWorkerVersion)
+            ? String(window.KIRPI_CONFIG.serviceWorkerVersion)
+            : '1';
+
+        navigator.serviceWorker.register(baseUrl + 'service-worker.js?v=' + encodeURIComponent(serviceWorkerVersion), { scope: baseUrl })
             .catch(function (error) {
                 if (window.console && window.console.warn) {
                     window.console.warn('Kirpi PWA service worker registration failed:', error);

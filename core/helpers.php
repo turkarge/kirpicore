@@ -737,3 +737,12 @@ function resolve_page_script(?string $routeFile): ?string
 
     return is_file($fullPath) ? $scriptPath : null;
 }
+
+function page_script_url(string $scriptPath): string
+{
+    $normalizedPath = ltrim($scriptPath, '/');
+    $scriptFile = BASE_PATH . '/' . $normalizedPath;
+    $version = is_file($scriptFile) ? (string) filemtime($scriptFile) : APP_VER;
+
+    return base_url($normalizedPath) . '?v=' . rawurlencode($version);
+}

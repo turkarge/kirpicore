@@ -1,4 +1,4 @@
-const KIRPI_PWA_CACHE = 'kirpi-core-static-v1';
+const KIRPI_PWA_CACHE = 'kirpi-core-static-v2';
 
 const KIRPI_STATIC_ASSETS = [
   '/assets/css/tabler.min.css',

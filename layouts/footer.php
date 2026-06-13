@@ -122,7 +122,7 @@ $page_script = resolve_page_script($route_file);
 
 if ($page_script):
 ?>
-<script src="<?php echo base_url($page_script); ?>"></script>
+<script src="<?php echo page_script_url($page_script); ?>"></script>
 <?php endif; ?>
 
 <?php

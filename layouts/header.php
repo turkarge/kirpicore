@@ -67,6 +67,7 @@ $usesKirpiTable = in_array($route_file, [
 window.KIRPI_CONFIG = {
     baseUrl: "<?php echo e(BASE_URL); ?>",
     csrfToken: "<?php echo e(get_csrf_token()); ?>",
+    serviceWorkerVersion: "<?php echo e((string) (is_file(BASE_PATH . '/service-worker.js') ? filemtime(BASE_PATH . '/service-worker.js') : APP_VER)); ?>",
     flashMessage: <?php echo json_encode($flash, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>
 };
 </script>
