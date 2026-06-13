@@ -45,6 +45,8 @@ try {
     json_response([
         'status' => 'success',
         'message' => notifications_lang('mark_all_read_success'),
+        'updated_count' => $stmt->rowCount(),
+        'unread_count' => 0,
     ]);
 } catch (Throwable $e) {
     error_log('notifications mark all read error: ' . $e->getMessage());

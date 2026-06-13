@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
             { data: "channel", name: "channel" },
             { data: "read_status", name: "read_status", render: (value, type) => type === "display" ? `<span class="badge ${value === "read" ? "bg-success-lt" : "bg-warning-lt"}">${KirpiTable.escape(value === "read" ? labels.read : labels.unread)}</span>` : value },
             { data: "created_at_display", name: "created_at" },
-            { data: null, name: "actions", orderable: false, searchable: false, render: (_, type, row) => type === "display" && row.read_status === "unread" ? `<div class="dropdown kirpi-row-actions"><button class="btn btn-sm btn-icon btn-ghost-secondary js-kirpi-row-menu" type="button" aria-expanded="false" aria-label="İşlemler"><i class="ti ti-dots-vertical"></i></button><div class="dropdown-menu dropdown-menu-end"><button type="button" class="dropdown-item js-notification-read" data-id="${Number(row.id)}"><i class="ti ti-check me-2"></i>${KirpiTable.escape(labels.markRead)}</button></div></div>` : "" }
+            { data: null, name: "actions", orderable: false, searchable: false, render: (_, type, row) => type === "display" && row.read_status === "unread" ? `<button type="button" class="btn btn-sm btn-icon btn-ghost-secondary js-notification-read" data-id="${Number(row.id)}" title="${KirpiTable.escape(labels.markRead)}" aria-label="${KirpiTable.escape(labels.markRead)}"><i class="ti ti-check"></i></button>` : '<i class="ti ti-check text-success" aria-hidden="true"></i>' }
         ],
         columnFilters: [
             { placeholder: "Başlık veya mesaj ara", label: "Bildirime göre filtrele" },
@@ -40,13 +40,21 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    element.addEventListener("click", async function (event) {
+    document.addEventListener("click", async function (event) {
         const button = event.target.closest(".js-notification-read");
-        if (!button) return;
+        if (!button || !button.closest("#notifications-data-table")) return;
+        event.preventDefault();
+        event.stopPropagation();
         button.disabled = true;
         try {
             const result = await KirpiTable.post(config.markReadEndpoint, { id: button.dataset.id });
             KirpiTable.notify(result);
+            document.querySelectorAll(`.js-notification-item[data-notification-id="${CSS.escape(String(button.dataset.id))}"]`).forEach((item) => {
+                window.KirpiCore?.markNotificationItemAsRead(item);
+            });
+            if (window.KirpiCore?.setNotificationUnreadCount && Number.isFinite(Number(result.unread_count))) {
+                window.KirpiCore.setNotificationUnreadCount(Number(result.unread_count));
+            }
             table.ajax.reload(null, false);
         } catch (error) {
             KirpiTable.notifyError(error);

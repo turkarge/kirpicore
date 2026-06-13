@@ -784,12 +784,25 @@
                 if (next > 0) {
                     if (!existingDot) {
                         const dot = document.createElement("span");
-                        dot.className = "badge bg-red badge-notification badge-pill position-absolute top-0 start-100 translate-middle js-notification-dot";
+                        dot.className = "badge bg-red badge-notification badge-pill position-absolute top-0 start-100 translate-middle js-notification-dot js-notification-count";
                         bell.appendChild(dot);
+                    }
+                    const countBadge = bell.querySelector(".js-notification-count");
+                    if (countBadge) {
+                        countBadge.textContent = next > 99 ? "99+" : String(next);
                     }
                 } else if (existingDot) {
                     existingDot.remove();
                 }
+            });
+
+            document.querySelectorAll(".js-notification-summary").forEach((summary) => {
+                const label = summary.dataset.unreadLabel || "okunmamış bildirim";
+                summary.textContent = `${next} ${label}`;
+            });
+
+            document.querySelectorAll(".js-notification-mark-all").forEach((button) => {
+                button.classList.toggle("d-none", next === 0);
             });
         },
 
@@ -800,41 +813,74 @@
 
         bindNotificationDropdown() {
             document.addEventListener("click", async (event) => {
-                const item = event.target.closest(".js-notification-item");
-                if (!item) {
-                    return;
-                }
+                const markAllButton = event.target.closest(".js-notification-mark-all");
+                if (markAllButton) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    markAllButton.disabled = true;
 
-                const isUnread = item.dataset.isUnread === "1";
-                if (!isUnread) {
-                    return;
-                }
-
-                event.preventDefault();
-
-                const markReadUrl = item.dataset.markReadUrl || "";
-                const notificationId = parseInt(item.dataset.notificationId || "0", 10);
-                const targetUrl = item.getAttribute("href") || `${this.baseUrl}/notifications/list`;
-
-                try {
-                    if (markReadUrl && notificationId > 0) {
-                        await this.post(markReadUrl, {
-                            id: String(notificationId)
-                        });
-
-                        item.dataset.isUnread = "0";
-                        const dot = item.querySelector(".js-notification-item-dot");
-                        if (dot) {
-                            dot.classList.remove("status-dot-animated", "bg-red");
-                            dot.classList.add("bg-secondary");
+                    try {
+                        const response = await this.post(markAllButton.dataset.markReadUrl || "", {});
+                        const result = await response.json();
+                        if (!response.ok || result.status !== "success") {
+                            throw new Error(result.message || "Bildirimler güncellenemedi.");
                         }
 
-                        this.decreaseNotificationUnreadCount(1);
+                        document.querySelectorAll(".js-notification-item").forEach((item) => {
+                            this.markNotificationItemAsRead(item);
+                        });
+                        this.setNotificationUnreadCount(Number(result.unread_count || 0));
+                        this.toast(result.message, "success");
+                    } catch (error) {
+                        this.toast(error.message || "Bildirimler güncellenemedi.", "error");
+                    } finally {
+                        markAllButton.disabled = false;
                     }
+                    return;
+                }
+
+                const markReadButton = event.target.closest(".js-notification-mark-read");
+                const openTrigger = event.target.closest(".js-notification-open");
+                if (!markReadButton && !openTrigger) {
+                    return;
+                }
+
+                const item = event.target.closest(".js-notification-item");
+                if (!item) return;
+
+                const targetUrl = openTrigger?.getAttribute("href") || "";
+                const shouldNavigate = Boolean(openTrigger && targetUrl);
+                if (markReadButton || item.dataset.isUnread === "1") {
+                    event.preventDefault();
+                }
+                if (markReadButton) {
+                    event.stopPropagation();
+                    markReadButton.disabled = true;
+                }
+
+                if (item.dataset.isUnread !== "1") {
+                    if (shouldNavigate) window.location.href = targetUrl;
+                    return;
+                }
+
+                try {
+                    const response = await this.post(item.dataset.markReadUrl || "", {
+                        id: String(parseInt(item.dataset.notificationId || "0", 10))
+                    });
+                    const result = await response.json();
+                    if (!response.ok || result.status !== "success") {
+                        throw new Error(result.message || "Bildirim güncellenemedi.");
+                    }
+
+                    this.markNotificationItemAsRead(item);
+                    this.setNotificationUnreadCount(Number(result.unread_count ?? this.getNotificationUnreadCount() - 1));
+                    if (markReadButton) this.toast(result.message, "success");
                 } catch (error) {
                     console.warn("Notification mark-read error:", error);
+                    if (markReadButton) this.toast(error.message || "Bildirim güncellenemedi.", "error");
                 } finally {
-                    window.location.href = targetUrl;
+                    if (markReadButton) markReadButton.disabled = false;
+                    if (shouldNavigate) window.location.href = targetUrl;
                 }
             });
 
@@ -851,9 +897,20 @@
                 }
 
                 if (form.id === "notifications-mark-all-read-form") {
-                    this.setNotificationUnreadCount(0);
+                    document.querySelectorAll(".js-notification-item").forEach((item) => {
+                        this.markNotificationItemAsRead(item);
+                    });
+                    this.setNotificationUnreadCount(Number(result.unread_count || 0));
                 }
             });
+        },
+
+        markNotificationItemAsRead(item) {
+            if (!item) return;
+            item.dataset.isUnread = "0";
+            item.classList.remove("is-unread");
+            item.querySelector(".js-notification-item-dot")?.remove();
+            item.querySelector(".js-notification-mark-read")?.remove();
         },
 
         bindAjaxForms() {

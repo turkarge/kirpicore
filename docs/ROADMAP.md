@@ -46,6 +46,10 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
 
 - Template tabanlı notification render akışı eklendi.
 - Standart modül olayları notification sistemine bağlandı.
+- Navbar bildirim merkezi sayısal okunmamış sayacı, kaynak ikonları, responsive dropdown ve light/dark uyumlu görünümle yenilendi.
+- Navbar içinde tek bildirimi veya tüm bildirimleri sayfadan ayrılmadan okundu işaretleme standardı eklendi.
+- Bildirim listesinde tekil okundu aksiyonu doğrudan ikon düğmesine taşındı; dropdown bağımlılığı kaldırıldı.
+- Okundu aksiyonları güncel `unread_count` değerini döndürür ve navbar, dropdown ile liste durumunu eşzamanlı günceller.
 - Notification metadata alanları eklendi:
   - `template_key`
   - `source_module`

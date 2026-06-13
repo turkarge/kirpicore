@@ -45,9 +45,13 @@ try {
         ':user_id' => $userId,
     ]);
 
+    $unreadCount = get_unread_notifications_count($userId);
+
     json_response([
         'status' => 'success',
         'message' => notifications_lang('mark_read_success'),
+        'updated' => $stmt->rowCount() > 0,
+        'unread_count' => $unreadCount,
     ]);
 } catch (Throwable $e) {
     error_log('notifications mark read error: ' . $e->getMessage());

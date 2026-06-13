@@ -57,6 +57,10 @@ function notifications_lang(string $key, ?string $default = null): string
                 'nav_new_badge' => 'Yeni',
                 'nav_empty' => 'Henüz bildiriminiz bulunmuyor.',
                 'nav_view_all' => 'Tüm bildirimleri gör',
+                'nav_mark_read' => 'Okundu olarak işaretle',
+                'nav_mark_all_read' => 'Tümünü okundu yap',
+                'nav_unread_count' => 'okunmamış bildirim',
+                'nav_open_notification' => 'Bildirimi aç',
             ],
             'en' => [
                 'communication_center' => 'Communication Center',
@@ -105,6 +109,10 @@ function notifications_lang(string $key, ?string $default = null): string
                 'nav_new_badge' => 'New',
                 'nav_empty' => 'You have no notifications yet.',
                 'nav_view_all' => 'View all notifications',
+                'nav_mark_read' => 'Mark as read',
+                'nav_mark_all_read' => 'Mark all as read',
+                'nav_unread_count' => 'unread notifications',
+                'nav_open_notification' => 'Open notification',
             ],
         ];
     }
