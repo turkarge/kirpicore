@@ -189,7 +189,19 @@
         });
 
         if (enableButtons) {
-            table.table().container().querySelector(".dt-layout-row")?.classList.add("kirpi-table-toolbar");
+            const container = table.table().container();
+            const search = container.querySelector(".dt-search");
+            const buttons = container.querySelector(".dt-buttons");
+            const layoutRow = search?.closest(".dt-layout-row") || buttons?.closest(".dt-layout-row");
+
+            if (search && buttons && layoutRow) {
+                const toolbar = document.createElement("div");
+                toolbar.className = "input-group kirpi-table-control";
+                search.classList.add("kirpi-table-search");
+                toolbar.append(search, buttons);
+                layoutRow.replaceChildren(toolbar);
+                layoutRow.className = "dt-layout-row kirpi-table-toolbar";
+            }
         }
 
         let filterTimer = null;

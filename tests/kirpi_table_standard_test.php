@@ -40,7 +40,7 @@ foreach (['MutationObserver', 'data-kirpi-table', 'tbody td[colspan]', 'serverSi
     }
 }
 
-foreach (['kirpi-table-tool', 'kirpi-table-toolbar', 'search: ""', 'element.closest(".card")?.classList.add("kirpi-table-card")', 'window.location.reload()'] as $token) {
+foreach (['kirpi-table-tool', 'kirpi-table-toolbar', 'input-group kirpi-table-control', 'layoutRow.replaceChildren(toolbar)', 'search: ""', 'element.closest(".card")?.classList.add("kirpi-table-card")', 'window.location.reload()'] as $token) {
     if (!str_contains((string) $script, $token)) {
         fwrite(STDERR, "KirpiTable toolbar contract is missing {$token}.\n");
         exit(1);
