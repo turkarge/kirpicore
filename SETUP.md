@@ -33,7 +33,6 @@ Aşağıdaki blok, Dokploy için referans production baseline'dir.
 
 ```env
 KIRPI_APP_PREFIX=kirpicore
-COMPOSE_PROJECT_NAME=kirpicore
 APP_NAME="Kirpi Core"
 APP_VER=1.0.15
 APP_ENV=production
@@ -43,7 +42,6 @@ APP_DEFAULT_ROUTE=dashboard/view
 BASE_URL=https://core.kirpinetwork.com
 APP_TRUST_PROXY=true
 APP_LOCALE=tr
-SESSION_COOKIE_NAME=KIRPICORESESSID
 
 # Mevcut Dokploy kurulumunda gerçek volume adları zorunludur.
 KIRPI_NETWORK_NAME=
@@ -59,7 +57,6 @@ AUTH_LOGIN_COVER_IMAGE=https://images.unsplash.com/photo-1516321318423-f06f85e50
 
 DB_HOST=db
 DB_PORT=3306
-DB_NAME=kirpicore
 DB_USER=root
 DB_PASS=CHANGE_ME
 AUTO_DB_INSTALL=true
@@ -102,6 +99,8 @@ THROTTLE_API_AUTH_BLOCK=600
 API_TOKEN_TTL_SECONDS=2592000
 API_REQUEST_LOG_RETENTION_DAYS=90
 ```
+
+Yeni kurulumda `DB_NAME`, `SESSION_COOKIE_NAME`, `COMPOSE_PROJECT_NAME` ve Docker kaynak adlarını tanımlamayın. Bu değerler `KIRPI_APP_PREFIX` üzerinden otomatik üretilir.
 
 ### 3.3 Deploy Sonrası Akış
 

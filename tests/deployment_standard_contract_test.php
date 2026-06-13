@@ -23,10 +23,19 @@ $assertions = [
     'local database port override' => str_contains($localCompose, 'KIRPI_DB_HOST_PORT'),
     'dual instance validator' => str_contains($validator, 'Compose proje adlari ayrismadi')
         && str_contains($validator, 'Volume adlari ayrismadi'),
-    'example prefix variables' => str_contains($envExample, 'KIRPI_APP_PREFIX=kirpicore')
-        && str_contains($envExample, 'COMPOSE_PROJECT_NAME=kirpicore'),
-    'example local ports' => str_contains($envExample, 'KIRPI_APP_HTTP_PORT=8080')
-        && str_contains($envExample, 'KIRPI_DB_HOST_PORT=3306'),
+    'example prefix variable' => str_contains($envExample, "\nKIRPI_APP_PREFIX=kirpicore\n"),
+    'derived database name is inactive' => !preg_match('/^DB_NAME=/m', $envExample),
+    'derived session name is inactive' => !preg_match('/^SESSION_COOKIE_NAME=/m', $envExample),
+    'derived compose project is inactive' => !preg_match('/^COMPOSE_PROJECT_NAME=/m', $envExample),
+    'derived resource names are inactive' => !preg_match('/^KIRPI_(NETWORK|DB_VOLUME|UPLOADS_VOLUME|LOGS_VOLUME)_NAME=/m', $envExample),
+    'local ports are inactive examples' => str_contains($envExample, '# KIRPI_APP_HTTP_PORT=8080')
+        && str_contains($envExample, '# KIRPI_DB_HOST_PORT=3306')
+        && !preg_match('/^KIRPI_(APP_HTTP|DB_HOST)_PORT=/m', $envExample),
+    'full runtime settings' => str_contains($envExample, 'DOCUMENTS_MAX_UPLOAD_MB=25')
+        && str_contains($envExample, 'AI_SQL_EXPLAIN_ENABLED=false')
+        && str_contains($envExample, 'AUTO_DB_INSTALL=true'),
+    'full runtime compose pass-through' => str_contains($compose, 'DOCUMENTS_MAX_UPLOAD_MB:')
+        && str_contains($compose, 'AI_SQL_EXPLAIN_ENABLED:'),
     'legacy migration warning' => str_contains($deploymentDocs, 'Volume adlarını doğrulamadan deploy etmeyin'),
     'dokploy keeps internal ports' => str_contains($deploymentDocs, 'app')
         && str_contains($deploymentDocs, 'db:3306'),

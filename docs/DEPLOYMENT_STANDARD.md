@@ -8,10 +8,9 @@ Her uygulama benzersiz ve stabil bir prefix kullanır:
 
 ```env
 KIRPI_APP_PREFIX=kirpicore
-COMPOSE_PROJECT_NAME=kirpicore
-SESSION_COOKIE_NAME=KIRPICORESESSID
-DB_NAME=kirpicore
 ```
+
+Yeni kurulumda bu tek değer otomatik olarak Compose proje adını, `DB_NAME`, session cookie adını, network ve volume adlarını üretir. Bu türetilen değerleri env içinde tekrar tanımlamayın.
 
 Prefix kuralları:
 
@@ -89,7 +88,6 @@ docker inspect <APP_CONTAINER> --format '{{range .Mounts}}{{println .Destination
 
 ```env
 KIRPI_APP_PREFIX=kirpicore
-COMPOSE_PROJECT_NAME=kirpicore
 SESSION_COOKIE_NAME=KIRPICORESESSID
 
 KIRPI_DB_VOLUME_NAME=<var/lib/mysql için görünen volume adı>
@@ -108,12 +106,12 @@ Yeni bir Core tabanlı uygulamada volume override değişkenleri gerekli değild
 
 ```env
 KIRPI_APP_PREFIX=kalibre
-COMPOSE_PROJECT_NAME=kalibre
-SESSION_COOKIE_NAME=KALIBRESESSID
-DB_NAME=kalibre
+APP_NAME="Kirpi Kalibre"
+BASE_URL=https://kalibre.example.com
+DB_PASS=CHANGE_WITH_A_STRONG_PASSWORD
 ```
 
-Bu değerlerle Docker kaynakları otomatik olarak `kalibre_*` adlarıyla oluşturulur.
+Bu değerlerle DB adı `kalibre`, session cookie adı sürüm ekiyle `KALIBRESESSID...` ve Docker kaynakları `kalibre_*` adlarıyla otomatik oluşturulur.
 
 ## 6. Doğrulama
 

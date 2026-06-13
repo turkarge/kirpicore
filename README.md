@@ -83,7 +83,6 @@ Aşağıdaki değerleri Dokploy `Environment Settings` alanına giriniz.
 
 ```env
 KIRPI_APP_PREFIX=kirpicore
-COMPOSE_PROJECT_NAME=kirpicore
 APP_NAME="Kirpi Core"
 APP_VER=1.0.15
 APP_ENV=production
@@ -93,13 +92,11 @@ APP_DEFAULT_ROUTE=dashboard/view
 BASE_URL=https://core.kirpinetwork.com
 APP_TRUST_PROXY=true
 APP_LOCALE=tr
-SESSION_COOKIE_NAME=KIRPICORESESSID
 
 DB_HOST=db
 DB_PORT=3306
 DB_APP_HOST=db
 DB_APP_PORT=3306
-DB_NAME=kirpicore
 DB_USER=root
 DB_PASS=CHANGE_ME
 AUTO_DB_INSTALL=true
@@ -113,6 +110,8 @@ MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS=your_mail@example.com
 MAIL_FROM_NAME="Kirpi Core"
 ```
+
+`DB_NAME`, `SESSION_COOKIE_NAME`, Compose proje adı, network ve volume adları `KIRPI_APP_PREFIX` üzerinden otomatik üretilir. Yeni kurulumda bunları tanımlamayın.
 
 Mevcut bir Dokploy kurulumunu bu standarda geçiriyorsanız deploy öncesinde mevcut DB, uploads ve logs volume adlarını env içine sabitlemeniz zorunludur. Ayrıntılı ve veri kayıpsız geçiş adımları için [Deployment Standardı](docs/DEPLOYMENT_STANDARD.md) belgesini izleyin.
 
