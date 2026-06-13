@@ -89,6 +89,10 @@ SQL kolonları yalnız sabit bir `$columnMap` üzerinden sıralanır. İstemcide
 - Ayrı bir üst filtre paneli oluşturulmaz; global arama ve kolon filtreleri KirpiTable içinde tutulur.
 - Global arama etiketsiz ve tam genişlikte gösterilir; tablo araçları arama alanının sağında birleşik input-group eki olarak yer alır.
 - Dışa aktarma, kolon yönetimi ve yenileme aksiyonları metin düğmeleri yerine tooltip içeren kompakt ikon grubu olarak sunulur.
+- Toolbar, DataTables 2 `layout.top` alanına verilen özel bir DOM düğümüyle ilk render sırasında oluşturulur.
+- Arama girdisi ve `DataTable.Buttons` container'ı aynı Bootstrap `input-group` düğümünün doğrudan çocuklarıdır.
+- DataTables'ın ayrı `topStart` ve `topEnd` hücreleri kullanılmaz; başlatma sonrasında kontrol taşıyan DOM manipülasyonu yapılmaz.
+- Arama girdisi `table.search(value).draw()` API'sini debounce ile çağırır ve state içindeki mevcut global aramayla senkronize edilir.
 - `columnFilters` dizisi `columns` dizisiyle aynı sırada olmalıdır.
 - Tam sonuç export'u gerekiyorsa `serverExport.endpoint` tanımlanır.
 - Export endpoint'i global arama ve kolon filtreleriyle aynı parametreleri kabul eder.
@@ -111,6 +115,7 @@ SQL kolonları yalnız sabit bir `$columnMap` üzerinden sıralanır. İstemcide
 - Tablo metinleri modül dil dosyasından gelmelidir.
 - Light, Dark ve System temalarında toolbar, dropdown, satır ve filtre kontrastı kontrol edilmelidir.
 - Mobil görünümde yatay taşma, satır aksiyonları ve responsive detay görünümü doğrulanmalıdır.
+- Toolbar doğrulamasında arama ve araçların iki ayrı grid hücresinde değil, tek `.kirpi-table-control.input-group` içinde olduğu kontrol edilmelidir.
 
 ## Doğrulama
 

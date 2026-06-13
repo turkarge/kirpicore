@@ -134,6 +134,7 @@ Liste ekranı olan core modüllerde aşağıdaki standart uygulanır:
 - Statik tablolar `standard`, `report`, `compact` veya `matrix` profillerinden biriyle işaretlenmelidir.
 - Büyük veya aksiyon içeren listeler `ajax/<module_key>/datatable` endpoint'i ve `core/kirpi_table.php` yardımcılarıyla sunucu taraflı çalışmalıdır.
 - Global arama ve kolon filtreleri tablo toolbar'ında yer alır; aynı işi yapan ayrı üst filtre paneli oluşturulmaz.
+- Global arama ve tablo araçları tek Bootstrap `input-group` içinde render edilir; modüller kendi toolbar veya tekrar eden export butonlarını üretmez.
 - Filtre parametreleri tablo endpoint'ine ve export endpoint'ine aynı anlamla taşınmalıdır.
 - Export endpoint standardı: `modules/<module_key>/actions/export.php`
 - Route standardı: `<module_key>/actions/export`
