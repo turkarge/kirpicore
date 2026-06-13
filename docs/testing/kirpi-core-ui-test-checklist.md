@@ -29,15 +29,15 @@ Hatalı veya test edilemeyen her madde için bölüm sonundaki not alanına test
 - `[x] GEN-07` Geniş ve dar görünüm seçimi çalışıyor ve sayfa değişiminde korunuyor.
 - `[x] GEN-08` Profil bağlantısı, bildirim dropdown'u ve çıkış işlemi çalışıyor.
 - `[x] GEN-09` AI balonu açılıyor, kapanıyor ve ekran içeriğiyle çakışmıyor.
-- `[!] GEN-10` Mobil görünümde menü, tablolar, formlar ve butonlar kullanılabilir durumda.
+- `[x] GEN-10` Mobil görünümde menü, tablolar, formlar ve butonlar kullanılabilir durumda.
 - `[x] GEN-11` Türkçe karakterler doğru; bozuk `Ä`, `Å`, `Ã` karakterleri görünmüyor.
 - `[x] GEN-12` Tarayıcı konsolunda kritik JavaScript hatası oluşmuyor.
 
-Notlar: `Mobil testte menü açılıyor ama kapatma aksiyonu çalışmıyor.`
+Notlar: `Mobil menü açma/kapatma, dışarı tıklama ve Esc davranışları düzeltildi ve doğrulandı.`
 
 ## 2. Kullanıcılar, Roller ve Profil
 
-- `[!] ACC-01` Kullanıcı listesi açılıyor; arama, filtre ve sayfalama çalışıyor.
+- `[x] ACC-01` Kullanıcı listesi açılıyor; arama, filtre ve sayfalama çalışıyor.
 - `[x] ACC-02` CSV ve XLS kullanıcı export dosyaları indiriliyor ve içerikleri doğru.
 - `[x] ACC-03` Test kullanıcısı oluşturma, düzenleme ve aktif/pasif işlemleri çalışıyor.
 - `[x] ACC-04` Kullanıcı oturum düşürme ve lock key sıfırlama işlemleri doğru uyarı veriyor.
@@ -50,7 +50,7 @@ Notlar: `Mobil testte menü açılıyor ama kapatma aksiyonu çalışmıyor.`
 - `[x] ACC-11` API token oluşturma ve iptal işlemleri çalışıyor; token sonradan açık gösterilmiyor.
 - `[x] ACC-12` Ekran kilitleme, kilit açma ve logout akışları çalışıyor.
 
-Notlar: `Kullanıcı listesi sayfasında arama bölümü sonuç getirmiyor. diğer seçmeli opsiyonlar çalışıyor.`
+Notlar: `Kullanıcı aramasındaki native prepared statement parametre çakışması düzeltildi ve doğrulandı.`
 
 ## 3. İçerik Yönetimi
 
@@ -60,11 +60,11 @@ Notlar: `Kullanıcı listesi sayfasında arama bölümü sonuç getirmiyor. diğ
 - `[x] CNT-04` TinyMCE Light/Dark teması kullanıcı temasıyla eşleşiyor.
 - `[x] CNT-05` Template CSV/XLS export mevcut filtreleri koruyor.
 - `[x] CNT-06` Documents ekranı açılıyor; arama, belge türü ve entity filtreleri çalışıyor.
-- `[!] CNT-07` Test belgesi yükleniyor, indiriliyor ve doğru entity bilgisiyle listeleniyor.
-- `[!] CNT-08` Test belgesi silme onayı ve silme işlemi çalışıyor.
+- `[x] CNT-07` Test belgesi yükleniyor, indiriliyor ve doğru entity bilgisiyle listeleniyor.
+- `[x] CNT-08` Test belgesi silme onayı ve silme işlemi çalışıyor.
 - `[x] CNT-09` Documents CSV/XLS export mevcut filtreleri koruyor.
 
-Notlar: `Yükleme sonrası ekranda {"status":"success","message":"Belge yüklendi.","reload_page":true} mesajı veriyor. sadece tek yüklenen görünüyor. Modülün yeniden ele alınması gerekiyor. Modül içerisindeyken Yönetim menüsü çalışmıyor.`
+Notlar: `Documents v2.0.0 çoklu yükleme, indirme, silme ve dosya yöneticisi akışlarıyla doğrulandı.`
 
 ## 4. İletişim
 
@@ -156,15 +156,15 @@ Notlar: `____________________________________________________________________`
 
 | Alan | Başarılı | Hatalı | Test Edilemedi | N/A |
 |---|---:|---:|---:|---:|
-| Genel Shell ve Dashboard | 11 | 1 | 0 | 0 |
-| Kullanıcılar, Roller ve Profil | 11 | 1 | 0 | 0 |
-| İçerik Yönetimi | 7 | 2 | 0 | 0 |
+| Genel Shell ve Dashboard | 12 | 0 | 0 | 0 |
+| Kullanıcılar, Roller ve Profil | 12 | 0 | 0 | 0 |
+| İçerik Yönetimi | 9 | 0 | 0 | 0 |
 | İletişim | 9 | 0 | 0 | 0 |
 | Operasyon ve İzleme | 15 | 0 | 0 | 0 |
 | Sistem Ayarları ve Modüller | 11 | 0 | 0 | 0 |
 | Kirpi Intelligence | 18 | 0 | 0 | 0 |
 | API ve Yetki | 8 | 0 | 0 | 0 |
-| **Toplam** | **90** | **4** | **0** | **0** |
+| **Toplam** | **94** | **0** | **0** | **0** |
 
 Genel karar: `[ ] Yayına uygun` `[ ] Düzeltme sonrası tekrar test` `[ ] Bloke`
 

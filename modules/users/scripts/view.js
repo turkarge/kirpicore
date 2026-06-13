@@ -1,161 +1,206 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const tableContainer = document.getElementById("users-table-container");
-    const searchInput = document.getElementById("users-search");
-    const roleFilter = document.getElementById("users-role-filter");
-    const statusFilter = document.getElementById("users-status-filter");
-    const exportButtons = document.querySelectorAll(".js-users-export");
+    const tableElement = document.getElementById("users-data-table");
+    const configElement = document.getElementById("users-table-config");
 
-    if (!tableContainer) {
+    if (!tableElement || !configElement || !window.KirpiTable) {
         return;
     }
 
-    let currentPage = 1;
-    let debounceTimer = null;
+    const config = JSON.parse(configElement.textContent || "{}");
+    const permissions = config.permissions || {};
+    const labels = config.labels || {};
+    const roleFilter = document.getElementById("users-role-filter");
+    const statusFilter = document.getElementById("users-status-filter");
+    const resetButton = document.getElementById("users-filter-reset");
+    const selectionBar = document.getElementById("users-selection-bar");
+    const selectionCount = document.getElementById("users-selection-count");
+    const selectionClear = document.getElementById("users-selection-clear");
+    const filterStateKey = "kirpi_table_users_external_filters";
 
-    function appendFilters(params) {
-        if (searchInput && searchInput.value.trim() !== "") {
-            params.set("search", searchInput.value.trim());
-        }
-
-        if (roleFilter && roleFilter.value !== "") {
-            params.set("role_id", roleFilter.value);
-        }
-
-        if (statusFilter && statusFilter.value !== "") {
-            params.set("status", statusFilter.value);
-        }
+    try {
+        const savedFilters = JSON.parse(localStorage.getItem(filterStateKey) || "{}");
+        if (roleFilter && savedFilters.role_id !== undefined) roleFilter.value = savedFilters.role_id;
+        if (statusFilter && savedFilters.status !== undefined) statusFilter.value = savedFilters.status;
+    } catch (_) {
+        localStorage.removeItem(filterStateKey);
     }
 
-    function buildUrl(page = 1) {
-        const params = new URLSearchParams();
-        params.set("page", page);
-        appendFilters(params);
+    const renderActions = (data) => {
+        const id = Number(data.id || 0);
+        const actions = [];
 
-        return `${window.KIRPI_CONFIG.baseUrl}/ajax/users/table?${params.toString()}`;
-    }
+        if (permissions.edit) {
+            actions.push(`<a href="#" class="dropdown-item btn-modal-trigger" data-url="/ajax/users/edit?id=${id}" data-size="modal-lg"><i class="ti ti-edit me-2"></i>${KirpiTable.escape(labels.edit)}</a>`);
+        }
+        if (permissions.dropSession) {
+            actions.push(`<button type="button" class="dropdown-item js-user-row-action" data-action="drop-session" data-id="${id}" data-confirm="${KirpiTable.escape(labels.dropSessionConfirm)}"><i class="ti ti-logout me-2"></i>${KirpiTable.escape(labels.session)}</button>`);
+        }
+        if (permissions.resetLock) {
+            actions.push(`<button type="button" class="dropdown-item js-user-row-action" data-action="reset-lock-key" data-id="${id}" data-confirm="${KirpiTable.escape(labels.resetKeyConfirm)}"><i class="ti ti-key me-2"></i>${KirpiTable.escape(labels.key)}</button>`);
+        }
 
-    async function loadTable(page = 1) {
-        currentPage = page;
+        if (actions.length === 0) {
+            return "";
+        }
 
-        tableContainer.innerHTML = `
-            <div class="kirpi-loading">
-                <div class="spinner-border" role="status"></div>
-            </div>
-        `;
+        return `<div class="dropdown"><button class="btn btn-sm btn-icon btn-ghost-secondary" type="button" data-bs-toggle="dropdown" aria-label="İşlemler"><i class="ti ti-dots-vertical"></i></button><div class="dropdown-menu dropdown-menu-end">${actions.join("")}</div></div>`;
+    };
 
-        try {
-            const response = await fetch(buildUrl(page), {
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest"
+    const table = KirpiTable.create(tableElement, {
+        ajax: {
+            url: config.endpoint,
+            data: function (payload) {
+                payload.role_id = roleFilter?.value || "";
+                payload.status = statusFilter?.value || "";
+            }
+        },
+        rowId: "row_key",
+        order: [[5, "desc"]],
+        columns: [
+            { data: null, name: "selection", defaultContent: "", orderable: false, searchable: false, render: DataTable.render.select(), className: "select-checkbox" },
+            {
+                data: "name",
+                name: "name",
+                render: function (value, type, row) {
+                    if (type !== "display") return value;
+                    const avatar = row.avatar_url
+                        ? `<span class="avatar avatar-sm me-2" style="background-image:url('${KirpiTable.escape(row.avatar_url)}')"></span>`
+                        : `<span class="avatar avatar-sm me-2">${KirpiTable.escape(row.initial)}</span>`;
+                    return `<div class="d-flex align-items-center">${avatar}<span class="fw-medium">${KirpiTable.escape(value)}</span></div>`;
                 }
+            },
+            { data: "email", name: "email", render: (value, type) => type === "display" ? `<a href="mailto:${KirpiTable.escape(value)}">${KirpiTable.escape(value)}</a>` : value },
+            {
+                data: "role_name",
+                name: "role_name",
+                render: function (value, type, row) {
+                    if (type !== "display") return value || "";
+                    const suffix = row.role_is_active === false ? " <span class=\"badge bg-secondary-lt\">Pasif</span>" : "";
+                    return `${KirpiTable.escape(value || "-")}${suffix}`;
+                }
+            },
+            {
+                data: "is_active",
+                name: "is_active",
+                render: function (value, type, row) {
+                    if (type !== "display") return value ? 1 : 0;
+                    if (!permissions.status) {
+                        return value ? `<span class="badge bg-success-lt">${KirpiTable.escape(labels.active)}</span>` : `<span class="badge bg-danger-lt">${KirpiTable.escape(labels.inactive)}</span>`;
+                    }
+                    return `<label class="form-check form-switch m-0"><input class="form-check-input users-status-switch" type="checkbox" data-id="${Number(row.id)}" ${value ? "checked" : ""} aria-label="Kullanıcı durumunu değiştir"></label>`;
+                }
+            },
+            { data: "created_at_display", name: "created_at" },
+            { data: "updated_at_display", name: "updated_at" },
+            { data: null, name: "actions", orderable: false, searchable: false, render: (_, type, row) => type === "display" ? renderActions(row) : "" }
+        ],
+        columnFilters: [
+            null,
+            { placeholder: "Ad ara", label: "Ada göre filtrele" },
+            { placeholder: "E-posta ara", label: "E-postaya göre filtrele" },
+            { placeholder: "Rol ara", label: "Role göre filtrele" },
+            {
+                type: "select",
+                label: "Duruma göre filtrele",
+                options: [
+                    { value: "", label: "Tümü" },
+                    { value: "1", label: labels.active },
+                    { value: "0", label: labels.inactive }
+                ]
+            },
+            { placeholder: "Tarih ara", label: "Oluşturulma tarihine göre filtrele" },
+            { placeholder: "Tarih ara", label: "Güncellenme tarihine göre filtrele" },
+            null
+        ],
+        exportColumns: [1, 2, 3, 4, 5, 6],
+        exportTitle: "Kullanıcılar",
+        stateKey: "users",
+        serverExport: {
+            endpoint: config.exportEndpoint,
+            filters: (dt) => ({
+                role_id: roleFilter?.value || "",
+                status: statusFilter?.value || "",
+                name: dt.column("name:name").search(),
+                email: dt.column("email:name").search(),
+                role: dt.column("role_name:name").search(),
+                created_at: dt.column("created_at:name").search(),
+                updated_at: dt.column("updated_at:name").search()
+            })
+        }
+    });
+
+    const reload = () => table.ajax.reload(null, false);
+    const saveExternalFilters = () => localStorage.setItem(filterStateKey, JSON.stringify({
+        role_id: roleFilter?.value || "",
+        status: statusFilter?.value || ""
+    }));
+
+    roleFilter?.addEventListener("change", () => { saveExternalFilters(); reload(); });
+    statusFilter?.addEventListener("change", () => { saveExternalFilters(); reload(); });
+    resetButton?.addEventListener("click", function () {
+        if (roleFilter) roleFilter.value = "";
+        if (statusFilter) statusFilter.value = "";
+        table.search("");
+        table.columns().search("");
+        table.state.clear();
+        localStorage.removeItem(filterStateKey);
+        tableElement.querySelectorAll("[data-column-filter]").forEach((control) => { control.value = ""; });
+        table.ajax.reload();
+    });
+
+    const updateSelection = () => {
+        const count = table.rows({ selected: true }).count();
+        if (selectionCount) selectionCount.textContent = String(count);
+        if (selectionBar) selectionBar.hidden = count === 0;
+    };
+    table.on("select deselect draw", updateSelection);
+    selectionClear?.addEventListener("click", () => table.rows().deselect());
+
+    tableElement.addEventListener("change", async function (event) {
+        const input = event.target.closest(".users-status-switch");
+        if (!input) return;
+        input.disabled = true;
+        const nextStatus = input.checked ? 1 : 0;
+        try {
+            const result = await KirpiTable.post("users/actions/toggle-status", {
+                id: input.dataset.id,
+                status: nextStatus
             });
-
-            const html = await response.text();
-            tableContainer.innerHTML = html;
+            KirpiTable.notify(result);
+            reload();
         } catch (error) {
-            tableContainer.innerHTML = `
-                <div class="p-4">
-                    <div class="alert alert-danger mb-0">
-                        Kullanıcı listesi yüklenirken bir hata oluştu.
-                    </div>
-                </div>
-            `;
+            input.checked = !input.checked;
+            KirpiTable.notifyError(error);
+        } finally {
+            input.disabled = false;
         }
-    }
-
-    function triggerReload() {
-        loadTable(1);
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener("input", function () {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(triggerReload, 300);
-        });
-    }
-
-    if (roleFilter) {
-        roleFilter.addEventListener("change", triggerReload);
-    }
-
-    if (statusFilter) {
-        statusFilter.addEventListener("change", triggerReload);
-    }
-
-    exportButtons.forEach(function (button) {
-        button.addEventListener("click", function (event) {
-            event.preventDefault();
-            const params = new URLSearchParams();
-            params.set("format", button.dataset.format || "csv");
-            appendFilters(params);
-            window.location.href = `${window.KIRPI_CONFIG.baseUrl}/users/actions/export?${params.toString()}`;
-        });
     });
 
-    document.addEventListener("click", function (event) {
-        const paginationLink = event.target.closest(".pagination .page-link");
-        if (!paginationLink) {
-            return;
-        }
-
+    tableElement.addEventListener("click", async function (event) {
+        const button = event.target.closest(".js-user-row-action");
+        if (!button) return;
         event.preventDefault();
-
-        const page = parseInt(paginationLink.dataset.page || "1", 10);
-        if (!Number.isNaN(page)) {
-            loadTable(page);
+        if (button.dataset.confirm && !window.confirm(button.dataset.confirm)) return;
+        button.disabled = true;
+        try {
+            const result = await KirpiTable.post(`users/actions/${button.dataset.action}`, { id: button.dataset.id });
+            KirpiTable.notify(result);
+            if (result.redirect) {
+                window.location.href = result.redirect;
+                return;
+            }
+            reload();
+        } catch (error) {
+            KirpiTable.notifyError(error);
+        } finally {
+            button.disabled = false;
         }
-    });
-
-    document.addEventListener("change", function (event) {
-        const switchInput = event.target.closest(".users-status-switch");
-        if (!switchInput) {
-            return;
-        }
-
-        const form = switchInput.closest("form");
-        if (!form) {
-            return;
-        }
-
-        const statusInput = form.querySelector('input[name="status"]');
-        const newStatus = switchInput.checked ? 1 : 0;
-
-        if (statusInput) {
-            statusInput.value = newStatus;
-        }
-
-        form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
     });
 
     document.addEventListener("kirpi:form.success", function (event) {
         const form = event.detail.form;
-        const result = event.detail.result || {};
-
-        if (!form) {
-            return;
-        }
-
-        const formId = form.id || null;
-        const isUsersCreate = formId === "users-create-form";
-        const isUsersEdit = formId === "users-edit-form";
-        const isUsersToggle = form.classList.contains("users-toggle-status-form");
-
-        if (!isUsersCreate && !isUsersEdit && !isUsersToggle) {
-            return;
-        }
-
-        if (result.status === "success") {
-            if (isUsersCreate || isUsersEdit || result.reload_page) {
-                window.location.reload();
-                return;
-            }
-
-            // Modal kapanırken küçük gecikmeyle tabloyu yenile.
-            setTimeout(() => {
-                loadTable(currentPage);
-            }, 150);
+        if (["users-create-form", "users-edit-form"].includes(form?.id)) {
+            table.ajax.reload(null, false);
         }
     });
-
-    loadTable(1);
 });

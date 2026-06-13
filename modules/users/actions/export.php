@@ -14,6 +14,11 @@ if (!db_table_exists('users')) {
 $search = trim((string) ($_GET['search'] ?? ''));
 $roleId = trim((string) ($_GET['role_id'] ?? ''));
 $status = trim((string) ($_GET['status'] ?? ''));
+$name = trim((string) ($_GET['name'] ?? ''));
+$email = trim((string) ($_GET['email'] ?? ''));
+$role = trim((string) ($_GET['role'] ?? ''));
+$createdAt = trim((string) ($_GET['created_at'] ?? ''));
+$updatedAt = trim((string) ($_GET['updated_at'] ?? ''));
 $format = trim((string) ($_GET['format'] ?? 'csv'));
 
 $where = [];
@@ -35,6 +40,22 @@ if ($roleId !== '') {
 if ($status !== '' && in_array($status, ['0', '1'], true)) {
     $where[] = 'u.is_active = :is_active';
     $params[':is_active'] = (int) $status;
+}
+
+$columnSearches = [
+    'name' => ['column' => 'u.name', 'value' => $name],
+    'email' => ['column' => 'u.email', 'value' => $email],
+    'role' => ['column' => 'r.name', 'value' => $role],
+    'created_at' => ['column' => 'u.created_at', 'value' => $createdAt],
+    'updated_at' => ['column' => 'u.updated_at', 'value' => $updatedAt],
+];
+foreach ($columnSearches as $key => $filter) {
+    if ($filter['value'] === '') {
+        continue;
+    }
+    $parameter = ':filter_' . $key;
+    $where[] = $filter['column'] . ' LIKE ' . $parameter;
+    $params[$parameter] = '%' . $filter['value'] . '%';
 }
 
 $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';

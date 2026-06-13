@@ -330,3 +330,10 @@ Tamamlanan son durum:
    - Varsayılan örnek: `KIRPI_APP_PREFIX=kirpicore`.
    - Çalışma portları env üzerinden konfigüre edilecek; örnek: `KIRPI_APP_HTTP_PORT`, `KIRPI_DB_PORT`.
    - DB adı, session cookie adı, container adları, network/volume adları, servis portları ve gerekiyorsa public route/proxy etiketleri bu standarda bağlanacak.
+
+4. **KirpiTable standart tablo sistemi** - Pilot aşaması
+   - DataTables 2.3.8 ve Bootstrap 5 entegrasyonu Core içine yerel asset olarak eklendi.
+   - Ortak `KirpiTable` adaptörü; server-side veri, global/kolon arama, sıralama, sayfalama, responsive görünüm, seçim, kolon görünürlüğü, kolon sıralama, sabit başlık, klavye navigasyonu ve state kaydı sağlar.
+   - CSV, Excel, yazdırma, kopyalama ve tüm filtrelenmiş sonuçları sunucu tarafında export etme akışları standardize edildi.
+   - Kullanıcılar modülü pilot ekran olarak yeni tablo sistemine geçirildi.
+   - Pilot doğrulamasından sonra Roller, Notifications ve kalan standart liste ekranları aynı sözleşmeye taşınacak.

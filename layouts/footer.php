@@ -87,11 +87,37 @@ if ($canUseAiLauncher):
 <script src="<?php echo asset_url('js/app.js'); ?>"></script>
 <script src="<?php echo asset_url('js/report-table.js'); ?>"></script>
 <script src="<?php echo asset_url('js/pwa.js'); ?>"></script>
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "7356366510c54c86a154d277ed978201"}'></script><!-- End Cloudflare Web Analytics -->
-
 <?php
 global $current_route;
 $route_file = $current_route['file'] ?? null;
+$usesKirpiTable = in_array($route_file, [
+    'modules/users/pages/view.php',
+], true);
+if ($usesKirpiTable):
+?>
+<script src="<?php echo asset_url('vendor/datatables/js/dataTables.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/datatables/js/dataTables.bootstrap5.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/datatables/js/jszip.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/datatables/js/dataTables.buttons.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/datatables/js/buttons.bootstrap5.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/datatables/js/buttons.html5.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/datatables/js/buttons.print.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/datatables/js/buttons.colVis.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/datatables/js/dataTables.responsive.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/datatables/js/responsive.bootstrap5.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/datatables/js/dataTables.select.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/datatables/js/select.bootstrap5.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/datatables/js/dataTables.colReorder.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/datatables/js/colReorder.bootstrap5.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/datatables/js/dataTables.fixedHeader.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/datatables/js/fixedHeader.bootstrap5.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/datatables/js/dataTables.keyTable.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/datatables/js/keyTable.bootstrap5.min.js'); ?>"></script>
+<script src="<?php echo asset_url('js/kirpi-table.js'); ?>"></script>
+<?php endif; ?>
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "7356366510c54c86a154d277ed978201"}'></script><!-- End Cloudflare Web Analytics -->
+
+<?php
 $page_script = resolve_page_script($route_file);
 
 if ($page_script):

@@ -29,6 +29,13 @@ return [
         'auth' => true,
         'method' => 'GET',
     ],
+    'ajax/users/datatable' => [
+        'file' => 'modules/users/actions/datatable.php',
+        'layout' => false,
+        'permission' => 'users.view',
+        'auth' => true,
+        'method' => 'GET',
+    ],
     'users/actions/export' => [
         'file' => 'modules/users/actions/export.php',
         'layout' => false,

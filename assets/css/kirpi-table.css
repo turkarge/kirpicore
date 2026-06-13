@@ -1,0 +1,106 @@
+.kirpi-table-card {
+    overflow: visible;
+}
+
+.kirpi-table-card .dt-container {
+    padding: 1rem;
+}
+
+.kirpi-table-card .dt-layout-row:first-child {
+    align-items: center;
+    gap: .75rem;
+    margin-top: 0;
+}
+
+.kirpi-table-card .dt-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.kirpi-table-card .dt-buttons .btn {
+    margin: 0;
+}
+
+.kirpi-table-card div.dt-search label,
+.kirpi-table-card div.dt-length label {
+    color: var(--tblr-secondary-color);
+    font-size: .8125rem;
+    font-weight: 600;
+}
+
+.kirpi-table-card div.dt-search input,
+.kirpi-table-card div.dt-length select {
+    border-color: var(--tblr-border-color);
+}
+
+.kirpi-data-table thead th {
+    white-space: nowrap;
+}
+
+.kirpi-data-table thead .kirpi-table-column-filters th {
+    background: var(--tblr-bg-surface-secondary);
+    padding: .5rem;
+}
+
+.kirpi-data-table .kirpi-table-column-filters .form-control,
+.kirpi-data-table .kirpi-table-column-filters .form-select {
+    min-width: 7rem;
+    font-weight: 400;
+}
+
+.kirpi-data-table tbody td {
+    vertical-align: middle;
+}
+
+.kirpi-data-table tbody tr.selected > * {
+    box-shadow: inset 0 0 0 9999px color-mix(in srgb, var(--tblr-primary) 12%, transparent);
+}
+
+.kirpi-data-table td.focus {
+    outline: 2px solid var(--tblr-primary);
+    outline-offset: -2px;
+}
+
+.kirpi-table-selection {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .5rem;
+    min-height: 38px;
+}
+
+.kirpi-table-selection[hidden] {
+    display: none;
+}
+
+html[data-bs-theme="dark"] .kirpi-table-card .dt-container,
+html[data-bs-theme="dark"] table.dataTable > tbody > tr {
+    --dt-row-stripe: 255, 255, 255;
+    --dt-row-hover: 255, 255, 255;
+}
+
+html[data-bs-theme="dark"] div.dt-button-collection {
+    background: var(--tblr-bg-surface);
+    border-color: var(--tblr-border-color);
+}
+
+@media (max-width: 767.98px) {
+    .kirpi-table-card .dt-layout-row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .kirpi-table-card .dt-layout-cell,
+    .kirpi-table-card div.dt-search input {
+        width: 100%;
+    }
+
+    .kirpi-table-card .dt-buttons .btn {
+        flex: 1 1 auto;
+    }
+
+    .kirpi-table-selection {
+        justify-content: flex-start;
+    }
+}

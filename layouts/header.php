@@ -9,6 +9,9 @@ $flash = get_flash_message();
 global $current_route;
 $route_file = $current_route['file'] ?? null;
 $page_script = resolve_page_script($route_file);
+$usesKirpiTable = in_array($route_file, [
+    'modules/users/pages/view.php',
+], true);
 ?>
 <!DOCTYPE html>
 <html lang="tr">
@@ -26,6 +29,16 @@ $page_script = resolve_page_script($route_file);
     <link href="<?php echo asset_url('css/tabler-icons.min.css'); ?>" rel="stylesheet"/>
     <link href="<?php echo asset_url('css/app.css'); ?>" rel="stylesheet"/>
     <link href="<?php echo asset_url('css/toastr.min.css'); ?>" rel="stylesheet">
+    <?php if ($usesKirpiTable): ?>
+    <link href="<?php echo asset_url('vendor/datatables/css/dataTables.bootstrap5.min.css'); ?>" rel="stylesheet">
+    <link href="<?php echo asset_url('vendor/datatables/css/buttons.bootstrap5.min.css'); ?>" rel="stylesheet">
+    <link href="<?php echo asset_url('vendor/datatables/css/responsive.bootstrap5.min.css'); ?>" rel="stylesheet">
+    <link href="<?php echo asset_url('vendor/datatables/css/select.bootstrap5.min.css'); ?>" rel="stylesheet">
+    <link href="<?php echo asset_url('vendor/datatables/css/colReorder.bootstrap5.min.css'); ?>" rel="stylesheet">
+    <link href="<?php echo asset_url('vendor/datatables/css/fixedHeader.bootstrap5.min.css'); ?>" rel="stylesheet">
+    <link href="<?php echo asset_url('vendor/datatables/css/keyTable.bootstrap5.min.css'); ?>" rel="stylesheet">
+    <link href="<?php echo asset_url('css/kirpi-table.css'); ?>" rel="stylesheet">
+    <?php endif; ?>
     <script>
     (function () {
         try {
