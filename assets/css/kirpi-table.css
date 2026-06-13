@@ -19,16 +19,9 @@
     flex-wrap: nowrap;
 }
 
-.kirpi-table-card .kirpi-table-search {
+.kirpi-table-card input.kirpi-table-search {
     flex: 1 1 auto;
     min-width: 0;
-}
-
-.kirpi-table-card .kirpi-table-search label {
-    display: none;
-}
-
-.kirpi-table-card .kirpi-table-search input {
     width: 100%;
     height: 38px;
     min-height: 38px;
@@ -210,8 +203,7 @@ div.dt-button-collection .dt-button + .dt-button {
     }
 
     .kirpi-table-card .kirpi-table-control,
-    .kirpi-table-card .kirpi-table-search,
-    .kirpi-table-card .kirpi-table-search input {
+    .kirpi-table-card input.kirpi-table-search {
         width: 100%;
     }
 

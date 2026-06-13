@@ -63,6 +63,39 @@
         return items;
     };
 
+    const toolbarButtons = (options, stateKey, serverSide) => [
+        {
+            extend: "collection",
+            text: '<i class="ti ti-download"></i><span class="visually-hidden">Dışa aktar</span>',
+            titleAttr: "Dışa aktar",
+            className: "btn-icon kirpi-table-tool",
+            buttons: exportButtons(options)
+        },
+        {
+            extend: "collection",
+            text: '<i class="ti ti-columns-3"></i><span class="visually-hidden">Kolonlar</span>',
+            titleAttr: "Kolonları yönet",
+            className: "btn-icon kirpi-table-tool",
+            buttons: [
+                { extend: "columnsToggle", columns: ":not(:first-child):not(:last-child)" },
+                {
+                    text: '<i class="ti ti-restore me-2"></i>Görünümü sıfırla',
+                    action: (_, dt) => {
+                        localStorage.removeItem(`kirpi_table_${stateKey}`);
+                        dt.state.clear();
+                        window.location.reload();
+                    }
+                }
+            ]
+        },
+        {
+            text: '<i class="ti ti-refresh"></i><span class="visually-hidden">Yenile</span>',
+            titleAttr: "Tabloyu yenile",
+            className: "btn-icon kirpi-table-tool kirpi-table-refresh",
+            action: (_, dt) => serverSide ? dt.ajax.reload(null, false) : window.location.reload()
+        }
+    ];
+
     const create = (element, options) => {
         if (!window.DataTable) {
             throw new Error("DataTables yüklenmedi.");
@@ -84,6 +117,14 @@
         const enableButtons = options.buttons !== false;
         const filterDefinitions = options.columnFilters || [];
         const hasColumnFilters = filterDefinitions.some(Boolean);
+        const toolbar = document.createElement("div");
+        const toolbarSearch = document.createElement("input");
+        toolbar.className = "input-group kirpi-table-control";
+        toolbarSearch.type = "search";
+        toolbarSearch.className = "form-control kirpi-table-search";
+        toolbarSearch.placeholder = language.searchPlaceholder;
+        toolbarSearch.setAttribute("aria-label", language.searchPlaceholder);
+        toolbar.appendChild(toolbarSearch);
         const filterRow = document.createElement("tr");
         filterRow.className = "kirpi-table-column-filters";
         (hasColumnFilters ? filterDefinitions : []).forEach((filter, index) => {
@@ -144,70 +185,29 @@
             rowId: options.rowId,
             language,
             layout: {
-                topStart: enableButtons ? {
-                    search: {
-                        placeholder: language.searchPlaceholder
-                    }
-                } : (options.search === false ? null : "search"),
-                topEnd: enableButtons ? {
-                    buttons: [
-                        {
-                            extend: "collection",
-                            text: '<i class="ti ti-download"></i><span class="visually-hidden">Dışa aktar</span>',
-                            titleAttr: "Dışa aktar",
-                            className: "btn-icon kirpi-table-tool",
-                            buttons: exportButtons(options)
-                        },
-                        {
-                            extend: "collection",
-                            text: '<i class="ti ti-columns-3"></i><span class="visually-hidden">Kolonlar</span>',
-                            titleAttr: "Kolonları yönet",
-                            className: "btn-icon kirpi-table-tool",
-                            buttons: [
-                                { extend: "columnsToggle", columns: ":not(:first-child):not(:last-child)" },
-                                {
-                                    text: '<i class="ti ti-restore me-2"></i>Görünümü sıfırla',
-                                    action: (_, dt) => {
-                                        localStorage.removeItem(`kirpi_table_${stateKey}`);
-                                        dt.state.clear();
-                                        window.location.reload();
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            text: '<i class="ti ti-refresh"></i><span class="visually-hidden">Yenile</span>',
-                            titleAttr: "Tabloyu yenile",
-                            className: "btn-icon kirpi-table-tool kirpi-table-refresh",
-                            action: (_, dt) => serverSide ? dt.ajax.reload(null, false) : window.location.reload()
-                        }
-                    ]
-                } : null,
+                top: enableButtons ? toolbar : (options.search === false ? null : "search"),
+                topStart: null,
+                topEnd: null,
                 bottomStart: enablePaging ? ["pageLength", "info"] : "info",
                 bottomEnd: enablePaging ? "paging" : null
             }
         });
 
-        const mountToolbar = () => {
-            if (!enableButtons) return;
-            const container = table.table().container();
-            if (container.querySelector(".kirpi-table-control")) return;
-            const search = container.querySelector(".dt-search");
-            const buttons = container.querySelector(".dt-buttons");
-            const layoutRow = search?.closest(".dt-layout-row") || buttons?.closest(".dt-layout-row");
-
-            if (search && buttons && layoutRow) {
-                const toolbar = document.createElement("div");
-                toolbar.className = "input-group kirpi-table-control";
-                search.classList.add("kirpi-table-search");
-                toolbar.append(search, buttons);
-                layoutRow.replaceChildren(toolbar);
-                layoutRow.className = "dt-layout-row kirpi-table-toolbar";
-            }
-        };
-        table.on("init", mountToolbar);
-        window.requestAnimationFrame(mountToolbar);
-        window.setTimeout(mountToolbar, 0);
+        if (enableButtons) {
+            new DataTable.Buttons(table, { buttons: toolbarButtons(options, stateKey, serverSide) });
+            const buttonContainer = table.buttons(0, null).container();
+            toolbar.appendChild(buttonContainer instanceof HTMLElement ? buttonContainer : buttonContainer[0]);
+            toolbar.closest(".dt-layout-row")?.classList.add("kirpi-table-toolbar");
+            toolbarSearch.value = table.search();
+            let toolbarSearchTimer = null;
+            toolbarSearch.addEventListener("input", () => {
+                clearTimeout(toolbarSearchTimer);
+                toolbarSearchTimer = setTimeout(() => table.search(toolbarSearch.value).draw(), 300);
+            });
+            table.on("search", () => {
+                if (toolbarSearch.value !== table.search()) toolbarSearch.value = table.search();
+            });
+        }
 
         let filterTimer = null;
         const filterColumn = (control) => {
