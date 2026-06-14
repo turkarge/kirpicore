@@ -11,6 +11,9 @@ $search = trim((string) ($_GET['search'] ?? ''));
 $documentType = trim((string) ($_GET['document_type'] ?? ''));
 $entityType = trim((string) ($_GET['entity_type'] ?? ''));
 $entityId = (int) ($_GET['entity_id'] ?? 0);
+$scope = in_array((string) ($_GET['scope'] ?? 'all'), ['all', 'recent', 'linked'], true)
+    ? (string) ($_GET['scope'] ?? 'all')
+    : 'all';
 $page = max(1, (int) ($_GET['page'] ?? 1));
 $perPage = (int) ($_GET['per_page'] ?? 24);
 $perPage = in_array($perPage, [12, 24, 48, 96], true) ? $perPage : 24;
@@ -36,6 +39,11 @@ if ($entityType !== '') {
 if ($entityId > 0) {
     $where[] = 'EXISTS (SELECT 1 FROM document_links dli WHERE dli.document_id = d.id AND dli.entity_id = :entity_id)';
     $params[':entity_id'] = $entityId;
+}
+if ($scope === 'recent') {
+    $where[] = 'd.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)';
+} elseif ($scope === 'linked') {
+    $where[] = 'EXISTS (SELECT 1 FROM document_links dls WHERE dls.document_id = d.id)';
 }
 $whereSql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 
@@ -91,6 +99,7 @@ $filterParams = array_filter([
     'document_type' => $documentType,
     'entity_type' => $entityType,
     'entity_id' => $entityId > 0 ? $entityId : null,
+    'scope' => $scope !== 'all' ? $scope : null,
     'per_page' => $perPage,
 ], static fn ($value): bool => $value !== '' && $value !== null);
 $pageUrl = static function (int $targetPage) use ($filterParams): string {
@@ -224,6 +233,37 @@ $showingText = str_replace(
                 <?php endforeach; ?>
             </div>
 
+            <div class="document-explorer">
+                <aside class="document-explorer__sidebar">
+                    <div class="card">
+                        <div class="card-header"><h3 class="card-title"><?php echo e(documents_lang('collections')); ?></h3></div>
+                        <div class="list-group list-group-flush">
+                            <a href="<?php echo base_url('documents/view'); ?>" class="list-group-item list-group-item-action d-flex align-items-center gap-2 <?php echo $scope === 'all' && $documentType === '' ? 'active' : ''; ?>">
+                                <i class="ti ti-files"></i><span class="flex-fill"><?php echo e(documents_lang('all_files')); ?></span><span class="badge bg-secondary-lt"><?php echo $stats['total_files']; ?></span>
+                            </a>
+                            <a href="<?php echo base_url('documents/view?scope=recent'); ?>" class="list-group-item list-group-item-action d-flex align-items-center gap-2 <?php echo $scope === 'recent' ? 'active' : ''; ?>">
+                                <i class="ti ti-clock"></i><span class="flex-fill"><?php echo e(documents_lang('recent_files')); ?></span><span class="badge bg-orange-lt"><?php echo $stats['recent_files']; ?></span>
+                            </a>
+                            <a href="<?php echo base_url('documents/view?scope=linked'); ?>" class="list-group-item list-group-item-action d-flex align-items-center gap-2 <?php echo $scope === 'linked' ? 'active' : ''; ?>">
+                                <i class="ti ti-link"></i><span class="flex-fill"><?php echo e(documents_lang('linked_files')); ?></span><span class="badge bg-green-lt"><?php echo $stats['linked_files']; ?></span>
+                            </a>
+                        </div>
+                        <?php if ($documentTypes !== []): ?>
+                            <div class="card-body border-top py-3">
+                                <div class="text-secondary text-uppercase small fw-bold mb-2"><?php echo e(documents_lang('document_types')); ?></div>
+                                <div class="nav nav-pills flex-column">
+                                    <?php foreach ($documentTypes as $type): ?>
+                                        <a href="<?php echo e(base_url('documents/view?document_type=' . rawurlencode((string) $type))); ?>" class="nav-link d-flex align-items-center gap-2 <?php echo $documentType === (string) $type ? 'active' : ''; ?>">
+                                            <i class="ti ti-folder"></i><span class="text-truncate"><?php echo e((string) $type); ?></span>
+                                        </a>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </aside>
+
+                <section class="document-explorer__workspace">
             <div class="document-toolbar mb-3">
                 <form method="get" action="<?php echo base_url('documents/view'); ?>" class="document-filter-form">
                     <div class="input-icon document-search">
@@ -244,6 +284,7 @@ $showingText = str_replace(
                     </select>
                     <input type="number" name="entity_id" class="form-control document-entity-id" min="1" value="<?php echo $entityId > 0 ? $entityId : ''; ?>" placeholder="Entity ID">
                     <input type="hidden" name="per_page" value="<?php echo $perPage; ?>">
+                    <?php if ($scope !== 'all'): ?><input type="hidden" name="scope" value="<?php echo e($scope); ?>"><?php endif; ?>
                     <button type="submit" class="btn btn-outline-primary"><i class="ti ti-filter"></i></button>
                     <a href="<?php echo base_url('documents/view'); ?>" class="btn btn-icon btn-outline-secondary" title="<?php echo e(documents_lang('clear')); ?>"><i class="ti ti-x"></i></a>
                 </form>
@@ -283,7 +324,22 @@ $showingText = str_replace(
                         $downloadUrl = base_url('documents/actions/download/' . $documentId);
                         $deleteFormId = 'document-delete-' . $documentId;
                         ?>
-                        <article class="document-item" data-document-item data-document-id="<?php echo $documentId; ?>" data-download-url="<?php echo e($downloadUrl); ?>">
+                        <article
+                            class="document-item"
+                            tabindex="0"
+                            data-document-item
+                            data-document-id="<?php echo $documentId; ?>"
+                            data-download-url="<?php echo e($downloadUrl); ?>"
+                            data-document-name="<?php echo e((string) ($document['original_name'] ?? '')); ?>"
+                            data-document-type="<?php echo e((string) ($document['document_type'] ?? '')); ?>"
+                            data-document-mime="<?php echo e((string) ($document['mime_type'] ?? '')); ?>"
+                            data-document-size="<?php echo e(documents_format_size((int) ($document['file_size'] ?? 0))); ?>"
+                            data-document-date="<?php echo e(kirpi_format_datetime((string) ($document['created_at'] ?? ''))); ?>"
+                            data-document-owner="<?php echo e((string) ($document['uploaded_by_name'] ?? '-')); ?>"
+                            data-document-links="<?php echo e((string) ($document['entity_links'] ?? '-')); ?>"
+                            data-document-icon="<?php echo e($presentation['icon']); ?>"
+                            data-document-tone="<?php echo e($presentation['tone']); ?>"
+                        >
                             <label class="document-select"><input type="checkbox" class="form-check-input" data-document-select value="<?php echo $documentId; ?>"><span class="visually-hidden"><?php echo e(documents_lang('select_files')); ?></span></label>
                             <div class="document-item__visual bg-<?php echo e($presentation['tone']); ?>-lt"><i class="ti <?php echo e($presentation['icon']); ?>"></i><span><?php echo e($presentation['label']); ?></span></div>
                             <div class="document-item__body">
@@ -326,6 +382,36 @@ $showingText = str_replace(
                         <a class="btn btn-sm btn-outline-secondary <?php echo $page >= $totalPages ? 'disabled' : ''; ?>" href="<?php echo e($pageUrl(min($totalPages, $page + 1))); ?>"><?php echo e(documents_lang('next')); ?><i class="ti ti-chevron-right"></i></a>
                     </div>
                 </div>
+            </div>
+                </section>
+
+                <aside class="document-explorer__details">
+                    <div class="card sticky-top" data-document-inspector>
+                        <div class="card-header"><h3 class="card-title"><?php echo e(documents_lang('file_details')); ?></h3></div>
+                        <div class="card-body text-center" data-document-inspector-empty>
+                            <span class="avatar avatar-xl bg-secondary-lt mb-3"><i class="ti ti-file-search fs-1"></i></span>
+                            <div class="fw-medium"><?php echo e(documents_lang('select_file')); ?></div>
+                            <div class="text-secondary small mt-1"><?php echo e(documents_lang('select_file_hint')); ?></div>
+                        </div>
+                        <div data-document-inspector-content hidden>
+                            <div class="card-body text-center border-bottom">
+                                <span class="avatar avatar-xl mb-3" data-document-inspector-avatar><i class="ti ti-file fs-1"></i></span>
+                                <div class="fw-semibold text-break" data-document-inspector-name></div>
+                                <div class="text-secondary small mt-1" data-document-inspector-mime></div>
+                            </div>
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item"><div class="text-secondary small"><?php echo e(documents_lang('document_type')); ?></div><div data-document-inspector-type></div></div>
+                                <div class="list-group-item"><div class="text-secondary small"><?php echo e(documents_lang('file_size')); ?></div><div data-document-inspector-size></div></div>
+                                <div class="list-group-item"><div class="text-secondary small"><?php echo e(documents_lang('uploaded_by')); ?></div><div data-document-inspector-owner></div></div>
+                                <div class="list-group-item"><div class="text-secondary small"><?php echo e(documents_lang('created_at')); ?></div><div data-document-inspector-date></div></div>
+                                <div class="list-group-item"><div class="text-secondary small"><?php echo e(documents_lang('entity_links')); ?></div><div class="text-break" data-document-inspector-links></div></div>
+                            </div>
+                            <div class="card-footer">
+                                <a href="#" class="btn btn-primary w-100" data-document-inspector-download><i class="ti ti-download"></i><?php echo e(documents_lang('download')); ?></a>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
             </div>
         <?php endif; ?>
     </div>

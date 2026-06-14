@@ -1,6 +1,63 @@
 (function () {
     "use strict";
 
+    const manager = document.querySelector("[data-document-manager]");
+    const inspector = manager?.querySelector("[data-document-inspector]");
+    const items = Array.from(manager?.querySelectorAll("[data-document-item]") || []);
+
+    const showDocumentDetails = (item) => {
+        if (!inspector || !item) {
+            return;
+        }
+
+        items.forEach((candidate) => candidate.classList.toggle("is-active", candidate === item));
+        inspector.querySelector("[data-document-inspector-empty]")?.setAttribute("hidden", "hidden");
+        inspector.querySelector("[data-document-inspector-content]")?.removeAttribute("hidden");
+
+        const values = {
+            name: item.dataset.documentName || "-",
+            mime: item.dataset.documentMime || "-",
+            type: item.dataset.documentType || "-",
+            size: item.dataset.documentSize || "-",
+            owner: item.dataset.documentOwner || "-",
+            date: item.dataset.documentDate || "-",
+            links: item.dataset.documentLinks || "-"
+        };
+
+        Object.entries(values).forEach(([key, value]) => {
+            const target = inspector.querySelector(`[data-document-inspector-${key}]`);
+            if (target) {
+                target.textContent = value;
+            }
+        });
+
+        const avatar = inspector.querySelector("[data-document-inspector-avatar]");
+        if (avatar) {
+            avatar.className = `avatar avatar-xl mb-3 bg-${item.dataset.documentTone || "secondary"}-lt`;
+            avatar.innerHTML = `<i class="ti ${item.dataset.documentIcon || "ti-file"} fs-1"></i>`;
+        }
+
+        const download = inspector.querySelector("[data-document-inspector-download]");
+        if (download) {
+            download.href = item.dataset.downloadUrl || "#";
+        }
+    };
+
+    items.forEach((item) => {
+        item.addEventListener("click", (event) => {
+            if (event.target.closest("a, button, input, label, form")) {
+                return;
+            }
+            showDocumentDetails(item);
+        });
+        item.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                showDocumentDetails(item);
+            }
+        });
+    });
+
     const form = document.querySelector("[data-document-filepond-form]");
     const input = form?.querySelector("[data-document-filepond]");
 

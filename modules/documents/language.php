@@ -81,6 +81,12 @@ function documents_lang(string $key, ?string $default = null): string
             'close' => 'Kapat',
             'files_ready' => '{count} dosya yüklemeye hazır.',
             'files_uploaded' => '{count} dosya başarıyla yüklendi.',
+            'collections' => 'Koleksiyonlar',
+            'all_files' => 'Tüm Dosyalar',
+            'document_types' => 'Belge Türleri',
+            'file_details' => 'Dosya Ayrıntıları',
+            'select_file' => 'Bir dosya seçin',
+            'select_file_hint' => 'Ayrıntıları görüntülemek için çalışma alanındaki bir dosyaya tıklayın.',
         ],
         'en' => [
             'documents' => 'Documents',
@@ -157,6 +163,12 @@ function documents_lang(string $key, ?string $default = null): string
             'close' => 'Close',
             'files_ready' => '{count} files ready to upload.',
             'files_uploaded' => '{count} files uploaded successfully.',
+            'collections' => 'Collections',
+            'all_files' => 'All Files',
+            'document_types' => 'Document Types',
+            'file_details' => 'File Details',
+            'select_file' => 'Select a file',
+            'select_file_hint' => 'Click a file in the workspace to inspect its details.',
         ],
     ];
 

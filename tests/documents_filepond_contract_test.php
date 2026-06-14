@@ -21,6 +21,14 @@ $assertions = [
     'server keeps the standard storage path' => str_contains($upload, 'document_store_upload($file, $documentType)'),
     'FilePond uploads remain audited' => str_contains($upload, "kirpi_audit_log('document_upload'"),
     'FilePond requests avoid notification storms' => str_contains($upload, 'if (!$isFilePondUpload)'),
+    'explorer has collection workspace and inspector regions' => str_contains($view, 'document-explorer__sidebar')
+        && str_contains($view, 'document-explorer__workspace')
+        && str_contains($view, 'data-document-inspector'),
+    'document cards expose inspector metadata' => str_contains($view, 'data-document-name=')
+        && str_contains($view, 'data-document-mime=')
+        && str_contains($view, 'data-document-owner='),
+    'inspector interaction is keyboard accessible' => str_contains($view, 'tabindex="0"')
+        && str_contains($script, 'event.key === "Enter"'),
 ];
 
 $failed = [];
