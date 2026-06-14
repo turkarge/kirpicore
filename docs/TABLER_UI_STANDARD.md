@@ -23,3 +23,10 @@ Navbar, bu standarda geçen ilk Core bölümüdür:
 - "Tüm bildirimleri gör" aksiyonu card footer içinde düz bağlantıdır.
 
 Sonraki ekran geçişlerinde aynı yaklaşım uygulanacak ve mevcut özel CSS yalnızca davranış veya yerleşim için gerekli olduğu kanıtlanırsa korunacaktır.
+
+## Ortak UI Temeli
+
+- Uygulama arka planı doğrudan `--tblr-body-bg` kullanır.
+- Kart, modal ve secondary text için global Kirpi görünüm override'ı uygulanmaz.
+- Eski `--kirpi-*` değişkenleri geçiş süresince yalnızca Tabler tokenlarına işaret eden uyumluluk alias'larıdır.
+- Light ve dark renk değerleri ayrı bir Kirpi paletinde tanımlanmaz; Tabler'ın `data-bs-theme` tokenları esas alınır.
