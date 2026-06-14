@@ -62,8 +62,9 @@ function auth_lang(string $key, ?string $default = null): string
 
                 // Oturum Kilidi (Lock)
                 'lock_title' => 'Oturum Kilidi',
-                'lock_info' => 'Oturum kilitlendi. Devam etmek için key girin.',
-                'lock_key_label' => 'Key (4 haneli)',
+                'lock_info' => 'Devam etmek için 4 haneli PIN kodunuzu girin.',
+                'lock_key_label' => '4 haneli PIN',
+                'lock_pin_digit' => 'PIN hanesi :digit',
                 'unlock_button' => 'Kilidi Aç',
                 'nav_lock_session' => 'Oturumu Kilitle',
                 'nav_logout' => 'Cikis',
@@ -108,8 +109,9 @@ function auth_lang(string $key, ?string $default = null): string
                 'terms_accept_link' => 'the terms of use',
                 'terms_accept_suffix' => '.',
                 'lock_title' => 'Session Lock',
-                'lock_info' => 'Session is locked. Enter your key to continue.',
-                'lock_key_label' => 'Key (4 digits)',
+                'lock_info' => 'Enter your 4-digit PIN to continue.',
+                'lock_key_label' => '4-digit PIN',
+                'lock_pin_digit' => 'PIN digit :digit',
                 'unlock_button' => 'Unlock',
                 'nav_lock_session' => 'Lock Session',
                 'nav_logout' => 'Logout',

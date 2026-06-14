@@ -32,8 +32,22 @@ $avatarUrl = !empty($user['avatar'])
     <link href="<?php echo asset_url('css/tabler-icons.min.css'); ?>" rel="stylesheet">
     <link href="<?php echo asset_url('css/app.css'); ?>" rel="stylesheet">
     <link href="<?php echo asset_url('css/toastr.min.css'); ?>" rel="stylesheet">
+    <script>
+    (function () {
+        try {
+            const preference = localStorage.getItem('kirpi_theme_preference') || 'system';
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = preference === 'system' ? (prefersDark ? 'dark' : 'light') : preference;
+            document.documentElement.setAttribute('data-bs-theme', theme);
+            document.documentElement.setAttribute('data-kirpi-theme', theme);
+        } catch (error) {
+            document.documentElement.setAttribute('data-bs-theme', 'light');
+            document.documentElement.setAttribute('data-kirpi-theme', 'light');
+        }
+    })();
+    </script>
 </head>
-<body class="d-flex flex-column">
+<body class="kirpi-lock-page">
 <script>
 window.KIRPI_CONFIG = {
     baseUrl: "<?php echo e(BASE_URL); ?>",
@@ -41,61 +55,70 @@ window.KIRPI_CONFIG = {
 };
 </script>
 
-<div class="page page-center">
-    <div class="container container-tight py-4">
-        <div class="text-center mb-4">
-            <?php if ($avatarUrl): ?>
-                <span class="avatar avatar-xl mb-3" style="background-image: url('<?php echo e($avatarUrl); ?>')"></span>
-            <?php else: ?>
-                <span class="avatar avatar-xl mb-3"><?php echo e($initial); ?></span>
-            <?php endif; ?>
-            <h2 class="mb-1"><?php echo e($userName); ?></h2>
+<main class="kirpi-lock-shell">
+    <section class="kirpi-lock-panel" aria-labelledby="lock-screen-title">
+        <div class="kirpi-lock-identity">
+            <div class="kirpi-lock-avatar-wrap">
+                <?php if ($avatarUrl): ?>
+                    <span class="avatar avatar-xl kirpi-lock-avatar" style="background-image: url('<?php echo e($avatarUrl); ?>')"></span>
+                <?php else: ?>
+                    <span class="avatar avatar-xl kirpi-lock-avatar"><?php echo e($initial); ?></span>
+                <?php endif; ?>
+                <span class="kirpi-lock-indicator" aria-hidden="true">
+                    <i class="ti ti-lock"></i>
+                </span>
+            </div>
+
+            <h1 id="lock-screen-title" class="h2 mb-1"><?php echo e($userName); ?></h1>
             <?php if ($userRole !== ''): ?>
                 <div class="text-secondary mb-2"><?php echo e($userRole); ?></div>
             <?php endif; ?>
-            <div class="text-secondary"><?php echo e(auth_lang('lock_info')); ?></div>
+            <p class="text-secondary mb-0"><?php echo e(auth_lang('lock_info')); ?></p>
         </div>
 
-        <div class="card card-md">
-            <div class="card-body">
-                <form action="<?php echo base_url('auth/actions/unlock'); ?>" method="post" data-ajax="true">
-                    <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+        <form id="lock-pin-form" class="kirpi-lock-form" action="<?php echo base_url('auth/actions/unlock'); ?>" method="post" data-ajax="true" autocomplete="off">
+            <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+            <input type="hidden" name="lock_pin" data-lock-pin-value>
 
-                    <div class="mb-3">
-                        <label class="form-label form-required"><?php echo e(auth_lang('lock_key_label')); ?></label>
+            <fieldset class="border-0 p-0 m-0">
+                <legend class="visually-hidden"><?php echo e(auth_lang('lock_key_label')); ?></legend>
+                <div class="kirpi-pin-inputs" data-lock-pin-inputs>
+                    <?php for ($digit = 1; $digit <= 4; $digit++): ?>
                         <input
                             type="password"
-                            name="lock_pin"
-                            class="form-control"
+                            class="form-control kirpi-pin-input"
                             inputmode="numeric"
-                            pattern="[0-9]{4}"
-                            minlength="4"
-                            maxlength="4"
-                            placeholder="0000"
-                            autocomplete="off"
-                            required
+                            pattern="[0-9]"
+                            maxlength="1"
+                            autocomplete="one-time-code"
+                            aria-label="<?php echo e(str_replace(':digit', (string) $digit, auth_lang('lock_pin_digit'))); ?>"
+                            data-lock-pin-digit
+                            <?php echo $digit === 1 ? 'autofocus' : ''; ?>
                         >
-                    </div>
+                    <?php endfor; ?>
+                </div>
+            </fieldset>
 
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary"><?php echo e(auth_lang('unlock_button')); ?></button>
-                    </div>
-                </form>
+            <div class="kirpi-lock-progress text-secondary" aria-live="polite" data-lock-pin-status></div>
+            <button type="submit" class="visually-hidden" tabindex="-1"><?php echo e(auth_lang('unlock_button')); ?></button>
+        </form>
 
-                <form action="<?php echo base_url('auth/actions/logout'); ?>" method="post" data-ajax="true" class="mt-3">
-                    <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
-                    <button type="submit" class="btn btn-outline-secondary w-100"><?php echo e(auth_lang('login_other_account')); ?></button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+        <form action="<?php echo base_url('auth/actions/logout'); ?>" method="post" data-ajax="true" class="mt-4">
+            <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+            <button type="submit" class="btn btn-link link-secondary text-decoration-none px-2">
+                <i class="ti ti-user-switch me-1"></i>
+                <?php echo e(auth_lang('login_other_account')); ?>
+            </button>
+        </form>
+    </section>
+</main>
 
 <script src="<?php echo asset_url('js/jquery-3.7.1.min.js'); ?>"></script>
 <script src="<?php echo asset_url('js/bootstrap.bundle.min.js'); ?>"></script>
 <script src="<?php echo asset_url('js/tabler.min.js'); ?>"></script>
 <script src="<?php echo asset_url('js/toastr.min.js'); ?>"></script>
 <script src="<?php echo asset_url('js/app.js'); ?>"></script>
+<script src="<?php echo asset_url('js/lock-screen.js'); ?>"></script>
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "7356366510c54c86a154d277ed978201"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

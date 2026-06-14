@@ -9,6 +9,7 @@ Bu belge, Core geliştirme sırasını ve tamamlanan standartları izlemek için
 - Kullanıcı menüsünden tema seçimi: `light`, `dark`, `system`.
 - Kullanıcı menüsünden görünüm seçimi: geniş/dar layout tercihi.
 - Login ekranında tema seçimi.
+- Kilit ekranı dört haneli, otomatik ilerleyen ve tamamlandığında otomatik doğrulanan modern PIN akışına geçirildi.
 - Tema varlıkları ve kullanıcı tercihleri kalıcı hale getirildi.
 - Menü üretimi `module.json > menu` standardına bağlandı.
 - Content menü grubu Türkçeleştirildi.
