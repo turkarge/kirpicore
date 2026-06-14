@@ -215,9 +215,7 @@ $statusBadge = static function (string $status): string {
             <div class="card-header">
                 <h3 class="card-title"><?php echo e(health_lang('system_matrix')); ?></h3>
                 <div class="card-actions">
-                    <span class="text-secondary me-2"><?php echo e(health_lang('last_check')); ?>: <?php echo e($now); ?></span>
-                    <a href="<?php echo base_url('health/actions/export?format=csv'); ?>" class="btn btn-outline-secondary"><?php echo e(health_lang('export_csv')); ?></a>
-                    <a href="<?php echo base_url('health/actions/export?format=xls'); ?>" class="btn btn-outline-secondary"><?php echo e(health_lang('export_excel')); ?></a>
+                    <span class="text-secondary"><?php echo e(health_lang('last_check')); ?>: <?php echo e($now); ?></span>
                 </div>
             </div>
             <div class="table-responsive">

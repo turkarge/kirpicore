@@ -118,7 +118,7 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
                                 <div class="tab-pane active show" id="tab-profile-info">
                 <?php endif; ?>
 
-                <div class="card <?php echo $isSuperAdmin ? 'border-0 shadow-none' : ''; ?>">
+                <div class="<?php echo $isSuperAdmin ? '' : 'card'; ?>">
                     <?php if (!$isSuperAdmin): ?>
                     <div class="card-header">
                         <h3 class="card-title"><?php echo e(profile_lang('profile_info')); ?></h3>
@@ -168,7 +168,7 @@ $lockEnabled = $lockSchemaReady && (int) ($profile['lock_enabled'] ?? 0) === 1;
                 <?php if ($isSuperAdmin): ?>
                                 </div>
                                 <div class="tab-pane" id="tab-profile-api-tokens">
-                                    <div class="card border-0 shadow-none">
+                                    <div>
                                         <div class="card-header">
                                             <h3 class="card-title"><?php echo e(profile_lang('api_token_management')); ?></h3>
                                         </div>

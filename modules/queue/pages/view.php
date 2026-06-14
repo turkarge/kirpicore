@@ -109,14 +109,6 @@ if ($queueReady) {
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title"><?php echo e(queue_lang('last_50_jobs')); ?></h3>
-                <div class="card-actions">
-                    <a href="<?php echo base_url('queue/actions/export?format=csv'); ?>" class="btn btn-outline-secondary">
-                        <?php echo e(queue_lang('export_csv')); ?>
-                    </a>
-                    <a href="<?php echo base_url('queue/actions/export?format=xls'); ?>" class="btn btn-outline-secondary">
-                        <?php echo e(queue_lang('export_excel')); ?>
-                    </a>
-                </div>
             </div>
             <div class="table-responsive">
                 <table data-kirpi-table="standard" data-table-title="Queue İşleri" class="table table-vcenter card-table table-striped">
