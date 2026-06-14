@@ -36,3 +36,9 @@ Sonraki ekran geçişlerinde aynı yaklaşım uygulanacak ve mevcut özel CSS ya
 - Profil sekmelerinde kart içinde kart kullanılmaz; tek dış kart ve native `nav-tabs` yapısı korunur.
 - `data-kirpi-table` kullanan ekranlarda ayrıca CSV/XLS buton takımı gösterilmez; arama, kolon, yenileme ve dışa aktarma tek tablo toolbar'ında sunulur.
 - Sistem Sağlığı, Queue, Güvenlik İzleme, Modül Yönetimi ve Menü Yönetimi ortak tablo standardına bağlıdır.
+
+## Auth Yüzeyleri
+
+- Login bölünmüş yerleşimi ürün deneyimi olarak korunur; form ve boş görsel yüzeyleri Tabler tema tokenlarını kullanır.
+- Tema seçim butonlarının active durumu özel renk CSS'iyle yeniden çizilmez.
+- Login, şifre yenileme ve kilit ekranı aynı `data-bs-theme` tercihini uygular.
