@@ -351,3 +351,11 @@ Tamamlanan son durum:
    - Ortak PHP istek, sıralama, parametre bağlama ve JSON response yardımcıları `core/kirpi_table.php` içinde standardize edildi.
    - Statik sözleşme ve gerçek MySQL endpoint smoke testleri eklendi.
    - Geliştirici standardı `docs/KIRPI_TABLE.md` içinde belgelendi.
+
+5. **Documents v2.1 profesyonel dosya yöneticisi** - Tamamlandı
+   - FilePond 4.32.12 ve dosya türü/boyutu doğrulama eklentileri yerel vendor asset olarak eklendi.
+   - Çoklu dosya yükleme; dosya bazında ilerleme, iptal, yeniden deneme ve paralel yükleme desteğine geçirildi.
+   - Mevcut Documents storage, permission, CSRF, MIME, boyut ve audit zinciri korundu.
+   - Sayfa; koleksiyon gezgini, merkezi grid/liste çalışma alanı ve dosya ayrıntı paneli olarak yeniden düzenlendi.
+   - Son 30 gün, bağlantılı dosyalar ve belge türü koleksiyonları gerçek sorgu filtrelerine bağlandı.
+   - Geliştirici ve güvenlik standardı `docs/DOCUMENTS_FILE_MANAGER.md` içinde belgelendi.

@@ -63,8 +63,14 @@ Notlar: `Kullanıcı aramasındaki native prepared statement parametre çakışm
 - `[x] CNT-07` Test belgesi yükleniyor, indiriliyor ve doğru entity bilgisiyle listeleniyor.
 - `[x] CNT-08` Test belgesi silme onayı ve silme işlemi çalışıyor.
 - `[x] CNT-09` Documents CSV/XLS export mevcut filtreleri koruyor.
+- `[ ] CNT-10` FilePond modalında çoklu dosya seçme, sürükle-bırak, dosya kaldırma ve toplu yükleme çalışıyor.
+- `[ ] CNT-11` Geçersiz dosya türü ve limit üstü dosya istemci tarafında reddediliyor; sunucu doğrulaması bypass edilemiyor.
+- `[ ] CNT-12` FilePond ilerleme, iptal, yeniden deneme ve başarısız dosya durumları doğru gösteriliyor.
+- `[ ] CNT-13` Koleksiyonlar, Son 30 Gün, Bağlantılı Dosyalar ve belge türü filtreleri doğru sonuçları getiriyor.
+- `[ ] CNT-14` Grid/liste görünümü korunuyor; dosya seçimi sağ ayrıntı panelini doğru bilgilerle dolduruyor.
+- `[ ] CNT-15` Light/Dark tema, masaüstü ve mobil Documents görünümü okunabilir ve taşmasız.
 
-Notlar: `Documents v2.0.0 çoklu yükleme, indirme, silme ve dosya yöneticisi akışlarıyla doğrulandı.`
+Notlar: `Documents v2.0.0 temel akışları doğrulandı. v2.1.0 FilePond ve explorer yenilemesi için CNT-10..15 canlı test bekliyor.`
 
 ## 4. İletişim
 

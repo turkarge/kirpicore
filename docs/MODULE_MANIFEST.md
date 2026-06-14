@@ -188,6 +188,11 @@ Dosya/ek yönetimi gereken modüller Documents Registry ile çalışmalıdır:
 - Dosya saklama modül içinde dağınık yapılmamalıdır.
 - Entity bağlantıları `document_links` üzerinden kurulmalıdır.
 - Belge tipi teknik anahtarı kısa ve stabil olmalıdır (`attachment`, `report`, `user_document` gibi).
+- Kullanıcı yüklemeleri FilePond arayüzü üzerinden yapılır; dosya saklama ve doğrulama yine Documents backend'i tarafından yürütülür.
+- Yeni modüller bağımsız dosya yöneticisi veya doğrudan `uploads/` yazma mekanizması eklememelidir.
+- MIME, dosya boyutu, CSRF, permission ve audit kontrolleri istemci tarafına bırakılamaz.
+
+Ayrıntılı entegrasyon sözleşmesi: `docs/DOCUMENTS_FILE_MANAGER.md`
 
 ## AI Schema Standardı
 

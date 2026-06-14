@@ -2,7 +2,7 @@
   "key": "documents",
   "name": "Documents",
   "description": "Belge ve ek yönetimi",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "enabled": true,
   "core": false,
   "load_order": 44,

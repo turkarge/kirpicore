@@ -6,6 +6,7 @@ $script = file_get_contents($root . '/modules/documents/scripts/view.js');
 $upload = file_get_contents($root . '/modules/documents/actions/upload.php');
 $header = file_get_contents($root . '/layouts/header.php');
 $footer = file_get_contents($root . '/layouts/footer.php');
+$manifest = file_get_contents($root . '/modules/documents/module.json');
 
 $assertions = [
     'FilePond input is present' => str_contains($view, 'data-document-filepond'),
@@ -29,6 +30,7 @@ $assertions = [
         && str_contains($view, 'data-document-owner='),
     'inspector interaction is keyboard accessible' => str_contains($view, 'tabindex="0"')
         && str_contains($script, 'event.key === "Enter"'),
+    'Documents manifest exposes the new file manager version' => str_contains($manifest, '"version": "2.1.0"'),
 ];
 
 $failed = [];
