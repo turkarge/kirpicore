@@ -110,10 +110,17 @@ window.KIRPI_CONFIG = {
                             autocomplete="current-password"
                             required
                         >
-                        <span class="input-group-text">
-                            <a href="#" class="link-secondary" id="toggle-login-password" tabindex="-1" aria-label="<?php echo e(auth_lang('show_password')); ?>">
-                                <i class="ti ti-eye"></i>
-                            </a>
+                        <span class="input-group-text p-0 pe-2">
+                            <button
+                                type="button"
+                                class="btn btn-icon border-0 bg-transparent shadow-none auth-password-toggle"
+                                id="toggle-login-password"
+                                aria-label="<?php echo e(auth_lang('show_password')); ?>"
+                                aria-controls="login-password"
+                                aria-pressed="false"
+                            >
+                                <i class="ti ti-eye" aria-hidden="true"></i>
+                            </button>
                         </span>
                     </div>
                 </div>

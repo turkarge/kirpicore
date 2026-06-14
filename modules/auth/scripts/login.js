@@ -11,10 +11,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const isPassword = passwordInput.getAttribute("type") === "password";
       passwordInput.setAttribute("type", isPassword ? "text" : "password");
+      this.setAttribute("aria-pressed", isPassword ? "true" : "false");
 
       this.innerHTML = isPassword
-        ? '<i class="ti ti-eye-off"></i>'
-        : '<i class="ti ti-eye"></i>';
+        ? '<i class="ti ti-eye-off" aria-hidden="true"></i>'
+        : '<i class="ti ti-eye" aria-hidden="true"></i>';
     });
   }
 

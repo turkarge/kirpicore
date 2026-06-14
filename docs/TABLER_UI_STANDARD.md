@@ -42,3 +42,5 @@ Sonraki ekran geçişlerinde aynı yaklaşım uygulanacak ve mevcut özel CSS ya
 - Login bölünmüş yerleşimi ürün deneyimi olarak korunur; form ve boş görsel yüzeyleri Tabler tema tokenlarını kullanır.
 - Tema seçim butonlarının active durumu özel renk CSS'iyle yeniden çizilmez.
 - Login, şifre yenileme ve kilit ekranı aynı `data-bs-theme` tercihini uygular.
+- Genel metin linkleri light/dark temada çevresindeki metin rengini devralır ve hover sırasında altı çizilmez; özel renk yalnızca açıkça `text-*` veya `link-*` sınıfı verilen semantik bağlantılarda kullanılır.
+- Parola görünürlüğü bağlantı değil, erişilebilir `button` tabanlı icon control olarak uygulanır.

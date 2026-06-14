@@ -18,6 +18,22 @@ body {
     background-color: var(--tblr-body-bg);
 }
 
+a,
+a:hover,
+a:focus {
+    text-decoration: none;
+}
+
+a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.badge):not([class*="text-"]):not([class*="link-"]) {
+    color: inherit;
+}
+
+a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.badge):not([class*="text-"]):not([class*="link-"]):hover,
+a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.badge):not([class*="text-"]):not([class*="link-"]):focus {
+    color: inherit;
+    opacity: .8;
+}
+
 .page {
     min-height: 100vh;
 }
@@ -71,6 +87,16 @@ body {
     display: inline-block;
     width: auto;
     height: 28px;
+}
+
+.auth-password-toggle {
+    color: var(--tblr-secondary-color);
+}
+
+.auth-password-toggle:hover,
+.auth-password-toggle:focus-visible {
+    color: var(--tblr-body-color);
+    background: transparent;
 }
 
 :root[data-kirpi-theme="dark"] .kirpi-auth-logo {
