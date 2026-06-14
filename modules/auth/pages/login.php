@@ -62,7 +62,7 @@ window.KIRPI_CONFIG = {
         <div class="auth-cover__form-wrap">
             <div class="text-center text-lg-start mb-4">
                 <h1 class="navbar-brand navbar-brand-autodark mb-0 d-inline-flex align-items-center gap-2">
-                    <img src="<?php echo asset_url('img/logo.svg'); ?>" alt="<?php echo e(app_name()); ?>" class="kirpi-brand-logo">
+                    <img src="<?php echo asset_url('img/logo.svg'); ?>" alt="<?php echo e(app_name()); ?>" class="kirpi-auth-logo">
                     <span><?php echo e(app_name()); ?></span>
                 </h1>
             </div>

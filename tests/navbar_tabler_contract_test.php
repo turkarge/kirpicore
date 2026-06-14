@@ -23,6 +23,13 @@ $assertions = [
         && str_contains($nav, 'class="list-group-item-actions js-notification-mark-read"'),
     'read hover has no custom background' => str_contains($css, '.js-notification-mark-read:hover i')
         && !str_contains($css, '.js-notification-mark-read:hover {'),
+    'notification item keeps text color' => str_contains($css, '.js-notification-open:hover')
+        && str_contains($css, 'text-decoration: none;'),
+    'available lock icon' => str_contains($nav, 'ti ti-lock fs-2')
+        && !str_contains($nav, 'ti ti-user-key'),
+    'single nested menu caret' => !str_contains($nav, 'ti ti-chevron-right opacity-75'),
+    'auth logo has scoped size' => str_contains($css, '.kirpi-auth-logo')
+        && str_contains($css, 'height: 28px;'),
 ];
 
 $failed = array_keys(array_filter($assertions, static fn (bool $passed): bool => !$passed));

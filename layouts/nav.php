@@ -187,7 +187,7 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                                 class="nav-link px-0 border-0 bg-transparent"
                                 title="<?php echo e($navLockAction); ?>"
                                 aria-label="<?php echo e($navLockAction); ?>">
-                                <i class="ti ti-user-key fs-2"></i>
+                                <i class="ti ti-lock fs-2"></i>
                             </button>
                         </form>
                     </div>
@@ -306,10 +306,7 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                                                     data-bs-toggle="dropdown"
                                                     data-bs-auto-close="outside"
                                                     aria-expanded="false">
-                                                    <span class="d-flex align-items-center justify-content-between w-100">
-                                                        <span><?php echo e($child['title']); ?></span>
-                                                        <i class="ti ti-chevron-right opacity-75"></i>
-                                                    </span>
+                                                    <?php echo e($child['title']); ?>
                                                 </a>
                                                 <div class="dropdown-menu">
                                                     <?php foreach ($child['children'] as $subChild): ?>
