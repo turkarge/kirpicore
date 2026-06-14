@@ -784,7 +784,7 @@
                 if (next > 0) {
                     if (!existingDot) {
                         const dot = document.createElement("span");
-                        dot.className = "badge bg-red badge-notification badge-pill position-absolute top-0 start-100 translate-middle js-notification-dot js-notification-count";
+                        dot.className = "badge badge-sm bg-red text-red-fg position-absolute top-0 start-100 translate-middle js-notification-dot js-notification-count";
                         bell.appendChild(dot);
                     }
                     const countBadge = bell.querySelector(".js-notification-count");
@@ -794,11 +794,6 @@
                 } else if (existingDot) {
                     existingDot.remove();
                 }
-            });
-
-            document.querySelectorAll(".js-notification-summary").forEach((summary) => {
-                const label = summary.dataset.unreadLabel || "okunmamış bildirim";
-                summary.textContent = `${next} ${label}`;
             });
 
             document.querySelectorAll(".js-notification-mark-all").forEach((button) => {
@@ -909,7 +904,11 @@
             if (!item) return;
             item.dataset.isUnread = "0";
             item.classList.remove("is-unread");
-            item.querySelector(".js-notification-item-dot")?.remove();
+            const dot = item.querySelector(".js-notification-item-dot");
+            if (dot) {
+                dot.classList.remove("status-dot-animated", "bg-red");
+                dot.classList.add("bg-secondary");
+            }
             item.querySelector(".js-notification-mark-read")?.remove();
         },
 

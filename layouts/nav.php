@@ -26,7 +26,6 @@ $navNotificationsEmpty = notifications_lang('nav_empty', 'No notifications');
 $navViewAllNotifications = notifications_lang('nav_view_all', 'View all notifications');
 $navMarkNotificationRead = notifications_lang('nav_mark_read', 'Mark as read');
 $navMarkAllNotificationsRead = notifications_lang('nav_mark_all_read', 'Mark all as read');
-$navUnreadCountLabel = notifications_lang('nav_unread_count', 'unread notifications');
 $navOpenNotification = notifications_lang('nav_open_notification', 'Open notification');
 $navProfileLabel = profile_lang('profile', 'Profile');
 $navUserMenuAria = profile_lang('nav_user_menu', 'User Menu');
@@ -108,22 +107,14 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                             data-bs-toggle="dropdown" data-bs-auto-close="outside" tabindex="-1" aria-label="<?php echo e($navBellAria); ?>" aria-expanded="false">
                             <i class="ti ti-bell fs-2 kirpi-bell-icon"></i>
                             <?php if ($unreadNotificationsCount > 0): ?>
-                                <span class="badge bg-red badge-notification badge-pill position-absolute top-0 start-100 translate-middle js-notification-dot js-notification-count"><?php echo $unreadNotificationsCount > 99 ? '99+' : (int) $unreadNotificationsCount; ?></span>
+                                <span class="badge badge-sm bg-red text-red-fg position-absolute top-0 start-100 translate-middle js-notification-dot js-notification-count"><?php echo $unreadNotificationsCount > 99 ? '99+' : (int) $unreadNotificationsCount; ?></span>
                             <?php endif; ?>
                         </a>
 
                         <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card kirpi-notification-menu">
-                            <div class="card kirpi-notification-card">
-                                <div class="card-header kirpi-notification-header">
-                                    <div class="d-flex align-items-center gap-2 min-w-0">
-                                        <span class="kirpi-notification-header-icon"><i class="ti ti-bell"></i></span>
-                                        <div class="min-w-0">
-                                            <h3 class="card-title m-0"><?php echo e($navNotificationsTitle); ?></h3>
-                                            <div class="text-secondary small js-notification-summary" data-unread-label="<?php echo e($navUnreadCountLabel); ?>">
-                                                <?php echo (int) $unreadNotificationsCount; ?> <?php echo e($navUnreadCountLabel); ?>
-                                            </div>
-                                        </div>
-                                    </div>
+                            <div class="card">
+                                <div class="card-header d-flex align-items-center justify-content-between">
+                                    <h3 class="card-title m-0"><?php echo e($navNotificationsTitle); ?></h3>
                                     <button
                                         type="button"
                                         class="btn btn-sm btn-icon btn-ghost-secondary js-notification-mark-all <?php echo $unreadNotificationsCount > 0 ? '' : 'd-none'; ?>"
@@ -134,62 +125,53 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                                     </button>
                                 </div>
 
-                                <div class="kirpi-notification-list">
+                                <div class="list-group list-group-flush list-group-hoverable">
                                     <?php if (empty($recentNotifications)): ?>
-                                        <div class="kirpi-notification-empty">
-                                            <i class="ti ti-bell-off"></i>
-                                            <span><?php echo e($navNotificationsEmpty); ?></span>
+                                        <div class="list-group-item py-4 text-center text-secondary">
+                                            <?php echo e($navNotificationsEmpty); ?>
                                         </div>
                                     <?php else: ?>
                                         <?php foreach ($recentNotifications as $notification): ?>
                                             <?php
                                             $isUnread = empty($notification['read_at']);
-                                            $dateLabel = '';
-
-                                            if (!empty($notification['created_at'])) {
-                                                $dateLabel = kirpi_format_datetime((string) $notification['created_at'], 'long', '');
-                                            }
-                                            $sourceModule = trim((string) ($notification['source_module'] ?? ''));
                                             ?>
                                             <div
-                                                class="kirpi-notification-item js-notification-item <?php echo $isUnread ? 'is-unread' : ''; ?>"
+                                                class="list-group-item js-notification-item <?php echo $isUnread ? 'is-unread' : ''; ?>"
                                                 data-notification-id="<?php echo (int) ($notification['id'] ?? 0); ?>"
                                                 data-is-unread="<?php echo $isUnread ? '1' : '0'; ?>"
                                                 data-mark-read-url="<?php echo base_url('notifications/actions/mark-read'); ?>">
-                                                <span class="kirpi-notification-source">
-                                                    <i class="ti <?php echo $sourceModule === 'security' ? 'ti-shield-check' : ($sourceModule === 'backup' ? 'ti-database' : ($sourceModule === 'mail' ? 'ti-mail' : 'ti-bell')); ?>"></i>
-                                                </span>
-                                                <a
-                                                    href="<?php echo base_url('notifications/list'); ?>"
-                                                    class="kirpi-notification-content js-notification-open"
-                                                    aria-label="<?php echo e($navOpenNotification); ?>">
-                                                    <span class="kirpi-notification-title"><?php echo e($notification['title'] ?? $navNotificationsTitle); ?></span>
-                                                    <span class="kirpi-notification-message"><?php echo e($notification['message'] ?? ''); ?></span>
-                                                    <span class="kirpi-notification-meta">
-                                                        <?php if ($sourceModule !== ''): ?><span><?php echo e($sourceModule); ?></span><?php endif; ?>
-                                                        <?php if ($dateLabel !== ''): ?><time><?php echo e($dateLabel); ?></time><?php endif; ?>
-                                                    </span>
-                                                </a>
-                                                <?php if ($isUnread): ?>
-                                                    <button
-                                                        type="button"
-                                                        class="btn btn-sm btn-icon btn-ghost-secondary kirpi-notification-read js-notification-mark-read"
-                                                        title="<?php echo e($navMarkNotificationRead); ?>"
-                                                        aria-label="<?php echo e($navMarkNotificationRead); ?>">
-                                                        <i class="ti ti-check"></i>
-                                                    </button>
-                                                    <span class="kirpi-notification-unread-dot js-notification-item-dot" aria-hidden="true"></span>
-                                                <?php endif; ?>
+                                                <div class="row align-items-center g-2">
+                                                    <div class="col-auto">
+                                                        <span class="status-dot <?php echo $isUnread ? 'status-dot-animated bg-red' : 'bg-secondary'; ?> d-block js-notification-item-dot"></span>
+                                                    </div>
+                                                    <div class="col text-truncate">
+                                                        <a
+                                                            href="<?php echo base_url('notifications/list'); ?>"
+                                                            class="text-body d-block text-truncate js-notification-open"
+                                                            aria-label="<?php echo e($navOpenNotification); ?>">
+                                                            <?php echo e($notification['title'] ?? $navNotificationsTitle); ?>
+                                                        </a>
+                                                        <div class="d-block text-secondary text-truncate mt-n1"><?php echo e($notification['message'] ?? ''); ?></div>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <?php if ($isUnread): ?>
+                                                            <button
+                                                                type="button"
+                                                                class="list-group-item-actions btn btn-sm btn-icon btn-ghost-secondary js-notification-mark-read"
+                                                                title="<?php echo e($navMarkNotificationRead); ?>"
+                                                                aria-label="<?php echo e($navMarkNotificationRead); ?>">
+                                                                <i class="ti ti-check"></i>
+                                                            </button>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
                                             </div>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 </div>
 
-                                <div class="card-footer kirpi-notification-footer">
-                                    <a href="<?php echo base_url('notifications/list'); ?>" class="btn btn-sm btn-ghost-primary w-100">
-                                        <span><?php echo e($navViewAllNotifications); ?></span>
-                                        <i class="ti ti-arrow-right"></i>
-                                    </a>
+                                <div class="card-footer text-center">
+                                    <a href="<?php echo base_url('notifications/list'); ?>" class="btn btn-sm btn-ghost-secondary w-100"><?php echo e($navViewAllNotifications); ?></a>
                                 </div>
                             </div>
                         </div>

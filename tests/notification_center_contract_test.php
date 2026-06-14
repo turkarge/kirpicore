@@ -9,10 +9,14 @@ $markAllRead = file_get_contents($root . '/modules/notifications/actions/mark_al
 $css = file_get_contents($root . '/assets/css/app.css');
 
 $assertions = [
-    'numeric unread badge' => str_contains($nav, 'js-notification-count'),
+    'tabler numeric unread badge' => str_contains($nav, 'badge badge-sm bg-red text-red-fg')
+        && str_contains($nav, 'js-notification-count'),
     'single read control' => str_contains($nav, 'js-notification-mark-read'),
     'mark all control' => str_contains($nav, 'js-notification-mark-all'),
-    'notification summary' => str_contains($nav, 'js-notification-summary'),
+    'compact tabler list' => str_contains($nav, 'list-group list-group-flush list-group-hoverable')
+        && str_contains($nav, 'status-dot-animated bg-red'),
+    'no custom detail metadata' => !str_contains($nav, 'kirpi-notification-source')
+        && !str_contains($nav, 'kirpi-notification-meta'),
     'responsive shared dropdown' => str_contains($nav, 'nav-item dropdown d-flex me-3')
         && !str_contains($nav, 'nav-item d-md-none me-3'),
     'server unread count' => str_contains($markRead, "'unread_count' => \$unreadCount"),
@@ -21,8 +25,8 @@ $assertions = [
         && str_contains($app, 'js-notification-mark-all'),
     'list direct action' => str_contains($list, 'js-notification-read')
         && !str_contains($list, 'js-kirpi-row-menu'),
-    'theme aware notification styles' => str_contains($css, '.kirpi-notification-menu')
-        && str_contains($css, 'var(--kirpi-surface-strong)'),
+    'compact notification styles' => str_contains($css, '.kirpi-notification-menu')
+        && !str_contains($css, '.kirpi-notification-list'),
 ];
 
 $failed = array_keys(array_filter($assertions, static fn (bool $passed): bool => !$passed));
