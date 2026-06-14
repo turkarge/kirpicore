@@ -146,7 +146,7 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                                                     <div class="col text-truncate">
                                                         <a
                                                             href="<?php echo base_url('notifications/list'); ?>"
-                                                            class="text-body d-block text-truncate js-notification-open"
+                                                            class="text-reset text-decoration-none d-block text-truncate js-notification-open"
                                                             aria-label="<?php echo e($navOpenNotification); ?>">
                                                             <?php echo e($notification['title'] ?? $navNotificationsTitle); ?>
                                                         </a>
@@ -184,10 +184,14 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                             <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
                             <button
                                 type="submit"
-                                class="nav-link px-0 border-0 bg-transparent"
+                                class="nav-link px-0 border-0 bg-transparent text-reset"
                                 title="<?php echo e($navLockAction); ?>"
                                 aria-label="<?php echo e($navLockAction); ?>">
-                                <i class="ti ti-lock fs-2"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icons-tabler-outline icon-tabler-lock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M5 13m0 2a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z" />
+                                    <path d="M8 13v-4a4 4 0 0 1 8 0v4" />
+                                </svg>
                             </button>
                         </form>
                     </div>

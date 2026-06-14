@@ -23,9 +23,10 @@ $assertions = [
         && str_contains($nav, 'class="list-group-item-actions js-notification-mark-read"'),
     'read hover has no custom background' => str_contains($css, '.js-notification-mark-read:hover i')
         && !str_contains($css, '.js-notification-mark-read:hover {'),
-    'notification item keeps text color' => str_contains($css, '.js-notification-open:hover')
-        && str_contains($css, 'text-decoration: none;'),
-    'available lock icon' => str_contains($nav, 'ti ti-lock fs-2')
+    'notification item keeps text color' => str_contains($nav, 'text-reset text-decoration-none d-block text-truncate js-notification-open')
+        && !str_contains($nav, 'text-body d-block text-truncate js-notification-open'),
+    'official lock icon' => str_contains($nav, 'icon-tabler-lock')
+        && str_contains($nav, 'stroke="currentColor"')
         && !str_contains($nav, 'ti ti-user-key'),
     'single nested menu caret' => !str_contains($nav, 'ti ti-chevron-right opacity-75'),
     'auth logo has scoped size' => str_contains($css, '.kirpi-auth-logo')
