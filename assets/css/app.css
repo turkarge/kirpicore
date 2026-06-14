@@ -43,51 +43,23 @@ body {
     min-height: calc(100vh - 56px);
 }
 
-.navbar-brand {
-    font-size: 1rem;
-    font-weight: 700;
-}
-
-.kirpi-app-shell .navbar {
-    position: relative;
-    z-index: 1030;
-    background: color-mix(in srgb, var(--kirpi-surface-strong) 88%, transparent);
-    border-bottom: 1px solid var(--kirpi-border);
-    backdrop-filter: blur(16px);
-}
-
-.kirpi-app-shell .navbar .dropdown-menu {
-    z-index: 1050;
-}
-
 :root[data-kirpi-layout="fluid"] .container-xl {
     max-width: none;
 }
 
-.kirpi-app-shell .card,
-.kirpi-app-shell .dropdown-menu,
+.kirpi-app-shell .page-wrapper .card,
 .kirpi-app-shell .modal-content {
     border-color: var(--kirpi-border);
     box-shadow: var(--kirpi-shadow-soft);
 }
 
-.kirpi-app-shell .card {
+.kirpi-app-shell .page-wrapper .card {
     background: var(--kirpi-surface);
 }
 
 .kirpi-app-shell .page-header .page-pretitle,
-.kirpi-app-shell .text-secondary {
+.kirpi-app-shell .page-wrapper .text-secondary {
     color: var(--kirpi-muted) !important;
-}
-
-.kirpi-brand-logo {
-    height: 28px;
-    width: auto;
-    display: inline-block;
-}
-
-:root[data-kirpi-theme="dark"] .kirpi-brand-logo {
-    filter: invert(1);
 }
 
 .nav-link-icon {
@@ -122,30 +94,9 @@ body {
     cursor: pointer;
 }
 
-.kirpi-notification-menu {
-    width: min(380px, calc(100vw - 2rem));
-    min-width: 0;
-    padding: 0;
-    overflow: hidden;
-}
-
-.js-notification-count {
-    min-width: 1.25rem;
-    min-height: 1.25rem;
-    padding: .2rem .35rem;
-    font-size: .7rem;
-    line-height: .85rem;
-}
-
-@media (max-width: 575.98px) {
-    .kirpi-notification-menu {
-        position: fixed !important;
-        top: 3.75rem !important;
-        right: 1rem !important;
-        left: 1rem !important;
-        width: auto;
-        transform: none !important;
-    }
+.js-notification-mark-read:hover i,
+.js-notification-mark-read:focus i {
+    font-weight: 700;
 }
 
 .kirpi-sortable-th {
@@ -217,64 +168,6 @@ body {
     line-height: 1.55;
 }
 
-.navbar .dropdown-toggle::after {
-    display: none !important;
-}
-
-.mobile-nav-header {
-    color: var(--kirpi-text);
-}
-
-@media (max-width: 767.98px) {
-    #navbar-menu.show,
-    #navbar-menu.collapsing {
-        width: 100%;
-        margin-top: .5rem;
-        border-top: 1px solid var(--kirpi-border);
-        background: var(--kirpi-surface-strong);
-    }
-
-    #navbar-menu .navbar-nav {
-        padding: .5rem;
-    }
-
-    #navbar-menu .nav-link {
-        min-height: 2.75rem;
-        border-radius: 6px;
-    }
-
-    body.mobile-nav-open {
-        overflow-x: hidden;
-    }
-}
-
-.js-notification-dot {
-    width: 0.55rem;
-    height: 0.55rem;
-    min-width: 0.55rem;
-    min-height: 0.55rem;
-    padding: 0;
-    border-radius: 50%;
-    border: 2px solid #fff;
-}
-
-.kirpi-bell-has-unread .kirpi-bell-icon {
-    animation: kirpi-bell-ring 1.6s ease-in-out infinite;
-    transform-origin: top center;
-}
-
-@keyframes kirpi-bell-ring {
-    0% { transform: rotate(0deg); }
-    8% { transform: rotate(14deg); }
-    16% { transform: rotate(-12deg); }
-    24% { transform: rotate(10deg); }
-    32% { transform: rotate(-8deg); }
-    40% { transform: rotate(6deg); }
-    48% { transform: rotate(-4deg); }
-    56% { transform: rotate(2deg); }
-    64% { transform: rotate(0deg); }
-    100% { transform: rotate(0deg); }
-}
 
 .auth-cover-page {
     min-height: 100vh;

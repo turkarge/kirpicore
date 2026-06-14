@@ -85,44 +85,43 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
 
 <header class="navbar navbar-expand-md d-print-none">
     <div class="container-xl">
-        <button class="navbar-toggler js-mobile-nav-toggle" type="button"
+        <button class="navbar-toggler" type="button"
+            data-bs-toggle="collapse" data-bs-target="#navbar-menu"
             aria-controls="navbar-menu" aria-expanded="false" aria-label="<?php echo e($navToggleLabel); ?>">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-            <a href="<?php echo base_url(APP_DEFAULT_ROUTE); ?>" class="text-decoration-none text-reset d-inline-flex align-items-center gap-2">
-                <img src="<?php echo asset_url('img/logo.svg'); ?>" alt="<?php echo e(app_name()); ?>" class="kirpi-brand-logo">
-                <?php echo e(app_name()); ?>
-            </a>
-        </div>
+        <a href="<?php echo base_url(APP_DEFAULT_ROUTE); ?>" class="navbar-brand navbar-brand-autodark me-3">
+            <img src="<?php echo asset_url('img/logo.svg'); ?>" alt="<?php echo e(app_name()); ?>" class="navbar-brand-image me-2">
+            <?php echo e(app_name()); ?>
+        </a>
 
         <div class="navbar-nav flex-row order-md-last">
             <?php if ($user): ?>
                 <?php if (route_exists('notifications/list') && check_permission('notifications.view')): ?>
                     <div class="nav-item dropdown d-flex me-3">
                         <a href="#"
-                            class="nav-link px-0 position-relative js-notification-bell <?php echo $currentRoutePath === 'notifications/list' ? 'active' : ''; ?> <?php echo $unreadNotificationsCount > 0 ? 'kirpi-bell-has-unread' : ''; ?>"
+                            class="nav-link px-0 js-notification-bell <?php echo $currentRoutePath === 'notifications/list' ? 'active' : ''; ?>"
                             data-unread-count="<?php echo (int) $unreadNotificationsCount; ?>"
                             data-bs-toggle="dropdown" data-bs-auto-close="outside" tabindex="-1" aria-label="<?php echo e($navBellAria); ?>" aria-expanded="false">
                             <i class="ti ti-bell fs-2 kirpi-bell-icon"></i>
                             <?php if ($unreadNotificationsCount > 0): ?>
-                                <span class="badge badge-sm bg-red text-red-fg position-absolute top-0 start-100 translate-middle js-notification-dot js-notification-count"><?php echo $unreadNotificationsCount > 99 ? '99+' : (int) $unreadNotificationsCount; ?></span>
+                                <span class="badge badge-sm bg-red text-red-fg ms-1 js-notification-dot js-notification-count"><?php echo $unreadNotificationsCount > 99 ? '99+' : (int) $unreadNotificationsCount; ?></span>
                             <?php endif; ?>
                         </a>
 
-                        <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card kirpi-notification-menu">
+                        <div class="dropdown-menu dropdown-menu-arrow dropdown-menu-end dropdown-menu-card" style="min-width: 24rem;">
                             <div class="card">
                                 <div class="card-header d-flex align-items-center justify-content-between">
                                     <h3 class="card-title m-0"><?php echo e($navNotificationsTitle); ?></h3>
-                                    <button
-                                        type="button"
-                                        class="btn btn-sm btn-icon btn-ghost-secondary js-notification-mark-all <?php echo $unreadNotificationsCount > 0 ? '' : 'd-none'; ?>"
+                                    <a
+                                        href="#"
+                                        class="link-secondary js-notification-mark-all <?php echo $unreadNotificationsCount > 0 ? '' : 'd-none'; ?>"
                                         data-mark-read-url="<?php echo base_url('notifications/actions/mark-all-read'); ?>"
                                         title="<?php echo e($navMarkAllNotificationsRead); ?>"
                                         aria-label="<?php echo e($navMarkAllNotificationsRead); ?>">
                                         <i class="ti ti-checks"></i>
-                                    </button>
+                                    </a>
                                 </div>
 
                                 <div class="list-group list-group-flush list-group-hoverable">
@@ -155,13 +154,13 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                                                     </div>
                                                     <div class="col-auto">
                                                         <?php if ($isUnread): ?>
-                                                            <button
-                                                                type="button"
-                                                                class="list-group-item-actions btn btn-sm btn-icon btn-ghost-secondary js-notification-mark-read"
+                                                            <a
+                                                                href="#"
+                                                                class="list-group-item-actions js-notification-mark-read"
                                                                 title="<?php echo e($navMarkNotificationRead); ?>"
                                                                 aria-label="<?php echo e($navMarkNotificationRead); ?>">
                                                                 <i class="ti ti-check"></i>
-                                                            </button>
+                                                            </a>
                                                         <?php endif; ?>
                                                     </div>
                                                 </div>
@@ -171,7 +170,7 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                                 </div>
 
                                 <div class="card-footer text-center">
-                                    <a href="<?php echo base_url('notifications/list'); ?>" class="btn btn-sm btn-ghost-secondary w-100"><?php echo e($navViewAllNotifications); ?></a>
+                                    <a href="<?php echo base_url('notifications/list'); ?>"><?php echo e($navViewAllNotifications); ?></a>
                                 </div>
                             </div>
                         </div>
@@ -188,14 +187,7 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
                                 class="nav-link px-0 border-0 bg-transparent"
                                 title="<?php echo e($navLockAction); ?>"
                                 aria-label="<?php echo e($navLockAction); ?>">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-user-key">
-                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                    <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
-                                    <path d="M6 21v-2a4 4 0 0 1 4 -4h5" />
-                                    <path d="M18.5 18.5l-3.5 3.5l-1.5 -1.5" />
-                                    <path d="M18.554 18.414a2 2 0 1 1 2.828 -2.828a2 2 0 0 1 -2.828 2.828" />
-                                    <path d="M16 19l1 1" />
-                                </svg>
+                                <i class="ti ti-user-key fs-2"></i>
                             </button>
                         </form>
                     </div>
@@ -264,17 +256,6 @@ $isMenuItemActive = static function (array $item, string $routePath) use (&$isMe
 
         <div class="collapse navbar-collapse" id="navbar-menu">
             <div class="d-flex flex-column flex-md-row flex-fill align-items-stretch align-items-md-center">
-                <div class="d-flex d-md-none align-items-center justify-content-between border-bottom px-3 py-2 mobile-nav-header">
-                    <strong><?php echo e($navToggleLabel); ?></strong>
-                    <button
-                        type="button"
-                        class="btn btn-icon btn-ghost-secondary js-mobile-nav-close"
-                        aria-controls="navbar-menu"
-                        aria-expanded="true"
-                        aria-label="Kapat">
-                        <i class="ti ti-x fs-2"></i>
-                    </button>
-                </div>
                 <ul class="navbar-nav">
                     <?php foreach ($menu as $item): ?>
                         <?php

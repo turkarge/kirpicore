@@ -25,8 +25,12 @@ $assertions = [
         && str_contains($app, 'js-notification-mark-all'),
     'list direct action' => str_contains($list, 'js-notification-read')
         && !str_contains($list, 'js-kirpi-row-menu'),
-    'compact notification styles' => str_contains($css, '.kirpi-notification-menu')
+    'native notification surface' => !str_contains($nav, 'kirpi-notification-menu')
+        && !str_contains($nav, 'btn-ghost-secondary js-notification-mark-read')
+        && !str_contains($css, '.js-notification-dot {')
         && !str_contains($css, '.kirpi-notification-list'),
+    'plain tabler footer link' => str_contains($nav, '<div class="card-footer text-center">')
+        && !str_contains($nav, 'btn btn-sm btn-ghost-secondary w-100'),
 ];
 
 $failed = array_keys(array_filter($assertions, static fn (bool $passed): bool => !$passed));
