@@ -14,6 +14,7 @@ if (!verify_csrf_token($_POST['csrf_token'] ?? null)) {
 $documentType = documents_sanitize_key((string) ($_POST['document_type'] ?? 'attachment'));
 $entityType = documents_sanitize_key((string) ($_POST['entity_type'] ?? ''), '');
 $entityId = (int) ($_POST['entity_id'] ?? 0);
+$isFilePondUpload = (string) ($_POST['filepond'] ?? '') === '1';
 $uploadInput = $_FILES['document_files'] ?? ($_FILES['document_file'] ?? []);
 $files = documents_normalize_uploads($uploadInput);
 
@@ -63,18 +64,20 @@ $summary = str_replace(
     [(string) count($uploaded), (string) count($failed)],
     $summaryTemplate
 );
-kirpi_notify_current_user('documents.uploaded', [
-    'document_id' => $firstDocumentId,
-    'document_type' => $documentType,
-    'uploaded_count' => count($uploaded),
-    'failed_count' => count($failed),
-], [
-    'title' => documents_lang('upload_success_title'),
-    'message' => $summary,
-    'source_module' => 'documents',
-    'entity_type' => 'document',
-    'entity_id' => $firstDocumentId,
-]);
+if (!$isFilePondUpload) {
+    kirpi_notify_current_user('documents.uploaded', [
+        'document_id' => $firstDocumentId,
+        'document_type' => $documentType,
+        'uploaded_count' => count($uploaded),
+        'failed_count' => count($failed),
+    ], [
+        'title' => documents_lang('upload_success_title'),
+        'message' => $summary,
+        'source_module' => 'documents',
+        'entity_type' => 'document',
+        'entity_id' => $firstDocumentId,
+    ]);
+}
 
 json_response([
     'status' => 'success',

@@ -9,6 +9,7 @@ $flash = get_flash_message();
 global $current_route;
 $route_file = $current_route['file'] ?? null;
 $page_script = resolve_page_script($route_file);
+$isDocumentsPage = $route_file === 'modules/documents/pages/view.php';
 ?>
 <!DOCTYPE html>
 <html lang="tr">
@@ -34,6 +35,9 @@ $page_script = resolve_page_script($route_file);
     <link href="<?php echo asset_url('vendor/datatables/css/fixedHeader.bootstrap5.min.css'); ?>" rel="stylesheet">
     <link href="<?php echo asset_url('vendor/datatables/css/keyTable.bootstrap5.min.css'); ?>" rel="stylesheet">
     <link href="<?php echo asset_url('css/kirpi-table.css'); ?>" rel="stylesheet">
+    <?php if ($isDocumentsPage): ?>
+    <link href="<?php echo asset_url('vendor/filepond/filepond.min.css'); ?>" rel="stylesheet">
+    <?php endif; ?>
     <script>
     (function () {
         try {

@@ -603,6 +603,53 @@ a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.badge):not([
     display: inline-flex;
 }
 
+.document-upload-settings {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--tblr-border-color);
+    border-radius: var(--tblr-border-radius);
+    background: var(--tblr-bg-surface-secondary);
+}
+
+.filepond--root {
+    margin-bottom: 0;
+    font-family: var(--tblr-font-sans-serif);
+}
+
+.filepond--panel-root {
+    border: 1px dashed var(--tblr-border-color);
+    border-radius: var(--tblr-border-radius);
+    background: var(--tblr-bg-surface-secondary);
+}
+
+.filepond--drop-label {
+    min-height: 12rem;
+    color: var(--tblr-secondary-color);
+}
+
+.filepond--drop-label label {
+    cursor: pointer;
+}
+
+.filepond--label-action {
+    color: var(--tblr-primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.filepond--item-panel {
+    background: var(--tblr-primary);
+}
+
+.filepond--file {
+    color: var(--tblr-light);
+}
+
+[data-bs-theme="dark"] .filepond--panel-root {
+    background: var(--tblr-bg-surface);
+}
+
 .document-dropzone {
     min-height: 220px;
     border: 2px dashed color-mix(in srgb, var(--kirpi-shell-accent) 42%, var(--kirpi-border));

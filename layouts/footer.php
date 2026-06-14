@@ -106,11 +106,18 @@ if ($canUseAiLauncher):
 <script src="<?php echo asset_url('vendor/datatables/js/dataTables.keyTable.min.js'); ?>"></script>
 <script src="<?php echo asset_url('vendor/datatables/js/keyTable.bootstrap5.min.js'); ?>"></script>
 <script src="<?php echo asset_url('js/kirpi-table.js'); ?>"></script>
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "7356366510c54c86a154d277ed978201"}'></script><!-- End Cloudflare Web Analytics -->
-
 <?php
 global $current_route;
 $route_file = $current_route['file'] ?? null;
+if ($route_file === 'modules/documents/pages/view.php'):
+?>
+<script src="<?php echo asset_url('vendor/filepond/filepond.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/filepond/filepond-plugin-file-validate-type.min.js'); ?>"></script>
+<script src="<?php echo asset_url('vendor/filepond/filepond-plugin-file-validate-size.min.js'); ?>"></script>
+<?php endif; ?>
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "7356366510c54c86a154d277ed978201"}'></script><!-- End Cloudflare Web Analytics -->
+
+<?php
 $page_script = resolve_page_script($route_file);
 
 if ($page_script):

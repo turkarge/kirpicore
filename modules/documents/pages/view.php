@@ -125,7 +125,7 @@ $showingText = str_replace(
                         </div>
                     </div>
                     <?php if (check_permission('documents.upload')): ?>
-                        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#document-upload-panel">
+                        <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#document-upload-modal">
                             <i class="ti ti-upload"></i> <?php echo e(documents_lang('upload_files')); ?>
                         </button>
                     <?php endif; ?>
@@ -134,6 +134,66 @@ $showingText = str_replace(
         </div>
     </div>
 </div>
+
+<?php if ($tableReady && check_permission('documents.upload')): ?>
+<div class="modal modal-blur fade" id="document-upload-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <form action="<?php echo base_url('documents/actions/upload'); ?>" method="post" enctype="multipart/form-data" class="modal-content" data-document-filepond-form>
+            <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
+            <div class="modal-header">
+                <div>
+                    <h3 class="modal-title"><?php echo e(documents_lang('upload_files')); ?></h3>
+                    <div class="text-secondary small mt-1"><?php echo e(documents_lang('upload_modal_hint')); ?></div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?php echo e(documents_lang('close')); ?>"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-4">
+                    <div class="col-lg-8">
+                        <input
+                            type="file"
+                            name="document_file"
+                            multiple
+                            data-document-filepond
+                            data-max-file-size="<?php echo documents_max_upload_size(); ?>"
+                            data-accepted-file-types="<?php echo e(implode(',', array_keys(documents_allowed_mime_types()))); ?>"
+                        >
+                        <div class="text-secondary small mt-2">
+                            <?php echo e(implode(', ', array_map('strtoupper', array_unique(array_values(documents_allowed_mime_types()))))); ?>
+                            &middot; <?php echo e(documents_format_size(documents_max_upload_size())); ?> / <?php echo e(documents_lang('file')); ?>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="document-upload-settings">
+                            <div>
+                                <label class="form-label form-required"><?php echo e(documents_lang('document_type')); ?></label>
+                                <input type="text" name="document_type" class="form-control" required value="attachment">
+                                <div class="form-hint"><?php echo e(documents_lang('type_hint')); ?></div>
+                            </div>
+                            <div>
+                                <label class="form-label"><?php echo e(documents_lang('entity_type')); ?></label>
+                                <input type="text" name="entity_type" class="form-control">
+                            </div>
+                            <div>
+                                <label class="form-label"><?php echo e(documents_lang('entity_id')); ?></label>
+                                <input type="number" name="entity_id" class="form-control" min="1">
+                                <div class="form-hint"><?php echo e(documents_lang('entity_hint')); ?></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="me-auto text-secondary small" data-document-upload-status></div>
+                <button type="button" class="btn btn-link link-secondary" data-bs-dismiss="modal"><?php echo e(documents_lang('cancel')); ?></button>
+                <button type="submit" class="btn btn-primary" disabled data-document-upload-submit>
+                    <i class="ti ti-upload"></i> <?php echo e(documents_lang('upload_all')); ?>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<?php endif; ?>
 
 <div class="page-body">
     <div class="container-xl" data-document-manager>
@@ -163,51 +223,6 @@ $showingText = str_replace(
                     </div>
                 <?php endforeach; ?>
             </div>
-
-            <?php if (check_permission('documents.upload')): ?>
-                <div class="collapse mb-4" id="document-upload-panel">
-                    <form action="<?php echo base_url('documents/actions/upload'); ?>" method="post" enctype="multipart/form-data" class="card" data-document-upload-form>
-                        <input type="hidden" name="csrf_token" value="<?php echo e(get_csrf_token()); ?>">
-                        <div class="card-header"><h3 class="card-title"><?php echo e(documents_lang('upload_files')); ?></h3></div>
-                        <div class="card-body">
-                            <div class="row g-4">
-                                <div class="col-lg-8">
-                                    <label class="document-dropzone" data-document-dropzone>
-                                        <input type="file" name="document_files[]" multiple hidden data-document-file-input>
-                                        <span class="document-dropzone__icon"><i class="ti ti-cloud-upload"></i></span>
-                                        <strong><?php echo e(documents_lang('drop_files')); ?></strong>
-                                        <span><?php echo e(documents_lang('drop_files_hint')); ?></span>
-                                        <small><?php echo e(implode(', ', array_map('strtoupper', array_unique(array_values(documents_allowed_mime_types()))))); ?> · <?php echo e(documents_format_size(documents_max_upload_size())); ?> / dosya</small>
-                                    </label>
-                                    <div class="document-upload-queue mt-3" data-document-upload-queue hidden></div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="row g-3">
-                                        <div class="col-12">
-                                            <label class="form-label form-required"><?php echo e(documents_lang('document_type')); ?></label>
-                                            <input type="text" name="document_type" class="form-control" required value="attachment">
-                                        </div>
-                                        <div class="col-8">
-                                            <label class="form-label"><?php echo e(documents_lang('entity_type')); ?></label>
-                                            <input type="text" name="entity_type" class="form-control">
-                                        </div>
-                                        <div class="col-4">
-                                            <label class="form-label"><?php echo e(documents_lang('entity_id')); ?></label>
-                                            <input type="number" name="entity_id" class="form-control" min="1">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer d-flex align-items-center justify-content-between gap-3">
-                            <div class="text-secondary small" data-document-upload-status></div>
-                            <button type="submit" class="btn btn-primary" disabled data-document-upload-submit>
-                                <i class="ti ti-upload"></i> <?php echo e(documents_lang('save')); ?>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            <?php endif; ?>
 
             <div class="document-toolbar mb-3">
                 <form method="get" action="<?php echo base_url('documents/view'); ?>" class="document-filter-form">

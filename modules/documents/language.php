@@ -75,6 +75,12 @@ function documents_lang(string $key, ?string $default = null): string
             'next' => 'Sonraki',
             'uploading' => 'Yükleniyor...',
             'upload_progress' => 'Dosyalar sunucuya aktarılıyor.',
+            'upload_modal_hint' => 'Dosyaları hazırlayın, yükleme ayarlarını belirleyin ve toplu olarak gönderin.',
+            'upload_all' => 'Tümünü Yükle',
+            'cancel' => 'İptal',
+            'close' => 'Kapat',
+            'files_ready' => '{count} dosya yüklemeye hazır.',
+            'files_uploaded' => '{count} dosya başarıyla yüklendi.',
         ],
         'en' => [
             'documents' => 'Documents',
@@ -145,6 +151,12 @@ function documents_lang(string $key, ?string $default = null): string
             'next' => 'Next',
             'uploading' => 'Uploading...',
             'upload_progress' => 'Files are being transferred to the server.',
+            'upload_modal_hint' => 'Prepare files, set upload metadata, and send them as a batch.',
+            'upload_all' => 'Upload All',
+            'cancel' => 'Cancel',
+            'close' => 'Close',
+            'files_ready' => '{count} files ready to upload.',
+            'files_uploaded' => '{count} files uploaded successfully.',
         ],
     ];
 
